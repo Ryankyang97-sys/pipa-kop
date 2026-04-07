@@ -999,8 +999,15 @@ function openReceiptSheet(invId, vendor, date) {
 
 function _renderReceiptSheet() {
   var vendor    = activeReceiptVendor;
+  var invId     = activeReceiptInvId;
   var vendorObj = ORDER_VENDORS[vendor];
-  var items     = vendorObj ? vendorObj.items : [];
+
+  // Prefer invoice line items if this invoice was created from the Orders tab.
+  // Fall back to full vendor item list for manually-created invoices.
+  var inv   = invoices.find(function(i) { return i.id === invId; });
+  var items = (inv && inv.lineItems && inv.lineItems.length)
+                ? inv.lineItems
+                : (vendorObj ? vendorObj.items : []);
 
   var content = document.getElementById('addSheetContent');
 
@@ -1016,10 +1023,15 @@ function _renderReceiptSheet() {
     var rows = cats[cat].map(function(item) {
       var qty = receiptDraft[item.d365] != null ? receiptDraft[item.d365] : '';
       var hasQty = qty !== '' && qty > 0;
+      var orderedQty = item.ordered_qty != null ? item.ordered_qty : null;
+      var metaParts = [item.d365];
+      if (item.par != null) metaParts.push('par ' + item.par);
+      if (orderedQty != null) metaParts.push('ordered: ' + orderedQty);
+      if (item.count_on_hand != null) metaParts.push('on hand: ' + item.count_on_hand);
       return '<div class="rcpt-item-row">' +
         '<div class="rcpt-item-info">' +
           '<div class="rcpt-item-name">' + item.name + '</div>' +
-          '<div class="rcpt-item-meta">' + item.d365 + (item.par != null ? ' · par ' + item.par : '') + '</div>' +
+          '<div class="rcpt-item-meta">' + metaParts.join(' · ') + '</div>' +
         '</div>' +
         '<input class="rcpt-qty-input' + (hasQty ? ' has-qty' : '') + '" ' +
           'type="number" inputmode="numeric" min="0" placeholder="—" ' +
@@ -1084,8 +1096,13 @@ function confirmReceipt() {
 function _saveReceiptItems(confirmed, cb) {
   var vendor    = activeReceiptVendor;
   var vendorObj = ORDER_VENDORS[vendor];
-  var items     = vendorObj ? vendorObj.items : [];
-  var itemMap   = {};
+  var inv       = invoices.find(function(i) { return i.id === activeReceiptInvId; });
+
+  // Build item lookup from invoice lineItems (if available) or full vendor list
+  var items = (inv && inv.lineItems && inv.lineItems.length)
+                ? inv.lineItems
+                : (vendorObj ? vendorObj.items : []);
+  var itemMap = {};
   items.forEach(function(i) { itemMap[i.d365] = i; });
 
   var rows = Object.keys(receiptDraft).map(function(d365) {
@@ -1112,25 +1129,49 @@ function _saveReceiptItems(confirmed, cb) {
     })
     .then(function(r) {
       if (r && r.error) { toast('Save error: ' + r.error.message); return; }
-      // If confirmed, also write to inventory_trend as inflow events
+
       if (confirmed) {
-        var trendRows = rows.map(function(row) {
+        // 1. Update received_qty on the invoice's lineItems in localStorage
+        if (inv && inv.lineItems && inv.lineItems.length) {
+          rows.forEach(function(row) {
+            var li = inv.lineItems.find(function(l) { return l.d365 === row.d365; });
+            if (li) li.received_qty = row.qty_received;
+          });
+          // Flag discrepancy if any received qty differs from ordered qty
+          var hasDiscrepancy = inv.lineItems.some(function(li) {
+            return li.ordered_qty != null && li.received_qty != null && li.received_qty !== li.ordered_qty;
+          });
+          if (hasDiscrepancy) inv.discrepancy = true;
+          inv.status = 'received';
+          save('invoices', invoices);
+        }
+
+        // 2. Update order_counts — add received qty to current on-hand count
+        //    so next Orders tab open reflects post-delivery stock
+        var countUpdates = rows.map(function(row) {
+          var prior = opCounts[row.d365] || 0;
+          var item  = itemMap[row.d365] || {};
           return {
-            snap_date:  row.received_date,
+            count_date: TODAY,
             d365:       row.d365,
             item_name:  row.item_name,
-            category:   itemMap[row.d365] ? itemMap[row.d365].cat : '',
-            vendor:     row.vendor,
-            par:        itemMap[row.d365] ? (itemMap[row.d365].par || null) : null,
-            count:      null,          // null = this is a delivery, not a count
-            received:   row.qty_received
+            category:   item.cat || '',
+            vendor:     vendor,
+            par:        item.par || null,
+            count:      prior + row.qty_received,
+            order_qty:  0
           };
         });
-        // Add 'received' column upsert — use insert since each delivery is unique
-        supa.from('delivery_items').select('id').limit(1); // no-op just to chain
-        // Upsert to inventory_trend keyed on date+d365+type if we track inflow separately
-        // For now: write to a separate field in inventory_trend
-        // delivery_items is the authoritative inflow source — trend reads from it directly
+
+        supa.from('order_counts')
+          .upsert(countUpdates, { onConflict: 'count_date,d365' })
+          .then(function() {
+            // Update local opCounts map immediately so UI reflects new stock
+            rows.forEach(function(row) {
+              opCounts[row.d365] = (opCounts[row.d365] || 0) + row.qty_received;
+            });
+          });
+
         if (cb) cb();
       } else {
         if (cb) cb();
@@ -1184,11 +1225,41 @@ function renderInvoiceCard(inv) {
       ${inv.checks[c.key] ? '✓ ' : ''}${c.label}
     </div>`).join('');
 
+  // Status pill
+  const statusLabels = { draft:'📝 Draft', ordered:'📦 Ordered', received:'✅ Received', verified:'🔒 Verified' };
+  const statusColors = { draft:'pill-dim', ordered:'pill-blue', received:'pill-green', verified:'pill-purple' };
+  const statusPill = inv.status
+    ? `<span class="pill ${statusColors[inv.status] || 'pill-dim'}" style="margin-left:8px;">${statusLabels[inv.status] || inv.status}</span>`
+    : '';
+
+  // Line items summary (if invoice was created from Orders tab)
+  var lineItemsHTML = '';
+  if (inv.lineItems && inv.lineItems.length) {
+    var totalOrdered = inv.lineItems.reduce(function(sum, li) { return sum + (li.ordered_qty || 0); }, 0);
+    var totalReceived = inv.lineItems.reduce(function(sum, li) { return sum + (li.received_qty || 0); }, 0);
+    var itemRows = inv.lineItems.map(function(li) {
+      var rcvd = li.received_qty != null ? li.received_qty : '—';
+      var discrepant = li.received_qty != null && li.received_qty !== li.ordered_qty;
+      return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--surface3);font-size:11px;">' +
+        '<span style="color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + li.name + '</span>' +
+        '<span style="font-family:\'JetBrains Mono\',monospace;color:var(--text3);margin-left:8px;flex-shrink:0;">ord:' + li.ordered_qty + '</span>' +
+        '<span style="font-family:\'JetBrains Mono\',monospace;margin-left:8px;flex-shrink:0;color:' + (discrepant ? 'var(--red-bright)' : 'var(--text2)') + ';">rcv:' + rcvd + '</span>' +
+      '</div>';
+    }).join('');
+    lineItemsHTML = `
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--surface3);">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px;">
+          ${inv.lineItems.length} items · ordered: ${totalOrdered}${totalReceived > 0 ? ' · received: ' + totalReceived : ''}
+        </div>
+        ${itemRows}
+      </div>`;
+  }
+
   return `
     <div class="card ${borderCls}" id="inv-${inv.id}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div>
-          <div style="font-size:15px;font-weight:700;">${inv.vendor}</div>
+          <div style="font-size:15px;font-weight:700;">${inv.vendor}${statusPill}</div>
           <div style="font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-top:3px;">
             ${fmtDate(inv.date)} · PO# ${inv.po || '—'} · Inv# ${inv.invoiceNum || '—'}
           </div>
@@ -1198,6 +1269,7 @@ function renderInvoiceCard(inv) {
           ${hasDiscrepancy ? `<div class="pill pill-red" style="margin-top:4px;">⚠️ Discrepancy</div>` : ''}
         </div>
       </div>
+      ${lineItemsHTML}
       <div class="invoice-checks">${checksHTML}</div>
       ${inv.discrepancy ? `
         <div onclick="toggleInvDiscrepancy('${inv.id}')" style="margin-top:8px;cursor:pointer;">
@@ -1641,11 +1713,63 @@ function saveInvoice() {
     notes:      document.getElementById('inv-notes').value.trim(),
     checks:     { received:false, d365:false, sentIC:false, pricingOK:false },
     discrepancy: false,
+    lineItems:  [],   // populated when created via "Create Invoice" from Orders tab
+    status:     'draft',
   });
   save('invoices', invoices);
   closeSheet('addSheet');
   renderInvoices();
   toast('Invoice logged');
+}
+
+// ─────────────────────────────────────────────
+// CREATE INVOICE FROM ORDERS TAB
+// ─────────────────────────────────────────────
+function createInvoiceFromOrder(vendorName) {
+  var v = ORDER_VENDORS[vendorName];
+  if (!v) return;
+
+  // Collect items where suggested order qty > 0
+  var lineItems = v.items
+    .filter(function(item) {
+      var count = opCounts[item.d365];
+      var sug = opSuggest(item.par, count !== undefined ? count : null);
+      return sug != null && sug > 0;
+    })
+    .map(function(item) {
+      var count = opCounts[item.d365];
+      var sug = opSuggest(item.par, count);
+      return {
+        d365:          item.d365,
+        name:          item.name,
+        cat:           item.cat,
+        par:           item.par,
+        count_on_hand: count != null ? count : null,
+        ordered_qty:   sug,
+        received_qty:  null,
+      };
+    });
+
+  if (!lineItems.length) { toast('No items need ordering from ' + vendorName); return; }
+
+  var inv = {
+    id:          'inv-' + Date.now(),
+    date:        TODAY,
+    vendor:      vendorName,
+    po:          '',
+    invoiceNum:  '',
+    amount:      '',
+    notes:       '',
+    checks:      { received:false, d365:false, sentIC:false, pricingOK:false },
+    discrepancy: false,
+    lineItems:   lineItems,
+    status:      'ordered',
+  };
+
+  invoices.unshift(inv);
+  save('invoices', invoices);
+  switchView('invoices');
+  toast('Invoice created — ' + lineItems.length + ' items from ' + vendorName);
 }
 
 function openWasteSheet() {
@@ -2269,6 +2393,12 @@ function _renderOPVendor(v) {
     ? '<button class="op-copy-btn" onclick="copyVendorOrder(\'' + v.name.replace(/'/g, "\\'") + '\')" style="margin-top:10px;">&#x1F4CB; Copy ' + v.name + ' Order</button>'
     : '';
 
+  var createInvBtn = itemsNeedOrder > 0
+    ? '<button class="op-copy-btn" onclick="createInvoiceFromOrder(\'' + v.name.replace(/'/g, "\\'") + '\')" ' +
+      'style="background:var(--accent-dim);color:var(--accent-bright);border-top:1px solid var(--surface3);">' +
+      '&#x1F9FE; Create Invoice — ' + v.name + ' (' + itemsNeedOrder + ' items)</button>'
+    : '';
+
   return '<div class="op-vendor-card">' +
     '<div class="op-vendor-header">' +
       '<div>' +
@@ -2283,6 +2413,7 @@ function _renderOPVendor(v) {
     editItemBtns +
     addItemBtn +
     copyBtn +
+    createInvBtn +
   '</div>';
 }
 
