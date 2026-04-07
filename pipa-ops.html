@@ -1390,12 +1390,18 @@ function renderInvoices() {
 
   // Sort newest first
   const sorted = [...invoices].sort((a,b) => new Date(b.date) - new Date(a.date));
-  const pending = sorted.filter(i => !i.checks.received || !i.checks.d365 || !i.checks.sentIC || !i.checks.pricingOK);
-  const clear = sorted.filter(i => i.checks.received && i.checks.d365 && i.checks.sentIC && i.checks.pricingOK);
+
+  // Complete = status received/verified OR all 4 checks done
+  const isComplete = inv =>
+    inv.status === 'received' || inv.status === 'verified' ||
+    (inv.checks.received && inv.checks.d365 && inv.checks.sentIC && inv.checks.pricingOK);
+
+  const pending = sorted.filter(i => !isComplete(i));
+  const clear   = sorted.filter(i =>  isComplete(i));
 
   let html = '';
   if (pending.length) {
-    html += `<div class="section-label">Needs Attention (${pending.length})</div>`;
+    html += `<div class="section-label">Open (${pending.length})</div>`;
     html += pending.map(renderInvoiceCard).join('');
   }
   if (clear.length) {
@@ -1929,47 +1935,99 @@ function createInvoiceFromOrder(vendorName) {
   var v = ORDER_VENDORS[vendorName];
   if (!v) return;
 
-  // Collect items where suggested order qty > 0
-  var lineItems = v.items
-    .filter(function(item) {
+  // Group all vendor items by category for the builder sheet
+  var cats = {};
+  v.items.forEach(function(item) {
+    var cat = item.cat || 'Other';
+    if (!cats[cat]) cats[cat] = [];
+    cats[cat].push(item);
+  });
+
+  var itemRowsHTML = Object.keys(cats).map(function(cat) {
+    var catStyle = CAT_COLORS[cat] || {bg:'var(--surface3)', color:'var(--text2)'};
+    var rows = cats[cat].map(function(item) {
       var count = opCounts[item.d365];
-      var sug = opSuggest(item.par, count !== undefined ? count : null);
-      return sug != null && sug > 0;
-    })
-    .map(function(item) {
-      var count = opCounts[item.d365];
-      var sug = opSuggest(item.par, count);
-      return {
-        d365:          item.d365,
-        name:          item.name,
-        cat:           item.cat,
-        par:           item.par,
-        count_on_hand: count != null ? count : null,
-        ordered_qty:   sug,
-        received_qty:  null,
-      };
+      var sug   = opSuggest(item.par, count !== undefined ? count : null);
+      var sugDisplay = sug != null ? (sug > 0 ? sug : '\u2713') : '\u2014';
+      var sugColor   = sug != null && sug > 0 ? 'color:var(--red-bright);font-weight:700;' : 'color:var(--green-bright);';
+      var preVal     = (sug != null && sug > 0) ? sug : '';
+      return '<div class="op-item-row" id="inv-build-row-' + item.d365 + '">' +
+        '<div class="op-item-info">' +
+          '<div class="op-item-name">' + item.name + '</div>' +
+          '<div class="op-item-meta">' +
+            '<span class="op-cat-badge" style="background:' + catStyle.bg + ';color:' + catStyle.color + ';">' + cat + '</span>' +
+            '<span>' + item.d365 + '</span>' +
+            (item.par != null ? '<span>par ' + item.par + '</span>' : '') +
+            (count != null ? '<span>on hand: ' + count + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="op-item-right">' +
+          '<div class="op-par-label" style="text-align:right;">suggest</div>' +
+          '<div class="op-suggest" style="' + sugColor + '">' + sugDisplay + '</div>' +
+          '<input class="op-count-input" type="number" inputmode="numeric" pattern="[0-9]*"' +
+            ' placeholder="0" value="' + preVal + '"' +
+            ' data-d365="' + item.d365 + '"' +
+            ' data-name="' + item.name.replace(/"/g, '&quot;') + '"' +
+            ' data-cat="' + cat + '"' +
+            ' data-par="' + (item.par || '') + '"' +
+            ' oninput="onInvBuildInput(this)" onfocus="this.select()">' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);padding:10px 6px 4px;">' + cat + '</div>' + rows;
+  }).join('');
+
+  var sheetContent = document.getElementById('addSheetContent');
+  sheetContent.innerHTML =
+    '<div class="sheet-handle"></div>' +
+    '<div class="sheet-title">Build Invoice \u2014 ' + vendorName + '</div>' +
+    '<div style="font-size:0.75rem;color:var(--text3);margin-bottom:12px;">Suggested qty pre-filled. Edit any quantity or leave 0 to exclude.</div>' +
+    itemRowsHTML +
+    '<div style="height:12px;"></div>' +
+    '<div class="rcpt-confirm-bar">' +
+      '<button class="btn-primary" style="width:100%;margin-bottom:6px;" onclick="confirmInvoiceBuild(\'' + vendorName.replace(/'/g, "\\'") + '\')">Create Invoice</button>' +
+      '<button class="btn-secondary" style="width:100%;font-size:0.813rem;" onclick="closeSheet(\'addSheet\')">Cancel</button>' +
+    '</div>';
+
+  document.getElementById('addSheet').classList.add('open');
+}
+
+function onInvBuildInput(input) {
+  var count = input.value.trim() === '' ? null : parseFloat(input.value);
+  var row = input.closest('.op-item-row');
+  if (row) {
+    if (count != null && count > 0) row.classList.add('op-row-counted');
+    else row.classList.remove('op-row-counted');
+  }
+}
+
+function confirmInvoiceBuild(vendorName) {
+  var lineItems = [];
+  document.querySelectorAll('#addSheetContent .op-count-input').forEach(function(inp) {
+    var val = parseFloat(inp.value);
+    if (isNaN(val) || val <= 0) return;
+    lineItems.push({
+      d365:          inp.dataset.d365,
+      name:          inp.dataset.name,
+      cat:           inp.dataset.cat,
+      par:           parseFloat(inp.dataset.par) || null,
+      count_on_hand: opCounts[inp.dataset.d365] != null ? opCounts[inp.dataset.d365] : null,
+      ordered_qty:   val,
+      received_qty:  null,
     });
-
-  if (!lineItems.length) { toast('No items need ordering from ' + vendorName); return; }
-
+  });
+  if (!lineItems.length) { toast('Enter at least one quantity'); return; }
   var inv = {
-    id:          'inv-' + Date.now(),
-    date:        TODAY,
-    vendor:      vendorName,
-    po:          '',
-    invoiceNum:  '',
-    amount:      '',
-    notes:       '',
-    checks:      { received:false, d365:false, sentIC:false, pricingOK:false },
-    discrepancy: false,
-    lineItems:   lineItems,
-    status:      'ordered',
+    id: 'inv-' + Date.now(), date: TODAY, vendor: vendorName,
+    po: '', invoiceNum: '', amount: '', notes: '',
+    checks: { received:false, d365:false, sentIC:false, pricingOK:false },
+    discrepancy: false, lineItems: lineItems, status: 'ordered',
   };
-
   invoices.unshift(inv);
   save('invoices', invoices);
+  closeSheet('addSheet');
   switchView('invoices');
-  toast('Invoice created — ' + lineItems.length + ' items from ' + vendorName);
+  toast('Invoice created \u2014 ' + lineItems.length + ' items from ' + vendorName);
 }
 
 function openWasteSheet() {
@@ -3475,41 +3533,45 @@ function openOrderItemSheet(vendorName, existingItem) {
     return '<option value="' + cat + '"' + (existingItem && existingItem.cat === cat ? ' selected' : '') + '>' + cat + '</option>';
   }).join('');
 
-  var isEdit = !!existingItem;
-  var sheet  = document.getElementById('addSheet');
+  var isEdit  = !!existingItem;
+  var content = document.getElementById('addSheetContent');
 
-  sheet.innerHTML =
+  content.innerHTML =
     '<div class="sheet-handle"></div>' +
     '<div class="sheet-title">' + (isEdit ? 'Edit Item' : 'Add Item to Order Guide') + '</div>' +
-    '<div class="field-group">' +
-      '<label class="field-label">Vendor</label>' +
-      '<select class="field-input" id="oi-vendor">' + vendorOpts + '</select>' +
+    '<div class="form-group">' +
+      '<label class="form-label">Vendor</label>' +
+      '<select class="form-select" id="oi-vendor">' + vendorOpts + '</select>' +
     '</div>' +
-    '<div class="field-group">' +
-      '<label class="field-label">D365 #</label>' +
-      '<input class="field-input" id="oi-d365" type="text" placeholder="e.g. 1136347" value="' + (existingItem ? existingItem.d365 : '') + '">' +
+    '<div class="form-group">' +
+      '<label class="form-label">D365 #</label>' +
+      '<input class="form-input" id="oi-d365" type="text" inputmode="numeric" placeholder="e.g. 1136347" value="' + (existingItem ? existingItem.d365 : '') + '">' +
     '</div>' +
-    '<div class="field-group">' +
-      '<label class="field-label">Item Name</label>' +
-      '<input class="field-input" id="oi-name" type="text" placeholder="e.g. Prosecco" value="' + (existingItem ? existingItem.name : '') + '">' +
+    '<div class="form-group">' +
+      '<label class="form-label">Item Name</label>' +
+      '<input class="form-input" id="oi-name" type="text" placeholder="e.g. Prosecco" value="' + (existingItem ? existingItem.name.replace(/"/g,'&quot;') : '') + '">' +
     '</div>' +
-    '<div class="field-group">' +
-      '<label class="field-label">Category</label>' +
-      '<select class="field-input" id="oi-cat">' + catOpts + '</select>' +
+    '<div class="form-row">' +
+      '<div class="form-group">' +
+        '<label class="form-label">Category</label>' +
+        '<select class="form-select" id="oi-cat">' + catOpts + '</select>' +
+      '</div>' +
+      '<div class="form-group">' +
+        '<label class="form-label">Par</label>' +
+        '<input class="form-input" id="oi-par" type="number" inputmode="numeric" placeholder="e.g. 12" value="' + (existingItem && existingItem.par != null ? existingItem.par : '') + '">' +
+      '</div>' +
     '</div>' +
-    '<div class="field-group">' +
-      '<label class="field-label">Par</label>' +
-      '<input class="field-input" id="oi-par" type="number" placeholder="e.g. 12" value="' + (existingItem && existingItem.par != null ? existingItem.par : '') + '">' +
+    '<div class="form-group">' +
+      '<label class="form-label">Notes (optional)</label>' +
+      '<input class="form-input" id="oi-note" type="text" placeholder="e.g. Off Menu, OOS" value="' + (existingItem ? (existingItem.note || '').replace(/"/g,'&quot;') : '') + '">' +
     '</div>' +
-    '<div class="field-group">' +
-      '<label class="field-label">Notes (optional)</label>' +
-      '<input class="field-input" id="oi-note" type="text" placeholder="e.g. Off Menu, OOS — evaluate replacement" value="' + (existingItem ? (existingItem.note || '') : '') + '">' +
+    '<div class="sheet-actions">' +
+      '<button class="btn-primary" onclick="saveOrderItem(' + (isEdit ? '\'' + existingItem.d365 + '\',\'' + existingItem.vendor + '\'' : 'null,null') + ')">Save Item</button>' +
     '</div>' +
-    '<button class="btn-action btn-primary" onclick="saveOrderItem(' + (isEdit ? '\'' + existingItem.d365 + '\',\'' + existingItem.vendor + '\'' : 'null,null') + ')" style="margin-top:8px;">Save Item</button>' +
-    (isEdit ? '<button class="btn-action" onclick="removeOrderItem(\'' + existingItem.d365 + '\',\'' + existingItem.vendor + '\')" style="margin-top:8px;color:var(--red-bright);background:var(--surface2);">Remove from Order Guide</button>' : '') +
-    '<button class="btn-action" onclick="closeSheet(\'addSheet\')" style="margin-top:8px;">Cancel</button>';
+    (isEdit ? '<button class="btn-secondary" style="margin-top:8px;color:var(--red-bright);" onclick="removeOrderItem(\'' + existingItem.d365 + '\',\'' + existingItem.vendor + '\')">Remove from Order Guide</button>' : '') +
+    '<button class="btn-secondary" style="margin-top:8px;" onclick="closeSheet(\'addSheet\')">Cancel</button>';
 
-  sheet.classList.add('open');
+  document.getElementById('addSheet').classList.add('open');
 }
 
 function saveOrderItem(existingD365, existingVendor) {
