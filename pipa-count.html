@@ -1407,8 +1407,34 @@ async function saveCountToSupabase() {
 
   if (result.error) {
     toast('Error: ' + result.error.message);
+    return;
+  }
+
+  // Mirror counts to order_counts so the Orders tab in PiPa Ops
+  // auto-populates without manual re-entry after a count.
+  // We only write count_date + d365 + count here — vendor/par/order_qty
+  // are filled by the Orders tab from its own ORDER_VENDORS data on load.
+  var orderRows = dedupedRows.map(function(row) {
+    return {
+      count_date: row.snap_date,
+      d365:       row.d365,
+      item_name:  row.item_name,
+      category:   row.category,
+      vendor:     null,
+      par:        null,
+      count:      row.count,
+      order_qty:  null
+    };
+  });
+
+  var orderResult = await supa.from('order_counts')
+    .upsert(orderRows, { onConflict: 'count_date,d365' });
+
+  if (orderResult.error) {
+    // Trend write succeeded — don't block the user, just log the issue
+    toast('Trend saved ✓ — Orders sync failed: ' + orderResult.error.message);
   } else {
-    toast('Saved ' + dedupedRows.length + ' items to trend ✓');
+    toast('Saved ' + dedupedRows.length + ' items — trend + orders updated ✓');
   }
 }
 
