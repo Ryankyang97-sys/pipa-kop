@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KS Tool">
+<title>KS — Kitchen Specialist</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#0D0D0D;--surface:#1A1A1A;--surface2:#242424;--surface3:#2E2E2E;
+  --text:#F0EDE8;--text2:#8A8680;--text3:#5A5650;
+  --accent:#B85C00;--accent-dim:rgba(184,92,0,0.15);--accent-border:rgba(184,92,0,0.3);
+  --green:#2D7A4F;--green-dim:rgba(45,122,79,0.12);--green-border:rgba(45,122,79,0.3);
+  --red-dim:rgba(139,32,32,0.2);--red-border:rgba(200,80,80,0.4);
+  --yellow-dim:rgba(200,180,40,0.15);--yellow-border:rgba(200,180,40,0.35);
+  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100%;-webkit-text-size-adjust:none;}
+.page{padding:calc(var(--safe-top) + 40px) 18px calc(var(--safe-bottom) + 60px);max-width:480px;margin:0 auto;}
+.nav-back{display:flex;align-items:center;gap:8px;margin-bottom:24px;text-decoration:none;color:var(--text3);font-size:0.75rem;font-weight:600;}
+.wordmark-main{font-size:1.5rem;font-weight:700;letter-spacing:-0.02em;}
+.wordmark-main span{color:var(--accent);}
+.wordmark-sub{font-size:0.688rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-top:4px;}
+.tabs{display:flex;gap:0;margin:20px 0 0;border-bottom:1px solid var(--surface2);overflow-x:auto;}
+.tab{padding:8px 12px 10px;font-size:0.688rem;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.panel{display:none;padding-top:20px;}
+.panel.active{display:block;}
+.section-label{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:var(--text3);margin-bottom:10px;margin-top:24px;}
+.section-label:first-of-type{margin-top:0;}
+.search-wrap{position:relative;margin-bottom:4px;}
+.search-input{width:100%;background:var(--surface);border:1px solid var(--surface3);border-radius:12px;padding:13px 16px 13px 44px;color:var(--text);font-size:0.938rem;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;}
+.search-input:focus{border-color:var(--accent);}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:1rem;}
+.search-hint{font-size:0.688rem;color:var(--text3);padding-left:4px;margin-bottom:12px;margin-top:4px;}
+.results{max-height:380px;overflow-y:auto;border-radius:12px;border:1px solid var(--surface2);}
+.result-item{padding:12px 14px;border-bottom:1px solid var(--surface2);cursor:pointer;transition:background 0.1s;}
+.result-item:last-child{border-bottom:none;}
+.result-item:active,.result-item.tappable:active{background:var(--surface2);}
+.result-name{font-size:0.813rem;font-weight:600;margin-bottom:4px;line-height:1.4;}
+.result-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.mono{font-family:'JetBrains Mono',monospace;font-size:0.688rem;}
+.clr-accent{color:var(--accent);}
+.clr-dim{color:var(--text3);}
+.tag{font-size:0.563rem;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);}
+.no-results{padding:20px;text-align:center;color:var(--text3);font-size:0.813rem;}
+.loading{padding:16px;text-align:center;color:var(--text3);font-size:0.813rem;}
+
+/* ACTIVATION CARDS */
+.activation-card{background:var(--surface);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--surface3);}
+.act-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.act-name{font-size:0.938rem;font-weight:700;line-height:1.3;}
+.act-delete{color:var(--text3);font-size:1rem;cursor:pointer;padding:2px 6px;flex-shrink:0;}
+.countdown{font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:700;padding:4px 10px;border-radius:6px;display:inline-block;}
+.cd-ok{background:var(--green-dim);color:#4CAF82;border:1px solid var(--green-border);}
+.cd-warn{background:var(--yellow-dim);color:#C8B428;border:1px solid var(--yellow-border);}
+.cd-danger{background:var(--red-dim);color:#E07070;border:1px solid var(--red-border);}
+.cd-past{background:var(--surface2);color:var(--text3);border:1px solid var(--surface3);}
+.act-meta{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
+.dept-tag{font-size:0.625rem;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;}
+.item-count{font-size:0.688rem;color:var(--text2);margin-bottom:10px;}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:0.625rem;color:var(--text3);font-weight:600;text-transform:uppercase;}
+.legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+
+/* CHECKLIST */
+.checklist-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--surface2);}
+.checklist-item:last-child{border-bottom:none;}
+.status-btn{flex-shrink:0;width:28px;height:28px;border-radius:8px;border:none;cursor:pointer;font-size:0.875rem;display:flex;align-items:center;justify-content:center;}
+.s-ok{background:var(--green-dim);border:1px solid var(--green-border);}
+.s-price{background:var(--yellow-dim);border:1px solid var(--yellow-border);}
+.s-release{background:var(--red-dim);border:1px solid var(--red-border);}
+.s-pending{background:var(--surface2);border:1px solid var(--surface3);}
+.item-info{flex:1;min-width:0;}
+.item-name{font-size:0.813rem;font-weight:600;line-height:1.4;margin-bottom:2px;}
+.item-ids{font-family:'JetBrains Mono',monospace;font-size:0.625rem;color:var(--text3);}
+.item-status{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:3px;}
+.sl-ok{color:#4CAF82;}.sl-price{color:#C8B428;}.sl-release{color:#E07070;}.sl-pending{color:var(--text3);}
+.item-remove{color:var(--text3);font-size:0.875rem;cursor:pointer;padding:4px;flex-shrink:0;}
+
+/* BUTTONS */
+.btn{width:100%;padding:13px;border-radius:12px;border:none;font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity 0.15s;}
+.btn:active{opacity:0.8;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-secondary{background:var(--surface2);color:var(--text2);border:1px solid var(--surface3);}
+.btn-danger{background:var(--red-dim);color:#E07070;border:1px solid var(--red-border);}
+.btn-green{background:var(--green-dim);color:#4CAF82;border:1px solid var(--green-border);}
+.btn-sm{width:auto;padding:7px 13px;font-size:0.75rem;margin-top:0;}
+
+/* FORMS */
+.form-group{margin-bottom:14px;}
+.form-label{font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px;display:block;}
+.form-input{width:100%;background:var(--surface);border:1px solid var(--surface3);border-radius:10px;padding:11px 14px;color:var(--text);font-size:0.875rem;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;}
+.form-input:focus{border-color:var(--accent);}
+.row{display:flex;gap:8px;}
+.row .form-input{flex:1;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
+.modal-overlay.hidden{display:none;}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 18px calc(var(--safe-bottom) + 20px);width:100%;max-width:480px;max-height:88vh;overflow-y:auto;}
+.modal-title{font-size:1rem;font-weight:700;margin-bottom:4px;}
+.modal-sub{font-size:0.75rem;color:var(--text3);margin-bottom:18px;}
+.modal-close{float:right;font-size:1.2rem;cursor:pointer;color:var(--text3);margin-top:-2px;}
+.modal-search-results{max-height:220px;overflow-y:auto;border-radius:10px;border:1px solid var(--surface2);margin-top:8px;margin-bottom:4px;}
+.divider{height:1px;background:var(--surface2);margin:16px 0;}
+
+/* EMAIL */
+.email-box{background:var(--bg);border-radius:10px;padding:14px;border:1px solid var(--surface3);font-size:0.688rem;line-height:1.8;color:var(--text2);font-family:'JetBrains Mono',monospace;white-space:pre-wrap;word-break:break-word;margin-bottom:12px;max-height:300px;overflow-y:auto;}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3);}
+.empty-icon{font-size:2rem;margin-bottom:10px;}
+.empty-msg{font-size:0.813rem;line-height:1.7;}
+
+/* ERROR BANNER */
+.error-banner{background:var(--red-dim);border:1px solid var(--red-border);border-radius:10px;padding:12px 14px;font-size:0.75rem;color:#E07070;margin-bottom:12px;display:none;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <a class="nav-back" href="index.html">&#8249; PiPa Hub</a>
+
+  <div class="wordmark-main">KS <span>Tool</span></div>
+  <div class="wordmark-sub">Kitchen Specialist &middot; Eataly KOP</div>
+
+  <div id="errorBanner" class="error-banner"></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('d365',this)">D365 Lookup</div>
+    <div class="tab" onclick="switchTab('adaco',this)">Adaco / MStore</div>
+    <div class="tab" onclick="switchTab('activations',this)">Activations</div>
+  </div>
+
+  <!-- D365 PANEL -->
+  <div class="panel active" id="panel-d365">
+    <div class="section-label">D365 Released Products</div>
+    <div class="search-wrap">
+      <span class="search-icon">&#128269;</span>
+      <input class="search-input" id="d365Search" type="search" placeholder="Adaco ID, D365 #, or product name..." oninput="debounce(searchD365, 300)(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="search-hint">e.g. "2065342" &nbsp;·&nbsp; "00699091" &nbsp;·&nbsp; "asparagus"</div>
+    <div class="results" id="d365Results" style="display:none;"></div>
+  </div>
+
+  <!-- ADACO PANEL -->
+  <div class="panel" id="panel-adaco">
+    <div class="section-label">Adaco Ingredients &mdash; MStore Lookup</div>
+    <div class="search-wrap">
+      <span class="search-icon">&#128269;</span>
+      <input class="search-input" id="adacoSearch" type="search" placeholder="Ingredient name or product #..." oninput="debounce(searchAdaco, 300)(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="search-hint">Search raw ingredients by name to find Adaco product # for MStore entry</div>
+    <div class="results" id="adacoResults" style="display:none;"></div>
+  </div>
+
+  <!-- ACTIVATIONS PANEL -->
+  <div class="panel" id="panel-activations">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="section-label" style="margin:0;">Active Launches</div>
+      <button class="btn btn-primary btn-sm" onclick="showNewActivation()">+ New</button>
+    </div>
+    <div id="activationsList"></div>
+  </div>
+
+</div>
+
+<!-- NEW ACTIVATION MODAL -->
+<div class="modal-overlay hidden" id="modalNewAct">
+  <div class="modal">
+    <span class="modal-close" onclick="closeModal('modalNewAct')">&#10005;</span>
+    <div class="modal-title">New Activation</div>
+    <div class="modal-sub">Track a new product launch</div>
+    <div class="form-group">
+      <label class="form-label">Activation Name</label>
+      <input class="form-input" id="actName" placeholder="e.g. Spring Greens — Pronto">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Launch Date</label>
+      <input class="form-input" id="actDate" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Department / Concept</label>
+      <input class="form-input" id="actDept" placeholder="e.g. Pronto, PiPa, Pastry...">
+    </div>
+    <button class="btn btn-primary" onclick="createActivation()">Create</button>
+    <button class="btn btn-secondary" style="margin-top:6px;" onclick="closeModal('modalNewAct')">Cancel</button>
+  </div>
+</div>
+
+<!-- ADD ITEM MODAL -->
+<div class="modal-overlay hidden" id="modalAddItem">
+  <div class="modal">
+    <span class="modal-close" onclick="closeModal('modalAddItem')">&#10005;</span>
+    <div class="modal-title">Add Item</div>
+    <div class="modal-sub" id="addItemActName"></div>
+    <div class="search-wrap">
+      <span class="search-icon">&#128269;</span>
+      <input class="search-input" id="addItemSearch" type="search" placeholder="Search D365 product..." oninput="debounce(searchAddItem, 300)(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="modal-search-results" id="addItemResults"></div>
+    <div class="divider"></div>
+    <div class="form-label">Or add manually (not in D365 yet)</div>
+    <div class="form-group" style="margin-top:8px;">
+      <input class="form-input" id="manualName" placeholder="Product name">
+    </div>
+    <div class="row" style="margin-bottom:14px;">
+      <input class="form-input" id="manualAdaco" placeholder="Adaco ID">
+      <input class="form-input" id="manualD365" placeholder="D365 #">
+    </div>
+    <button class="btn btn-primary" onclick="addManualItem()">Add Manual Item</button>
+  </div>
+</div>
+
+<!-- STATUS MODAL -->
+<div class="modal-overlay hidden" id="modalStatus">
+  <div class="modal">
+    <span class="modal-close" onclick="closeModal('modalStatus')">&#10005;</span>
+    <div class="modal-title" id="statusItemName" style="font-size:0.875rem;margin-bottom:4px;"></div>
+    <div class="modal-sub">Set verification status</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btn btn-green" onclick="setStatus('ok')">&#9989;&nbsp; Verified — Works in PO</button>
+      <button class="btn btn-secondary" style="border-color:var(--yellow-border);color:#C8B428;" onclick="setStatus('price')">&#9888;&#65039;&nbsp; Price Error — Needs fix</button>
+      <button class="btn btn-secondary" style="border-color:var(--red-border);color:#E07070;" onclick="setStatus('release')">&#128683;&nbsp; Not Released to EKP — Escalate</button>
+      <button class="btn btn-secondary" onclick="setStatus('pending')">&#8987;&nbsp; Pending Verification</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL MODAL -->
+<div class="modal-overlay hidden" id="modalEmail">
+  <div class="modal">
+    <span class="modal-close" onclick="closeModal('modalEmail')">&#10005;</span>
+    <div class="modal-title">Escalation Email — Paul</div>
+    <div class="modal-sub">Copy and send to Paul Challapa</div>
+    <div class="email-box" id="emailContent"></div>
+    <button class="btn btn-primary" onclick="copyEmail()">Copy to Clipboard</button>
+    <button class="btn btn-secondary" style="margin-top:6px;" onclick="closeModal('modalEmail')">Close</button>
+  </div>
+</div>
+
+<script>
+const SB_URL = 'https://fhbusipvtxjnwidlgpaa.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
+
+const MF = {
+  CK:'Kitchen Prep',P1:'Pronto',RS:'Restaurant',BA:'Bakery',
+  PA:'Pastry',FA:'Fresh Pasta',OF:'Produce',FG:'Cheese/Dairy',
+  GF:'Eggs/Dairy',MP:'Pantry/Oil'
+};
+
+// ── SUPABASE ────────────────────────────────────────────────────────────
+async function sbFetch(path) {
+  const r = await fetch(SB_URL + '/rest/v1/' + path, {
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+  });
+  if (!r.ok) throw new Error('Supabase error ' + r.status);
+  return r.json();
+}
+
+async function sbPost(table, body) {
+  const r = await fetch(SB_URL + '/rest/v1/' + table, {
+    method: 'POST',
+    headers: {
+      'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json', 'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error('Insert error ' + r.status);
+  return r.json();
+}
+
+async function sbPatch(table, id, body) {
+  const r = await fetch(SB_URL + '/rest/v1/' + table + '?id=eq.' + id, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json', 'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error('Update error ' + r.status);
+  return r.json();
+}
+
+async function sbDelete(table, id) {
+  const r = await fetch(SB_URL + '/rest/v1/' + table + '?id=eq.' + id, {
+    method: 'DELETE',
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+  });
+  if (!r.ok) throw new Error('Delete error ' + r.status);
+}
+
+function showError(msg) {
+  const b = document.getElementById('errorBanner');
+  b.textContent = msg;
+  b.style.display = 'block';
+  setTimeout(() => b.style.display = 'none', 5000);
+}
+
+// ── DEBOUNCE ────────────────────────────────────────────────────────────
+function debounce(fn, ms) {
+  let t;
+  return function(...args) {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+
+// ── TABS ────────────────────────────────────────────────────────────────
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'activations') loadActivations();
+}
+
+// ── D365 SEARCH ─────────────────────────────────────────────────────────
+async function searchD365(q) {
+  const box = document.getElementById('d365Results');
+  q = q.trim();
+  if (q.length < 2) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  box.innerHTML = '<div class="loading">Searching...</div>';
+  try {
+    const qClean = q.replace(/^0+/, '');
+    // Search by name (ilike), d365_id, or adaco_id
+    const enc = encodeURIComponent('%' + q + '%');
+    const encClean = encodeURIComponent('%' + qClean + '%');
+    const data = await sbFetch(
+      'ks_products?or=(name.ilike.' + enc + ',d365_id.ilike.' + encClean + ',adaco_id.ilike.' + encClean + ')&limit=30&order=name.asc'
+    );
+    if (!data.length) { box.innerHTML = '<div class="no-results">No items found in D365</div>'; return; }
+    box.innerHTML = data.map(r =>
+      '<div class="result-item">' +
+        '<div class="result-name">' + esc(r.name) + '</div>' +
+        '<div class="result-meta">' +
+          '<span class="mono clr-accent">D365: ' + esc(r.d365_id) + '</span>' +
+          '<span class="mono clr-dim">Adaco: ' + esc(r.adaco_id) + '</span>' +
+          '<span class="tag">' + esc(MF[r.macrofamily] || r.macrofamily || '') + '</span>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+  } catch(e) {
+    box.innerHTML = '<div class="no-results">Error loading — check connection</div>';
+    showError('D365 search failed: ' + e.message);
+  }
+}
+
+// ── ADACO SEARCH ────────────────────────────────────────────────────────
+async function searchAdaco(q) {
+  const box = document.getElementById('adacoResults');
+  q = q.trim();
+  if (q.length < 2) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  box.innerHTML = '<div class="loading">Searching...</div>';
+  try {
+    const enc = encodeURIComponent('%' + q + '%');
+    const data = await sbFetch(
+      'ks_adaco_ingredients?or=(description.ilike.' + enc + ',product_number.ilike.' + enc + ')&limit=30&order=description.asc'
+    );
+    if (!data.length) { box.innerHTML = '<div class="no-results">No ingredients found</div>'; return; }
+    box.innerHTML = data.map(r =>
+      '<div class="result-item">' +
+        '<div class="result-name">' + esc(r.description) + '</div>' +
+        '<div class="result-meta">' +
+          '<span class="mono clr-accent"># ' + esc(r.product_number) + '</span>' +
+          '<span class="tag">' + esc(r.category || '') + '</span>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+  } catch(e) {
+    box.innerHTML = '<div class="no-results">Error loading — check connection</div>';
+    showError('Adaco search failed: ' + e.message);
+  }
+}
+
+// ── ADD ITEM SEARCH ──────────────────────────────────────────────────────
+async function searchAddItem(q) {
+  const box = document.getElementById('addItemResults');
+  q = q.trim();
+  if (q.length < 2) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="loading">Searching...</div>';
+  try {
+    const enc = encodeURIComponent('%' + q + '%');
+    const qClean = q.replace(/^0+/, '');
+    const encClean = encodeURIComponent('%' + qClean + '%');
+    const data = await sbFetch(
+      'ks_products?or=(name.ilike.' + enc + ',d365_id.ilike.' + encClean + ',adaco_id.ilike.' + encClean + ')&limit=20&order=name.asc'
+    );
+    if (!data.length) { box.innerHTML = '<div class="no-results">No items found</div>'; return; }
+    box.innerHTML = data.map(r =>
+      '<div class="result-item tappable" onclick=\'addItemFromSearch(' + JSON.stringify(r) + ')\'>' +
+        '<div class="result-name">' + esc(r.name) + '</div>' +
+        '<div class="result-meta">' +
+          '<span class="mono clr-accent">D365: ' + esc(r.d365_id) + '</span>' +
+          '<span class="mono clr-dim">Adaco: ' + esc(r.adaco_id) + '</span>' +
+          '<span class="tag">' + esc(MF[r.macrofamily] || r.macrofamily || '') + '</span>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+  } catch(e) {
+    box.innerHTML = '<div class="no-results">Search error</div>';
+  }
+}
+
+// ── ACTIVATIONS ──────────────────────────────────────────────────────────
+let activations = [];
+let currentActId = null;
+let currentItemIdx = null;
+
+async function loadActivations() {
+  const el = document.getElementById('activationsList');
+  el.innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    activations = await sbFetch('ks_activations?order=created_at.desc');
+    renderActivations();
+  } catch(e) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-msg">Could not load activations.<br>' + e.message + '</div></div>';
+    showError('Load failed: ' + e.message);
+  }
+}
+
+function daysUntil(d) {
+  if (!d) return null;
+  const launch = new Date(d + 'T12:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  return Math.round((launch - today) / 86400000);
+}
+
+function cdHtml(d) {
+  const n = daysUntil(d);
+  if (n === null) return '';
+  if (n < 0) return '<span class="countdown cd-past">Launched ' + Math.abs(n) + 'd ago</span>';
+  if (n === 0) return '<span class="countdown cd-danger">LAUNCH TODAY</span>';
+  if (n <= 4) return '<span class="countdown cd-danger">' + n + 'd to launch</span>';
+  if (n <= 11) return '<span class="countdown cd-warn">' + n + 'd to launch</span>';
+  return '<span class="countdown cd-ok">' + n + 'd to launch</span>';
+}
+
+function sIcon(s){return {ok:'✅',price:'⚠️',release:'🚫',pending:'⏳'}[s]||'⏳';}
+function sLabel(s){return {ok:'Verified',price:'Price Error',release:'Not Released',pending:'Pending'}[s]||'Pending';}
+function sCls(s){return {ok:'sl-ok',price:'sl-price',release:'sl-release',pending:'sl-pending'}[s]||'sl-pending';}
+function sBtnCls(s){return {ok:'s-ok',price:'s-price',release:'s-release',pending:'s-pending'}[s]||'s-pending';}
+
+function renderActivations() {
+  const el = document.getElementById('activationsList');
+  if (!activations.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">No activations yet.<br>Tap <strong>+ New</strong> to start tracking a launch.</div></div>';
+    return;
+  }
+  let html = '';
+  activations.forEach(function(act, ai) {
+    const items = act.items || [];
+    const escalate = items.filter(i => i.status === 'price' || i.status === 'release');
+    let itemsHtml = '';
+    if (items.length) {
+      items.forEach(function(item, ii) {
+        itemsHtml +=
+          '<div class="checklist-item">' +
+            '<button class="status-btn ' + sBtnCls(item.status) + '" onclick="openStatusPicker(' + ai + ',' + ii + ')">' + sIcon(item.status) + '</button>' +
+            '<div class="item-info">' +
+              '<div class="item-name">' + esc(item.name) + '</div>' +
+              '<div class="item-ids">D365: ' + esc(item.d365_id||'—') + ' &nbsp;|&nbsp; Adaco: ' + esc(item.adaco_id||'—') + '</div>' +
+              '<div class="item-status ' + sCls(item.status) + '">' + sLabel(item.status) + '</div>' +
+            '</div>' +
+            '<span class="item-remove" onclick="removeItem(' + ai + ',' + ii + ')">&#10005;</span>' +
+          '</div>';
+      });
+    } else {
+      itemsHtml = '<div style="font-size:0.75rem;color:var(--text3);padding:10px 0;">No items added yet.</div>';
+    }
+    html +=
+      '<div class="activation-card">' +
+        '<div class="act-header">' +
+          '<div class="act-name">' + esc(act.name) + '</div>' +
+          '<span class="act-delete" onclick="deleteActivation(' + ai + ')">&#128465;</span>' +
+        '</div>' +
+        '<div class="act-meta">' + cdHtml(act.launch_date) + (act.department ? '<span class="dept-tag">' + esc(act.department) + '</span>' : '') + '</div>' +
+        '<div class="item-count">' + items.length + ' item' + (items.length!==1?'s':'') + ' &nbsp;&middot;&nbsp; ' + escalate.length + ' need' + (escalate.length!==1?'':'s') + ' escalation</div>' +
+        '<div class="legend">' +
+          '<div class="legend-item"><div class="legend-dot" style="background:#2D7A4F;"></div>Verified</div>' +
+          '<div class="legend-item"><div class="legend-dot" style="background:#7A6A20;"></div>Price Error</div>' +
+          '<div class="legend-item"><div class="legend-dot" style="background:#8B2020;"></div>Not Released</div>' +
+          '<div class="legend-item"><div class="legend-dot" style="background:#3A3A3A;"></div>Pending</div>' +
+        '</div>' +
+        itemsHtml +
+        '<button class="btn btn-secondary" style="margin-top:12px;" onclick="openAddItem(' + ai + ')">+ Add Item</button>' +
+        (escalate.length ? '<button class="btn btn-danger" style="margin-top:6px;" onclick="generateEmail(' + ai + ')">&#128231; Generate Paul Email</button>' : '') +
+      '</div>';
+  });
+  el.innerHTML = html;
+}
+
+// ── ACTIVATION CRUD ──────────────────────────────────────────────────────
+function showNewActivation() {
+  document.getElementById('actName').value = '';
+  document.getElementById('actDate').value = '';
+  document.getElementById('actDept').value = '';
+  document.getElementById('modalNewAct').classList.remove('hidden');
+}
+
+async function createActivation() {
+  const name = document.getElementById('actName').value.trim();
+  const date = document.getElementById('actDate').value || null;
+  const dept = document.getElementById('actDept').value.trim();
+  if (!name) { alert('Please enter an activation name.'); return; }
+  try {
+    const rows = await sbPost('ks_activations', { name, launch_date: date, department: dept, items: [] });
+    activations.unshift(rows[0]);
+    closeModal('modalNewAct');
+    renderActivations();
+  } catch(e) { showError('Could not create: ' + e.message); }
+}
+
+async function deleteActivation(ai) {
+  if (!confirm('Delete "' + activations[ai].name + '"?')) return;
+  try {
+    await sbDelete('ks_activations', activations[ai].id);
+    activations.splice(ai, 1);
+    renderActivations();
+  } catch(e) { showError('Delete failed: ' + e.message); }
+}
+
+async function saveItems(ai) {
+  const act = activations[ai];
+  try {
+    await sbPatch('ks_activations', act.id, { items: act.items, updated_at: new Date().toISOString() });
+    renderActivations();
+  } catch(e) { showError('Save failed: ' + e.message); }
+}
+
+// ── ITEM CRUD ────────────────────────────────────────────────────────────
+function openAddItem(ai) {
+  currentActId = ai;
+  document.getElementById('addItemActName').textContent = activations[ai].name;
+  document.getElementById('addItemSearch').value = '';
+  document.getElementById('addItemResults').innerHTML = '';
+  document.getElementById('manualName').value = '';
+  document.getElementById('manualAdaco').value = '';
+  document.getElementById('manualD365').value = '';
+  document.getElementById('modalAddItem').classList.remove('hidden');
+}
+
+function addItemFromSearch(r) {
+  activations[currentActId].items.push({ d365_id: r.d365_id, adaco_id: r.adaco_id, name: r.name, macrofamily: r.macrofamily, status: 'pending' });
+  saveItems(currentActId);
+  closeModal('modalAddItem');
+}
+
+function addManualItem() {
+  const name = document.getElementById('manualName').value.trim();
+  const adaco = document.getElementById('manualAdaco').value.trim();
+  const d365 = document.getElementById('manualD365').value.trim();
+  if (!name) { alert('Please enter a product name.'); return; }
+  activations[currentActId].items.push({ d365_id: d365||'—', adaco_id: adaco||'—', name, macrofamily: '', status: 'pending' });
+  saveItems(currentActId);
+  closeModal('modalAddItem');
+}
+
+function removeItem(ai, ii) {
+  activations[ai].items.splice(ii, 1);
+  saveItems(ai);
+}
+
+// ── STATUS ────────────────────────────────────────────────────────────────
+function openStatusPicker(ai, ii) {
+  currentActId = ai; currentItemIdx = ii;
+  document.getElementById('statusItemName').textContent = activations[ai].items[ii].name;
+  document.getElementById('modalStatus').classList.remove('hidden');
+}
+
+function setStatus(s) {
+  activations[currentActId].items[currentItemIdx].status = s;
+  saveItems(currentActId);
+  closeModal('modalStatus');
+}
+
+// ── EMAIL ─────────────────────────────────────────────────────────────────
+function generateEmail(ai) {
+  const act = activations[ai];
+  const days = daysUntil(act.launch_date);
+  const escalate = (act.items||[]).filter(i => i.status==='price'||i.status==='release');
+  const dateStr = act.launch_date
+    ? new Date(act.launch_date+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})
+    : 'TBD';
+  const daysLine = days!==null
+    ? (days>=0 ? ' We are '+days+' day'+(days!==1?'s':'')+' out from launch.' : ' The launch date has passed.')
+    : '';
+  const urgency = days!==null && days>=0 && days<=11
+    ? '⚠️ NOTE: Launch is in '+days+' day'+(days!==1?'s':'')+' — this is within the 11-day lead time window.\n\n'
+    : '';
+  let lines = '';
+  escalate.forEach(function(item, i) {
+    if (i>0) lines+='\n\n';
+    const issue = item.status==='price'
+      ? 'PRICE ERROR — item exists in D365 but has no price assigned, blocking PO entry'
+      : 'NOT RELEASED — item not released to EKP or department, blocking ordering';
+    lines += '  • '+item.name+'\n    Adaco: '+item.adaco_id+' | D365: '+item.d365_id+'\n    Issue: '+issue;
+  });
+  const email =
+    'Hi Paul,\n\n' +
+    'I\'m reaching out regarding the '+act.name+' activation (Launch: '+dateStr+').'+daysLine+'\n\n' +
+    urgency +
+    'The following item'+(escalate.length!==1?'s have':' has')+' not been verified in D365 for our location (EKP) and '+(escalate.length!==1?'require':'requires')+' your attention before we can order:\n\n' +
+    lines +
+    '\n\nCould you please look into releasing these items to our site/department and/or resolving the pricing so we can place our first order in time for the launch?\n\n' +
+    'Happy to provide any additional details.\n\n' +
+    'Thank you,\nRyan Yang\nKitchen Specialist — Eataly King of Prussia';
+  document.getElementById('emailContent').textContent = email;
+  document.getElementById('modalEmail').classList.remove('hidden');
+}
+
+function copyEmail() {
+  const text = document.getElementById('emailContent').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(function(){ btn.textContent = orig; }, 2000);
+  });
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+
+document.querySelectorAll('.modal-overlay').forEach(function(o) {
+  o.addEventListener('click', function(e) { if(e.target===o) o.classList.add('hidden'); });
+});
+</script>
+</body>
+</html>

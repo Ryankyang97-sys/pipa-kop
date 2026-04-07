@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PiPa KOP">
+<title>PiPa KOP — Beverage Tools</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+:root {
+  --bg: #0D0D0D;
+  --surface: #1A1A1A;
+  --surface2: #242424;
+  --surface3: #2E2E2E;
+  --text: #F0EDE8;
+  --text2: #8A8680;
+  --text3: #5A5650;
+  --accent: #B85C00;
+  --accent-dim: rgba(184,92,0,0.15);
+  --accent-border: rgba(184,92,0,0.3);
+  --green: #2D7A4F;
+  --green-dim: rgba(45,122,79,0.12);
+  --green-border: rgba(45,122,79,0.3);
+  --wine: #3B0D14;
+  --wine-dim: rgba(59,13,20,0.4);
+  --wine-border: rgba(139,74,68,0.4);
+  --blue-dim: rgba(27,58,92,0.2);
+  --blue-border: rgba(50,100,160,0.35);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100%;
+  font-size: 100%;
+  -webkit-text-size-adjust: none;
+}
+
+.page {
+  padding: calc(var(--safe-top) + 40px) 18px calc(var(--safe-bottom) + 40px);
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* HEADER */
+.header {
+  margin-bottom: 32px;
+}
+.wordmark-main {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1;
+}
+.wordmark-main span { color: var(--accent); }
+.wordmark-sub {
+  font-size: 0.688rem;
+  color: var(--text3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.date-line {
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin-top: 8px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* SECTION */
+.section-label {
+  font-size: 0.563rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text3);
+  margin-bottom: 10px;
+  margin-top: 28px;
+  padding-left: 2px;
+}
+.section-label:first-of-type { margin-top: 0; }
+
+/* APP CARDS */
+.app-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 14px;
+  background: var(--surface);
+  border-radius: 14px;
+  text-decoration: none;
+  color: var(--text);
+  margin-bottom: 8px;
+  border: 1px solid transparent;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+}
+.app-card:active {
+  background: var(--surface2);
+  border-color: var(--accent);
+}
+
+.app-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.app-info { flex: 1; min-width: 0; }
+.app-name {
+  font-size: 0.938rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.app-desc {
+  font-size: 0.688rem;
+  color: var(--text2);
+  line-height: 1.5;
+}
+.app-role {
+  font-size: 0.563rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  display: inline-block;
+}
+
+.app-arrow {
+  color: var(--text3);
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+/* ROLE BADGE COLORS */
+.role-ryan    { background: rgba(184,92,0,0.2);  color: #D4834A; }
+.role-bar     { background: rgba(139,74,68,0.25); color: #C4A49A; }
+.role-manager { background: rgba(50,100,160,0.2); color: #7AB0D8; }
+.role-server  { background: rgba(45,122,79,0.18); color: #38966A; }
+
+/* DIVIDER */
+.divider {
+  height: 1px;
+  background: var(--surface2);
+  margin: 24px 0;
+}
+
+/* TIP BOX */
+.tip-box {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 14px 16px;
+  border-left: 3px solid var(--accent);
+  margin-top: 8px;
+}
+.tip-title {
+  font-size: 0.688rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.tip-text {
+  font-size: 0.75rem;
+  color: var(--text2);
+  line-height: 1.7;
+}
+.tip-text strong { color: var(--text); }
+
+/* FOOTER */
+.footer {
+  margin-top: 32px;
+  font-size: 0.688rem;
+  color: var(--text3);
+  text-align: center;
+  line-height: 1.7;
+  font-family: 'JetBrains Mono', monospace;
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="wordmark-main">PiPa <span>KOP</span></div>
+    <div class="wordmark-sub">Eataly King of Prussia &middot; Beverage</div>
+    <div class="date-line" id="dateLine"></div>
+  </div>
+
+  <!-- RYAN'S TOOLS -->
+  <div class="section-label">Beverage Lead</div>
+
+  <a class="app-card" href="pipa-ops.html">
+    <div class="app-icon" style="background:var(--green-dim);border:1px solid var(--green-border);">📋</div>
+    <div class="app-info">
+      <div class="app-role role-ryan">Ryan Only</div>
+      <div class="app-name">PiPa Ops</div>
+      <div class="app-desc">Orders · Activations · Trend · Updates · Invoices · Waste · Events · Specs</div>
+    </div>
+    <div class="app-arrow">›</div>
+  </a>
+
+  <a class="app-card" href="pipa-admin.html">
+    <div class="app-icon" style="background:rgba(74,32,112,0.2);border:1px solid rgba(74,32,112,0.35);">⚙️</div>
+    <div class="app-info">
+      <div class="app-role role-ryan">Ryan Only</div>
+      <div class="app-name">PiPa Admin</div>
+      <div class="app-desc">Vendors · Weekly schedule · BTG wine list · Checklist management · PIN</div>
+    </div>
+    <div class="app-arrow">›</div>
+  </a>
+
+  <a class="app-card" href="pipa-count.html">
+    <div class="app-icon" style="background:var(--accent-dim);border:1px solid var(--accent-border);">🍷</div>
+    <div class="app-info">
+      <div class="app-role role-ryan">Ryan Only</div>
+      <div class="app-name">PiPa Count</div>
+      <div class="app-desc">Walk-route inventory · Cellar, cage, walk-in, back bar · CSV export</div>
+    </div>
+    <div class="app-arrow">›</div>
+  </a>
+
+  <!-- BAR TEAM -->
+  <div class="section-label">Bar Team</div>
+
+  <a class="app-card" href="pipa-bar.html">
+    <div class="app-icon" style="background:var(--wine-dim);border:1px solid var(--wine-border);">🍸</div>
+    <div class="app-info">
+      <div class="app-role role-bar">Bar Staff</div>
+      <div class="app-name">Bar Tools</div>
+      <div class="app-desc">Updates · Checklist · Bar pull · Cocktail specs · Wine notes · Submit</div>
+    </div>
+    <div class="app-arrow">›</div>
+  </a>
+
+  <!-- MANAGEMENT -->
+  <div class="section-label">Management</div>
+
+  <a class="app-card" href="pipa-manager.html">
+    <div class="app-icon" style="background:var(--blue-dim);border:1px solid var(--blue-border);">🔐</div>
+    <div class="app-info">
+      <div class="app-role role-manager">Managers</div>
+      <div class="app-name">Manager Dashboard</div>
+      <div class="app-desc">Shift overview · Post alerts · Inbox · Scratchpad &middot; PIN protected</div>
+    </div>
+    <div class="app-arrow">›</div>
+  </a>
+
+  <!-- KITCHEN SPECIALIST -->
+  <div class="section-label">Kitchen Specialist</div>
+
+  <a class="app-card" href="pipa-ks.html">
+    <div class="app-icon" style="background:rgba(40,80,60,0.2);border:1px solid rgba(40,120,80,0.35);">🍽️</div>
+    <div class="app-info">
+      <div class="app-role role-ryan">Ryan Only</div>
+      <div class="app-name">KS Tool</div>
+      <div class="app-desc">D365 lookup &middot; Adaco / MStore search &middot; Activation tracker &middot; Paul email generator</div>
+    </div>
+    <div class="app-arrow">›</div>
+  </a>
+
+  <!-- FOH -->
+  <div class="section-label">Floor Team</div>
+
+  <a class="app-card" href="pipa-foh.html">
+    <div class="app-icon" style="background:rgba(45,122,79,0.15);border:1px solid rgba(45,122,79,0.3);">🫅</div>
+    <div class="app-info">
+      <div class="app-role role-server">Servers &amp; FOH</div>
+      <div class="app-name">Server Guide</div>
+      <div class="app-desc">Updates · Wine knowledge · BTG wine sales log</div>
+    </div>
+    <div class="app-arrow">›</div>
+  </a>
+
+  <div class="divider"></div>
+
+  <div class="tip-box">
+    <div class="tip-title">📱 Add to Home Screen</div>
+    <div class="tip-text">
+      Save each tool as its own icon for the best experience:<br><br>
+      <strong>1.</strong> Open the tool in Safari<br>
+      <strong>2.</strong> Tap the <strong>Share</strong> button (box with arrow)<br>
+      <strong>3.</strong> Tap <strong>"Add to Home Screen"</strong> &rarr; <strong>Add</strong><br><br>
+      Or save <strong>this hub page</strong> and tap through from here.
+    </div>
+  </div>
+
+  <div class="footer">
+    Ryan Yang &middot; Beverage Lead &middot; EKP<br>
+    Tu&ndash;Sa &nbsp;10:00 AM &ndash; 6:00 PM
+  </div>
+
+</div>
+
+<script>
+document.getElementById('dateLine').textContent = new Date().toLocaleDateString('en-US', {
+  weekday: 'long', month: 'long', day: 'numeric'
+});
+</script>
+</body>
+</html>

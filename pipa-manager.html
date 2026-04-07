@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Manager">
+<meta name="theme-color" content="#3B0D14">
+<title>PiPa KOP — Manager</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#3B0D14;--surface:#501828;--surface2:#62202E;--surface3:#7A2E3C;
+  --text:#F5EDE8;--text2:#C4A49A;--text3:#8A6058;
+  --accent:#8B4A44;--accent-bright:#A85A52;--accent-dim:rgba(139,74,68,0.3);
+  --nav-bg:#F5EDE8;--nav-border:rgba(105,57,53,0.2);--nav-active:#693935;--nav-active-bg:rgba(105,57,53,0.1);
+  --green:#1E5C38;--green-dim:rgba(30,92,56,0.25);--green-bright:#38966A;
+  --red-dim:rgba(180,30,30,0.25);--red-bright:#E05050;
+  --yellow-dim:rgba(200,165,20,0.2);--yellow-bright:#D4A830;
+  --blue-dim:rgba(50,100,160,0.25);--blue-bright:#7AB0D8;
+  --radius:12px;--radius-sm:8px;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html{min-height:100vh;background:#3B0D14;}
+html,body{font-family:'DM Sans',sans-serif;background:#3B0D14;color:var(--text);height:100%;overflow:hidden;font-size:100%;-webkit-text-size-adjust:none;}
+
+/* PIN SCREEN */
+.pin-screen{position:fixed;inset:0;background:#3B0D14;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;}
+.pin-logo{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:var(--text3);margin-bottom:8px;}
+.pin-title{font-size:1.25rem;font-weight:700;color:var(--text);margin-bottom:4px;}
+.pin-sub{font-size:0.813rem;color:var(--text2);margin-bottom:36px;}
+.pin-dots{display:flex;gap:14px;margin-bottom:32px;}
+.pin-dot{width:14px;height:14px;border-radius:50%;background:var(--surface3);transition:background 0.15s;}
+.pin-dot.filled{background:var(--text);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:240px;}
+.pin-btn{height:60px;border-radius:var(--radius);background:var(--surface);border:none;color:var(--text);font-size:1.25rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.1s;}
+.pin-btn:active{background:var(--surface3);}
+.pin-btn.del{font-size:1rem;color:var(--text2);}
+.pin-error{font-size:0.813rem;color:var(--red-bright);margin-top:16px;opacity:0;transition:opacity 0.2s;}
+.pin-error.show{opacity:1;}
+
+/* HEADER */
+.header{position:fixed;top:0;left:0;right:0;z-index:100;padding:calc(var(--safe-top) + 10px) 16px 0;background:var(--bg);border-bottom:1px solid var(--surface3);}
+.header-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;}
+.header-title{font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);}
+.header-badge{font-size:0.688rem;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--surface3);color:var(--text2);}
+
+/* NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;padding:6px 4px calc(var(--safe-bottom) + 6px);background:var(--nav-bg);border-top:1px solid var(--nav-border);display:flex;gap:2px;}
+.bottom-nav::after{content:"";position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);background:var(--nav-bg);z-index:99;}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px;border-radius:10px;cursor:pointer;color:var(--nav-active);opacity:0.4;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;transition:all 0.15s;}
+.nav-tab .nav-icon{font-size:1.125rem;line-height:1;}
+.nav-tab.active{opacity:1;background:var(--nav-active-bg);}
+
+/* SCROLL */
+.scroll-area{position:fixed;top:calc(var(--safe-top) + 52px);bottom:calc(var(--safe-bottom) + 60px);left:0;right:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 24px;background:#3B0D14;}
+.view{display:none;background:#3B0D14;}.view.active{display:block;}
+
+/* CARDS & FORMS */
+.card{background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:8px;}
+.section-label{font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);padding:0 2px 8px;margin-top:18px;}
+.section-label:first-child{margin-top:0;}
+.form-label{font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);display:block;margin-bottom:6px;}
+.form-input,.form-select,.form-textarea{width:100%;padding:11px 12px;background:var(--surface2);border:1.5px solid var(--surface3);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.875rem;outline:none;-webkit-appearance:none;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent-bright);}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--text3);}
+.form-select option{background:var(--surface2);}
+.form-textarea{resize:none;line-height:1.5;}
+.form-group{margin-bottom:12px;}
+.btn-primary{width:100%;padding:13px;border-radius:var(--radius);background:var(--surface3);color:var(--text);border:1.5px solid var(--surface3);font-size:0.875rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.btn-primary:active{opacity:0.8;}
+.btn-sm{padding:6px 12px;border-radius:var(--radius-sm);background:var(--surface2);color:var(--text2);border:none;font-size:0.688rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-approve{background:var(--green-dim);color:var(--green-bright);border:1px solid var(--green);}
+.btn-flag{background:var(--red-dim);color:var(--red-bright);border:1px solid var(--red-bright);}
+
+/* ALERT BADGE */
+.alert-badge{display:inline-flex;padding:3px 8px;border-radius:4px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
+.badge-alert{background:rgba(180,80,0,0.3);color:#E08030;}
+.badge-info{background:var(--surface3);color:var(--text2);}
+.badge-ops{background:var(--blue-dim);color:var(--blue-bright);}
+.badge-86{background:var(--red-dim);color:var(--red-bright);}
+.badge-new{background:var(--green-dim);color:var(--green-bright);}
+.badge-spec{background:var(--accent-dim);color:var(--accent-bright);}
+
+/* SUBMISSION ROWS */
+.sub-row{background:var(--surface);border-radius:var(--radius);padding:12px;margin-bottom:6px;border-left:3px solid var(--surface3);}
+.sub-row.approved{border-left-color:var(--green);}
+.sub-row.flagged{border-left-color:var(--red-bright);}
+.sub-name{font-size:0.844rem;font-weight:600;color:var(--text);}
+.sub-meta{font-size:0.688rem;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.sub-actions{display:flex;gap:6px;margin-top:10px;}
+.sub-note{font-size:0.813rem;color:var(--text2);margin-top:8px;padding:8px;background:var(--surface2);border-radius:var(--radius-sm);line-height:1.5;}
+
+/* SCRATCHPAD */
+.scratch-item{background:var(--surface);border-radius:var(--radius);padding:12px 14px;margin-bottom:6px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.scratch-text{font-size:0.844rem;color:var(--text);flex:1;line-height:1.5;}
+.scratch-meta{font-size:0.625rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:4px;}
+.scratch-del{background:none;border:none;color:var(--text3);font-size:1.25rem;cursor:pointer;padding:0;line-height:1;flex-shrink:0;}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:40px 24px;color:var(--text3);}
+.empty-icon{font-size:2.5rem;margin-bottom:10px;}
+.empty-text{font-size:0.813rem;line-height:1.6;}
+
+/* TOAST */
+.toast{position:fixed;top:calc(var(--safe-top) + 64px);left:50%;transform:translateX(-50%) translateY(-14px);background:var(--green);color:#fff;padding:10px 20px;border-radius:20px;font-size:0.813rem;font-weight:600;opacity:0;transition:all 0.25s;z-index:999;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div class="pin-screen" id="pinScreen">
+  <div class="pin-logo">PiPa KOP</div>
+  <div class="pin-title">Manager Access</div>
+  <div class="pin-sub">Enter your PIN to continue</div>
+  <div class="pin-dots" id="pinDots">
+    <div class="pin-dot" id="dot0"></div>
+    <div class="pin-dot" id="dot1"></div>
+    <div class="pin-dot" id="dot2"></div>
+    <div class="pin-dot" id="dot3"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pin-btn" onclick="pinPress('1')">1</button>
+    <button class="pin-btn" onclick="pinPress('2')">2</button>
+    <button class="pin-btn" onclick="pinPress('3')">3</button>
+    <button class="pin-btn" onclick="pinPress('4')">4</button>
+    <button class="pin-btn" onclick="pinPress('5')">5</button>
+    <button class="pin-btn" onclick="pinPress('6')">6</button>
+    <button class="pin-btn" onclick="pinPress('7')">7</button>
+    <button class="pin-btn" onclick="pinPress('8')">8</button>
+    <button class="pin-btn" onclick="pinPress('9')">9</button>
+    <button class="pin-btn" onclick="pinPress('')"></button>
+    <button class="pin-btn" onclick="pinPress('0')">0</button>
+    <button class="pin-btn del" onclick="pinDel()">&#x232B;</button>
+  </div>
+  <div class="pin-error" id="pinError">Incorrect PIN</div>
+</div>
+
+<!-- APP (hidden until PIN) -->
+<div id="app" style="display:none;">
+
+<div class="header">
+  <div class="header-row" style="position:relative;display:flex;align-items:center;justify-content:space-between;">
+    <div class="header-title">Manager</div>
+    <div style="position:absolute;left:50%;transform:translateX(-50%);height:64px;display:flex;align-items:center;"><svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" height="64" width="128" style="display:block;">
+  <g>
+    <path d="M56.345,61.26c.231-.019.374-.06.429-.124.056-.063.083-.216.083-.456v-2.461c0-.206-.031-.339-.093-.398-.062-.061-.202-.098-.42-.112v-.105h1.615v.105c-.222.011-.365.048-.43.11-.064.062-.097.195-.097.398v1.163c.349-.298.635-.551.857-.76.397-.378.596-.62.596-.728,0-.075-.034-.125-.101-.148-.067-.024-.163-.036-.287-.036v-.105h1.486v.105c-.181.018-.324.053-.429.104s-.249.166-.434.341l-1.107,1.027,1.351,1.46c.246.262.414.426.502.491.089.064.219.107.391.128v.097h-1.735v-.097c.157-.006.263-.019.319-.038.055-.02.083-.058.083-.115,0-.031-.018-.079-.054-.145-.036-.064-.093-.14-.17-.225l-1.093-1.181-.175.162v1.027c0,.211.032.345.096.401.063.056.203.094.417.112v.097h-1.601v-.097Z" fill="#F5EDE8"/>
+    <path d="M60.432,61.251c.231-.017.38-.051.449-.104.068-.052.103-.188.103-.406v-2.523c0-.209-.034-.344-.103-.403s-.218-.096-.449-.106v-.105h1.679v.105c-.231.011-.381.047-.449.106s-.102.194-.102.403v2.523c0,.219.034.354.102.406.068.053.218.087.449.104v.105h-1.679v-.105Z" fill="#F5EDE8"/>
+    <path d="M62.293,61.251c.235-.023.385-.077.452-.159.067-.082.1-.272.1-.571v-2.5l-.078-.091c-.083-.099-.154-.158-.212-.182s-.146-.036-.262-.04v-.105h.968l2.19,2.715v-1.886c0-.311-.046-.512-.139-.605-.061-.061-.196-.1-.404-.118v-.105h1.333v.105c-.216.021-.36.074-.432.157-.072.084-.108.273-.108.571v2.986h-.097l-2.51-3.111v2.209c0,.31.045.512.136.606.059.061.191.103.396.124v.105h-1.333v-.105Z" fill="#F5EDE8"/>
+    <path d="M69.076,57.627c.212.062.334.092.365.092.082,0,.139-.016.173-.047s.063-.077.087-.136h.125l.044,1.194h-.13c-.116-.275-.236-.48-.36-.615-.224-.236-.515-.354-.873-.354-.364,0-.684.138-.96.414-.276.276-.414.73-.414,1.364,0,.522.138.931.413,1.225.275.294.615.44,1.02.44.068,0,.148-.007.241-.02s.18-.033.263-.061c.135-.044.219-.083.252-.115.034-.032.05-.079.05-.142v-.904c0-.219-.031-.355-.093-.409-.062-.054-.197-.088-.406-.101v-.105h1.446v.105c-.14.01-.233.032-.28.069-.078.059-.116.181-.116.365v1.117c0,.066-.163.155-.489.266-.326.111-.64.166-.94.166-.554,0-1.021-.161-1.402-.484-.419-.356-.629-.835-.629-1.436,0-.528.167-.98.501-1.357.368-.415.855-.623,1.463-.623.22,0,.436.03.648.091Z" fill="#F5EDE8"/>
+    <path d="M72.583,58.023c.349-.334.778-.501,1.288-.501s.942.168,1.291.504c.379.364.568.849.568,1.454,0,.615-.196,1.104-.587,1.469-.351.325-.775.487-1.272.487-.532,0-.973-.18-1.324-.54-.356-.367-.535-.84-.535-1.416,0-.605.19-1.091.571-1.457ZM73.007,60.804c.235.285.523.428.865.428.335,0,.621-.139.858-.417.238-.277.356-.723.356-1.334,0-.618-.12-1.065-.36-1.341-.241-.274-.525-.412-.854-.412-.34,0-.628.143-.864.428-.236.285-.354.728-.354,1.325s.118,1.038.353,1.323Z" fill="#F5EDE8"/>
+    <path d="M76.004,61.251c.224-.023.363-.064.417-.122.055-.059.082-.21.082-.454v-2.457c0-.201-.031-.333-.091-.396-.061-.062-.197-.1-.408-.114v-.105h3.023l.019.812h-.158c-.039-.259-.112-.423-.219-.492-.107-.068-.319-.104-.635-.104h-.778c-.076,0-.125.013-.146.039-.021.025-.032.076-.032.152v1.266h.823c.242,0,.396-.035.463-.107.066-.071.12-.217.161-.436h.133v1.311h-.133c-.042-.22-.097-.365-.164-.437-.066-.07-.22-.106-.46-.106h-.823v1.241c0,.208.032.341.096.398.063.058.203.095.417.111v.105h-1.588v-.105Z" fill="#F5EDE8"/>
+    <path d="M80.606,61.251c.216-.021.351-.062.405-.128s.08-.215.08-.448v-2.457c0-.198-.029-.328-.09-.391-.06-.063-.192-.103-.395-.119v-.105h1.497c.48,0,.848.093,1.103.279.255.188.382.433.382.737,0,.386-.141.666-.424.84-.282.173-.636.26-1.061.26-.062,0-.14,0-.234-.004s-.166-.004-.212-.004v1.03c0,.213.033.348.099.402.065.056.212.091.438.107v.105h-1.587v-.105ZM82.521,57.918c-.16-.07-.363-.104-.609-.104-.116,0-.188.011-.215.034-.026.023-.04.074-.04.153v1.479c.102.01.168.016.199.017.031.002.062.003.092.003.261,0,.466-.037.615-.11.271-.135.407-.387.407-.757,0-.347-.149-.585-.449-.715Z" fill="#F5EDE8"/>
+    <path d="M83.734,61.251c.218-.021.354-.062.407-.127s.08-.214.08-.449v-2.457c0-.2-.029-.33-.09-.393-.06-.062-.192-.101-.397-.117v-.105h1.571c.326,0,.599.041.816.124.414.157.621.446.621.866,0,.282-.092.499-.275.65-.185.151-.434.251-.75.299l1.169,1.439c.072.088.145.152.217.192.071.041.164.066.276.077v.105h-.913l-1.42-1.748-.249.014v1.118c0,.21.032.343.096.399.064.056.203.093.417.111v.105h-1.576v-.105ZM85.674,59.284c.301-.124.451-.355.451-.697,0-.328-.135-.552-.404-.672-.144-.064-.335-.097-.573-.097-.161,0-.259.012-.295.035-.036.022-.055.076-.055.161v1.396c.408-.015.7-.057.876-.127Z" fill="#F5EDE8"/>
+    <path d="M89.142,57.603v.105c-.218.015-.358.051-.424.109-.064.058-.097.191-.097.4v1.814c0,.297.041.529.122.695.151.303.438.454.861.454.464,0,.775-.155.934-.465.089-.174.133-.441.133-.804v-1.477c0-.309-.036-.502-.11-.58-.074-.079-.214-.128-.421-.148v-.105h1.312v.105c-.22.023-.363.077-.431.159s-.101.271-.101.569v1.477c0,.392-.061.697-.181.917-.222.404-.643.606-1.263.606-.613,0-1.031-.199-1.253-.599-.12-.214-.18-.496-.18-.848v-1.772c0-.207-.032-.34-.096-.397-.063-.059-.202-.096-.417-.112v-.105h1.609Z" fill="#F5EDE8"/>
+    <path d="M91.918,60.215c.096.255.209.458.338.609.225.265.504.396.838.396.181,0,.337-.058.469-.172s.198-.274.198-.479c0-.185-.066-.345-.199-.481-.087-.087-.27-.218-.548-.391l-.483-.303c-.146-.092-.262-.186-.349-.279-.161-.18-.241-.377-.241-.593,0-.286.095-.524.285-.715s.442-.285.757-.285c.129,0,.284.031.467.096.182.063.285.095.312.095.07,0,.118-.017.146-.05.026-.033.047-.08.062-.141h.116l.124,1.208h-.136c-.092-.364-.24-.618-.444-.763-.204-.144-.406-.216-.605-.216-.155,0-.29.046-.405.138-.116.091-.174.218-.174.381,0,.146.045.271.133.374.089.104.226.215.412.329l.499.308c.312.192.531.368.659.529.126.162.189.354.189.576,0,.298-.112.546-.337.745s-.511.3-.86.3c-.175,0-.358-.033-.55-.101-.191-.066-.301-.1-.328-.1-.066,0-.111.021-.135.062-.022.04-.038.084-.045.13h-.125l-.169-1.208h.13Z" fill="#F5EDE8"/>
+    <path d="M95.073,60.215c.096.255.209.458.338.609.225.265.504.396.838.396.181,0,.337-.058.47-.172.132-.114.197-.274.197-.479,0-.185-.066-.345-.199-.481-.087-.087-.27-.218-.548-.391l-.483-.303c-.146-.092-.262-.186-.349-.279-.161-.18-.241-.377-.241-.593,0-.286.095-.524.285-.715s.442-.285.757-.285c.129,0,.284.031.467.096.182.063.286.095.312.095.07,0,.119-.017.146-.05s.048-.08.062-.141h.116l.125,1.208h-.136c-.093-.364-.241-.618-.445-.763-.204-.144-.406-.216-.605-.216-.155,0-.29.046-.405.138-.116.091-.174.218-.174.381,0,.146.045.271.133.374.089.104.226.215.412.329l.499.308c.312.192.531.368.659.529.127.162.189.354.189.576,0,.298-.112.546-.337.745-.224.199-.511.3-.86.3-.175,0-.358-.033-.55-.101-.191-.066-.301-.1-.328-.1-.066,0-.111.021-.135.062-.022.04-.038.084-.045.13h-.125l-.169-1.208h.13Z" fill="#F5EDE8"/>
+    <path d="M97.955,61.251c.23-.017.38-.051.448-.104.068-.052.103-.188.103-.406v-2.523c0-.209-.034-.344-.103-.403s-.218-.096-.448-.106v-.105h1.679v.105c-.231.011-.381.047-.449.106s-.103.194-.103.403v2.523c0,.219.034.354.103.406.068.053.218.087.449.104v.105h-1.679v-.105Z" fill="#F5EDE8"/>
+    <path d="M99.837,61.356v-.105c.146-.017.255-.071.328-.164.073-.094.198-.349.375-.767l1.182-2.784h.113l1.414,3.217c.094.213.169.345.226.395.057.051.15.085.284.104v.105h-1.443v-.105c.166-.015.272-.032.321-.054.048-.021.071-.073.071-.155,0-.028-.009-.076-.027-.146s-.044-.144-.078-.221l-.227-.546h-1.495c-.147.371-.235.598-.265.68-.028.082-.043.146-.043.194,0,.096.039.162.116.198.049.022.139.039.271.05v.105h-1.124ZM102.28,59.899l-.65-1.562-.653,1.562h1.304Z" fill="#F5EDE8"/>
+  </g>
+  <g>
+    <path d="M2.662,45.052c1.168-.123,1.925-.331,2.272-.624.346-.293.52-1.036.52-2.229v-14.129c0-1.126-.171-1.863-.512-2.21-.341-.346-1.102-.561-2.28-.644v-.589h16.874l.108,4.544h-.806c-.269-1.399-.672-2.305-1.21-2.717s-1.737-.617-3.598-.617h-4.324c-.467,0-.754.075-.863.225-.109.15-.164.432-.164.845v7.087h4.901c1.354,0,2.218-.2,2.59-.602.372-.401.672-1.214.899-2.438h.744v7.336h-.744c-.238-1.23-.543-2.045-.915-2.443-.373-.398-1.23-.597-2.575-.597h-4.901v7.863c0,.631.199,1.003.598,1.117.398.113,1.592.17,3.58.17,2.154,0,3.743-.234,4.768-.705s1.946-1.61,2.763-3.42h.884l-1.442,5.367H2.662v-.59Z" fill="#F5EDE8"/>
+    <path d="M28.378,45.642v-.59c.816-.092,1.429-.399,1.838-.922.408-.522,1.108-1.951,2.1-4.289l6.617-15.587h.632l7.914,18.006c.527,1.193.948,1.931,1.264,2.213.315.283.845.476,1.59.578v.59h-8.077v-.59c.928-.082,1.526-.183,1.795-.301.269-.118.403-.409.403-.872,0-.154-.052-.427-.155-.817-.104-.392-.248-.803-.434-1.235l-1.271-3.056h-8.371c-.825,2.078-1.318,3.347-1.478,3.805s-.24.82-.24,1.088c0,.535.217.905.651,1.111.269.123.774.216,1.517.277v.59h-6.293ZM42.058,37.483l-3.64-8.747-3.657,8.747h7.297Z" fill="#F5EDE8"/>
+    <path d="M57.113,24.626h17.959l.171,5.397h-.76c-.372-1.695-.845-2.799-1.419-3.311s-1.781-.768-3.621-.768h-1.768v16.253c0,1.224.191,1.982.574,2.275.382.293,1.22.485,2.512.578v.59h-9.259v-.59c1.344-.103,2.182-.324,2.513-.663.331-.34.496-1.194.496-2.562v-15.881h-1.784c-1.758,0-2.954.253-3.59.76-.636.507-1.114,1.613-1.435,3.319h-.775l.186-5.397Z" fill="#F5EDE8"/>
+    <path d="M82.008,45.642v-.59c.817-.092,1.43-.399,1.838-.922s1.108-1.951,2.101-4.289l6.617-15.587h.632l7.914,18.006c.527,1.193.948,1.931,1.264,2.213.315.283.846.476,1.59.578v.59h-8.077v-.59c.928-.082,1.526-.183,1.795-.301s.403-.409.403-.872c0-.154-.052-.427-.155-.817-.104-.392-.248-.803-.435-1.235l-1.271-3.056h-8.37c-.825,2.078-1.317,3.347-1.478,3.805-.161.458-.24.82-.24,1.088,0,.535.217.905.65,1.111.269.123.773.216,1.517.277v.59h-6.294ZM95.688,37.483l-3.641-8.747-3.656,8.747h7.297Z" fill="#F5EDE8"/>
+    <path d="M111.038,45.052c1.169-.123,1.926-.331,2.272-.624.346-.293.52-1.036.52-2.229v-14.129c0-1.126-.171-1.863-.512-2.21-.342-.346-1.102-.561-2.28-.644v-.589h8.965v.589c-1.169.062-1.952.253-2.35.574-.398.321-.598,1.008-.598,2.063v15.261c0,.352.06.628.179.83.119.201.381.328.784.38.238.031.489.052.753.062.264.011.759.016,1.483.016,2.825,0,4.735-.232,5.729-.697.994-.466,1.956-1.654,2.889-3.568h.807l-1.553,5.506h-17.089v-.59Z" fill="#F5EDE8"/>
+    <path d="M145.282,24.626v.589c-.745-.021-1.303.036-1.676.17-.372.135-.558.424-.558.869,0,.135.03.302.093.504.062.202.201.468.419.799l4.675,6.855,4.561-6.964c.186-.3.307-.548.363-.745.057-.196.086-.341.086-.434,0-.455-.243-.755-.729-.899-.29-.093-.786-.145-1.489-.155v-.589h6.94v.589c-.64.031-1.213.223-1.718.574-.785.548-1.667,1.566-2.647,3.055l-4.691,7.166v6.177c0,1.229.198,1.995.597,2.3s1.29.492,2.676.564v.59h-9.693v-.59c1.437-.082,2.329-.296,2.675-.643.347-.346.52-1.21.52-2.593v-5.512l-4.156-6.095c-1.437-2.099-2.445-3.445-3.024-4.04-.579-.594-1.281-.912-2.108-.954v-.589h8.887Z" fill="#F5EDE8"/>
+  </g>
+</svg></div>
+    <div class="header-badge" id="shiftBadge">Loading...</div>
+  </div>
+</div>
+
+<div class="scroll-area">
+  <div class="view active" id="view-shift"></div>
+  <div class="view" id="view-alerts"></div>
+  <div class="view" id="view-submissions"></div>
+  <div class="view" id="view-scratch"></div>
+</div>
+
+<div class="bottom-nav">
+  <div class="nav-tab active" onclick="switchView('shift')" id="nav-shift">
+    <span class="nav-icon">&#x1F4CB;</span>Shift
+  </div>
+  <div class="nav-tab" onclick="switchView('alerts')" id="nav-alerts">
+    <span class="nav-icon">&#x1F4E3;</span>Alerts
+  </div>
+  <div class="nav-tab" onclick="switchView('submissions')" id="nav-submissions">
+    <span class="nav-icon">&#x1F4E5;</span>Inbox
+  </div>
+  <div class="nav-tab" onclick="switchView('scratch')" id="nav-scratch">
+    <span class="nav-icon">&#x1F4DD;</span>Notes
+  </div>
+</div>
+
+</div><!-- end app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL = 'https://fhbusipvtxjnwidlgpaa.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
+var MANAGER_PIN = '3411'; // overwritten from Supabase on load
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+const TODAY = new Date().toISOString().slice(0,10);
+
+// ── PIN ──────────────────────────────────────────────────────────
+var pinEntry = '';
+function pinPress(d) {
+  if (!d || pinEntry.length >= 4) return;
+  pinEntry += d;
+  document.getElementById('dot' + (pinEntry.length-1)).classList.add('filled');
+  if (pinEntry.length === 4) setTimeout(checkPin, 100);
+}
+function pinDel() {
+  if (!pinEntry.length) return;
+  pinEntry = pinEntry.slice(0,-1);
+  document.getElementById('dot' + pinEntry.length).classList.remove('filled');
+}
+function checkPin() {
+  // Fetch live PIN from Supabase each time (so changes take effect immediately)
+  supa.from('app_settings').select('value').eq('key', 'manager_pin').single()
+    .then(function(r) {
+      var currentPIN = (r.data && r.data.value) ? r.data.value : MANAGER_PIN;
+      if (pinEntry === currentPIN) {
+        MANAGER_PIN = currentPIN; // cache it
+        document.getElementById('pinScreen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        initApp();
+        initManagerRealtime();
+      } else {
+        document.getElementById('pinError').classList.add('show');
+        pinEntry = '';
+        [0,1,2,3].forEach(function(i){ document.getElementById('dot'+i).classList.remove('filled'); });
+        setTimeout(function(){ document.getElementById('pinError').classList.remove('show'); }, 1500);
+      }
+    })
+    .catch(function() {
+      // Fallback to hardcoded if Supabase unreachable
+      if (pinEntry === MANAGER_PIN) {
+        document.getElementById('pinScreen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        initApp();
+        initManagerRealtime();
+      } else {
+        document.getElementById('pinError').classList.add('show');
+        pinEntry = '';
+        [0,1,2,3].forEach(function(i){ document.getElementById('dot'+i).classList.remove('filled'); });
+        setTimeout(function(){ document.getElementById('pinError').classList.remove('show'); }, 1500);
+      }
+    });
+}
+
+// ── APP ──────────────────────────────────────────────────────────
+function initApp() {
+  var time = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  document.getElementById('shiftBadge').textContent = time;
+  switchView('shift');
+}
+
+function switchView(v) {
+  document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');});
+  document.querySelectorAll('.nav-tab').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('nav-'+v).classList.add('active');
+  var renders = {shift:renderShift, alerts:renderAlerts, submissions:renderSubmissions, scratch:renderScratch};
+  if (renders[v]) renders[v]();
+}
+
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');}, 2200);
+}
+
+// ── SHIFT OVERVIEW ───────────────────────────────────────────────
+function renderShift() {
+  var el = document.getElementById('view-shift');
+  el.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F4E1;</div><div class="empty-text">Loading shift data...</div></div>';
+
+  Promise.all([
+    supa.from('checklist_completions').select('*').eq('shift_date', TODAY),
+    supa.from('waste_log').select('*').eq('shift_date', TODAY),
+    supa.from('bottle_log').select('*').eq('shift_date', TODAY),
+    supa.from('pull_flags').select('*').eq('shift_date', TODAY),
+    supa.from('collateral_requests').select('*').eq('shift_date', TODAY),
+  ]).then(function(results) {
+    var checklists = results[0].data || [];
+    var waste      = results[1].data || [];
+    var bottles    = results[2].data || [];
+    var pulls      = results[3].data || [];
+    var collat     = results[4].data || [];
+
+    var eightySixd = pulls.filter(function(p){return p.flag_type==='86';});
+    var needs      = pulls.filter(function(p){return p.flag_type==='need';});
+
+    var clHTML = checklists.length ? checklists.map(function(c) {
+      var pct = c.total ? Math.round((c.done/c.total)*100) : 0;
+      var color = c.missed > 0 ? 'var(--yellow-bright)' : 'var(--green-bright)';
+      return '<div class="card">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+          '<div style="font-size:0.844rem;font-weight:700;">' + (c.shift_type==='am'?'AM Opening':'PM Closing') + '</div>' +
+          '<div style="font-size:0.75rem;font-weight:700;color:'+color+';">' + c.done + '/' + c.total + ' complete</div>' +
+        '</div>' +
+        (c.missed > 0 ? '<div style="font-size:0.75rem;color:var(--yellow-bright);">&#x26A0; ' + c.missed + ' items not completed</div>' : '<div style="font-size:0.75rem;color:var(--green-bright);">&#x2713; All items complete</div>') +
+        '<div style="font-size:0.625rem;color:var(--text3);font-family:monospace;margin-top:4px;">' + new Date(c.completed_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) + '</div>' +
+      '</div>';
+    }).join('') : '<div class="card" style="color:var(--text3);font-size:0.813rem;">No checklists completed yet.</div>';
+
+    var statCards =
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;">' +
+        statCard('&#x1F5D1;', waste.length, 'Waste Entries') +
+        statCard('&#x1F377;', bottles.length, 'Open Bottles') +
+        statCard('&#x1F6AB;', eightySixd.length, "86'd Items") +
+        statCard('&#x1F4CB;', collat.length, 'Requests') +
+      '</div>';
+
+    var s86HTML = '';
+    if (eightySixd.length) {
+      var clearAllBtn =
+        '<button onclick="clearAll86s()" ' +
+        'style="font-size:0.688rem;font-weight:700;padding:4px 10px;border-radius:6px;' +
+        'background:var(--red-dim);color:var(--red-bright);border:none;cursor:pointer;' +
+        'font-family:\'DM Sans\',sans-serif;">Clear All</button>';
+      s86HTML =
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;margin-top:18px;">' +
+          '<div class="section-label" style="margin:0;">86\'d Items</div>' +
+          clearAllBtn +
+        '</div>' +
+        eightySixd.map(function(p) {
+          var itemId = String(p.item_id || p.id || '').replace(/'/g,'');
+          return '<div class="sub-row flagged" style="display:flex;align-items:center;justify-content:space-between;">' +
+            '<div class="sub-name">' + p.item_name + '</div>' +
+            '<button data-itemid="' + itemId + '" onclick="clear86(this.dataset.itemid)" ' +
+              'style="font-size:0.688rem;font-weight:700;padding:3px 9px;border-radius:5px;' +
+              'background:var(--surface2);color:var(--text3);border:none;cursor:pointer;' +
+              'font-family:\'DM Sans\',sans-serif;flex-shrink:0;margin-left:8px;">Clear</button>' +
+          '</div>';
+        }).join('');
+    }
+
+    el.innerHTML =
+      '<div class="section-label">Today\'s Overview</div>' +
+      statCards +
+      '<div class="section-label">Checklist Status</div>' +
+      clHTML +
+      s86HTML;
+  });
+}
+
+function clear86(itemId) {
+  // Try delete by item_id first, fall back to clearing all matching item_name
+  supa.from('pull_flags').delete()
+    .eq('item_id', itemId).eq('flag_type', '86')
+    .then(function(r) {
+      if (r && r.error) { toast('Delete failed: ' + r.error.message); return; }
+      toast('86 cleared');
+      renderShiftOverview();
+    })
+    .catch(function(e) { toast('Error: ' + (e.message || e)); });
+}
+
+function clearAll86s() {
+  supa.from('pull_flags').delete().eq('flag_type', '86')
+    .then(function(r) {
+      if (r && r.error) { toast('Delete failed: ' + r.error.message); return; }
+      toast('All 86s cleared');
+      renderShiftOverview();
+    })
+    .catch(function(e) { toast('Error: ' + (e.message || e)); });
+}
+
+function statCard(icon, count, label) {
+  return '<div class="card" style="text-align:center;padding:16px 8px;">' +
+    '<div style="font-size:1.5rem;margin-bottom:4px;">' + icon + '</div>' +
+    '<div style="font-size:1.25rem;font-weight:700;color:var(--text);">' + count + '</div>' +
+    '<div style="font-size:0.625rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">' + label + '</div>' +
+  '</div>';
+}
+
+// ── ALERTS COMPOSER ──────────────────────────────────────────────
+function renderAlerts() {
+  var el = document.getElementById('view-alerts');
+  el.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F4E1;</div><div class="empty-text">Loading...</div></div>';
+
+  supa.from('updates').select('*').not('expires_at','is',null).order('created_at',{ascending:false}).limit(20)
+    .then(function(result) {
+      var data = result.data || [];
+      var now  = new Date();
+      var active  = data.filter(function(u){ return new Date(u.expires_at) > now; });
+      var expired = data.filter(function(u){ return new Date(u.expires_at) <= now; });
+
+      var durationOpts = [
+        {val:15,  label:'15 min'},
+        {val:30,  label:'30 min'},
+        {val:60,  label:'1 hour'},
+        {val:120, label:'2 hours'},
+        {val:240, label:'4 hours'},
+        {val:480, label:'8 hours'},
+      ].map(function(o){ return '<option value="'+o.val+'">'+o.label+'</option>'; }).join('');
+
+      var activeFeed = active.length ? active.map(function(u) {
+        var exp = new Date(u.expires_at);
+        var mins = Math.round((exp - now) / 60000);
+        var timeLeft = mins >= 60 ? Math.round(mins/60) + 'h left' : mins + 'min left';
+        return '<div class="card" style="border-left:3px solid var(--yellow-bright);">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+            '<span class="alert-badge badge-alert">ALERT · ' + timeLeft + '</span>' +
+            '<button onclick="deleteAlert('+u.id+')" style="background:none;border:none;color:var(--text3);font-size:1.25rem;cursor:pointer;">&times;</button>' +
+          '</div>' +
+          '<div style="font-size:0.844rem;color:var(--text);line-height:1.5;">' + u.text + '</div>' +
+        '</div>';
+      }).join('') : '<div class="card" style="color:var(--text3);font-size:0.813rem;">No active alerts.</div>';
+
+      el.innerHTML =
+        '<div class="section-label">Post Alert</div>' +
+        '<div class="card">' +
+          '<div class="form-group">' +
+            '<label class="form-label">Duration</label>' +
+            '<select id="alert-dur" class="form-select">' + durationOpts + '</select>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label">Message</label>' +
+            '<textarea id="alert-text" class="form-textarea" rows="3" placeholder="e.g. Kitchen is running behind — hold large parties for 30 min"></textarea>' +
+          '</div>' +
+          '<button class="btn-primary" onclick="postAlert()">Post Alert to Team</button>' +
+        '</div>' +
+        '<div class="section-label">Active Alerts</div>' +
+        activeFeed;
+    });
+}
+
+function postAlert() {
+  var text = document.getElementById('alert-text').value.trim();
+  var mins = parseInt(document.getElementById('alert-dur').value);
+  if (!text) { toast('Write a message first'); return; }
+  var expiresAt = new Date(Date.now() + mins * 60000).toISOString();
+  supa.from('updates').insert({tag:'ops', text:text, date:TODAY, published:true, expires_at:expiresAt})
+    .then(function(r) {
+      if (r.error) { toast('Error: ' + r.error.message); return; }
+      toast('Alert posted');
+      renderAlerts();
+    });
+}
+
+function deleteAlert(id) {
+  if (!confirm('Remove this alert?')) return;
+  supa.from('updates').delete().eq('id', id)
+    .then(function(r){ if (!r.error) { toast('Alert removed'); renderAlerts(); } });
+}
+
+// ── SUBMISSIONS INBOX ────────────────────────────────────────────
+function renderSubmissions() {
+  var el = document.getElementById('view-submissions');
+  el.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F4E1;</div><div class="empty-text">Loading...</div></div>';
+
+  Promise.all([
+    supa.from('waste_log').select('*').eq('shift_date', TODAY).order('created_at',{ascending:false}),
+    supa.from('bottle_log').select('*').eq('shift_date', TODAY).order('created_at',{ascending:false}),
+    supa.from('collateral_requests').select('*').eq('shift_date', TODAY).order('created_at',{ascending:false}),
+    supa.from('approvals').select('*'),
+  ]).then(function(results) {
+    var waste   = results[0].data || [];
+    var bottles = results[1].data || [];
+    var collat  = results[2].data || [];
+    var approvals = results[3].data || [];
+
+    function getApproval(type, id) {
+      return approvals.find(function(a){ return a.record_type===type && a.record_id===id; });
+    }
+
+    function subRow(type, id, title, meta) {
+      var appr = getApproval(type, id);
+      var cls  = appr ? (appr.status==='approved' ? ' approved' : ' flagged') : '';
+      return '<div class="sub-row'+cls+'">' +
+        '<div class="sub-name">'+title+'</div>' +
+        '<div class="sub-meta">'+meta+'</div>' +
+        (appr && appr.note ? '<div class="sub-note">&#x1F4DD; '+appr.note+'</div>' : '') +
+        (!appr ?
+          '<div class="sub-actions">' +
+            '<button class="btn-sm btn-approve" onclick="approveRecord(\''+type+'\','+id+',\'approved\')">&#x2713; Acknowledge</button>' +
+            '<button class="btn-sm btn-flag" onclick="approveRecord(\''+type+'\','+id+',\'flagged\')">&#x26A0; Flag</button>' +
+            '<button class="btn-sm" onclick="addNote(\''+type+'\','+id+')">+ Note</button>' +
+          '</div>' :
+          '<div style="font-size:0.625rem;color:var(--text3);margin-top:6px;text-transform:uppercase;letter-spacing:0.06em;">' +
+            (appr.status==='approved'?'&#x2713; Acknowledged':'&#x26A0; Flagged') + ' &middot; <button class="btn-sm" onclick="addNote(\''+type+'\','+id+')" style="font-size:0.625rem;">Edit note</button>' +
+          '</div>'
+        ) +
+      '</div>';
+    }
+
+    var wasteHTML = waste.length ?
+      waste.map(function(w){ return subRow('waste_log', w.id, w.item, w.qty+' '+w.unit+' · '+w.reason+(w.initials?' · '+w.initials:'')); }).join('') :
+      '<div class="card" style="color:var(--text3);font-size:0.813rem;">No waste logged today.</div>';
+
+    var bottleHTML = bottles.length ?
+      bottles.map(function(b){ return subRow('bottle_log', b.id, b.wine, b.amount+' remaining'); }).join('') :
+      '<div class="card" style="color:var(--text3);font-size:0.813rem;">No bottles logged today.</div>';
+
+    var collatHTML = collat.length ?
+      collat.map(function(c){
+        var items = JSON.parse(c.items||'[]');
+        var names = items.map(function(i){return (i.name||i)+' x'+(i.qty||1);}).join(', ');
+        return subRow('collateral_requests', c.id, 'Collateral Request', names);
+      }).join('') :
+      '<div class="card" style="color:var(--text3);font-size:0.813rem;">No requests today.</div>';
+
+    el.innerHTML =
+      '<div class="section-label">Waste & Breakage</div>' + wasteHTML +
+      '<div class="section-label">Open Bottles</div>' + bottleHTML +
+      '<div class="section-label">Collateral Requests</div>' + collatHTML;
+  });
+}
+
+
+
+function approveRecord(type, id, status) {
+  supa.from('approvals').upsert({record_type:type, record_id:id, status:status, approved_at:new Date().toISOString()}, {onConflict:'record_type,record_id'})
+    .then(function(r){
+      if (r.error) { toast('Error'); return; }
+      toast(status === 'approved' ? 'Acknowledged' : 'Flagged');
+      renderSubmissions();
+    });
+}
+
+function addNote(type, id) {
+  var note = prompt('Add a manager note:');
+  if (note === null) return;
+  supa.from('approvals').upsert({record_type:type, record_id:id, status:'noted', note:note, approved_at:new Date().toISOString()}, {onConflict:'record_type,record_id'})
+    .then(function(r){
+      if (r.error) { toast('Error'); return; }
+      toast('Note saved');
+      renderSubmissions();
+    });
+}
+
+// ── SCRATCHPAD ───────────────────────────────────────────────────
+function renderScratch() {
+  var el = document.getElementById('view-scratch');
+  el.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F4DD;</div><div class="empty-text">Loading notes...</div></div>';
+
+  supa.from('manager_notes').select('*').order('created_at',{ascending:false})
+    .then(function(result) {
+      var notes = result.data || [];
+      var feed = notes.length ? notes.map(function(n) {
+        var ts = new Date(n.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' +
+                 new Date(n.created_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+        return '<div class="scratch-item">' +
+          '<div style="flex:1;">' +
+            '<div class="scratch-text">' + n.text + '</div>' +
+            '<div class="scratch-meta">' + ts + '</div>' +
+          '</div>' +
+          '<button class="scratch-del" onclick="deleteNote('+n.id+')">&times;</button>' +
+        '</div>';
+      }).join('') :
+      '<div class="card" style="color:var(--text3);font-size:0.813rem;">No notes yet.</div>';
+
+      el.innerHTML =
+        '<div class="section-label">Add Note</div>' +
+        '<div class="card">' +
+          '<textarea id="scratch-input" class="form-textarea" rows="3" placeholder="Tasks, reminders, shift notes..."></textarea>' +
+          '<button class="btn-primary" style="margin-top:10px;" onclick="saveNote()">Save Note</button>' +
+        '</div>' +
+        '<div class="section-label">Notes</div>' +
+        feed;
+    });
+}
+
+function saveNote() {
+  var text = document.getElementById('scratch-input').value.trim();
+  if (!text) return;
+  supa.from('manager_notes').insert({text:text})
+    .then(function(r){
+      if (r.error) { toast('Error saving'); return; }
+      toast('Note saved');
+      renderScratch();
+    });
+}
+
+function deleteNote(id) {
+  if (!confirm('Delete this note?')) return;
+  supa.from('manager_notes').delete().eq('id',id)
+    .then(function(r){ if(!r.error){ toast('Deleted'); renderScratch(); } });
+}
+
+// ─────────────────────────────────────────────
+// REALTIME
+// ─────────────────────────────────────────────
+var inboxBadgeCount = 0;
+
+function initManagerRealtime() {
+  var submissionTables = ['waste_log', 'bottle_log', 'collateral_requests', 'checklist_completions'];
+
+  submissionTables.forEach(function(tbl) {
+    supa.channel('mgr-' + tbl)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: tbl }, function(payload) {
+        inboxBadgeCount++;
+        updateInboxBadge();
+        // If currently on submissions tab, refresh it
+        var active = document.querySelector('.view.active');
+        if (active && active.id === 'view-submissions') renderSubmissions();
+        // If on shift tab, refresh it
+        if (active && active.id === 'view-shift') renderShift();
+        // Toast notification
+        var labels = { waste_log: 'Waste entry', bottle_log: 'Bottle log', collateral_requests: 'Collateral request', checklist_completions: 'Checklist completed' };
+        toast((labels[tbl] || tbl) + ' submitted');
+      })
+      .subscribe();
+  });
+
+  // Listen for new manager alerts
+  supa.channel('mgr-updates')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'updates' }, function() {
+      var active = document.querySelector('.view.active');
+      if (active && active.id === 'view-alerts') renderAlerts();
+    })
+    .subscribe();
+}
+
+function updateInboxBadge() {
+  var tab = document.getElementById('nav-submissions');
+  if (!tab) return;
+  if (inboxBadgeCount > 0) {
+    tab.style.position = 'relative';
+    var badge = tab.querySelector('.rt-badge') || document.createElement('span');
+    badge.className = 'rt-badge';
+    badge.textContent = inboxBadgeCount;
+    badge.style.cssText = 'position:absolute;top:4px;right:8px;background:var(--red-bright);color:#fff;border-radius:10px;font-size:0.5rem;font-weight:700;padding:1px 5px;min-width:14px;text-align:center;';
+    if (!tab.querySelector('.rt-badge')) tab.appendChild(badge);
+  }
+}
+
+</script>
+</body>
+</html>

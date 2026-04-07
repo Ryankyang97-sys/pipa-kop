@@ -1,0 +1,2324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0D0D0D">
+<meta name="apple-mobile-web-app-title" content="PiPa Admin">
+<title>PiPa Admin</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+:root {
+  --bg: #0D0D0D;
+  --surface: #1A1A1A;
+  --surface2: #242424;
+  --surface3: #2E2E2E;
+  --surface4: #383838;
+  --text: #F0EDE8;
+  --text2: #8A8680;
+  --text3: #5A5650;
+  --accent: #B85C00;
+  --accent-dim: rgba(184,92,0,0.15);
+  --accent-bright: #D4700A;
+  --green: #2D7A4F;
+  --green-dim: rgba(45,122,79,0.15);
+  --green-bright: #38966A;
+  --red: #8B1A1A;
+  --red-dim: rgba(180,30,30,0.18);
+  --red-bright: #C0392B;
+  --yellow: #7A6010;
+  --yellow-dim: rgba(200,165,20,0.18);
+  --yellow-bright: #C9A010;
+  --blue: #1B3A5C;
+  --blue-dim: rgba(27,58,92,0.25);
+  --blue-bright: #2E6099;
+  --purple: #4A2070;
+  --purple-dim: rgba(74,32,112,0.2);
+  --purple-bright: #7B3FBD;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html{min-height:100vh;background:#0D0D0D;}
+html, body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100%;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+/* ── HEADER ── */
+.header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: calc(var(--safe-top) + 10px) 16px 0;
+  background: var(--bg);
+}
+.header-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 10px;
+}
+.header-title {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text2);
+  display: flex; align-items: center; gap: 8px;
+}
+.header-title .app-name { color: var(--text); }
+.header-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--accent);
+}
+.header-link {
+  font-size: 11px; color: var(--text3); text-decoration: none;
+  padding: 5px 10px; border-radius: 20px;
+  border: 1px solid var(--surface3);
+}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  padding: 6px 6px calc(var(--safe-bottom) + 6px);
+  background: var(--surface);
+  border-top: 1px solid var(--surface3);
+  display: flex; gap: 2px;
+  overflow-x: auto; overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.bottom-nav::-webkit-scrollbar { display: none; }
+.bottom-nav::after{content:"";position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);background:var(--surface);z-index:99;}
+
+.nav-tab {
+  flex: 0 0 64px; display: flex; flex-direction: column;
+  align-items: center; gap: 3px;
+  padding: 6px 4px; border-radius: var(--radius-sm);
+  cursor: pointer; color: var(--text3);
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.03em; transition: all 0.15s; white-space: nowrap;
+}
+.nav-tab .nav-icon { font-size: 20px; line-height: 1; }
+.nav-tab.active { color: var(--accent); background: var(--accent-dim); }
+.nav-tab .badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); position: absolute;
+  top: 6px; right: 6px;
+}
+
+/* ── SCROLL AREA ── */
+.scroll-area {
+  position: fixed;
+  top: calc(var(--safe-top) + 56px);
+  bottom: calc(var(--safe-bottom) + 68px);
+  left: 0; right: 0;
+  overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 12px 24px;
+}
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text3);
+  padding: 0 4px 8px; margin-top: 20px;
+}
+.section-label:first-child { margin-top: 0; }
+
+/* ── CARD ── */
+.card {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 14px; margin-bottom: 8px;
+  border: 1px solid transparent;
+}
+.card.border-green  { border-color: var(--green); }
+.card.border-yellow { border-color: var(--yellow-bright); }
+.card.border-red    { border-color: var(--red-bright); }
+.card.border-blue   { border-color: var(--blue-bright); }
+.card.border-accent { border-color: var(--accent); }
+
+/* ── STATUS PILL ── */
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; padding: 3px 8px; border-radius: 20px;
+}
+.pill-green  { background: var(--green-dim);  color: var(--green-bright); }
+.pill-yellow { background: var(--yellow-dim); color: var(--yellow-bright); }
+.pill-red    { background: var(--red-dim);    color: var(--red-bright); }
+.pill-blue   { background: var(--blue-dim);   color: var(--blue-bright); }
+.pill-purple { background: var(--purple-dim); color: var(--purple-bright); }
+.pill-dim    { background: var(--surface3);   color: var(--text2); }
+
+/* ── FORM ELEMENTS ── */
+.form-group { margin-bottom: 14px; }
+.form-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text2);
+  display: block; margin-bottom: 6px;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 12px;
+  background: var(--surface2); border: 1.5px solid var(--surface3);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  outline: none; -webkit-appearance: none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent);
+}
+.form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
+.form-select option { background: var(--surface2); }
+.form-textarea { resize: none; line-height: 1.5; }
+.form-row { display: flex; gap: 8px; }
+.form-row .form-group { flex: 1; }
+
+/* Toggle row */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--surface3);
+}
+.toggle-row:last-child { border-bottom: none; }
+.toggle-label { font-size: 13px; color: var(--text); }
+.toggle-sublabel { font-size: 11px; color: var(--text2); margin-top: 1px; }
+.toggle {
+  width: 44px; height: 26px; border-radius: 13px;
+  background: var(--surface3); position: relative; cursor: pointer;
+  transition: background 0.2s; flex-shrink: 0;
+}
+.toggle.on { background: var(--green); }
+.toggle::after {
+  content: ''; width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; position: absolute; top: 3px; left: 3px;
+  transition: transform 0.2s;
+}
+.toggle.on::after { transform: translateX(18px); }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  width: 100%; padding: 14px; border-radius: var(--radius);
+  background: var(--accent); color: #fff;
+  border: none; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+.btn-secondary {
+  width: 100%; padding: 12px; border-radius: var(--radius);
+  background: var(--surface2); color: var(--text2);
+  border: 1px solid var(--surface3); font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+}
+.btn-danger {
+  padding: 10px 16px; border-radius: var(--radius-sm);
+  background: var(--red-dim); color: var(--red-bright);
+  border: none; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.btn-sm {
+  padding: 6px 12px; border-radius: var(--radius-sm);
+  background: var(--surface3); color: var(--text2);
+  border: none; font-size: 11px; font-weight: 600; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-sm.green { background: var(--green-dim); color: var(--green-bright); }
+.btn-sm.accent { background: var(--accent-dim); color: var(--accent-bright); }
+
+/* ── CHECKLIST STEPS ── */
+.checklist {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;
+}
+.check-step {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  background: var(--surface2); color: var(--text3);
+  border: 1.5px solid var(--surface3); transition: all 0.15s;
+  user-select: none;
+}
+.check-step.done {
+  background: var(--green-dim); color: var(--green-bright);
+  border-color: var(--green);
+}
+.check-step .step-icon { font-size: 13px; }
+
+/* ── ACTIVATION CARD ── */
+.activation-name {
+  font-size: 15px; font-weight: 700; margin-bottom: 4px;
+}
+.activation-meta {
+  font-size: 11px; color: var(--text2);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 10px; display: flex; gap: 12px; flex-wrap: wrap;
+}
+.activation-swap {
+  font-size: 11px; color: var(--text2); margin-top: 8px;
+  padding: 8px; background: var(--surface2); border-radius: var(--radius-sm);
+}
+.activation-notes {
+  font-size: 12px; color: var(--text); margin-top: 8px;
+  line-height: 1.5; padding: 8px; background: var(--surface2);
+  border-radius: var(--radius-sm); border-left: 2px solid var(--accent);
+}
+.launch-btn {
+  margin-top: 12px; width: 100%; padding: 12px;
+  border-radius: var(--radius); border: none;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--green-dim); color: var(--green-bright);
+  transition: all 0.15s;
+}
+.launch-btn.launched {
+  background: var(--green); color: #fff;
+}
+
+/* ── INVOICE CARD ── */
+.invoice-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 0; font-size: 13px;
+}
+.invoice-row .label { color: var(--text2); font-size: 12px; }
+.invoice-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.invoice-checks {
+  display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;
+}
+.inv-check {
+  padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;
+  cursor: pointer; border: 1.5px solid var(--surface3);
+  background: var(--surface2); color: var(--text3);
+  transition: all 0.15s; user-select: none;
+}
+.inv-check.checked {
+  background: var(--green-dim); color: var(--green-bright);
+  border-color: var(--green);
+}
+.inv-check.flagged {
+  background: var(--red-dim); color: var(--red-bright);
+  border-color: var(--red-bright);
+}
+
+/* ── WASTE CARD ── */
+.waste-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 8px;
+}
+.waste-item-name { font-size: 14px; font-weight: 600; }
+.waste-detail { font-size: 11px; color: var(--text2); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+
+/* ── EVENT CARD ── */
+.event-date-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--accent); font-weight: 700;
+  margin-bottom: 6px;
+}
+.event-name { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.event-flags {
+  display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px;
+}
+.event-flag {
+  font-size: 10px; font-weight: 700; padding: 3px 8px;
+  border-radius: 20px; background: var(--surface2); color: var(--text3);
+}
+.event-flag.active { background: var(--accent-dim); color: var(--accent-bright); }
+
+/* ── SPECS ── */
+.spec-search-wrap {
+  position: sticky; top: -12px; z-index: 10;
+  background: var(--bg); padding: 0 0 10px; margin: -4px 0 0;
+}
+.spec-search {
+  width: 100%; padding: 12px 16px;
+  background: var(--surface); border: 1.5px solid var(--surface3);
+  border-radius: 24px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none;
+}
+.spec-search:focus { border-color: var(--accent); }
+.spec-search::placeholder { color: var(--text3); }
+
+.spec-filter-row {
+  display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px;
+  scrollbar-width: none;
+}
+.spec-filter-row::-webkit-scrollbar { display: none; }
+.spec-filter {
+  flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  background: var(--surface); color: var(--text2);
+  border: 1.5px solid transparent;
+}
+.spec-filter.active {
+  border-color: var(--accent); color: var(--text);
+  background: var(--accent-dim);
+}
+
+.recipe-card {
+  background: var(--surface); border-radius: var(--radius);
+  margin-bottom: 8px; overflow: hidden;
+}
+.recipe-header {
+  padding: 14px 14px 10px; cursor: pointer;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.recipe-name { font-size: 15px; font-weight: 700; }
+.recipe-sub {
+  font-size: 11px; color: var(--text2); margin-top: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex; gap: 10px;
+}
+.recipe-chevron { color: var(--text3); font-size: 14px; transition: transform 0.2s; flex-shrink: 0; padding-top: 2px; }
+.recipe-header.open .recipe-chevron { transform: rotate(180deg); }
+
+.recipe-body { display: none; padding: 0 14px 14px; }
+.recipe-body.open { display: block; }
+
+.recipe-meta-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.recipe-meta-tag {
+  font-size: 10px; font-weight: 600; padding: 3px 8px;
+  border-radius: 20px; background: var(--surface2); color: var(--text2);
+}
+
+.ingredients-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+.ingredients-table tr { border-bottom: 1px solid var(--surface3); }
+.ingredients-table tr:last-child { border-bottom: none; }
+.ingredients-table td {
+  padding: 7px 4px; font-size: 13px; vertical-align: middle;
+}
+.ing-qty {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: var(--accent); width: 50px; white-space: nowrap;
+}
+.ing-unit {
+  font-size: 11px; color: var(--text2); width: 40px;
+}
+.ing-name { color: var(--text); }
+
+.recipe-footer {
+  display: flex; gap: 8px; padding-top: 8px;
+  border-top: 1px solid var(--surface3);
+  font-size: 11px; color: var(--text2);
+}
+.recipe-footer span { display: flex; align-items: center; gap: 4px; }
+
+.recipe-edit-btn {
+  margin-top: 10px; padding: 8px 14px; border-radius: var(--radius-sm);
+  background: var(--surface2); color: var(--text2);
+  border: none; font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ── SHEET (bottom drawer) ── */
+.sheet-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.72); backdrop-filter: blur(8px);
+  align-items: flex-end;
+}
+.sheet-overlay.open { display: flex; }
+.sheet {
+  background: var(--surface); border-radius: 20px 20px 0 0;
+  width: 100%; max-height: 90vh; overflow-y: auto;
+  padding: 20px 16px calc(var(--safe-bottom) + 16px);
+}
+.sheet-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--surface3); margin: 0 auto 20px;
+}
+.sheet-title {
+  font-size: 17px; font-weight: 700; margin-bottom: 20px;
+}
+.sheet-actions { display: flex; gap: 8px; margin-top: 16px; }
+
+/* Ingredient builder rows */
+.ing-build-row {
+  display: flex; gap: 6px; align-items: center; margin-bottom: 8px;
+}
+.ing-build-row .form-input { flex: 2; }
+.ing-build-row .form-input.qty { flex: 0.7; }
+.ing-build-row .form-input.unit { flex: 0.8; }
+.ing-remove {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--red-dim); color: var(--red-bright);
+  border: none; font-size: 16px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.add-ing-btn {
+  width: 100%; padding: 10px; border-radius: var(--radius-sm);
+  background: var(--surface2); color: var(--accent);
+  border: 1px dashed var(--accent); font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'DM Sans', sans-serif; margin-bottom: 14px;
+}
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center; padding: 48px 24px; color: var(--text3);
+}
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-text { font-size: 14px; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; top: calc(var(--safe-top) + 70px);
+  left: 50%; transform: translateX(-50%) translateY(-16px);
+  background: var(--green); color: #fff;
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 600;
+  opacity: 0; transition: all 0.25s; z-index: 999; pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.error { background: var(--red-bright); }
+
+/* ── FAB ── */
+.fab {
+  position: fixed; bottom: calc(var(--safe-bottom) + 80px);
+  right: 16px; z-index: 150;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  border: none; font-size: 24px; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(184,92,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+}
+.fab:active { transform: scale(0.94); }
+.fab.hidden { display: none; }
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px; background: var(--surface3);
+  margin: 16px 0;
+}
+
+/* ── CARD ACTIONS ROW ── */
+.card-actions {
+  display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap;
+}
+
+.ops-update-compose { background:var(--surface); border-radius:12px; padding:16px; margin-bottom:4px; }
+.ops-update-card { background:var(--surface); border-radius:12px; padding:14px; margin-bottom:8px; }
+
+/* ORDER PLANNER */
+.op-view-btn{padding:6px 14px;border-radius:20px;background:var(--surface);color:var(--text2);border:1.5px solid transparent;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.op-view-btn.active{border-color:var(--accent);color:var(--text);background:var(--surface2);}
+.op-save-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.op-need-badge{font-size:0.688rem;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--red-dim);color:var(--red-bright);}
+.op-vendor-card{background:var(--surface);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+.op-vendor-header{padding:12px 14px;border-bottom:1px solid var(--surface3);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.op-vendor-name{font-size:0.938rem;font-weight:700;color:var(--text);}
+.op-vendor-meta{font-size:0.625rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;}
+.op-cutoff{font-size:0.625rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--yellow-dim);color:var(--yellow-bright);}
+.op-need-count{font-size:0.625rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--red-dim);color:var(--red-bright);}
+.op-item-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--surface3);transition:background 0.1s;}
+.op-item-row:last-of-type{border-bottom:none;}
+.op-item-row.op-row-counted{background:var(--surface2);}
+.op-item-row.op-row-need{background:rgba(180,30,30,0.08);}
+.op-item-info{flex:1;min-width:0;}
+.op-item-name{font-size:0.844rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.op-item-meta{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap;}
+.op-cat-badge{font-size:0.563rem;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:0.06em;}
+.op-item-meta span{font-size:0.625rem;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+.op-item-note{font-size:0.625rem;color:var(--yellow-bright) !important;font-family:'DM Sans',sans-serif !important;}
+.op-item-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.op-par-label{font-size:0.563rem;color:var(--text3);font-family:'JetBrains Mono',monospace;text-align:right;}
+.op-count-input{width:56px;height:40px;background:var(--surface3);border:1.5px solid transparent;border-radius:var(--radius-sm);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:600;text-align:center;outline:none;-webkit-appearance:none;}
+.op-count-input:focus{border-color:var(--accent);}
+.op-suggest{width:32px;text-align:center;font-size:0.875rem;font-family:'JetBrains Mono',monospace;}
+.op-copy-btn{display:block;width:100%;padding:11px;background:var(--surface2);border:none;color:var(--text2);font-size:0.813rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:center;border-top:1px solid var(--surface3);}
+.op-copy-btn:active{background:var(--surface3);}
+.trend-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;background:var(--surface);border-radius:var(--radius);margin-bottom:4px;}
+
+.sub-hist-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:10px 14px;background:var(--surface);border-radius:var(--radius);margin-bottom:4px;}
+.sub-hist-name{font-size:0.844rem;font-weight:500;color:var(--text);}
+.sub-hist-meta{font-size:0.688rem;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+.sub-hist-date{font-size:0.625rem;color:var(--text3);font-family:'JetBrains Mono',monospace;text-align:right;flex-shrink:0;}
+
+.field-input{width:100%;display:block;box-sizing:border-box;padding:10px 12px;background:var(--surface2);border:1.5px solid var(--surface3);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.813rem;outline:none;-webkit-appearance:none;}
+.field-input:focus{border-color:var(--accent);}
+.field-input::placeholder{color:var(--text3);}
+textarea.field-input{resize:none;line-height:1.5;}
+select.field-input{cursor:pointer;}
+.field-label{font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);display:block;margin-bottom:6px;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row">
+    <div class="header-title">
+      <span class="app-name">PiPa Admin</span>
+      <span style="color:var(--text3)">·</span>
+      <span>EKP</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="header-date" id="headerDate"></span>
+      <a class="header-link" href="pipa-ops.html">Ops →</a>
+    </div>
+  </div>
+</div>
+
+<div class="scroll-area" id="scrollArea">
+  <div class="view active" id="view-updates"></div>
+  <div class="view" id="view-submissions"></div>
+  <div class="view" id="view-vendors"></div>
+  <div class="view" id="view-weekly"></div>
+  <div class="view" id="view-admin"></div>
+  <div class="view" id="view-qr"></div>
+</div>
+
+<button class="fab hidden" id="fab" onclick="openAddUpdate()">+</button>
+
+<div class="bottom-nav" id="bottomNav">
+  <div class="nav-tab active" onclick="switchView('updates')" id="nav-updates">
+    <span class="nav-icon">📢</span>Updates
+  </div>
+  <div class="nav-tab" onclick="switchView('submissions')" id="nav-submissions">
+    <span class="nav-icon">📥</span>Inbox
+  </div>
+  <div class="nav-tab" onclick="switchView('vendors')" id="nav-vendors">
+    <span class="nav-icon">📞</span>Vendors
+  </div>
+  <div class="nav-tab" onclick="switchView('weekly')" id="nav-weekly">
+    <span class="nav-icon">📅</span>Weekly
+  </div>
+  <div class="nav-tab" onclick="switchView('admin')" id="nav-admin">
+    <span class="nav-icon">⚙</span>Lists
+  </div>
+  <div class="nav-tab" onclick="switchView('qr')" id="nav-qr">
+    <span class="nav-icon">🔗</span>QR
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL = 'https://fhbusipvtxjnwidlgpaa.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+const TODAY = new Date().toISOString().slice(0,10);
+let currentView = 'updates';
+
+var adminSection = 'btg';
+var vendorSearch = '';
+var subType      = 'waste';
+var subDate      = '';
+var subSearch    = '';
+var subType   = 'waste';
+var subDate   = '';
+var subSearch = '';
+
+
+
+var VENDOR_LIST = [{"contact": "Michael Madrigale", "company": "Cloche Wine Co", "vendor_id": "F231600", "email": "mike@clochewine.com", "phone": "917.703.8773", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "12:00 PM"}, {"contact": "Jeff", "company": "The Wine Merchant", "vendor_id": "F231708", "email": "jeff@thewinemerchantltd.com", "phone": "302-377-4139", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "FRI", "order_days": "WED", "cutoff": "11:59 PM"}, {"contact": "Faith Proetto", "company": "The Wine Merchant / Winebow", "vendor_id": "", "email": "Faith.Proetto@winebow-imports.com", "phone": "215.806.0095", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "David Hall", "company": "F Magnotta", "vendor_id": "F231710", "email": "orders@fredmagnotta.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "2:30 PM"}, {"contact": "Brad DuPlessis", "company": "RNDC", "vendor_id": "F230750", "email": "Brad.duPlessis@RNDC-USA.COM", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "FRI", "order_days": "MON", "cutoff": "9:00 AM"}, {"contact": "Mitchell Skwer", "company": "RNDC", "vendor_id": "", "email": "mitchell.skwer@rndc-usa.com", "phone": "267.252.0017", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Christine McNelis", "company": "Palm Bay / RNDC", "vendor_id": "", "email": "cmcnelis@palmbay.com", "phone": "484.941.2195", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Kristin Blizzard", "company": "Palm Bay / RNDC", "vendor_id": "", "email": "kblizzard@palmbay.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Joe Venuto", "company": "Muller Inc — Beer", "vendor_id": "F231445", "email": "jvenuto@mullerbev.com", "phone": "", "payment": "Fintech", "loop": "", "d365": "✓", "delivery_days": "TUE", "order_days": "MON", "cutoff": "2:00 PM"}, {"contact": "Orders Inbox", "company": "Muller Inc — Beer", "vendor_id": "", "email": "neworders@mullerbev.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Shawn Lawrence", "company": "SGWS", "vendor_id": "F228499", "email": "Shawn.Lawrence@sgws.com", "phone": "267.535.0985", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "2:00 PM"}, {"contact": "Mark Kauterman", "company": "SGWS — Main Rep", "vendor_id": "", "email": "mark.kauterman@sgws.com", "phone": "610.470.8051", "payment": "", "loop": "", "d365": "", "delivery_days": "FRI", "order_days": "WED", "cutoff": "2:00 PM"}, {"contact": "Bekah MacLaughlin", "company": "SGWS — Campari", "vendor_id": "", "email": "rebekah.maclaughlin@sgws.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Zack Gage", "company": "SGWS", "vendor_id": "", "email": "zack.gage@sgws.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Tim Madden", "company": "Breakthru", "vendor_id": "F226891", "email": "TMMadden@Breakthrubev.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "WED", "cutoff": "12:00 PM"}, {"contact": "SO Orders", "company": "Breakthru", "vendor_id": "", "email": "soorders1@breakthrubev.com", "phone": "", "payment": "", "loop": "✓", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Scott McBride", "company": "Regal Wine", "vendor_id": "F228323", "email": "smcbride@regalwine.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "WED", "order_days": "TUE", "cutoff": "2:00 PM"}, {"contact": "David Costanzo", "company": "Vine Street Imports", "vendor_id": "F231731", "email": "David@vsimports.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "TUE", "order_days": "MON", "cutoff": "3:00 PM"}, {"contact": "Mark Monaco", "company": "Palateur / Classica", "vendor_id": "F231527", "email": "mark@palateur.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "12:00 PM"}, {"contact": "Iacopo Di Teodoro", "company": "Palateur / Classica", "vendor_id": "", "email": "iac@classica-usa.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Ryan", "company": "Filthy", "vendor_id": "F232146", "email": "ryan@filthyfood.com", "phone": "", "payment": "Fintech?", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}];
+var vendorSearch = '';
+
+var WEEKLY_SCHEDULE = [{"num": 1, "vendor": "Vine Street Imports", "day": "MON", "contact": "David Costanzo", "note": ""}, {"num": 2, "vendor": "RNDC", "day": "MON", "contact": "Brad DuPlessis", "note": "Order by 9AM"}, {"num": 3, "vendor": "Muller Inc — Beer", "day": "TUE", "contact": "Joe Venuto", "note": "Order by 2PM"}, {"num": 4, "vendor": "Ace Endico", "day": "TUE", "contact": "A. Galvan", "note": ""}, {"num": 5, "vendor": "Beta Imports", "day": "TUE", "contact": "Confirm PO Only", "note": ""}, {"num": 6, "vendor": "SGWS", "day": "TUE", "contact": "Mark Kauterman", "note": "Order by 2PM"}, {"num": 7, "vendor": "Regal Wine", "day": "WED", "contact": "Scott McBride", "note": ""}, {"num": 8, "vendor": "Baldor", "day": "WED", "contact": "National Accts", "note": "Order varies"}, {"num": 9, "vendor": "F Magnotta", "day": "THU", "contact": "David Hall", "note": "Order by 2:30PM"}, {"num": 10, "vendor": "Palateur / Classica", "day": "THU", "contact": "Mark Monaco", "note": "Order by 12PM"}, {"num": 11, "vendor": "Cloche Wine Co", "day": "THU", "contact": "Michael Madrigale", "note": "Order by 12PM"}, {"num": 12, "vendor": "Breakthru", "day": "THU", "contact": "Tim Madden", "note": "Order by 12PM"}, {"num": 13, "vendor": "RNDC (Wine)", "day": "FRI", "contact": "Brad DuPlessis", "note": ""}, {"num": 14, "vendor": "The Wine Merchant", "day": "FRI", "contact": "Jeff", "note": "Order by 11:59PM"}, {"num": 15, "vendor": "Breakthru (Alt)", "day": "FRI", "contact": "Tim Madden", "note": ""}, {"num": 16, "vendor": "VOS Selections", "day": "TUE", "contact": "", "note": "Order by 12PM"}];
+var weeklySummaryData = {};  // vendor -> {confirmed, received, po, issues, notes}
+
+var ADMIN_BTG = [{"d365": "1136347", "brand": "Ronco Belvedere", "item": "Prosecco", "name": "Ronco Belvedere Prosecco", "region": "Veneto", "vendor": "SGWS", "notes": ""}, {"d365": "1136348", "brand": "Ronco Belvedere", "item": "Lambrusco", "name": "Ronco Belvedere Lambrusco", "region": "Emilia-Romagna", "vendor": "SGWS", "notes": ""}, {"d365": "00702794", "brand": "Lucci", "item": "Lambrusco Reggiano DOC Secco", "name": "Lucci Lambrusco Reggiano DOC Secco", "region": "Emilia-Romagna", "vendor": "SGWS", "notes": "✅ D365# Added"}, {"d365": "1151781", "brand": "Cascina Asinari", "item": "Moscato d'Asti", "name": "Cascina Asinari Moscato d'Asti", "region": "Piemonte", "vendor": "SGWS", "notes": ""}, {"d365": "200517", "brand": "Cantine Ferrari", "item": "Trento DOC", "name": "Cantine Ferrari Trento DOC", "region": "Trentino", "vendor": "RNDC", "notes": ""}, {"d365": "1113651", "brand": "Baglio di Grisi", "item": "Grillo", "name": "Baglio di Grisi Grillo", "region": "Sicilia", "vendor": "SGWS", "notes": ""}, {"d365": "1119524", "brand": "Fontanafredda", "item": "Arneis Pradalupo", "name": "Fontanafredda Arneis Pradalupo", "region": "Piemonte", "vendor": "RNDC", "notes": ""}, {"d365": "1121887", "brand": "La Staffa", "item": "Verdicchio Castello di Jesi", "name": "La Staffa Verdicchio Castello di Jesi", "region": "Marche", "vendor": "Palateur", "notes": ""}, {"d365": "1120834", "brand": "Feudi di San Gregorio", "item": "Falanghina", "name": "Feudi di San Gregorio Falanghina", "region": "Campania", "vendor": "SGWS", "notes": ""}, {"d365": "1112217", "brand": "Jermann", "item": "Pinot Grigio", "name": "Jermann Pinot Grigio", "region": "Friuli Venezia Giulia", "vendor": "Breakthru", "notes": "⭐ Also BTB"}, {"d365": "1114289", "brand": "Tormaresca", "item": "Califuria Rosato", "name": "Tormaresca Califuria Rosato", "region": "Puglia", "vendor": "SGWS", "notes": ""}, {"d365": "1122135", "brand": "La Mozza", "item": "Cabernet Sauvignon 'I Perazzi'", "name": "La Mozza Cabernet Sauvignon 'I Perazzi'", "region": "Toscana", "vendor": "SGWS", "notes": ""}, {"d365": "1121578", "brand": "Planeta", "item": "La Segreta Rosso", "name": "Planeta La Segreta Rosso", "region": "Sicilia", "vendor": "RNDC", "notes": ""}, {"d365": "1114012", "brand": "Valle Reale", "item": "Montepulciano d'Abruzzo", "name": "Valle Reale Montepulciano d'Abruzzo", "region": "Abruzzo", "vendor": "Wine Merchant", "notes": ""}, {"d365": "1140193", "brand": "Colombaio di Cencio", "item": "Chianti Classico", "name": "Colombaio di Cencio Chianti Classico", "region": "Toscana", "vendor": "SGWS", "notes": ""}, {"d365": "1120559", "brand": "Fontanafredda", "item": "Barbera 'Briccotondo'", "name": "Fontanafredda Barbera 'Briccotondo'", "region": "Piemonte", "vendor": "RNDC", "notes": ""}, {"d365": "1119793", "brand": "Allegrini", "item": "Valpolicella", "name": "Allegrini Valpolicella", "region": "Veneto", "vendor": "Breakthru", "notes": ""}, {"d365": "1109844", "brand": "Mirafiore", "item": "Nebbiolo", "name": "Mirafiore Nebbiolo", "region": "Piemonte", "vendor": "SGWS", "notes": ""}, {"d365": "1126687", "brand": "Feudo Montoni", "item": "Nero d'Avola Lagnusa", "name": "Feudo Montoni Nero d'Avola Lagnusa", "region": "Sicilia", "vendor": "Breakthru", "notes": ""}, {"d365": "1107052", "brand": "Fontanafredda", "item": "Nebbiolo Langhe Ebbio 2013", "name": "Fontanafredda Nebbiolo Langhe Ebbio 2013", "region": "Piemonte", "vendor": "RNDC", "notes": ""}, {"d365": "1133781", "brand": "Elena Walch", "item": "Chardonnay", "name": "Elena Walch Chardonnay", "region": "Alto Adige", "vendor": "Breakthru", "notes": "RNDC APRIL"}, {"d365": "00671872", "brand": "Canella", "item": "Mimosa Granriviera 750", "name": "Canella Mimosa Granriviera 750", "region": "Veneto", "vendor": "SGWS", "notes": ""}, {"d365": "521709", "brand": "Canella", "item": "Bellini", "name": "Canella Bellini", "region": "Veneto", "vendor": "SGWS", "notes": ""}, {"d365": "1119309", "brand": "Argiolas", "item": "Costamolino Vermentino", "name": "Argiolas Costamolino Vermentino", "region": "Sardegna", "vendor": "Wine Merchant", "notes": "⭐ Also BTB"}];
+var adminSection = 'btg';
+
+var WEEKLY_SCHEDULE = [{"num": 1, "vendor": "Vine Street Imports", "day": "MON", "contact": "David Costanzo", "note": ""}, {"num": 2, "vendor": "RNDC", "day": "MON", "contact": "Brad DuPlessis", "note": "Order by 9AM"}, {"num": 3, "vendor": "Muller Inc — Beer", "day": "TUE", "contact": "Joe Venuto", "note": "Order by 2PM"}, {"num": 4, "vendor": "Ace Endico", "day": "TUE", "contact": "A. Galvan", "note": ""}, {"num": 5, "vendor": "Beta Imports", "day": "TUE", "contact": "Confirm PO Only", "note": ""}, {"num": 6, "vendor": "SGWS", "day": "TUE", "contact": "Mark Kauterman", "note": "Order by 2PM"}, {"num": 7, "vendor": "Regal Wine", "day": "WED", "contact": "Scott McBride", "note": ""}, {"num": 8, "vendor": "Baldor", "day": "WED", "contact": "National Accts", "note": "Order varies"}, {"num": 9, "vendor": "F Magnotta", "day": "THU", "contact": "David Hall", "note": "Order by 2:30PM"}, {"num": 10, "vendor": "Palateur / Classica", "day": "THU", "contact": "Mark Monaco", "note": "Order by 12PM"}, {"num": 11, "vendor": "Cloche Wine Co", "day": "THU", "contact": "Michael Madrigale", "note": "Order by 12PM"}, {"num": 12, "vendor": "Breakthru", "day": "THU", "contact": "Tim Madden", "note": "Order by 12PM"}, {"num": 13, "vendor": "RNDC (Wine)", "day": "FRI", "contact": "Brad DuPlessis", "note": ""}, {"num": 14, "vendor": "The Wine Merchant", "day": "FRI", "contact": "Jeff", "note": "Order by 11:59PM"}, {"num": 15, "vendor": "Breakthru (Alt)", "day": "FRI", "contact": "Tim Madden", "note": ""}, {"num": 16, "vendor": "VOS Selections", "day": "TUE", "contact": "", "note": "Order by 12PM"}];
+var weeklySummaryData = {};  // vendor -> {confirmed, received, po, issues, notes}
+
+var ADMIN_BTG = [{"d365": "1136347", "brand": "Ronco Belvedere", "item": "Prosecco", "name": "Ronco Belvedere Prosecco", "region": "Veneto", "vendor": "SGWS", "notes": ""}, {"d365": "1136348", "brand": "Ronco Belvedere", "item": "Lambrusco", "name": "Ronco Belvedere Lambrusco", "region": "Emilia-Romagna", "vendor": "SGWS", "notes": ""}, {"d365": "00702794", "brand": "Lucci", "item": "Lambrusco Reggiano DOC Secco", "name": "Lucci Lambrusco Reggiano DOC Secco", "region": "Emilia-Romagna", "vendor": "SGWS", "notes": "✅ D365# Added"}, {"d365": "1151781", "brand": "Cascina Asinari", "item": "Moscato d'Asti", "name": "Cascina Asinari Moscato d'Asti", "region": "Piemonte", "vendor": "SGWS", "notes": ""}, {"d365": "200517", "brand": "Cantine Ferrari", "item": "Trento DOC", "name": "Cantine Ferrari Trento DOC", "region": "Trentino", "vendor": "RNDC", "notes": ""}, {"d365": "1113651", "brand": "Baglio di Grisi", "item": "Grillo", "name": "Baglio di Grisi Grillo", "region": "Sicilia", "vendor": "SGWS", "notes": ""}, {"d365": "1119524", "brand": "Fontanafredda", "item": "Arneis Pradalupo", "name": "Fontanafredda Arneis Pradalupo", "region": "Piemonte", "vendor": "RNDC", "notes": ""}, {"d365": "1121887", "brand": "La Staffa", "item": "Verdicchio Castello di Jesi", "name": "La Staffa Verdicchio Castello di Jesi", "region": "Marche", "vendor": "Palateur", "notes": ""}, {"d365": "1120834", "brand": "Feudi di San Gregorio", "item": "Falanghina", "name": "Feudi di San Gregorio Falanghina", "region": "Campania", "vendor": "SGWS", "notes": ""}, {"d365": "1112217", "brand": "Jermann", "item": "Pinot Grigio", "name": "Jermann Pinot Grigio", "region": "Friuli Venezia Giulia", "vendor": "Breakthru", "notes": "⭐ Also BTB"}, {"d365": "1114289", "brand": "Tormaresca", "item": "Califuria Rosato", "name": "Tormaresca Califuria Rosato", "region": "Puglia", "vendor": "SGWS", "notes": ""}, {"d365": "1122135", "brand": "La Mozza", "item": "Cabernet Sauvignon 'I Perazzi'", "name": "La Mozza Cabernet Sauvignon 'I Perazzi'", "region": "Toscana", "vendor": "SGWS", "notes": ""}, {"d365": "1121578", "brand": "Planeta", "item": "La Segreta Rosso", "name": "Planeta La Segreta Rosso", "region": "Sicilia", "vendor": "RNDC", "notes": ""}, {"d365": "1114012", "brand": "Valle Reale", "item": "Montepulciano d'Abruzzo", "name": "Valle Reale Montepulciano d'Abruzzo", "region": "Abruzzo", "vendor": "Wine Merchant", "notes": ""}, {"d365": "1140193", "brand": "Colombaio di Cencio", "item": "Chianti Classico", "name": "Colombaio di Cencio Chianti Classico", "region": "Toscana", "vendor": "SGWS", "notes": ""}, {"d365": "1120559", "brand": "Fontanafredda", "item": "Barbera 'Briccotondo'", "name": "Fontanafredda Barbera 'Briccotondo'", "region": "Piemonte", "vendor": "RNDC", "notes": ""}, {"d365": "1119793", "brand": "Allegrini", "item": "Valpolicella", "name": "Allegrini Valpolicella", "region": "Veneto", "vendor": "Breakthru", "notes": ""}, {"d365": "1109844", "brand": "Mirafiore", "item": "Nebbiolo", "name": "Mirafiore Nebbiolo", "region": "Piemonte", "vendor": "SGWS", "notes": ""}, {"d365": "1126687", "brand": "Feudo Montoni", "item": "Nero d'Avola Lagnusa", "name": "Feudo Montoni Nero d'Avola Lagnusa", "region": "Sicilia", "vendor": "Breakthru", "notes": ""}, {"d365": "1107052", "brand": "Fontanafredda", "item": "Nebbiolo Langhe Ebbio 2013", "name": "Fontanafredda Nebbiolo Langhe Ebbio 2013", "region": "Piemonte", "vendor": "RNDC", "notes": ""}, {"d365": "1133781", "brand": "Elena Walch", "item": "Chardonnay", "name": "Elena Walch Chardonnay", "region": "Alto Adige", "vendor": "Breakthru", "notes": "RNDC APRIL"}, {"d365": "00671872", "brand": "Canella", "item": "Mimosa Granriviera 750", "name": "Canella Mimosa Granriviera 750", "region": "Veneto", "vendor": "SGWS", "notes": ""}, {"d365": "521709", "brand": "Canella", "item": "Bellini", "name": "Canella Bellini", "region": "Veneto", "vendor": "SGWS", "notes": ""}, {"d365": "1119309", "brand": "Argiolas", "item": "Costamolino Vermentino", "name": "Argiolas Costamolino Vermentino", "region": "Sardegna", "vendor": "Wine Merchant", "notes": "⭐ Also BTB"}];
+var adminSection = 'btg';
+
+var ADMIN_BTG = [{"d365": "1136347", "brand": "Ronco Belvedere", "item": "Prosecco", "name": "Ronco Belvedere Prosecco", "region": "Veneto", "vendor": "SGWS", "notes": ""}, {"d365": "1136348", "brand": "Ronco Belvedere", "item": "Lambrusco", "name": "Ronco Belvedere Lambrusco", "region": "Emilia-Romagna", "vendor": "SGWS", "notes": ""}, {"d365": "00702794", "brand": "Lucci", "item": "Lambrusco Reggiano DOC Secco", "name": "Lucci Lambrusco Reggiano DOC Secco", "region": "Emilia-Romagna", "vendor": "SGWS", "notes": "✅ D365# Added"}, {"d365": "1151781", "brand": "Cascina Asinari", "item": "Moscato d'Asti", "name": "Cascina Asinari Moscato d'Asti", "region": "Piemonte", "vendor": "SGWS", "notes": ""}, {"d365": "200517", "brand": "Cantine Ferrari", "item": "Trento DOC", "name": "Cantine Ferrari Trento DOC", "region": "Trentino", "vendor": "RNDC", "notes": ""}, {"d365": "1113651", "brand": "Baglio di Grisi", "item": "Grillo", "name": "Baglio di Grisi Grillo", "region": "Sicilia", "vendor": "SGWS", "notes": ""}, {"d365": "1119524", "brand": "Fontanafredda", "item": "Arneis Pradalupo", "name": "Fontanafredda Arneis Pradalupo", "region": "Piemonte", "vendor": "RNDC", "notes": ""}, {"d365": "1121887", "brand": "La Staffa", "item": "Verdicchio Castello di Jesi", "name": "La Staffa Verdicchio Castello di Jesi", "region": "Marche", "vendor": "Palateur", "notes": ""}, {"d365": "1120834", "brand": "Feudi di San Gregorio", "item": "Falanghina", "name": "Feudi di San Gregorio Falanghina", "region": "Campania", "vendor": "SGWS", "notes": ""}, {"d365": "1112217", "brand": "Jermann", "item": "Pinot Grigio", "name": "Jermann Pinot Grigio", "region": "Friuli Venezia Giulia", "vendor": "Breakthru", "notes": "⭐ Also BTB"}, {"d365": "1114289", "brand": "Tormaresca", "item": "Califuria Rosato", "name": "Tormaresca Califuria Rosato", "region": "Puglia", "vendor": "SGWS", "notes": ""}, {"d365": "1122135", "brand": "La Mozza", "item": "Cabernet Sauvignon 'I Perazzi'", "name": "La Mozza Cabernet Sauvignon 'I Perazzi'", "region": "Toscana", "vendor": "SGWS", "notes": ""}, {"d365": "1121578", "brand": "Planeta", "item": "La Segreta Rosso", "name": "Planeta La Segreta Rosso", "region": "Sicilia", "vendor": "RNDC", "notes": ""}, {"d365": "1114012", "brand": "Valle Reale", "item": "Montepulciano d'Abruzzo", "name": "Valle Reale Montepulciano d'Abruzzo", "region": "Abruzzo", "vendor": "Wine Merchant", "notes": ""}, {"d365": "1140193", "brand": "Colombaio di Cencio", "item": "Chianti Classico", "name": "Colombaio di Cencio Chianti Classico", "region": "Toscana", "vendor": "SGWS", "notes": ""}, {"d365": "1120559", "brand": "Fontanafredda", "item": "Barbera 'Briccotondo'", "name": "Fontanafredda Barbera 'Briccotondo'", "region": "Piemonte", "vendor": "RNDC", "notes": ""}, {"d365": "1119793", "brand": "Allegrini", "item": "Valpolicella", "name": "Allegrini Valpolicella", "region": "Veneto", "vendor": "Breakthru", "notes": ""}, {"d365": "1109844", "brand": "Mirafiore", "item": "Nebbiolo", "name": "Mirafiore Nebbiolo", "region": "Piemonte", "vendor": "SGWS", "notes": ""}, {"d365": "1126687", "brand": "Feudo Montoni", "item": "Nero d'Avola Lagnusa", "name": "Feudo Montoni Nero d'Avola Lagnusa", "region": "Sicilia", "vendor": "Breakthru", "notes": ""}, {"d365": "1107052", "brand": "Fontanafredda", "item": "Nebbiolo Langhe Ebbio 2013", "name": "Fontanafredda Nebbiolo Langhe Ebbio 2013", "region": "Piemonte", "vendor": "RNDC", "notes": ""}, {"d365": "1133781", "brand": "Elena Walch", "item": "Chardonnay", "name": "Elena Walch Chardonnay", "region": "Alto Adige", "vendor": "Breakthru", "notes": "RNDC APRIL"}, {"d365": "00671872", "brand": "Canella", "item": "Mimosa Granriviera 750", "name": "Canella Mimosa Granriviera 750", "region": "Veneto", "vendor": "SGWS", "notes": ""}, {"d365": "521709", "brand": "Canella", "item": "Bellini", "name": "Canella Bellini", "region": "Veneto", "vendor": "SGWS", "notes": ""}, {"d365": "1119309", "brand": "Argiolas", "item": "Costamolino Vermentino", "name": "Argiolas Costamolino Vermentino", "region": "Sardegna", "vendor": "Wine Merchant", "notes": "⭐ Also BTB"}];
+var adminSection = 'btg';
+
+function switchView(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.getElementById('nav-' + view).classList.add('active');
+  document.getElementById('scrollArea').scrollTop = 0;
+  currentView = view;
+  var activeTab = document.getElementById('nav-' + view);
+  if (activeTab) activeTab.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+  var fab = document.getElementById('fab');
+  if (view === 'updates') { fab.classList.remove('hidden'); } else { fab.classList.add('hidden'); }
+  render(view);
+}
+
+function render(view) {
+  var fns = {
+    updates:     renderUpdatesOps,
+    submissions: renderSubmissions,
+    vendors:     renderVendors,
+    weekly:      renderWeeklySummary,
+    qr:          renderQR,
+    admin:       renderAdmin,
+  };
+  if (fns[view]) fns[view]();
+}
+
+function openAddUpdate() {
+  var area = document.getElementById('scrollArea');
+  if (area) area.scrollTop = 0;
+  setTimeout(function() {
+    var ta = document.getElementById('upd-text');
+    if (ta) ta.focus();
+  }, 100);
+}
+
+
+function toast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2300);
+}
+
+// ═══════════════════════════════════════════════
+// EXPORT CSV (all modules)
+// ═══════════════════════════════════════════════
+// Accessible via a long-press on Export or could add to each view — keeping it simple for now
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+document.getElementById('headerDate').textContent = new Date().toLocaleDateString('en-US', {
+  weekday:'short', month:'short', day:'numeric'
+});
+
+render('updates');
+
+// ─────────────────────────────────────────────
+// UPDATES COMPOSER
+// ─────────────────────────────────────────────
+var updFilter = 'all';
+
+
+
+function fmtDate(d) {
+  if (!d) return '—';
+  try {
+    return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+  } catch(e) { return d; }
+}
+
+
+
+function trendStat(icon, val, label) {
+  return '<div style="background:var(--surface);border-radius:var(--radius);padding:12px 8px;text-align:center;">' +
+    '<div style="font-size:1.25rem;margin-bottom:2px;">' + icon + '</div>' +
+    '<div style="font-size:1.063rem;font-weight:700;color:var(--text);">' + val + '</div>' +
+    '<div style="font-size:0.563rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;">' + label + '</div>' +
+  '</div>';
+}
+
+
+// ─────────────────────────────────────────────
+// VENDOR CONTACTS
+// ─────────────────────────────────────────────
+var VENDOR_LIST = [{"contact": "Michael Madrigale", "company": "Cloche Wine Co", "vendor_id": "F231600", "email": "mike@clochewine.com", "phone": "917.703.8773", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "12:00 PM"}, {"contact": "Jeff", "company": "The Wine Merchant", "vendor_id": "F231708", "email": "jeff@thewinemerchantltd.com", "phone": "302-377-4139", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "FRI", "order_days": "WED", "cutoff": "11:59 PM"}, {"contact": "Faith Proetto", "company": "The Wine Merchant / Winebow", "vendor_id": "", "email": "Faith.Proetto@winebow-imports.com", "phone": "215.806.0095", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "David Hall", "company": "F Magnotta", "vendor_id": "F231710", "email": "orders@fredmagnotta.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "2:30 PM"}, {"contact": "Brad DuPlessis", "company": "RNDC", "vendor_id": "F230750", "email": "Brad.duPlessis@RNDC-USA.COM", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "FRI", "order_days": "MON", "cutoff": "9:00 AM"}, {"contact": "Mitchell Skwer", "company": "RNDC", "vendor_id": "", "email": "mitchell.skwer@rndc-usa.com", "phone": "267.252.0017", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Christine McNelis", "company": "Palm Bay / RNDC", "vendor_id": "", "email": "cmcnelis@palmbay.com", "phone": "484.941.2195", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Kristin Blizzard", "company": "Palm Bay / RNDC", "vendor_id": "", "email": "kblizzard@palmbay.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Joe Venuto", "company": "Muller Inc — Beer", "vendor_id": "F231445", "email": "jvenuto@mullerbev.com", "phone": "", "payment": "Fintech", "loop": "", "d365": "✓", "delivery_days": "TUE", "order_days": "MON", "cutoff": "2:00 PM"}, {"contact": "Orders Inbox", "company": "Muller Inc — Beer", "vendor_id": "", "email": "neworders@mullerbev.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Shawn Lawrence", "company": "SGWS", "vendor_id": "F228499", "email": "Shawn.Lawrence@sgws.com", "phone": "267.535.0985", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "2:00 PM"}, {"contact": "Mark Kauterman", "company": "SGWS — Main Rep", "vendor_id": "", "email": "mark.kauterman@sgws.com", "phone": "610.470.8051", "payment": "", "loop": "", "d365": "", "delivery_days": "FRI", "order_days": "WED", "cutoff": "2:00 PM"}, {"contact": "Bekah MacLaughlin", "company": "SGWS — Campari", "vendor_id": "", "email": "rebekah.maclaughlin@sgws.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Zack Gage", "company": "SGWS", "vendor_id": "", "email": "zack.gage@sgws.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Tim Madden", "company": "Breakthru", "vendor_id": "F226891", "email": "TMMadden@Breakthrubev.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "WED", "cutoff": "12:00 PM"}, {"contact": "SO Orders", "company": "Breakthru", "vendor_id": "", "email": "soorders1@breakthrubev.com", "phone": "", "payment": "", "loop": "✓", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Scott McBride", "company": "Regal Wine", "vendor_id": "F228323", "email": "smcbride@regalwine.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "WED", "order_days": "TUE", "cutoff": "2:00 PM"}, {"contact": "David Costanzo", "company": "Vine Street Imports", "vendor_id": "F231731", "email": "David@vsimports.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "TUE", "order_days": "MON", "cutoff": "3:00 PM"}, {"contact": "Mark Monaco", "company": "Palateur / Classica", "vendor_id": "F231527", "email": "mark@palateur.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "12:00 PM"}, {"contact": "Iacopo Di Teodoro", "company": "Palateur / Classica", "vendor_id": "", "email": "iac@classica-usa.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Ryan", "company": "Filthy", "vendor_id": "F232146", "email": "ryan@filthyfood.com", "phone": "", "payment": "Fintech?", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}];
+var vendorSearch = '';
+
+
+
+function xlsxCell(value, opts) {
+  var cell = { v: value !== null && value !== undefined ? value : '' };
+  if (typeof value === 'number') cell.t = 'n';
+  else if (value instanceof Date) { cell.t = 'd'; cell.z = 'yyyy-mm-dd'; }
+  else cell.t = 's';
+  if (opts) Object.assign(cell, opts);
+  return cell;
+}
+
+
+
+function xlsxSheet(headers, rows, colWidths) {
+  var ws = {};
+  var range = { s: { c: 0, r: 0 }, e: { c: headers.length - 1, r: rows.length } };
+  headers.forEach(function(h, ci) {
+    ws[XLSX.utils.encode_cell({ c: ci, r: 0 })] = { v: h, t: 's', s: { font: { bold: true } } };
+  });
+  rows.forEach(function(row, ri) {
+    row.forEach(function(val, ci) {
+      var key = XLSX.utils.encode_cell({ c: ci, r: ri + 1 });
+      ws[key] = xlsxCell(val);
+    });
+  });
+  ws['!ref'] = XLSX.utils.encode_range(range);
+  if (colWidths) ws['!cols'] = colWidths.map(function(w) { return { wch: w }; });
+  return ws;
+}
+
+
+
+function downloadXlsx(wb, filename) {
+  // Generate file as blob
+  var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  var blob  = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  var url   = URL.createObjectURL(blob);
+
+  // Try direct download first
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // On iOS Safari, direct download often doesn't work — show share sheet fallback
+  setTimeout(function() {
+    // Check if we're on iOS
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+      // Show a modal with an Open button that triggers the share sheet
+      var overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
+      overlay.innerHTML =
+        '<div style="background:var(--surface);border-radius:16px 16px 0 0;padding:24px 20px 40px;width:100%;max-width:480px;">' +
+          '<div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px;">' + filename + '</div>' +
+          '<div style="font-size:0.813rem;color:var(--text2);margin-bottom:20px;">Tap Open to view in Files or Excel. From there you can save or share.</div>' +
+          '<a href="' + url + '" download="' + filename + '" ' +
+            'style="display:block;width:100%;padding:14px;background:var(--accent);color:var(--text);text-align:center;border-radius:var(--radius);font-weight:700;font-size:0.938rem;text-decoration:none;margin-bottom:10px;">' +
+            '&#x1F4C2; Open File' +
+          '</a>' +
+          '<button onclick="this.closest(\'div\').parentElement.remove();URL.revokeObjectURL(\'' + url + '\')" ' +
+            'style="width:100%;padding:12px;background:var(--surface2);border:none;border-radius:var(--radius);color:var(--text2);font-size:0.938rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">' +
+            'Cancel' +
+          '</button>' +
+        '</div>';
+      overlay.onclick = function(e) { if (e.target === overlay) { overlay.remove(); URL.revokeObjectURL(url); } };
+      document.body.appendChild(overlay);
+    } else {
+      URL.revokeObjectURL(url);
+      toast(filename + ' downloaded');
+    }
+  }, 300);
+}
+
+// ── 1. ORDER SNAPSHOT ─────────────────────────────────────────────
+
+
+function exportWeeklyReport() {
+  var weekStart = getWeekStart();
+  var wb = XLSX.utils.book_new();
+
+  // Fetch all this week's data in parallel
+  Promise.all([
+    supa.from('order_counts').select('*').eq('count_date', TODAY),
+    supa.from('waste_log').select('*').gte('shift_date', weekStart),
+    supa.from('bottle_log').select('*').gte('shift_date', weekStart),
+    supa.from('checklist_completions').select('*').gte('shift_date', weekStart),
+    supa.from('collateral_requests').select('*').gte('shift_date', weekStart),
+    supa.from('weekly_summary').select('*').eq('week_start', weekStart),
+    supa.from('activations_log').select('*').eq('launched', false),
+  ]).then(function(results) {
+    var orders     = results[0].data || [];
+    var waste      = results[1].data || [];
+    var bottles    = results[2].data || [];
+    var checklists = results[3].data || [];
+    var collateral = results[4].data || [];
+    var weeklySched= results[5].data || [];
+    var activations= results[6].data || [];
+
+    // Sheet 1 — Weekly Summary
+    var summarySheet = xlsxSheet(
+      ['Vendor', 'Day', 'Contact', 'Confirmed', 'Received', 'Issues', 'Notes'],
+      weeklySched.map(function(r) {
+        return [r.vendor, r.delivery_day || '', '', r.confirmed ? 'Y' : 'N', r.received ? 'Y' : 'N', r.issues || '', r.notes || ''];
+      }),
+      [24, 6, 20, 10, 10, 30, 30]
+    );
+    XLSX.utils.book_append_sheet(wb, summarySheet, 'Weekly Summary');
+
+    // Sheet 2 — Order Counts
+    var orderSheet = xlsxSheet(
+      ['D365', 'Item', 'Category', 'Vendor', 'Par', 'Count', 'Order Qty'],
+      orders.filter(function(r) { return r.order_qty > 0; }).map(function(r) {
+        return [r.d365, r.item_name, r.category || '', r.vendor || '', r.par || '', r.count, r.order_qty || 0];
+      }),
+      [12, 36, 12, 14, 6, 8, 9]
+    );
+    XLSX.utils.book_append_sheet(wb, orderSheet, 'Order Counts');
+
+    // Sheet 3 — Waste & Breakage
+    var wasteSheet = xlsxSheet(
+      ['Date', 'Item', 'Category', 'Qty', 'Unit', 'Reason', 'Initials'],
+      waste.map(function(r) {
+        return [r.shift_date, r.item, r.category || '', r.qty || '', r.unit || '', r.reason || '', r.initials || ''];
+      }),
+      [12, 28, 12, 6, 8, 24, 8]
+    );
+    XLSX.utils.book_append_sheet(wb, wasteSheet, 'Waste & Breakage');
+
+    // Sheet 4 — Open Bottles / BTG Sales
+    var bottleSheet = xlsxSheet(
+      ['Date', 'Wine', 'Amount'],
+      bottles.map(function(r) { return [r.shift_date, r.wine, r.amount || '']; }),
+      [12, 36, 14]
+    );
+    XLSX.utils.book_append_sheet(wb, bottleSheet, 'Bottles & BTG Sales');
+
+    // Sheet 5 — Checklists
+    var clSheet = xlsxSheet(
+      ['Date', 'Shift', 'Done', 'Total', 'Missed', 'Completed At'],
+      checklists.map(function(r) {
+        return [r.shift_date, r.shift_type === 'am' ? 'AM Opening' : 'PM Closing',
+          r.done, r.total, r.missed, r.completed_at ? new Date(r.completed_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : ''];
+      }),
+      [12, 14, 6, 6, 6, 12]
+    );
+    XLSX.utils.book_append_sheet(wb, clSheet, 'Checklists');
+
+    // Sheet 6 — Active Activations
+    var actSheet = xlsxSheet(
+      ['Priority', 'Name', 'D365', 'Vendor', 'Category', 'Launch Date', 'Swap Item', 'Notes', 'Steps Done', 'Issues'],
+      activations.map(function(r) {
+        var steps = r.steps || {};
+        var stepsDone = Object.values(steps).filter(Boolean).length + '/5';
+        return [r.priority, r.name, r.d365 || '', r.vendor || '', r.category || '',
+          r.launch_date || '', r.swap_item || '', r.notes || '', stepsDone, r.open_issues || ''];
+      }),
+      [8, 36, 12, 14, 12, 12, 24, 40, 10, 30]
+    );
+    XLSX.utils.book_append_sheet(wb, actSheet, 'Activations');
+
+    var filename = 'Weekly_Report_' + weekStart + '.xlsx';
+    downloadXlsx(wb, filename);
+  });
+}
+
+// ── 3. PRESENTATION PACK ──────────────────────────────────────────
+
+
+function exportPresentationPack() {
+  var wb = XLSX.utils.book_new();
+  var today = TODAY;
+
+  // Sheet 1 — BTG Wine List
+  var btgHeaders = ['D365', 'Brand', 'Item', 'Category', 'Vendor'];
+  var btgRows = [];
+  if (typeof ORDER_VENDORS !== 'undefined') {
+    Object.values(ORDER_VENDORS).forEach(function(v) {
+      v.items.filter(function(i){ return i.cat === 'BTG WINE'; }).forEach(function(item) {
+        var parts = item.name.split(' ');
+        btgRows.push([item.d365, parts.slice(0,2).join(' '), parts.slice(2).join(' ') || item.name, item.cat, v.name]);
+      });
+    });
+  }
+  XLSX.utils.book_append_sheet(wb, xlsxSheet(btgHeaders, btgRows, [12,20,24,10,14]), 'BTG Wine List');
+
+  // Sheet 2 — Back Bar
+  var bbHeaders = ['D365', 'Item', 'Category', 'Vendor', 'Par'];
+  var bbRows = [];
+  Object.values(ORDER_VENDORS).forEach(function(v) {
+    v.items.filter(function(i){ return i.cat === 'BACK BAR'; }).forEach(function(item) {
+      bbRows.push([item.d365, item.name, item.cat, v.name, item.par || '']);
+    });
+  });
+  XLSX.utils.book_append_sheet(wb, xlsxSheet(bbHeaders, bbRows, [12,32,12,14,6]), 'Back Bar');
+
+  // Sheet 3 — Full Order Guide
+  var ogHeaders = ['D365', 'Item', 'Category', 'Vendor', 'Par', 'Order Days', 'Cutoff'];
+  var ogRows = [];
+  Object.values(ORDER_VENDORS).forEach(function(v) {
+    v.items.forEach(function(item) {
+      ogRows.push([item.d365, item.name, item.cat, v.name, item.par || '', v.days.join(', '), v.cutoff]);
+    });
+  });
+  XLSX.utils.book_append_sheet(wb, xlsxSheet(ogHeaders, ogRows, [12,36,12,14,6,10,10]), 'Order Guide');
+
+  // Sheet 4 — Vendor Contacts (embedded)
+  var vcJson = [{"contact": "Michael Madrigale", "company": "Cloche Wine Co", "vendor_id": "F231600", "email": "mike@clochewine.com", "phone": "917.703.8773", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "12:00 PM"}, {"contact": "Jeff", "company": "The Wine Merchant", "vendor_id": "F231708", "email": "jeff@thewinemerchantltd.com", "phone": "302-377-4139", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "FRI", "order_days": "WED", "cutoff": "11:59 PM"}, {"contact": "Faith Proetto", "company": "The Wine Merchant / Winebow", "vendor_id": "", "email": "Faith.Proetto@winebow-imports.com", "phone": "215.806.0095", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "David Hall", "company": "F Magnotta", "vendor_id": "F231710", "email": "orders@fredmagnotta.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "2:30 PM"}, {"contact": "Brad DuPlessis", "company": "RNDC", "vendor_id": "F230750", "email": "Brad.duPlessis@RNDC-USA.COM", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "FRI", "order_days": "MON", "cutoff": "9:00 AM"}, {"contact": "Mitchell Skwer", "company": "RNDC", "vendor_id": "", "email": "mitchell.skwer@rndc-usa.com", "phone": "267.252.0017", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Christine McNelis", "company": "Palm Bay / RNDC", "vendor_id": "", "email": "cmcnelis@palmbay.com", "phone": "484.941.2195", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Kristin Blizzard", "company": "Palm Bay / RNDC", "vendor_id": "", "email": "kblizzard@palmbay.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Joe Venuto", "company": "Muller Inc — Beer", "vendor_id": "F231445", "email": "jvenuto@mullerbev.com", "phone": "", "payment": "Fintech", "loop": "", "d365": "✓", "delivery_days": "TUE", "order_days": "MON", "cutoff": "2:00 PM"}, {"contact": "Orders Inbox", "company": "Muller Inc — Beer", "vendor_id": "", "email": "neworders@mullerbev.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Shawn Lawrence", "company": "SGWS", "vendor_id": "F228499", "email": "Shawn.Lawrence@sgws.com", "phone": "267.535.0985", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "2:00 PM"}, {"contact": "Mark Kauterman", "company": "SGWS — Main Rep", "vendor_id": "", "email": "mark.kauterman@sgws.com", "phone": "610.470.8051", "payment": "", "loop": "", "d365": "", "delivery_days": "FRI", "order_days": "WED", "cutoff": "2:00 PM"}, {"contact": "Bekah MacLaughlin", "company": "SGWS — Campari", "vendor_id": "", "email": "rebekah.maclaughlin@sgws.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Zack Gage", "company": "SGWS", "vendor_id": "", "email": "zack.gage@sgws.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Tim Madden", "company": "Breakthru", "vendor_id": "F226891", "email": "TMMadden@Breakthrubev.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "WED", "cutoff": "12:00 PM"}, {"contact": "SO Orders", "company": "Breakthru", "vendor_id": "", "email": "soorders1@breakthrubev.com", "phone": "", "payment": "", "loop": "✓", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Scott McBride", "company": "Regal Wine", "vendor_id": "F228323", "email": "smcbride@regalwine.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "WED", "order_days": "TUE", "cutoff": "2:00 PM"}, {"contact": "David Costanzo", "company": "Vine Street Imports", "vendor_id": "F231731", "email": "David@vsimports.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "TUE", "order_days": "MON", "cutoff": "3:00 PM"}, {"contact": "Mark Monaco", "company": "Palateur / Classica", "vendor_id": "F231527", "email": "mark@palateur.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "12:00 PM"}, {"contact": "Iacopo Di Teodoro", "company": "Palateur / Classica", "vendor_id": "", "email": "iac@classica-usa.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Ryan", "company": "Filthy", "vendor_id": "F232146", "email": "ryan@filthyfood.com", "phone": "", "payment": "Fintech?", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}];
+  var vcHeaders = ['Contact', 'Company', 'Vendor ID', 'Email', 'Phone', 'Delivery Days', 'Order Days', 'Cutoff'];
+  var vcRows = vcJson.map(function(v) {
+    return [v.contact, v.company, v.vendor_id, v.email, v.phone, v.delivery_days, v.order_days, v.cutoff];
+  });
+  XLSX.utils.book_append_sheet(wb, xlsxSheet(vcHeaders, vcRows, [20,24,12,36,16,14,10,10]), 'Vendors');
+
+  downloadXlsx(wb, 'PiPa_Beverage_Reference_' + today + '.xlsx');
+}
+
+
+// ─────────────────────────────────────────────
+// ORDER GUIDE MANAGEMENT
+// ─────────────────────────────────────────────
+
+// Load overrides from Supabase and merge into ORDER_VENDORS
+
+
+function renderVendors() {
+  var el = document.getElementById('view-vendors');
+
+  var filtered = VENDOR_LIST.filter(function(v) {
+    var s = vendorSearch.toLowerCase();
+    return !s || v.contact.toLowerCase().includes(s) ||
+      v.company.toLowerCase().includes(s) ||
+      v.email.toLowerCase().includes(s);
+  });
+
+  // Group by company
+  var companies = {};
+  filtered.forEach(function(v) {
+    var co = v.company || 'Other';
+    if (!companies[co]) companies[co] = [];
+    companies[co].push(v);
+  });
+
+  var packBtn = document.createElement('button');
+  packBtn.textContent = '\uD83D\uDCCA Export Presentation Pack';
+  packBtn.style.cssText = 'width:100%;padding:11px;background:var(--surface2);border:1.5px solid var(--surface3);border-radius:var(--radius);color:var(--text);font-size:0.813rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-bottom:10px;';
+  packBtn.onclick = exportPresentationPack;
+
+  var searchEl = document.createElement('input');
+  searchEl.className = 'field-input';
+  searchEl.type = 'text';
+  searchEl.placeholder = 'Search contact, company, email...';
+  searchEl.value = vendorSearch || '';
+  searchEl.style.cssText = 'margin-bottom:12px;';
+  searchEl.oninput = function() { vendorSearch = this.value; renderVendors(); };
+
+  var cardsHTML = Object.keys(companies).sort().map(function(coName) {
+    var contacts = companies[coName];
+    var primary  = contacts.find(function(v) { return v.delivery_days; }) || contacts[0];
+    var schedInfo = primary.delivery_days
+      ? '<span style="font-size:0.563rem;color:var(--text3);">Delivery: ' + primary.delivery_days + '</span>' +
+        (primary.order_days ? '<span style="font-size:0.563rem;color:var(--text3);">Order: ' + primary.order_days + '</span>' : '') +
+        (primary.cutoff ? '<span style="font-size:0.563rem;color:var(--yellow-bright);">&#x23F0; ' + primary.cutoff + '</span>' : '')
+      : '';
+
+    var contactRows = contacts.map(function(v) {
+      var emailLink = v.email && v.email !== 'nan' && v.email !== '—'
+        ? '<a href="mailto:' + v.email + '" style="color:var(--accent-bright);font-size:0.688rem;font-family:\'JetBrains Mono\',monospace;text-decoration:none;">' + v.email + '</a>'
+        : '<span style="font-size:0.688rem;color:var(--text3);">No email</span>';
+      var phoneLink = v.phone && v.phone !== 'nan'
+        ? ' &middot; <a href="tel:' + v.phone.replace(/[^0-9]/g,'') + '" style="color:var(--text2);font-size:0.688rem;">' + v.phone + '</a>'
+        : '';
+      return '<div style="padding:8px 0;border-top:1px solid var(--surface3);">' +
+        '<div style="font-size:0.813rem;font-weight:600;color:var(--text);">' + v.contact + '</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:3px;">' +
+          emailLink + phoneLink +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    return '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:8px;">' +
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">' +
+        '<div style="font-size:0.938rem;font-weight:700;color:var(--text);">' + coName + '</div>' +
+        (primary.vendor_id ? '<div style="font-size:0.563rem;color:var(--text3);font-family:\'JetBrains Mono\',monospace;">' + primary.vendor_id + '</div>' : '') +
+      '</div>' +
+      (schedInfo ? '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px;">' + schedInfo + '</div>' : '') +
+      contactRows +
+    '</div>';
+  }).join('');
+
+  el.innerHTML = '';
+  el.appendChild(packBtn);
+  el.appendChild(searchEl);
+  el.insertAdjacentHTML('beforeend', cardsHTML || '<div class="empty-state"><div class="empty-text">No contacts found.</div></div>');
+}
+
+// ─────────────────────────────────────────────
+// WEEKLY SUMMARY
+// ─────────────────────────────────────────────
+var WEEKLY_SCHEDULE = [{"num": 1, "vendor": "Vine Street Imports", "day": "MON", "contact": "David Costanzo", "note": ""}, {"num": 2, "vendor": "RNDC", "day": "MON", "contact": "Brad DuPlessis", "note": "Order by 9AM"}, {"num": 3, "vendor": "Muller Inc — Beer", "day": "TUE", "contact": "Joe Venuto", "note": "Order by 2PM"}, {"num": 4, "vendor": "Ace Endico", "day": "TUE", "contact": "A. Galvan", "note": ""}, {"num": 5, "vendor": "Beta Imports", "day": "TUE", "contact": "Confirm PO Only", "note": ""}, {"num": 6, "vendor": "SGWS", "day": "TUE", "contact": "Mark Kauterman", "note": "Order by 2PM"}, {"num": 7, "vendor": "Regal Wine", "day": "WED", "contact": "Scott McBride", "note": ""}, {"num": 8, "vendor": "Baldor", "day": "WED", "contact": "National Accts", "note": "Order varies"}, {"num": 9, "vendor": "F Magnotta", "day": "THU", "contact": "David Hall", "note": "Order by 2:30PM"}, {"num": 10, "vendor": "Palateur / Classica", "day": "THU", "contact": "Mark Monaco", "note": "Order by 12PM"}, {"num": 11, "vendor": "Cloche Wine Co", "day": "THU", "contact": "Michael Madrigale", "note": "Order by 12PM"}, {"num": 12, "vendor": "Breakthru", "day": "THU", "contact": "Tim Madden", "note": "Order by 12PM"}, {"num": 13, "vendor": "RNDC (Wine)", "day": "FRI", "contact": "Brad DuPlessis", "note": ""}, {"num": 14, "vendor": "The Wine Merchant", "day": "FRI", "contact": "Jeff", "note": "Order by 11:59PM"}, {"num": 15, "vendor": "Breakthru (Alt)", "day": "FRI", "contact": "Tim Madden", "note": ""}, {"num": 16, "vendor": "VOS Selections", "day": "TUE", "contact": "", "note": "Order by 12PM"}];
+var weeklySummaryData = {};  // vendor -> {confirmed, received, po, issues, notes}
+
+
+
+function getWeekStart() {
+  var d = new Date();
+  var day = d.getDay();
+  var diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  var mon = new Date(d.setDate(diff));
+  return mon.toISOString().slice(0,10);
+}
+
+
+
+function renderWeeklySummary() {
+  var el = document.getElementById('view-weekly');
+  var weekStart = getWeekStart();
+
+  el.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F4E1;</div><div class="empty-text">Loading...</div></div>';
+
+  supa.from('weekly_summary').select('*').eq('week_start', weekStart)
+    .then(function(result) {
+      var saved = result.data || [];
+      weeklySummaryData = {};
+      saved.forEach(function(row) {
+        weeklySummaryData[row.vendor] = row;
+      });
+      _renderWeeklySummaryInner(el, weekStart);
+    });
+}
+
+
+
+function _renderWeeklySummaryInner(el, weekStart) {
+  var DAYS = ['MON','TUE','WED','THU','FRI'];
+  var today = ['SUN','MON','TUE','WED','THU','FRI','SAT'][new Date().getDay()];
+
+  var totalDeliveries = WEEKLY_SCHEDULE.length;
+  var confirmed = Object.values(weeklySummaryData).filter(function(r){return r.confirmed;}).length;
+  var received  = Object.values(weeklySummaryData).filter(function(r){return r.received;}).length;
+  var issues    = Object.values(weeklySummaryData).filter(function(r){return r.issues;}).length;
+
+  var statBar =
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:14px;">' +
+      trendStat('&#x1F69A;', totalDeliveries, 'Deliveries') +
+      trendStat('&#x2713;',  confirmed, 'Confirmed') +
+      trendStat('&#x1F4E6;', received,  'Received') +
+      trendStat('&#x26A0;',  issues,    'Issues') +
+    '</div>';
+
+  var dayGroups = {};
+  WEEKLY_SCHEDULE.forEach(function(sched) {
+    var d = sched.day || 'Other';
+    if (!dayGroups[d]) dayGroups[d] = [];
+    dayGroups[d].push(sched);
+  });
+
+  var dayOrder = ['MON','TUE','WED','THU','FRI','SAT','Other'];
+  var schedHTML = dayOrder.filter(function(d){return dayGroups[d];}).map(function(day) {
+    var isToday = day === today;
+    var rows = dayGroups[day].map(function(sched) {
+      var saved = weeklySummaryData[sched.vendor] || {};
+      var confirmed = saved.confirmed;
+      var received  = saved.received;
+      var hasIssue  = saved.issues;
+      var borderColor = hasIssue ? 'var(--red-bright)' : received ? 'var(--green)' : confirmed ? 'var(--yellow-bright)' : 'var(--surface3)';
+
+      var vendorKey = sched.vendor.replace(/'/g, "\\'");
+      var orders = [];
+      try { orders = JSON.parse(saved.orders || '[]'); } catch(e) {}
+      var orderRows = orders.map(function(o, idx) {
+        return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">' +
+          '<span style="font-size:0.563rem;font-weight:700;color:var(--text3);min-width:16px;">#' + (idx+1) + '</span>' +
+          '<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:5px;">' +
+            '<div style="background:var(--surface3);border-radius:4px;padding:5px 7px;">' +
+              '<div style="font-size:0.5rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:2px;">PO#</div>' +
+              '<div style="font-size:0.688rem;font-family:monospace;color:var(--text);">' + (o.po || '—') + '</div>' +
+            '</div>' +
+            '<div style="background:var(--surface3);border-radius:4px;padding:5px 7px;">' +
+              '<div style="font-size:0.5rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:2px;">Invoice#</div>' +
+              '<div style="font-size:0.688rem;font-family:monospace;color:var(--text);">' + (o.inv || '—') + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<button onclick="removeWeeklyOrder(\'' + vendorKey + '\',' + idx + ')" ' +
+            'style="font-size:0.625rem;padding:3px 7px;border-radius:4px;border:none;cursor:pointer;background:var(--surface3);color:var(--text3);flex-shrink:0;">✕</button>' +
+        '</div>';
+      }).join('');
+
+      var panelId = 'po-panel-' + sched.vendor.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+
+      return '<div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:6px;border-left:3px solid ' + borderColor + ';">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:0.844rem;font-weight:600;color:var(--text);">' + sched.vendor + '</div>' +
+            '<div style="font-size:0.625rem;color:var(--text3);">' + sched.contact + (sched.note ? ' &middot; ' + sched.note : '') + '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:5px;align-items:center;">' +
+            '<button onclick="toggleWeekly(\'' + vendorKey + '\',\'confirmed\')" ' +
+              'style="font-size:0.625rem;font-weight:700;padding:4px 8px;border-radius:4px;border:none;cursor:pointer;' +
+              (confirmed ? 'background:var(--yellow-bright);color:#000;' : 'background:var(--surface3);color:var(--text2);') + '">✓ Conf</button>' +
+            '<button onclick="toggleWeekly(\'' + vendorKey + '\',\'received\')" ' +
+              'style="font-size:0.625rem;font-weight:700;padding:4px 8px;border-radius:4px;border:none;cursor:pointer;' +
+              (received ? 'background:var(--green);color:#fff;' : 'background:var(--surface3);color:var(--text2);') + '">📦 Rcvd</button>' +
+            '<button onclick="togglePoPanel(\'' + panelId + '\')" ' +
+              'style="font-size:0.625rem;font-weight:700;padding:4px 8px;border-radius:4px;border:none;cursor:pointer;background:var(--surface3);color:var(--text2);" ' +
+              'title="Add PO / Invoice">📋' + (orders.length ? ' ' + orders.length : '') + '</button>' +
+          '</div>' +
+        '</div>' +
+        (saved.issues ? '<div style="font-size:0.75rem;color:var(--red-bright);margin-top:6px;">⚠ ' + saved.issues + '</div>' : '') +
+        '<div id="' + panelId + '" style="display:none;margin-top:10px;border-top:1px solid var(--surface3);padding-top:10px;">' +
+          (orderRows ? orderRows : '') +
+          '<div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-top:' + (orders.length ? '8px' : '0') + ';">' +
+            '<input id="' + panelId + '-po" class="field-input" type="text" placeholder="PO#" style="font-size:0.75rem;padding:6px 10px;">' +
+            '<input id="' + panelId + '-inv" class="field-input" type="text" placeholder="Invoice#" style="font-size:0.75rem;padding:6px 10px;">' +
+            '<button onclick="addWeeklyOrder(\'' + vendorKey + '\',\'' + panelId + '\')" ' +
+              'style="font-size:0.688rem;font-weight:700;padding:6px 12px;border-radius:var(--radius-sm);border:none;cursor:pointer;background:var(--accent);color:#fff;white-space:nowrap;">+ Add</button>' +
+          '</div>' +
+          '<div style="font-size:0.563rem;color:var(--text3);margin-top:6px;">Wine vendors: Invoice# comes from LOOP or delivery slip. All others: delivery slip.</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    return '<div style="margin-bottom:14px;">' +
+      '<div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:' +
+        (isToday ? 'var(--accent-bright)' : 'var(--text3)') + ';padding:0 2px 8px;">' +
+        day + (isToday ? ' — TODAY' : '') +
+      '</div>' +
+      rows +
+    '</div>';
+  }).join('');
+
+  var exportBtn = '<button onclick="exportWeeklyReport()" style="float:right;font-size:0.688rem;font-weight:700;padding:6px 14px;border-radius:20px;border:none;cursor:pointer;background:var(--surface3);color:var(--text2);font-family:\'DM Sans\',sans-serif;margin-bottom:4px;">&#x1F4E5; Export</button>';
+
+  el.innerHTML =
+    exportBtn +
+    '<div style="font-size:0.688rem;color:var(--text3);margin-bottom:12px;">Week of ' + weekStart + '</div>' +
+    statBar +
+    schedHTML +
+    '<div id="weekly-insights-panel" style="margin-top:4px;">'
+      + '<div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);padding:18px 0 10px;">Weekly Insights</div>'
+      + '<div id="weekly-insights-body" style="color:var(--text2);font-size:0.75rem;">Loading insights…</div>'
+    + '</div>';
+
+  // Now async-load insights into the placeholder
+  renderWeeklyInsights(weekStart);
+}
+
+
+
+function renderWeeklyInsights(weekStart) {
+  var panel = document.getElementById('weekly-insights-body');
+  if (!panel) return;
+
+  Promise.all([
+    supa.from('waste_log').select('*').gte('shift_date', weekStart),
+    supa.from('order_counts').select('*').gte('count_date', weekStart),
+    supa.from('checklist_completions').select('*').gte('shift_date', weekStart),
+  ]).then(function(results) {
+    var wastes     = results[0].data || [];
+    var orders     = results[1].data || [];
+    var checklists = results[2].data || [];
+
+    var html = '';
+
+    // ── WASTE & BREAKAGE ─────────────────────────────────
+    html += '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:10px;">';
+    html += '<div style="font-size:0.75rem;font-weight:700;color:var(--text);margin-bottom:10px;">🗑 Waste & Breakage</div>';
+
+    if (wastes.length === 0) {
+      html += '<div style="font-size:0.75rem;color:var(--text3);">No waste logged this week.</div>';
+    } else {
+      // Count by reason
+      var reasons = {};
+      var itemCount = {};
+      wastes.forEach(function(w) {
+        var r = w.reason || 'Other';
+        reasons[r] = (reasons[r] || 0) + 1;
+        var key = (w.item_name || w.item || 'Unknown').trim();
+        itemCount[key] = (itemCount[key] || 0) + 1;
+      });
+
+      html += '<div style="font-size:0.688rem;color:var(--text3);margin-bottom:8px;">' + wastes.length + ' entries this week</div>';
+
+      // Reason bars
+      var total = wastes.length;
+      Object.keys(reasons).sort(function(a,b){return reasons[b]-reasons[a];}).forEach(function(r) {
+        var pct = Math.round((reasons[r] / total) * 100);
+        html += '<div style="margin-bottom:6px;">';
+        html += '<div style="display:flex;justify-content:space-between;font-size:0.625rem;margin-bottom:3px;">';
+        html += '<span style="color:var(--text2);">' + r + '</span>';
+        html += '<span style="color:var(--text3);">' + reasons[r] + ' (' + pct + '%)</span>';
+        html += '</div>';
+        html += '<div style="height:4px;background:var(--surface3);border-radius:2px;">';
+        html += '<div style="height:4px;width:' + pct + '%;background:var(--red-bright);border-radius:2px;transition:width 0.4s;"></div>';
+        html += '</div></div>';
+      });
+
+      // Top 3 wasted items
+      var sortedItems = Object.keys(itemCount).sort(function(a,b){return itemCount[b]-itemCount[a];}).slice(0,3);
+      if (sortedItems.length) {
+        html += '<div style="margin-top:10px;font-size:0.625rem;color:var(--text3);margin-bottom:5px;">TOP WASTED ITEMS</div>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:5px;">';
+        sortedItems.forEach(function(item) {
+          html += '<span style="font-size:0.625rem;padding:3px 8px;border-radius:20px;background:rgba(220,60,60,0.15);color:#E07070;font-weight:600;">'
+                + item + ' ×' + itemCount[item] + '</span>';
+        });
+        html += '</div>';
+      }
+    }
+    html += '</div>';
+
+    // ── STOCK LEVELS ─────────────────────────────────────
+    html += '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:10px;">';
+    html += '<div style="font-size:0.75rem;font-weight:700;color:var(--text);margin-bottom:10px;">📦 Stock Levels</div>';
+
+    if (orders.length === 0) {
+      html += '<div style="font-size:0.75rem;color:var(--text3);">No order counts recorded this week.</div>';
+    } else {
+      // Latest count per item — last record wins
+      var latestByItem = {};
+      orders.forEach(function(o) {
+        var key = o.item_name || o.item || '';
+        if (!key) return;
+        if (!latestByItem[key] || o.count_date > latestByItem[key].count_date) {
+          latestByItem[key] = o;
+        }
+      });
+
+      // Flag items at/below 25% par as critical, 26-50% as low
+      var critical = [], low = [], ok = 0;
+      Object.keys(latestByItem).forEach(function(item) {
+        var r = latestByItem[item];
+        var par = parseFloat(r.par) || 0;
+        var cnt = parseFloat(r.count) || 0;
+        if (par <= 0) { ok++; return; }
+        var pct = cnt / par;
+        if (pct <= 0.25) critical.push({item: item, cnt: cnt, par: par, pct: Math.round(pct*100)});
+        else if (pct <= 0.50) low.push({item: item, cnt: cnt, par: par, pct: Math.round(pct*100)});
+        else ok++;
+      });
+
+      // Sort most critical first
+      critical.sort(function(a,b){return a.pct-b.pct;});
+      low.sort(function(a,b){return a.pct-b.pct;});
+
+      var tracked = Object.keys(latestByItem).length;
+      html += '<div style="font-size:0.688rem;color:var(--text3);margin-bottom:10px;">' + tracked + ' items tracked &middot; ' + critical.length + ' critical &middot; ' + low.length + ' low</div>';
+
+      if (critical.length === 0 && low.length === 0) {
+        html += '<div style="font-size:0.75rem;color:var(--green);padding:8px 0;">✓ All items above 50% par</div>';
+      } else {
+        critical.forEach(function(s) {
+          html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--surface2);">';
+          html += '<span style="font-size:0.75rem;color:var(--text);">' + s.item + '</span>';
+          html += '<span style="font-size:0.625rem;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(220,60,60,0.18);color:var(--red-bright);">CRITICAL ' + s.pct + '%</span>';
+          html += '</div>';
+        });
+        low.forEach(function(s) {
+          html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--surface2);">';
+          html += '<span style="font-size:0.75rem;color:var(--text);">' + s.item + '</span>';
+          html += '<span style="font-size:0.625rem;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(220,170,0,0.15);color:var(--yellow-bright);">LOW ' + s.pct + '%</span>';
+          html += '</div>';
+        });
+      }
+    }
+    html += '</div>';
+
+    // ── SHIFT PERFORMANCE ─────────────────────────────────
+    html += '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:10px;">';
+    html += '<div style="font-size:0.75rem;font-weight:700;color:var(--text);margin-bottom:10px;">📋 Shift Performance</div>';
+
+    if (checklists.length === 0) {
+      html += '<div style="font-size:0.75rem;color:var(--text3);">No checklist data this week.</div>';
+    } else {
+      var amDone = 0, amTotal = 0, pmDone = 0, pmTotal = 0;
+      checklists.forEach(function(c) {
+        var shift = (c.shift || '').toUpperCase();
+        var done  = parseInt(c.completed_items) || 0;
+        var total = parseInt(c.total_items)     || 0;
+        if (shift === 'AM') { amDone += done; amTotal += total; }
+        else                { pmDone += done; pmTotal += total; }
+      });
+
+      function pctBar(done, total, label) {
+        if (total === 0) return '';
+        var pct = Math.round((done/total)*100);
+        var color = pct >= 95 ? 'var(--green)' : pct >= 80 ? 'var(--yellow-bright)' : 'var(--red-bright)';
+        return '<div style="margin-bottom:8px;">'
+          + '<div style="display:flex;justify-content:space-between;font-size:0.625rem;margin-bottom:3px;">'
+          + '<span style="color:var(--text2);">' + label + '</span>'
+          + '<span style="color:' + color + ';font-weight:700;">' + pct + '%</span>'
+          + '</div>'
+          + '<div style="height:4px;background:var(--surface3);border-radius:2px;">'
+          + '<div style="height:4px;width:' + pct + '%;background:' + color + ';border-radius:2px;transition:width 0.4s;"></div>'
+          + '</div></div>';
+      }
+
+      html += pctBar(amDone, amTotal, 'AM Completion');
+      html += pctBar(pmDone, pmTotal, 'PM Completion');
+
+      // 86'd count from updates (use waste_log items marked 86 if available, otherwise show note)
+      var eighty6 = wastes.filter(function(w){ return (w.reason||'').toLowerCase().indexOf('86') !== -1; }).length;
+      html += '<div style="display:flex;gap:10px;margin-top:10px;">';
+      html += '<div style="flex:1;background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">';
+      html += '<div style="font-size:1.1rem;font-weight:700;color:var(--red-bright);">' + eighty6 + '</div>';
+      html += '<div style="font-size:0.563rem;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.07em;">86&rsquo;d Items</div>';
+      html += '</div>';
+      var totalEntries = wastes.length;
+      html += '<div style="flex:1;background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">';
+      html += '<div style="font-size:1.1rem;font-weight:700;color:var(--accent);">' + totalEntries + '</div>';
+      html += '<div style="font-size:0.563rem;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.07em;">Waste Entries</div>';
+      html += '</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+
+    panel.innerHTML = html;
+  }).catch(function(err) {
+    var panel = document.getElementById('weekly-insights-body');
+    if (panel) panel.innerHTML = '<div style="font-size:0.75rem;color:var(--text3);">Could not load insights.</div>';
+    console.error('Insights error:', err);
+  });
+}
+
+
+function togglePoPanel(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function addWeeklyOrder(vendor, panelId) {
+  var poEl  = document.getElementById(panelId + '-po');
+  var invEl = document.getElementById(panelId + '-inv');
+  var po  = (poEl  ? poEl.value.trim()  : '');
+  var inv = (invEl ? invEl.value.trim() : '');
+  if (!po && !inv) { toast('Enter at least a PO# or Invoice#'); return; }
+
+  var weekStart = getWeekStart();
+  var existing  = weeklySummaryData[vendor] || {};
+  var orders = [];
+  try { orders = JSON.parse(existing.orders || '[]'); } catch(e) {}
+  orders.push({ po: po, inv: inv, added: new Date().toISOString().slice(0,10) });
+
+  var record = Object.assign({}, existing, {
+    week_start: weekStart,
+    vendor: vendor,
+    orders: JSON.stringify(orders)
+  });
+  weeklySummaryData[vendor] = record;
+
+  supa.from('weekly_summary')
+    .upsert(record, {onConflict: 'week_start,vendor'})
+    .then(function(r) {
+      if (r && r.error) { toast('Error: ' + r.error.message); return; }
+      toast('Order saved');
+      renderWeeklySummary();
+      // Re-open panel after re-render
+      setTimeout(function() {
+        var el = document.getElementById(panelId);
+        if (el) el.style.display = 'block';
+      }, 80);
+    });
+}
+
+function removeWeeklyOrder(vendor, idx) {
+  var weekStart = getWeekStart();
+  var existing  = weeklySummaryData[vendor] || {};
+  var orders = [];
+  try { orders = JSON.parse(existing.orders || '[]'); } catch(e) {}
+  orders.splice(idx, 1);
+
+  var record = Object.assign({}, existing, {
+    week_start: weekStart,
+    vendor: vendor,
+    orders: JSON.stringify(orders)
+  });
+  weeklySummaryData[vendor] = record;
+
+  var panelId = 'po-panel-' + vendor.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+
+  supa.from('weekly_summary')
+    .upsert(record, {onConflict: 'week_start,vendor'})
+    .then(function(r) {
+      if (r && r.error) { toast('Error: ' + r.error.message); return; }
+      renderWeeklySummary();
+      setTimeout(function() {
+        var el = document.getElementById(panelId);
+        if (el) el.style.display = 'block';
+      }, 80);
+    });
+}
+
+
+function toggleWeekly(vendor, field) {
+  var weekStart = getWeekStart();
+  var existing  = weeklySummaryData[vendor] || {};
+  var newVal    = !existing[field];
+  var record    = Object.assign({}, existing, {week_start: weekStart, vendor: vendor});
+  record[field] = newVal;
+  weeklySummaryData[vendor] = record;
+
+  // Upsert
+  supa.from('weekly_summary')
+    .upsert(record, {onConflict: 'week_start,vendor'})
+    .then(function(r) {
+      if (r && r.error) { toast('Error: ' + r.error.message); return; }
+      renderWeeklySummary();
+    });
+}
+
+
+// ─────────────────────────────────────────────
+// SUBMISSIONS HISTORY (ops view — full log)
+// ─────────────────────────────────────────────
+var subType   = 'waste';
+var subDate   = '';
+var subSearch = '';
+
+
+
+
+function renderAdmin() {
+  var el = document.getElementById('view-admin');
+
+  var sections = [
+    { key:'btg', label:'BTG Wines', icon:'🍷' },
+    { key:'checklist', label:'Checklists', icon:'✅' },
+    { key:'pin', label:'Manager PIN', icon:'🔐' },
+  ];
+
+  // Build tabs using DOM to avoid quote issues
+  var tabRow = document.createElement('div');
+  tabRow.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;';
+  sections.forEach(function(s) {
+    var btn = document.createElement('button');
+    btn.textContent = s.icon + ' ' + s.label;
+    btn.style.cssText = 'padding:7px 14px;border-radius:20px;border:1.5px solid transparent;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;' +
+      (adminSection === s.key ? 'background:var(--accent);color:var(--text);' : 'background:var(--surface2);color:var(--text2);');
+    btn.onclick = (function(key){ return function() { adminSection = key; renderAdmin(); }; })(s.key);
+    tabRow.appendChild(btn);
+  });
+
+  el.innerHTML = '<div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:10px;">Admin — List Management</div>';
+  el.appendChild(tabRow);
+
+  var bodyEl = document.createElement('div');
+  if (adminSection === 'btg') renderAdminBTG(bodyEl);
+  else if (adminSection === 'checklist') renderAdminChecklist(bodyEl);
+  else if (adminSection === 'pin') renderAdminPIN(bodyEl);
+  el.appendChild(bodyEl);
+}
+
+
+
+function renderAdminBTG(el) {
+  el.innerHTML = '';
+
+  var note = document.createElement('div');
+  note.style.cssText = 'font-size:0.688rem;color:var(--text3);margin-bottom:10px;';
+  note.textContent = 'Toggle wines on/off. Changes apply immediately to bar and server wine tabs.';
+  el.appendChild(note);
+
+  var loadingEl = document.createElement('div');
+  loadingEl.style.cssText = 'font-size:0.688rem;color:var(--text3);padding:14px 0;text-align:center;';
+  loadingEl.textContent = 'Loading...';
+  loadingEl.id = 'btg-load';
+  el.appendChild(loadingEl);
+
+  supa.from('btg_wines').select('d365,active').then(function(r) {
+    var ld = document.getElementById('btg-load');
+    if (ld) ld.remove();
+
+    var stateMap = {};
+    (r.data || []).forEach(function(row) { stateMap[row.d365] = row.active !== false; });
+
+    ADMIN_BTG.forEach(function(w) {
+      var isOn = stateMap.hasOwnProperty(w.d365) ? stateMap[w.d365] : true;
+
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;' +
+        'padding:10px 14px;background:var(--surface);border-radius:var(--radius-sm);' +
+        'margin-bottom:4px;opacity:' + (isOn ? '1' : '0.38') + ';transition:opacity 0.2s;';
+
+      var info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0;';
+      info.innerHTML =
+        '<div style="font-size:0.844rem;font-weight:600;color:var(--text);">' + w.name + '</div>' +
+        '<div style="font-size:0.625rem;color:var(--text3);font-family:monospace;margin-top:2px;">' +
+          w.d365 + ' &middot; ' + w.region + ' &middot; ' + w.vendor + '</div>';
+
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = isOn;
+      cb.style.cssText = 'width:20px;height:20px;cursor:pointer;flex-shrink:0;margin-left:12px;accent-color:var(--accent);';
+
+      cb.addEventListener('change', (function(d365, name, rowEl) {
+        return function() {
+          var active = this.checked;
+          rowEl.style.opacity = active ? '1' : '0.38';
+          supa.from('btg_wines')
+            .upsert({ d365: d365, name: name, active: active }, { onConflict: 'd365' })
+            .then(function(res) {
+              if (res && res.error) {
+                toast('Failed: ' + res.error.message);
+                return;
+              }
+              toast(active ? '\u2713 ' + name + ' enabled' : name + ' disabled');
+            })
+            .catch(function(e) { toast('Error: ' + (e.message || e)); });
+        };
+      })(w.d365, w.name, row));
+
+      row.appendChild(info);
+      row.appendChild(cb);
+      el.appendChild(row);
+    });
+
+    // Add wine form
+    var addWrap = document.createElement('div');
+    addWrap.style.cssText = 'margin-top:14px;padding:14px;background:var(--surface);' +
+      'border-radius:var(--radius-sm);border:1.5px dashed var(--surface3);';
+    var addTitle = document.createElement('div');
+    addTitle.style.cssText = 'font-size:0.75rem;font-weight:700;color:var(--text);margin-bottom:10px;';
+    addTitle.textContent = '+ Add Wine';
+    addWrap.appendChild(addTitle);
+    [['admin-btg-d365','D365 #'],['admin-btg-name','Brand + Item name'],
+     ['admin-btg-region','Region'],['admin-btg-vendor','Vendor']].forEach(function(s) {
+      var inp = document.createElement('input');
+      inp.id = s[0]; inp.type = 'text'; inp.placeholder = s[1];
+      inp.className = 'field-input'; inp.style.marginBottom = '8px';
+      addWrap.appendChild(inp);
+    });
+    var addBtn = document.createElement('button');
+    addBtn.className = 'btn-send';
+    addBtn.style.cssText = 'font-size:0.813rem;margin-top:2px;';
+    addBtn.textContent = 'Add Wine';
+    addBtn.onclick = addAdminBTGWine;
+    addWrap.appendChild(addBtn);
+    el.appendChild(addWrap);
+
+  }).catch(function(e) {
+    var ld = document.getElementById('btg-load');
+    if (ld) { ld.style.color = '#E07070'; ld.textContent = 'Error: ' + (e.message || e); }
+  });
+}
+
+function addAdminBTGWine() {
+  var d365   = document.getElementById('admin-btg-d365').value.trim();
+  var name   = document.getElementById('admin-btg-name').value.trim();
+  var region = document.getElementById('admin-btg-region').value.trim();
+  var vendor = document.getElementById('admin-btg-vendor').value.trim();
+  if (!d365 || !name) { toast('D365 and name required'); return; }
+  var parts = name.split(' ');
+  ADMIN_BTG.push({ d365:d365, brand:parts[0], item:parts.slice(1).join(' '), name:name, region:region, vendor:vendor });
+  toast('Wine added');
+  renderAdmin();
+}
+
+
+
+function renderAdminChecklist(el) {
+  el.innerHTML = '<div style="font-size:0.688rem;color:var(--text3);padding:20px;text-align:center;">Loading checklist items…</div>';
+
+  var clAdminShift = 'am';
+
+  function load() {
+    supa.from('checklist_items')
+      .select('*')
+      .order('shift').order('sort_order', { ascending: true })
+      .then(function(r) {
+        var all = r.data || [];
+        draw(all);
+      });
+  }
+
+  function draw(all) {
+    el.innerHTML = '';
+
+    // Shift toggle
+    var toggleRow = document.createElement('div');
+    toggleRow.style.cssText = 'display:flex;gap:6px;margin-bottom:16px;';
+    ['am','pm'].forEach(function(s) {
+      var btn = document.createElement('button');
+      btn.textContent = s === 'am' ? '☀️ AM Opening' : '🌙 PM Closing';
+      btn.style.cssText = 'padding:7px 16px;border-radius:20px;border:none;cursor:pointer;font-size:0.75rem;font-weight:700;font-family:\'DM Sans\',sans-serif;' +
+        (clAdminShift === s ? 'background:var(--accent);color:#fff;' : 'background:var(--surface2);color:var(--text2);');
+      btn.onclick = function() { clAdminShift = s; draw(all); };
+      toggleRow.appendChild(btn);
+    });
+    el.appendChild(toggleRow);
+
+    // Filter to current shift
+    var items = all.filter(function(x){ return x.shift === clAdminShift; });
+
+    // Group by section
+    var sections = {};
+    var sectionOrder = [];
+    items.forEach(function(row) {
+      if (!sections[row.section]) { sections[row.section] = []; sectionOrder.push(row.section); }
+      sections[row.section].push(row);
+    });
+
+    // Render each section
+    sectionOrder.forEach(function(sec) {
+      var secItems = sections[sec];
+
+      var secDiv = document.createElement('div');
+      secDiv.style.cssText = 'background:var(--surface);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;';
+
+      var secHdr = document.createElement('div');
+      secHdr.style.cssText = 'font-size:0.688rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;';
+      secHdr.innerHTML = '<span>' + sec + '</span><span style="color:var(--text3);font-size:0.563rem;">' + secItems.length + ' items</span>';
+      secDiv.appendChild(secHdr);
+
+      secItems.forEach(function(row) {
+        var row_el = document.createElement('div');
+        row_el.style.cssText = 'display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--surface2);' + (row.active ? '' : 'opacity:0.4;');
+
+        var label = document.createElement('div');
+        label.style.cssText = 'flex:1;font-size:0.813rem;color:var(--text);line-height:1.4;';
+        label.textContent = row.item;
+
+        var toggleBtn = document.createElement('button');
+        toggleBtn.textContent = row.active ? 'On' : 'Off';
+        toggleBtn.style.cssText = 'font-size:0.563rem;font-weight:700;padding:3px 8px;border-radius:4px;border:none;cursor:pointer;font-family:\'DM Sans\',sans-serif;' +
+          (row.active ? 'background:var(--green);color:#fff;' : 'background:var(--surface3);color:var(--text3);');
+        toggleBtn.onclick = (function(id, active) {
+          return function() {
+            supa.from('checklist_items').update({ active: !active }).eq('id', id)
+              .then(function(r) {
+                if (r && r.error) { toast('Error: ' + r.error.message); return; }
+                load();
+              });
+          };
+        })(row.id, row.active);
+
+        var delBtn = document.createElement('button');
+        delBtn.textContent = '✕';
+        delBtn.style.cssText = 'font-size:0.625rem;padding:3px 7px;border-radius:4px;border:none;cursor:pointer;background:var(--surface3);color:var(--text3);';
+        delBtn.onclick = (function(id, itemText) {
+          return function() {
+            if (!confirm('Delete: "' + itemText + '"?')) return;
+            supa.from('checklist_items').delete().eq('id', id)
+              .then(function(r) {
+                if (r && r.error) { toast('Error: ' + r.error.message); return; }
+                toast('Deleted');
+                load();
+              });
+          };
+        })(row.id, row.item);
+
+        row_el.appendChild(label);
+        row_el.appendChild(toggleBtn);
+        row_el.appendChild(delBtn);
+        secDiv.appendChild(row_el);
+      });
+
+      el.appendChild(secDiv);
+    });
+
+    // ── Add new item form ────────────────────────────────────────────
+    var addDiv = document.createElement('div');
+    addDiv.style.cssText = 'background:var(--surface);border-radius:var(--radius);padding:14px;margin-top:4px;';
+    addDiv.innerHTML =
+      '<div style="font-size:0.688rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;">+ Add Item</div>';
+
+    var sectionSel = document.createElement('select');
+    sectionSel.className = 'field-input';
+    sectionSel.style.cssText = 'margin-bottom:8px;font-size:0.813rem;';
+    sectionOrder.forEach(function(sec) {
+      var opt = document.createElement('option');
+      opt.value = sec;
+      opt.textContent = sec;
+      sectionSel.appendChild(opt);
+    });
+    var newSecOpt = document.createElement('option');
+    newSecOpt.value = '__new__';
+    newSecOpt.textContent = '— New section…';
+    sectionSel.appendChild(newSecOpt);
+
+    var newSecInput = document.createElement('input');
+    newSecInput.className = 'field-input';
+    newSecInput.placeholder = 'New section name';
+    newSecInput.style.cssText = 'display:none;margin-bottom:8px;font-size:0.813rem;';
+    sectionSel.onchange = function() {
+      newSecInput.style.display = sectionSel.value === '__new__' ? 'block' : 'none';
+    };
+
+    var itemInput = document.createElement('input');
+    itemInput.className = 'field-input';
+    itemInput.placeholder = 'Checklist item text';
+    itemInput.style.cssText = 'margin-bottom:10px;font-size:0.813rem;';
+
+    var addBtn = document.createElement('button');
+    addBtn.textContent = '+ Add to ' + (clAdminShift === 'am' ? 'AM' : 'PM') + ' Checklist';
+    addBtn.className = 'btn-send';
+    addBtn.style.cssText = 'font-size:0.75rem;width:100%;';
+    addBtn.onclick = function() {
+      var sec = sectionSel.value === '__new__' ? newSecInput.value.trim() : sectionSel.value;
+      var txt = itemInput.value.trim();
+      if (!sec || !txt) { toast('Enter section and item text'); return; }
+      var maxSort = items.length ? Math.max.apply(null, items.map(function(x){return x.sort_order;})) + 1 : 0;
+      supa.from('checklist_items').insert({ shift: clAdminShift, section: sec, item: txt, sort_order: maxSort, active: true })
+        .then(function(r) {
+          if (r && r.error) { toast('Error: ' + r.error.message); return; }
+          toast('Item added');
+          itemInput.value = '';
+          load();
+        });
+    };
+
+    addDiv.appendChild(sectionSel);
+    addDiv.appendChild(newSecInput);
+    addDiv.appendChild(itemInput);
+    addDiv.appendChild(addBtn);
+    el.appendChild(addDiv);
+  }
+
+  load();
+}
+
+
+
+function renderAdminPIN(el) {
+  el.innerHTML =
+    '<div style="background:var(--surface);border-radius:var(--radius);padding:16px;">' +
+      '<div style="font-size:0.875rem;font-weight:700;color:var(--text);margin-bottom:8px;">&#x1F510; Manager PIN</div>' +
+      '<div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px;margin-bottom:12px;">' +
+        '<div style="font-size:0.688rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;">Current PIN</div>' +
+        '<div style="font-size:2rem;font-weight:700;font-family:monospace;color:var(--accent);letter-spacing:0.2em;">3411</div>' +
+      '</div>' +
+      '<div style="font-size:0.813rem;color:var(--text2);line-height:1.6;margin-bottom:16px;">' +
+        'PIN is hardcoded. Moving it to Supabase lets you change it here without a redeploy.' +
+      '</div>' +
+      '<button class="btn-send" style="font-size:0.75rem;" onclick="toast(\'Flagged for next build session\')">Flag: Move PIN to Supabase</button>' +
+    '</div>';
+}
+
+
+
+
+// Init
+document.getElementById('headerDate').textContent = new Date().toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+render('vendors');
+
+
+
+function renderUpdatesOps() {
+  var el = document.getElementById('view-updates');
+  el.innerHTML = '<div class="updates-loading"><div class="empty-state"><div class="empty-icon">📡</div><div class="empty-text">Loading...</div></div></div>';
+
+  supa.from('updates').select('*').order('created_at', {ascending: false}).limit(50)
+    .then(function(result) {
+      var data  = result.data || [];
+
+      // Filter
+      var filtered = updFilter === 'all' ? data : data.filter(function(u) { return u.tag === updFilter; });
+
+      var tagColors = {info:'#5A5650', ops:'#1B3A5C', '86':'#8B1A1A', 'new':'#1E5C38', spec:'#4A1520'};
+      var tagLabels = {info:'Info', ops:'Ops', '86':'86', 'new':'New', spec:'Spec', all:'All'};
+      var filterTags = ['all','info','ops','86','new','spec'];
+
+      var filterBtns = '';
+      // filter buttons built via DOM after innerHTML set
+
+
+
+      var feed = filtered.length === 0
+        ? '<div class="empty-state" style="padding:24px 0;"><div class="empty-text">No updates' + (updFilter !== 'all' ? ' with this tag' : ' posted yet') + '.</div></div>'
+        : filtered.map(function(u) {
+            var bg  = tagColors[u.tag] || '#2E2E2E';
+            var ts  = new Date(u.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'}) + ' ' +
+                      new Date(u.created_at).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
+            var isAlert = !!u.expires_at;
+            var alertBadge = isAlert ? ' <span style="font-size:9px;padding:2px 5px;border-radius:3px;background:rgba(180,80,0,0.3);color:#E08030;margin-left:4px;">TIMED</span>' : '';
+            return '<div class="ops-update-card">' +
+              '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+                '<div style="display:flex;align-items:center;gap:6px;">' +
+                  '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:3px 8px;border-radius:4px;background:' + bg + ';color:#F0EDE8;">' + u.tag.toUpperCase() + '</span>' +
+                  alertBadge +
+                '</div>' +
+                '<div style="display:flex;align-items:center;gap:8px;">' +
+                  '<span style="font-size:11px;color:var(--text3);font-family:monospace;">' + ts + '</span>' +
+                  '<button onclick="deleteUpdate(' + u.id + ')" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;">&times;</button>' +
+                '</div>' +
+              '</div>' +
+              '<div style="font-size:13px;color:var(--text);line-height:1.6;">' + u.text + '</div>' +
+            '</div>';
+          }).join('');
+
+      el.innerHTML =
+        '<div class="ops-update-compose">' +
+          '<div class="field-label">Tag</div>' +
+          '<select id="upd-tag" class="field-input"><option value="info">Info</option><option value="ops">Ops</option><option value="86">86</option><option value="new">New Item</option><option value="spec">Spec Update</option></select>' +
+          '<div class="field-label" style="margin-top:12px;">Message</div>' +
+          '<textarea id="upd-text" class="field-input" rows="4" placeholder="Write your update for the team..." style="resize:none;line-height:1.5;" oninput="updateCharCount(this)"></textarea>' +
+          '<div style="text-align:right;font-size:10px;color:var(--text3);margin-top:4px;" id="upd-char-count">0 / 280</div>' +
+          '<div style="display:flex;gap:8px;margin-top:12px;">' +
+            '<button class="btn-action btn-primary" onclick="postUpdate()" style="flex:1;">Post Update</button>' +
+          '</div>' +
+        '</div>' +
+        '<div id="upd-filter-row"></div>' +
+        '<div style="font-size:10px;color:var(--text3);margin-bottom:10px;">' + data.length + ' total &middot; ' + filtered.length + ' shown</div>' +
+        feed;
+      // Insert filter buttons via DOM
+      setTimeout(function() { _insertFilterBtns(filterTags, tagLabels); }, 0);
+    });
+}
+
+
+function setUpdFilter(t) { updFilter = t; renderUpdatesOps(); }
+
+
+function _insertFilterBtns(filterTags, tagLabels) {
+  var row = document.getElementById('upd-filter-row');
+  if (!row) return;
+  filterTags.forEach(function(t) {
+    var btn = document.createElement('button');
+    btn.textContent = tagLabels[t];
+    var baseStyle = 'border:none;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;margin:2px;';
+    btn.style.cssText = (updFilter === t ? 'background:var(--accent);color:#fff;' : 'background:var(--surface2);color:var(--text2);') + baseStyle;
+
+    btn.onclick = (function(tag){ return function(){ setUpdFilter(tag); }; })(t);
+    row.appendChild(btn);
+  });
+}
+
+function updateCharCount(el) {
+  var count = el.value.length;
+  var counter = document.getElementById('upd-char-count');
+  if (counter) counter.textContent = count + ' / 280';
+}
+
+
+
+function postUpdate() {
+  var tag  = document.getElementById('upd-tag').value;
+  var text = document.getElementById('upd-text').value.trim();
+  if (!text) { alert('Write a message first.'); return; }
+
+  var btn = document.querySelector('[onclick="postUpdate()"]');
+  if (btn) { btn.textContent = 'Posting...'; btn.disabled = true; }
+
+  supa.from('updates').insert({ tag: tag, text: text, date: TODAY, published: true })
+    .then(function(result) {
+      if (result.error) {
+        alert('Error posting: ' + result.error.message);
+        if (btn) { btn.textContent = 'Post Update'; btn.disabled = false; }
+        return;
+      }
+      renderUpdatesOps();
+    });
+}
+
+
+function deleteUpdate(id) {
+  if (!confirm('Delete this update?')) return;
+  supa.from('updates').delete().eq('id', id)
+    .then(function(result) {
+      if (result.error) { toast('Delete failed: ' + (result.error.message || 'Check RLS')); return; }
+      toast('Deleted');
+      renderUpdatesOps();
+    });
+}
+
+
+// ─────────────────────────────────────────────
+// ORDER PLANNER
+// ─────────────────────────────────────────────
+var ORDER_VENDORS = {"RNDC": {"name": "RNDC", "contact": "Brad DuPlessis", "email": "Brad.duPlessis@RNDC-USA.COM", "cutoff": "9:00 AM", "vendor_id": "F230750", "days": ["MON"], "items": [{"d365": "200517", "name": "Trento DOC", "cat": "BTG WINE", "par": 12.0, "note": "", "vendor": "RNDC"}, {"d365": "1119524", "name": "Arneis Pradalupo", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "RNDC"}, {"d365": "1121578", "name": "La Segreta Rosso", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "RNDC"}, {"d365": "1120559", "name": "Barbera 'Briccotondo'", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "RNDC"}, {"d365": "1153073", "name": "Kitchen Red Magnums", "cat": "KITCHEN", "par": 24.0, "note": "", "vendor": "RNDC"}, {"d365": "1105087", "name": "Flor de Cana 4 yr Silver", "cat": "WELL", "par": 4.0, "note": "", "vendor": "RNDC"}, {"d365": "1137938", "name": "Ramazzotti Rosato", "cat": "WELL", "par": 4.0, "note": "", "vendor": "RNDC"}, {"d365": "00670086", "name": "Barolo Silver Label 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "521017", "name": "Barolo La Villa 2005", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1116147", "name": "Barbera Raimonda 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1113958", "name": "Gavi Di Gavi 2023", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1157466", "name": "Brunello di Montalcino 2018", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1116337", "name": "Tanca Fara Alghero 2018", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1120120", "name": "Chardonnay 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1118923", "name": "Rosato 2024", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1131849", "name": "Amarone Della Valpolicella 2011", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1132769", "name": "Perle Rose", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1132308", "name": "Giulio Ferrari 2009", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "521093", "name": "Perle Nero", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1155529", "name": "Drumshanbo Gunpowder Sardinian Citrus Irish Gin", "cat": "BACK BAR", "par": 1.0, "note": "", "vendor": "RNDC"}, {"d365": "1126978", "name": "Malfy Originale", "cat": "BACK BAR", "par": 1.0, "note": "", "vendor": "RNDC"}, {"d365": "1133046", "name": "Malfy Rosa", "cat": "BACK BAR", "par": 1.0, "note": "", "vendor": "RNDC"}, {"d365": "1100046", "name": "Ramazzotti Amaro", "cat": "BACK BAR", "par": 1.0, "note": "", "vendor": "RNDC"}]}, "Vine Street": {"name": "Vine Street", "contact": "David Costanzo", "email": "David@vsimports.com", "cutoff": "3:00 PM", "vendor_id": "F231731", "days": ["MON"], "items": [{"d365": "1151358", "name": "Boca 2019", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Vine Street"}, {"d365": "1137393", "name": "Nebbiolo 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Vine Street"}, {"d365": "1118045", "name": "Chianti Classico Riserva Rancia Berardenga 2019", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Vine Street"}, {"d365": "1132391", "name": "Pecorino", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Vine Street"}, {"d365": "1119956", "name": "Gruner Veltriner", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Vine Street"}, {"d365": "1120835", "name": "Pinot Grigio Ramato", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Vine Street"}, {"d365": "1123390", "name": "Bordiga Vermouth Rosso", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Vine Street"}]}, "Muller Inc": {"name": "Muller Inc", "contact": "Joe Venuto", "email": "jvenuto@mullerbev.com", "cutoff": "2:00 PM", "vendor_id": "F231445", "days": ["MON"], "items": [{"d365": "1100467", "name": "Peroni  —  Nastro Azzurro | Italian Lager | 5%", "cat": "BEER", "par": 3.0, "note": "", "vendor": "Muller Inc"}, {"d365": "00692737", "name": "Yards  —  Philadelphia Pale Ale | Pale Ale | 4.6%", "cat": "BEER", "par": 2.0, "note": "", "vendor": "Muller Inc"}, {"d365": "00692736", "name": "Bru Daddy  —  Haze Daddy | Hazy IPA | 6.3%", "cat": "BEER", "par": null, "note": "OOS — evaluate replacement", "vendor": "Muller Inc"}, {"d365": "00692735", "name": "1911  —  Honeycrisp | Cider | 5.5%", "cat": "BEER", "par": 2.0, "note": "Consider switching keg", "vendor": "Muller Inc"}, {"d365": "100321", "name": "Peroni (Btls — If Needed)  —  Nastro Azzurro | Italian Lager", "cat": "KITCHEN", "par": 3.0, "note": "Kitchen only", "vendor": "Muller Inc"}, {"d365": "00687694", "name": "Von C  —  OG Pils | Philly Lager | 4.9%", "cat": "BEER", "par": 6.0, "note": "", "vendor": "Muller Inc"}, {"d365": "00687699", "name": "Von C  —  Walking on Clouds | IPA", "cat": "BEER", "par": 2.0, "note": "⚠ D365# Pending — Incoming", "vendor": "Muller Inc"}, {"d365": "1155723", "name": "Peroni  —  0.0 | Zero Proof", "cat": "BEER", "par": 6.0, "note": "", "vendor": "Muller Inc"}]}, "Beta Imports": {"name": "Beta Imports", "contact": "Confirm PO Only", "email": "No Email — Confirm PO Only", "cutoff": "6:00 PM", "vendor_id": "F228565", "days": ["MON", "WED"], "items": [{"d365": "00675723", "name": "EPL Limonata", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}, {"d365": "00675722", "name": "EPL Vivace (Orange)", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}, {"d365": "00675724", "name": "EPL Cola Classic", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}, {"d365": "00675725", "name": "EPL Cola Sugar-Free", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}, {"d365": "1134996", "name": "Espresso Pod (Decaf)", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}, {"d365": "00184029", "name": "Molecola Cola Classic", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}, {"d365": "00184028", "name": "Molecola Cola SF", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}]}, "Baldor": {"name": "Baldor", "contact": "National Accts", "email": "nationalaccounts@baldorfood.com", "cutoff": "Varies", "vendor_id": "F227066", "days": ["MON", "TUE", "WED", "THU", "FRI", "SAT"], "items": [{"d365": "101457", "name": "Orange Juice", "cat": "N.A.", "par": 2.0, "note": "", "vendor": "Baldor"}, {"d365": "1111723", "name": "Lemon Juice", "cat": "N.A.", "par": 4.0, "note": "", "vendor": "Baldor"}, {"d365": "101455", "name": "Lime Juice", "cat": "N.A.", "par": 4.0, "note": "", "vendor": "Baldor"}, {"d365": "1159135", "name": "Whole Milk", "cat": "N.A.", "par": 3.0, "note": "", "vendor": "Baldor"}, {"d365": "1125252", "name": "Oat Milk", "cat": "N.A.", "par": 4.0, "note": "", "vendor": "Baldor"}, {"d365": "1159137", "name": "Half and half", "cat": "N.A.", "par": 6.0, "note": "", "vendor": "Baldor"}, {"d365": "1164662", "name": "Fever Tree Tonic", "cat": "N.A.", "par": 6.0, "note": "", "vendor": "Baldor"}, {"d365": "1124369", "name": "Fever Tree Club soda", "cat": "N.A.", "par": 16.0, "note": "", "vendor": "Baldor"}, {"d365": "1164566", "name": "Oranges", "cat": "N.A.", "par": 10.0, "note": "", "vendor": "Baldor"}, {"d365": "102068", "name": "Lemons", "cat": "N.A.", "par": 10.0, "note": "", "vendor": "Baldor"}, {"d365": "102091", "name": "Limes", "cat": "N.A.", "par": 10.0, "note": "", "vendor": "Baldor"}, {"d365": "102098", "name": "Mint Fresh", "cat": "N.A.", "par": 0.5, "note": "", "vendor": "Baldor"}, {"d365": "1103107", "name": "Olives", "cat": "N.A.", "par": 0.25, "note": "", "vendor": "Baldor"}, {"d365": "101454", "name": "Cranberry Juice", "cat": "N.A.", "par": 4.0, "note": "", "vendor": "Baldor"}, {"d365": "1161854", "name": "White Sugar", "cat": "N.A.", "par": 2.0, "note": "", "vendor": "Baldor"}, {"d365": "1115772", "name": "Luxardo Cherries", "cat": "N.A.", "par": 2.0, "note": "", "vendor": "Baldor"}, {"d365": "1148781", "name": "Ginger Ale", "cat": "N.A.", "par": 8.0, "note": "", "vendor": "Baldor"}]}, "SGWS": {"name": "SGWS", "contact": "Mark Kauterman", "email": "mark.kauterman@sgws.com", "cutoff": "2:00 PM", "vendor_id": "F228499", "days": ["TUE", "WED"], "items": [{"d365": "1136347", "name": "Prosecco", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1136348", "name": "Lambrusco", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1113651", "name": "Grillo", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1120834", "name": "Falanghina", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1114289", "name": "Califuria Rosato", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1122135", "name": "Cabernet Sauvgnon", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1140193", "name": "Chianti Classico", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1109844", "name": "Nebbiolo", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1109414", "name": "Bulldog", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1158859", "name": "Wild Turkey 81", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1116710", "name": "Luxardo Bitter", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1119514", "name": "Luxardo Triple Sec", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1100061", "name": "Luxardo Amaretto", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1120691", "name": "Aperol", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "505680", "name": "Campari", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1159036", "name": "Barolo Lazzarito 2017", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "00676048", "name": "Barolo Riserva 2015", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1140199", "name": "Rosso Monferrato Ciuchino", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1112868", "name": "Freisa", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1112592", "name": "Era Ora Riesling", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1126510", "name": "Rosso Di Montalcino 2023", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1163242", "name": "Flaccianello 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1162641", "name": "Tignanello 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1133015", "name": "Taurasi 2018", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1118576", "name": "Greco Di Tufo", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1119979", "name": "Primitivo Piluna 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1115458", "name": "Syrah", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1117554", "name": "Cervaro Della Sala", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1120284", "name": "Valpolicella 2023", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1116935", "name": "Vespa Bianco 2018", "cat": "BTB WINE", "par": 2.0, "note": "Off Menu", "vendor": "SGWS"}, {"d365": "1159477", "name": "Alta Langa Brut", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1154461", "name": "Altos Anejo", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1138246", "name": "Espolon Resposado", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1142593", "name": "Ilegal Mezcal Reposado", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1100098", "name": "1757 Vermouth Rosso Cinzano", "cat": "BACK BAR", "par": 2.0, "note": "Off Menu", "vendor": "SGWS"}, {"d365": "1100243", "name": "Braulio", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1104213", "name": "Averna", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "SGWS"}]}, "Palateur": {"name": "Palateur", "contact": "Mark Monaco", "email": "mark@palateur.com", "cutoff": "12:00 PM", "vendor_id": "F231527", "days": ["TUE"], "items": [{"d365": "1121887", "name": "Verdicchio", "cat": "BTG WINE", "par": 2.0, "note": "", "vendor": "Palateur"}, {"d365": "1144088", "name": "Il Guercio 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Palateur"}, {"d365": "1123404", "name": "Sangiovese Superiore 2023", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Palateur"}, {"d365": "1132835", "name": "Verdicchio Rincrocca 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Palateur"}, {"d365": "1121130", "name": "Etna Rosso Monfete 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Palateur"}, {"d365": "1150623", "name": "Blanc e Morgex 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Palateur"}]}, "Cloche": {"name": "Cloche", "contact": "Michael M.", "email": "mike@clochewine.com", "cutoff": "12:00 PM", "vendor_id": "F231600", "days": ["TUE"], "items": [{"d365": "1134131", "name": "Rossese 2023", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Cloche"}]}, "Regal": {"name": "Regal", "contact": "Scott McBride", "email": "smcbride@regalwine.com", "cutoff": "2:00 PM", "vendor_id": "F228323", "days": ["TUE"], "items": [{"d365": "1130819", "name": "Rosso Montalcino 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Regal"}, {"d365": "1138775", "name": "Toscana Bianco PA'RO' 2024", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Regal"}, {"d365": "1130146", "name": "Montepulciano Notari 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Regal"}, {"d365": "1127803", "name": "Grillo Vurria 2024", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Regal"}, {"d365": "1145420", "name": "Rosato Nasciolo", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Regal"}]}, "F Magnotta": {"name": "F Magnotta", "contact": "David Hall", "email": "orders@fredmagnotta.com", "cutoff": "2:30 PM", "vendor_id": "F231710", "days": ["TUE"], "items": [{"d365": "1114937", "name": "Vino Nobile 2020", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "F Magnotta"}, {"d365": "1115287", "name": "Montefalco Rosso 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "F Magnotta"}, {"d365": "1164264", "name": "Vermentino Costa Marina 2023", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "F Magnotta"}]}, "Ace Endico": {"name": "Ace Endico", "contact": "A. Galvan", "email": "agalvan@aceendico.com", "cutoff": "4:00 PM", "vendor_id": "F226939", "days": ["TUE", "THU"], "items": [{"d365": "1144705", "name": "San Pellegrino 750ml", "cat": "N.A.", "par": 180.0, "note": "", "vendor": "Ace Endico"}, {"d365": "1163669", "name": "San Benedetto 25.4oz", "cat": "N.A.", "par": 216.0, "note": "", "vendor": "Ace Endico"}, {"d365": "800017", "name": "S. Pellegrino Soda 11.15 fl oz", "cat": "N.A.", "par": 48.0, "note": "", "vendor": "Ace Endico"}, {"d365": "800016", "name": "S. Pellegrino Soda 11.15 fl oz", "cat": "N.A.", "par": 48.0, "note": "", "vendor": "Ace Endico"}, {"d365": "1126712", "name": "S. Pellegrino Soda 11.15 fl oz (L)", "cat": "N.A.", "par": null, "note": "", "vendor": "Ace Endico"}]}, "VOS SELECTIONS INC.": {"name": "VOS SELECTIONS INC.", "contact": "—", "email": "—", "cutoff": "12:00 PM", "vendor_id": "—", "days": ["TUE"], "items": [{"d365": "00690713", "name": "Altamura", "cat": "WELL", "par": 4.0, "note": "", "vendor": "VOS SELECTIONS INC."}]}, "Breakthru": {"name": "Breakthru", "contact": "Tim Madden", "email": "TMMadden@Breakthrubev.com", "cutoff": "12:00 PM", "vendor_id": "F226891", "days": ["WED"], "items": [{"d365": "1112217", "name": "Pinot Grigio", "cat": "BTG WINE", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1119793", "name": "Valpolicella", "cat": "BTG WINE", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "200624", "name": "Carpano Antica Formula", "cat": "WELL", "par": 4.0, "note": "", "vendor": "Breakthru"}, {"d365": "??????????", "name": "Carpano Classico", "cat": "WELL", "par": 4.0, "note": "", "vendor": "Breakthru"}, {"d365": "100401", "name": "Pallini Limoncello", "cat": "WELL", "par": 4.0, "note": "", "vendor": "Breakthru"}, {"d365": "1152568", "name": "Lyre's NA Sprakling", "cat": "N.A.", "par": 6.0, "note": "", "vendor": "Breakthru"}, {"d365": "1151638", "name": "Lyre's Italian Orange", "cat": "N.A.", "par": 3.0, "note": "", "vendor": "Breakthru"}, {"d365": "1152567", "name": "Lyre's London Dry", "cat": "N.A.", "par": 3.0, "note": "", "vendor": "Breakthru"}, {"d365": "1155641", "name": "Lyre's Rosso", "cat": "N.A.", "par": 3.0, "note": "", "vendor": "Breakthru"}, {"d365": "1121193", "name": "Le Volte 2022", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1111510", "name": "Vermentino 2023", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1143268", "name": "Etna Bianco 2023", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1117837", "name": "Gewurstraminer 2023", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1142549", "name": "Valpolicella Classico 2018", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1113375", "name": "Chardonnay Where Dreams 2022", "cat": "BTB WINE", "par": 24.0, "note": "", "vendor": "Breakthru"}, {"d365": "1128425", "name": "Pinot Grigio 2022", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "Breakthru"}, {"d365": "802991", "name": "Franciacorta Cuvee Prestige", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "Breakthru"}, {"d365": "1136499", "name": "Franciacorta Anna Maria Clementi", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1121291", "name": "Prosecco Rosato", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1127215", "name": "Diplomatico Exclusiva Rum, 80 proof", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "506914", "name": "Zacapa 23 yr", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1163625", "name": "Michter's Rye", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1119851", "name": "Woodford Reserve Double Oaked", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1160159", "name": "Tullamore Dew - Irish Whiskey", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1126513", "name": "Montenegro Amaro", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "100342", "name": "Lucano", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1116712", "name": "Zucca Amaro Rabarbaro", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1152746", "name": "Amaro dell Etna", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1163334", "name": "Remy Martin VSOP", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "100400", "name": "Meletti Limoncello", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "100413", "name": "Meletti Sambuca", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "200609", "name": "Branca Menta", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "200615", "name": "Fernet Branca", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}]}, "Wine Merchant": {"name": "Wine Merchant", "contact": "Jeff", "email": "jeff@thewinemerchantltd.com", "cutoff": "11:59 PM", "vendor_id": "F231708", "days": ["WED"], "items": [{"d365": "1114012", "name": "Montepulciano d'Abruzzo", "cat": "BTG WINE", "par": 6.0, "note": "", "vendor": "Wine Merchant"}, {"d365": "1153120", "name": "Cocchi Extra Dry", "cat": "WELL", "par": 4.0, "note": "", "vendor": "Wine Merchant"}, {"d365": "200765", "name": "Cocchi Americano Bianco", "cat": "WELL", "par": 4.0, "note": "", "vendor": "Wine Merchant"}, {"d365": "1151916", "name": "Barbaresco 2020", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1123125", "name": "Barbera Conca Tra Le Pile 2021", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1160644", "name": "Brunello di Montalcino 2019", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1123172", "name": "Bolgheri Rosso 2023", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1117344", "name": "Chianti Classico 2023", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1117059", "name": "Lugana", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1119309", "name": "Vermentino Costamolino 2024", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1151609", "name": "Sagrantino Memoria 2015", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1126508", "name": "Pinot Grigio Dessemis", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1113282", "name": "Cocchi Dopo Teatro Vermouth Amaro", "cat": "BACK BAR", "par": 1.0, "note": "", "vendor": "Wine Merchant"}]}};
+
+var opCounts = {};       // d365 -> entered count
+var opNotes  = {};       // d365 -> note override
+var opView   = 'today';   // 'today' | 'all' | vendor name
+var opSaved  = false;
+
+var CAT_COLORS = {
+  'BTG WINE':  {bg:'rgba(200,175,30,0.18)',color:'#C8AF1E'},
+  'BTB WINE':  {bg:'rgba(160,30,30,0.2)',   color:'#E05050'},
+  'BACK BAR':  {bg:'rgba(50,100,160,0.2)',  color:'#7AB0D8'},
+  'WELL':      {bg:'rgba(139,74,68,0.25)', color:'#A85A52'},
+  'BEER':      {bg:'rgba(180,140,20,0.2)', color:'#D4A830'},
+  'KITCHEN':   {bg:'rgba(30,92,56,0.2)',   color:'#38966A'},
+  'N.A.':      {bg:'rgba(80,80,80,0.2)',   color:'#8A8680'},
+};
+
+var DAY_ORDER = {MON:0,TUE:1,WED:2,THU:3,FRI:4,SAT:5,SUN:6};
+var DAYS      = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+
+function deleteSubmission(table, id) {
+  if (!confirm('Delete this record?')) return;
+  supa.from(table).delete().eq('id', id)
+    .then(function(r) {
+      if (r && r.error) {
+        var msg = r.error.message || r.error.code || JSON.stringify(r.error);
+        toast('Delete failed: ' + msg);
+        console.error('Supabase delete error:', r.error);
+        return;
+      }
+      // Supabase returns data:[] on success for delete — check status
+      toast('Record deleted');
+      renderSubmissions();
+    })
+    .catch(function(err) {
+      toast('Delete error: ' + (err.message || err));
+      console.error('Delete catch:', err);
+    });
+}
+
+
+function renderSubmissions() {
+  var el = document.getElementById('view-submissions');
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">Loading...</div>';
+
+  var tables = { waste: 'waste_log', bottles: 'bottle_log', collateral: 'collateral_requests', checklist: 'checklist_completions', orders: 'order_counts' };
+  var tbl = tables[subType] || 'waste_log';
+
+  var query = supa.from(tbl).select('*').order('created_at', {ascending: false}).limit(100);
+  if (subDate) query = query.eq(tbl === 'checklist_completions' ? 'shift_date' : (tbl === 'order_counts' ? 'count_date' : 'shift_date'), subDate);
+
+  query.then(function(result) {
+    var data = result.data || [];
+
+    // Type filter buttons
+    var typeLabels = { waste:'Waste', bottles:'Bottles', collateral:'Collateral', checklist:'Checklists', orders:'Orders' };
+    var typeBtns = Object.keys(typeLabels).map(function(t) {
+      var active = subType === t;
+      var btn = document.createElement('button');
+      btn.textContent = typeLabels[t];
+      btn.style.cssText = (active ? 'background:var(--accent);color:#fff;' : 'background:var(--surface2);color:var(--text2);') +
+        'border:none;padding:5px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;';
+      btn.onclick = function() { subType = t; renderSubmissions(); };
+      return btn;
+    });
+
+    var typeRow = document.createElement('div');
+    typeRow.style.cssText = 'display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:8px;scrollbar-width:none;';
+    typeBtns.forEach(function(btn) { typeRow.appendChild(btn); });
+
+    // Date filter
+    var dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.value = subDate || '';
+    dateInput.style.cssText = 'background:var(--surface2);border:1.5px solid var(--surface3);border-radius:8px;color:var(--text);padding:8px 12px;font-size:0.813rem;width:100%;margin-bottom:8px;outline:none;';
+    dateInput.onchange = function() { subDate = this.value; renderSubmissions(); };
+
+    // Filter by search
+    if (subSearch) {
+      data = data.filter(function(row) {
+        return JSON.stringify(row).toLowerCase().includes(subSearch.toLowerCase());
+      });
+    }
+
+    var rowsHTML = '';
+    if (!data.length) {
+      rowsHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">No records' + (subDate ? ' for ' + subDate : '') + '.</div>';
+    } else if (subType === 'waste') {
+      rowsHTML = data.map(function(r) {
+        var delBtn = document.createElement('button');
+        delBtn.innerHTML = '&times;';
+        delBtn.style.cssText = 'background:none;border:none;color:var(--text3);font-size:1.125rem;cursor:pointer;flex-shrink:0;padding:0;';
+        delBtn.onclick = (function(id){ return function(){ deleteSubmission('waste_log', id); }; })(r.id);
+        var row = document.createElement('div');
+        row.className = 'sub-hist-row';
+        row.innerHTML = '<div style="flex:1;min-width:0;">' +
+          '<div class="sub-hist-name">' + r.item + '</div>' +
+          '<div class="sub-hist-meta">' + (r.qty||'') + ' ' + (r.unit||'') + ' &middot; ' + (r.reason||'') + (r.initials ? ' &middot; ' + r.initials : '') + '</div>' +
+          '<div class="sub-hist-date">' + (r.shift_date||'') + '</div></div>';
+        row.appendChild(delBtn);
+        return row.outerHTML;
+      }).join('');
+    } else if (subType === 'bottles') {
+      rowsHTML = data.map(function(r) {
+        var delBtn = document.createElement('button');
+        delBtn.innerHTML = '&times;';
+        delBtn.style.cssText = 'background:none;border:none;color:var(--text3);font-size:1.125rem;cursor:pointer;flex-shrink:0;padding:0;';
+        delBtn.onclick = (function(id){ return function(){ deleteSubmission('bottle_log', id); }; })(r.id);
+        var row = document.createElement('div');
+        row.className = 'sub-hist-row';
+        row.innerHTML = '<div style="flex:1;min-width:0;">' +
+          '<div class="sub-hist-name">' + r.wine + '</div>' +
+          '<div class="sub-hist-meta">' + (r.amount||'') + '</div>' +
+          '<div class="sub-hist-date">' + (r.shift_date||'') + '</div></div>';
+        row.appendChild(delBtn);
+        return row.outerHTML;
+      }).join('');
+    } else if (subType === 'collateral') {
+      rowsHTML = data.map(function(r) {
+        var items2 = [];
+        try { items2 = JSON.parse(r.items||'[]'); } catch(e) {}
+        var itemStr = items2.map(function(i){ return (i.name||i) + (i.qty ? ' x'+i.qty : ''); }).join(', ');
+        var delBtn = document.createElement('button');
+        delBtn.innerHTML = '&times;';
+        delBtn.style.cssText = 'background:none;border:none;color:var(--text3);font-size:1.125rem;cursor:pointer;flex-shrink:0;padding:0;';
+        delBtn.onclick = (function(id){ return function(){ deleteSubmission('collateral_requests', id); }; })(r.id);
+        var row = document.createElement('div');
+        row.className = 'sub-hist-row';
+        row.innerHTML = '<div style="flex:1;min-width:0;">' +
+          '<div class="sub-hist-name">Collateral Request</div>' +
+          '<div class="sub-hist-meta">' + (itemStr || 'No items') + '</div>' +
+          '<div class="sub-hist-date">' + (r.shift_date||'') + '</div></div>';
+        row.appendChild(delBtn);
+        return row.outerHTML;
+      }).join('');
+    } else if (subType === 'checklist') {
+      rowsHTML = data.map(function(r) {
+        var color = r.missed > 0 ? 'var(--yellow-bright)' : 'var(--green-bright)';
+        var delBtn = document.createElement('button');
+        delBtn.innerHTML = '&times;';
+        delBtn.style.cssText = 'background:none;border:none;color:var(--text3);font-size:1.125rem;cursor:pointer;flex-shrink:0;padding:0;';
+        delBtn.onclick = (function(id){ return function(){ deleteSubmission('checklist_completions', id); }; })(r.id);
+        var row = document.createElement('div');
+        row.className = 'sub-hist-row';
+        row.innerHTML = '<div style="flex:1;min-width:0;">' +
+          '<div class="sub-hist-name">' + (r.shift_type === 'am' ? 'AM Opening' : 'PM Closing') + '</div>' +
+          '<div class="sub-hist-meta" style="color:' + color + ';">' + r.done + '/' + r.total + ' complete' + (r.missed > 0 ? ' &middot; ' + r.missed + ' missed' : '') + '</div>' +
+          '<div class="sub-hist-date">' + new Date(r.completed_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) + ' &middot; ' + (r.shift_date||'') + '</div></div>';
+        row.appendChild(delBtn);
+        return row.outerHTML;
+      }).join('');
+    } else if (subType === 'orders') {
+      rowsHTML = data.map(function(r) {
+        var needOrder = r.order_qty && r.order_qty > 0;
+        return '<div class="sub-hist-row">' +
+          '<div>' +
+            '<div class="sub-hist-name">' + r.item_name + '</div>' +
+            '<div class="sub-hist-meta">' + (r.vendor||'') + ' &middot; ' + r.d365 + ' &middot; count:' + r.count + (r.par ? ' / par:' + r.par : '') + '</div>' +
+          '</div>' +
+          '<div style="text-align:right;flex-shrink:0;">' +
+            (needOrder ? '<div style="font-size:0.875rem;font-weight:700;color:var(--red-bright);">+' + r.order_qty + '</div>' : '<div style="font-size:0.875rem;color:var(--green-bright);">&#x2713;</div>') +
+            '<div class="sub-hist-date">' + (r.count_date||'') + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    el.innerHTML = '';
+    el.appendChild(typeRow);
+    el.appendChild(dateInput);
+
+    var totalEl = document.createElement('div');
+    totalEl.style.cssText = 'font-size:0.688rem;color:var(--text3);margin-bottom:8px;';
+    totalEl.textContent = data.length + ' record' + (data.length !== 1 ? 's' : '') + (subDate ? ' on ' + subDate : ' (last 100)');
+    el.appendChild(totalEl);
+
+    if (!data.length) {
+      var empty = document.createElement('div');
+      empty.style.cssText = 'text-align:center;padding:40px;color:var(--text3);';
+      empty.textContent = 'No records' + (subDate ? ' for ' + subDate : '') + '.';
+      el.appendChild(empty);
+    } else {
+      // Build rows directly as DOM nodes so onclick handlers work
+      var fragment = document.createDocumentFragment();
+      data.forEach(function(r) {
+        var row = document.createElement('div');
+        row.className = 'sub-hist-row';
+
+        var info = document.createElement('div');
+        info.style.cssText = 'flex:1;min-width:0;';
+
+        var nameEl = document.createElement('div');
+        nameEl.className = 'sub-hist-name';
+        var metaEl = document.createElement('div');
+        metaEl.className = 'sub-hist-meta';
+        var dateEl = document.createElement('div');
+        dateEl.className = 'sub-hist-date';
+
+        if (subType === 'waste') {
+          nameEl.textContent = r.item;
+          metaEl.textContent = (r.qty||'') + ' ' + (r.unit||'') + ' · ' + (r.reason||'') + (r.initials ? ' · ' + r.initials : '');
+          dateEl.textContent = r.shift_date || '';
+        } else if (subType === 'bottles') {
+          nameEl.textContent = r.wine;
+          metaEl.textContent = r.amount || '';
+          dateEl.textContent = r.shift_date || '';
+        } else if (subType === 'collateral') {
+          var items2 = [];
+          try { items2 = JSON.parse(r.items||'[]'); } catch(e) {}
+          nameEl.textContent = 'Collateral Request';
+          metaEl.textContent = items2.map(function(i){ return (i.name||i) + (i.qty ? ' x'+i.qty : ''); }).join(', ') || 'No items';
+          dateEl.textContent = r.shift_date || '';
+        } else if (subType === 'checklist') {
+          var color = r.missed > 0 ? 'var(--yellow-bright)' : 'var(--green-bright)';
+          nameEl.textContent = r.shift_type === 'am' ? 'AM Opening' : 'PM Closing';
+          metaEl.textContent = r.done + '/' + r.total + ' complete' + (r.missed > 0 ? ' · ' + r.missed + ' missed' : '');
+          metaEl.style.color = color;
+          dateEl.textContent = (r.completed_at ? new Date(r.completed_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) + ' · ' : '') + (r.shift_date||'');
+        } else if (subType === 'orders') {
+          nameEl.textContent = r.item_name;
+          metaEl.textContent = (r.vendor||'') + ' · ' + r.d365 + ' · count:' + r.count + (r.par ? ' / par:' + r.par : '');
+          var needOrder = r.order_qty && r.order_qty > 0;
+          dateEl.textContent = r.count_date || '';
+          var qtyEl = document.createElement('div');
+          qtyEl.style.cssText = 'font-size:0.875rem;font-weight:700;color:' + (needOrder ? 'var(--red-bright)' : 'var(--green-bright)') + ';';
+          qtyEl.textContent = needOrder ? '+' + r.order_qty : '✓';
+          var rightCol = document.createElement('div');
+          rightCol.style.cssText = 'text-align:right;flex-shrink:0;';
+          rightCol.appendChild(qtyEl);
+          rightCol.appendChild(dateEl);
+          info.appendChild(nameEl);
+          info.appendChild(metaEl);
+          row.appendChild(info);
+          row.appendChild(rightCol);
+          fragment.appendChild(row);
+          return;
+        }
+
+        info.appendChild(nameEl);
+        info.appendChild(metaEl);
+        info.appendChild(dateEl);
+        row.appendChild(info);
+
+        if (subType !== 'orders') {
+          var tableMap = { waste:'waste_log', bottles:'bottle_log', collateral:'collateral_requests', checklist:'checklist_completions' };
+          var delBtn = document.createElement('button');
+          delBtn.innerHTML = '&times;';
+          delBtn.style.cssText = 'background:none;border:none;color:var(--text3);font-size:1.25rem;cursor:pointer;flex-shrink:0;padding:0 4px;line-height:1;';
+          delBtn.onclick = (function(tbl, id){ return function(){ deleteSubmission(tbl, id); }; })(tableMap[subType], r.id);
+          row.appendChild(delBtn);
+        }
+
+        fragment.appendChild(row);
+      });
+      el.appendChild(fragment);
+    }
+  });
+}
+
+
+// ─────────────────────────────────────────────
+// EXPORT / REPORT GENERATION
+// ─────────────────────────────────────────────
+
+
+
+// Init
+document.getElementById('headerDate').textContent = new Date().toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+render('updates');
+
+// ─────────────────────────────────────────────
+// QR CODE TAB
+// ─────────────────────────────────────────────
+var qrRendered = false;
+
+function renderQR() {
+  var el = document.getElementById('view-qr');
+  if (qrRendered) return;
+  qrRendered = true;
+
+  var SVGS = {
+  hub: `<svg shape-rendering="geometricPrecision" xmlns="http://www.w3.org/2000/svg"  class="qrcode" viewBox="0 0 29 29" preserveAspectRatio="xMidYMid">
+<rect fill="#F5F0EB" width="100%" height="100%"/>
+<path class="modules" fill="#1A1A1A" d="M11 2 m0 0h1v1h-1z M14 2 m0 0h1v1h-1z M15 2 m0 0h1v1h-1z M16 2 m0 0h1v1h-1z M17 2 m0 0h1v1h-1z M11 3 m0 0h1v1h-1z M12 3 m0 0h1v1h-1z M13 3 m0 0h1v1h-1z M14 3 m0 0h1v1h-1z M15 3 m0 0h1v1h-1z M16 3 m0 0h1v1h-1z M17 3 m0 0h1v1h-1z M18 3 m0 0h1v1h-1z M10 4 m0 0h1v1h-1z M11 4 m0 0h1v1h-1z M12 4 m0 0h1v1h-1z M13 4 m0 0h1v1h-1z M15 4 m0 0h1v1h-1z M17 4 m0 0h1v1h-1z M10 5 m0 0h1v1h-1z M11 5 m0 0h1v1h-1z M16 5 m0 0h1v1h-1z M17 5 m0 0h1v1h-1z M10 6 m0 0h1v1h-1z M13 6 m0 0h1v1h-1z M17 6 m0 0h1v1h-1z M18 6 m0 0h1v1h-1z M10 7 m0 0h1v1h-1z M12 7 m0 0h1v1h-1z M14 7 m0 0h1v1h-1z M10 8 m0 0h1v1h-1z M12 8 m0 0h1v1h-1z M14 8 m0 0h1v1h-1z M16 8 m0 0h1v1h-1z M18 8 m0 0h1v1h-1z M10 9 m0 0h1v1h-1z M16 9 m0 0h1v1h-1z M18 9 m0 0h1v1h-1z M2 10 m0 0h1v1h-1z M4 10 m0 0h1v1h-1z M5 10 m0 0h1v1h-1z M6 10 m0 0h1v1h-1z M7 10 m0 0h1v1h-1z M8 10 m0 0h1v1h-1z M13 10 m0 0h1v1h-1z M20 10 m0 0h1v1h-1z M21 10 m0 0h1v1h-1z M22 10 m0 0h1v1h-1z M23 10 m0 0h1v1h-1z M24 10 m0 0h1v1h-1z M3 11 m0 0h1v1h-1z M4 11 m0 0h1v1h-1z M7 11 m0 0h1v1h-1z M10 11 m0 0h1v1h-1z M15 11 m0 0h1v1h-1z M16 11 m0 0h1v1h-1z M17 11 m0 0h1v1h-1z M19 11 m0 0h1v1h-1z M21 11 m0 0h1v1h-1z M25 11 m0 0h1v1h-1z M2 12 m0 0h1v1h-1z M6 12 m0 0h1v1h-1z M7 12 m0 0h1v1h-1z M8 12 m0 0h1v1h-1z M9 12 m0 0h1v1h-1z M10 12 m0 0h1v1h-1z M13 12 m0 0h1v1h-1z M14 12 m0 0h1v1h-1z M15 12 m0 0h1v1h-1z M16 12 m0 0h1v1h-1z M17 12 m0 0h1v1h-1z M21 12 m0 0h1v1h-1z M22 12 m0 0h1v1h-1z M23 12 m0 0h1v1h-1z M25 12 m0 0h1v1h-1z M26 12 m0 0h1v1h-1z M2 13 m0 0h1v1h-1z M7 13 m0 0h1v1h-1z M10 13 m0 0h1v1h-1z M11 13 m0 0h1v1h-1z M12 13 m0 0h1v1h-1z M15 13 m0 0h1v1h-1z M18 13 m0 0h1v1h-1z M19 13 m0 0h1v1h-1z M20 13 m0 0h1v1h-1z M21 13 m0 0h1v1h-1z M22 13 m0 0h1v1h-1z M2 14 m0 0h1v1h-1z M3 14 m0 0h1v1h-1z M4 14 m0 0h1v1h-1z M8 14 m0 0h1v1h-1z M10 14 m0 0h1v1h-1z M11 14 m0 0h1v1h-1z M14 14 m0 0h1v1h-1z M16 14 m0 0h1v1h-1z M19 14 m0 0h1v1h-1z M20 14 m0 0h1v1h-1z M22 14 m0 0h1v1h-1z M23 14 m0 0h1v1h-1z M24 14 m0 0h1v1h-1z
+M26 14 m0 0h1v1h-1z M2 15 m0 0h1v1h-1z M4 15 m0 0h1v1h-1z M5 15 m0 0h1v1h-1z M6 15 m0 0h1v1h-1z M7 15 m0 0h1v1h-1z M12 15 m0 0h1v1h-1z M18 15 m0 0h1v1h-1z M24 15 m0 0h1v1h-1z M25 15 m0 0h1v1h-1z M2 16 m0 0h1v1h-1z M7 16 m0 0h1v1h-1z M8 16 m0 0h1v1h-1z M9 16 m0 0h1v1h-1z M10 16 m0 0h1v1h-1z M12 16 m0 0h1v1h-1z M13 16 m0 0h1v1h-1z M14 16 m0 0h1v1h-1z M17 16 m0 0h1v1h-1z M20 16 m0 0h1v1h-1z M21 16 m0 0h1v1h-1z M22 16 m0 0h1v1h-1z M24 16 m0 0h1v1h-1z M25 16 m0 0h1v1h-1z M26 16 m0 0h1v1h-1z M2 17 m0 0h1v1h-1z M4 17 m0 0h1v1h-1z M5 17 m0 0h1v1h-1z M6 17 m0 0h1v1h-1z M11 17 m0 0h1v1h-1z M12 17 m0 0h1v1h-1z M13 17 m0 0h1v1h-1z M16 17 m0 0h1v1h-1z M17 17 m0 0h1v1h-1z M18 17 m0 0h1v1h-1z M19 17 m0 0h1v1h-1z M21 17 m0 0h1v1h-1z M23 17 m0 0h1v1h-1z M25 17 m0 0h1v1h-1z M26 17 m0 0h1v1h-1z M2 18 m0 0h1v1h-1z M5 18 m0 0h1v1h-1z M7 18 m0 0h1v1h-1z M8 18 m0 0h1v1h-1z M9 18 m0 0h1v1h-1z M10 18 m0 0h1v1h-1z M11 18 m0 0h1v1h-1z M12 18 m0 0h1v1h-1z M13 18 m0 0h1v1h-1z M17 18 m0 0h1v1h-1z M18 18 m0 0h1v1h-1z M19 18 m0 0h1v1h-1z M20 18 m0 0h1v1h-1z M21 18 m0 0h1v1h-1z M22 18 m0 0h1v1h-1z M23 18 m0 0h1v1h-1z M24 18 m0 0h1v1h-1z M26 18 m0 0h1v1h-1z M10 19 m0 0h1v1h-1z M11 19 m0 0h1v1h-1z M14 19 m0 0h1v1h-1z M15 19 m0 0h1v1h-1z M16 19 m0 0h1v1h-1z M17 19 m0 0h1v1h-1z M18 19 m0 0h1v1h-1z M22 19 m0 0h1v1h-1z M24 19 m0 0h1v1h-1z M25 19 m0 0h1v1h-1z M11 20 m0 0h1v1h-1z M12 20 m0 0h1v1h-1z M15 20 m0 0h1v1h-1z M16 20 m0 0h1v1h-1z M18 20 m0 0h1v1h-1z M20 20 m0 0h1v1h-1z M22 20 m0 0h1v1h-1z M23 20 m0 0h1v1h-1z M24 20 m0 0h1v1h-1z M25 20 m0 0h1v1h-1z M26 20 m0 0h1v1h-1z M10 21 m0 0h1v1h-1z M11 21 m0 0h1v1h-1z M12 21 m0 0h1v1h-1z M14 21 m0 0h1v1h-1z M15 21 m0 0h1v1h-1z M18 21 m0 0h1v1h-1z M22 21 m0 0h1v1h-1z M25 21 m0 0h1v1h-1z M10 22 m0 0h1v1h-1z M11 22 m0 0h1v1h-1z M12 22 m0 0h1v1h-1z M14 22 m0 0h1v1h-1z M16 22 m0 0h1v1h-1z M17 22 m0 0h1v1h-1z M18 22 m0 0h1v1h-1z M19 22 m0 0h1v1h-1z M20 22 m0 0h1v1h-1z M21 22 m0 0h1v1h-1z M22 22 m0 0h1v1h-1z M23 22 m0 0h1v1h-1z M24 22 m0 0h1v1h-1z
+M25 22 m0 0h1v1h-1z M10 23 m0 0h1v1h-1z M12 23 m0 0h1v1h-1z M17 23 m0 0h1v1h-1z M19 23 m0 0h1v1h-1z M20 23 m0 0h1v1h-1z M22 23 m0 0h1v1h-1z M24 23 m0 0h1v1h-1z M26 23 m0 0h1v1h-1z M10 24 m0 0h1v1h-1z M11 24 m0 0h1v1h-1z M13 24 m0 0h1v1h-1z M14 24 m0 0h1v1h-1z M17 24 m0 0h1v1h-1z M19 24 m0 0h1v1h-1z M20 24 m0 0h1v1h-1z M21 24 m0 0h1v1h-1z M24 24 m0 0h1v1h-1z M26 24 m0 0h1v1h-1z M11 25 m0 0h1v1h-1z M12 25 m0 0h1v1h-1z M13 25 m0 0h1v1h-1z M16 25 m0 0h1v1h-1z M18 25 m0 0h1v1h-1z M19 25 m0 0h1v1h-1z M20 25 m0 0h1v1h-1z M22 25 m0 0h1v1h-1z M26 25 m0 0h1v1h-1z M10 26 m0 0h1v1h-1z M11 26 m0 0h1v1h-1z M12 26 m0 0h1v1h-1z M13 26 m0 0h1v1h-1z M19 26 m0 0h1v1h-1z M20 26 m0 0h1v1h-1z M24 26 m0 0h1v1h-1z M25 26 m0 0h1v1h-1z M26 26 m0 0h1v1h-1z"/>
+<path class="outer" fill="#1A1A1A" d="M2 2 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M2 2 m2 2h3v3h-3z"/>
+<path class="outer" fill="#1A1A1A" d="M2 20 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M2 20 m2 2h3v3h-3z"/>
+<path class="outer" fill="#1A1A1A" d="M20 2 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M20 2 m2 2h3v3h-3z"/>
+</svg>`,
+  bar: `<svg shape-rendering="geometricPrecision" xmlns="http://www.w3.org/2000/svg"  class="qrcode" viewBox="0 0 29 29" preserveAspectRatio="xMidYMid">
+<rect fill="#F5F0EB" width="100%" height="100%"/>
+<path class="modules" fill="#1A1A1A" d="M10 2 m0 0h1v1h-1z M11 2 m0 0h1v1h-1z M17 2 m0 0h1v1h-1z M18 2 m0 0h1v1h-1z M13 3 m0 0h1v1h-1z M15 3 m0 0h1v1h-1z M16 3 m0 0h1v1h-1z M18 3 m0 0h1v1h-1z M10 4 m0 0h1v1h-1z M14 4 m0 0h1v1h-1z M16 4 m0 0h1v1h-1z M17 4 m0 0h1v1h-1z M18 4 m0 0h1v1h-1z M11 5 m0 0h1v1h-1z M13 5 m0 0h1v1h-1z M14 5 m0 0h1v1h-1z M16 5 m0 0h1v1h-1z M11 6 m0 0h1v1h-1z M12 6 m0 0h1v1h-1z M14 6 m0 0h1v1h-1z M15 6 m0 0h1v1h-1z M16 6 m0 0h1v1h-1z M17 6 m0 0h1v1h-1z M10 7 m0 0h1v1h-1z M12 7 m0 0h1v1h-1z M17 7 m0 0h1v1h-1z M10 8 m0 0h1v1h-1z M12 8 m0 0h1v1h-1z M14 8 m0 0h1v1h-1z M16 8 m0 0h1v1h-1z M18 8 m0 0h1v1h-1z M12 9 m0 0h1v1h-1z M16 9 m0 0h1v1h-1z M17 9 m0 0h1v1h-1z M18 9 m0 0h1v1h-1z M2 10 m0 0h1v1h-1z M4 10 m0 0h1v1h-1z M8 10 m0 0h1v1h-1z M9 10 m0 0h1v1h-1z M13 10 m0 0h1v1h-1z M14 10 m0 0h1v1h-1z M15 10 m0 0h1v1h-1z M16 10 m0 0h1v1h-1z M18 10 m0 0h1v1h-1z M21 10 m0 0h1v1h-1z M24 10 m0 0h1v1h-1z M26 10 m0 0h1v1h-1z M2 11 m0 0h1v1h-1z M3 11 m0 0h1v1h-1z M4 11 m0 0h1v1h-1z M5 11 m0 0h1v1h-1z M6 11 m0 0h1v1h-1z M7 11 m0 0h1v1h-1z M9 11 m0 0h1v1h-1z M10 11 m0 0h1v1h-1z M13 11 m0 0h1v1h-1z M14 11 m0 0h1v1h-1z M15 11 m0 0h1v1h-1z M16 11 m0 0h1v1h-1z M20 11 m0 0h1v1h-1z M21 11 m0 0h1v1h-1z M23 11 m0 0h1v1h-1z M25 11 m0 0h1v1h-1z M26 11 m0 0h1v1h-1z M4 12 m0 0h1v1h-1z M5 12 m0 0h1v1h-1z M7 12 m0 0h1v1h-1z M8 12 m0 0h1v1h-1z M17 12 m0 0h1v1h-1z M20 12 m0 0h1v1h-1z M23 12 m0 0h1v1h-1z M24 12 m0 0h1v1h-1z M26 12 m0 0h1v1h-1z M5 13 m0 0h1v1h-1z M7 13 m0 0h1v1h-1z M9 13 m0 0h1v1h-1z M10 13 m0 0h1v1h-1z M11 13 m0 0h1v1h-1z M13 13 m0 0h1v1h-1z M14 13 m0 0h1v1h-1z M15 13 m0 0h1v1h-1z M17 13 m0 0h1v1h-1z M18 13 m0 0h1v1h-1z M19 13 m0 0h1v1h-1z M21 13 m0 0h1v1h-1z M22 13 m0 0h1v1h-1z M23 13 m0 0h1v1h-1z M26 13 m0 0h1v1h-1z M2 14 m0 0h1v1h-1z M4 14 m0 0h1v1h-1z M5 14 m0 0h1v1h-1z M6 14 m0 0h1v1h-1z M7 14 m0 0h1v1h-1z M8 14 m0 0h1v1h-1z M13 14 m0 0h1v1h-1z M14 14 m0 0h1v1h-1z M15 14 m0 0h1v1h-1z M17 14 m0 0h1v1h-1z M20 14 m0 0h1v1h-1z M21 14 m0 0h1v1h-1z
+M23 14 m0 0h1v1h-1z M25 14 m0 0h1v1h-1z M26 14 m0 0h1v1h-1z M3 15 m0 0h1v1h-1z M4 15 m0 0h1v1h-1z M6 15 m0 0h1v1h-1z M12 15 m0 0h1v1h-1z M14 15 m0 0h1v1h-1z M17 15 m0 0h1v1h-1z M19 15 m0 0h1v1h-1z M23 15 m0 0h1v1h-1z M24 15 m0 0h1v1h-1z M25 15 m0 0h1v1h-1z M26 15 m0 0h1v1h-1z M2 16 m0 0h1v1h-1z M3 16 m0 0h1v1h-1z M4 16 m0 0h1v1h-1z M5 16 m0 0h1v1h-1z M6 16 m0 0h1v1h-1z M8 16 m0 0h1v1h-1z M11 16 m0 0h1v1h-1z M14 16 m0 0h1v1h-1z M15 16 m0 0h1v1h-1z M16 16 m0 0h1v1h-1z M17 16 m0 0h1v1h-1z M20 16 m0 0h1v1h-1z M26 16 m0 0h1v1h-1z M6 17 m0 0h1v1h-1z M9 17 m0 0h1v1h-1z M10 17 m0 0h1v1h-1z M11 17 m0 0h1v1h-1z M13 17 m0 0h1v1h-1z M14 17 m0 0h1v1h-1z M16 17 m0 0h1v1h-1z M17 17 m0 0h1v1h-1z M18 17 m0 0h1v1h-1z M19 17 m0 0h1v1h-1z M20 17 m0 0h1v1h-1z M21 17 m0 0h1v1h-1z M25 17 m0 0h1v1h-1z M2 18 m0 0h1v1h-1z M3 18 m0 0h1v1h-1z M7 18 m0 0h1v1h-1z M8 18 m0 0h1v1h-1z M9 18 m0 0h1v1h-1z M11 18 m0 0h1v1h-1z M15 18 m0 0h1v1h-1z M16 18 m0 0h1v1h-1z M18 18 m0 0h1v1h-1z M19 18 m0 0h1v1h-1z M20 18 m0 0h1v1h-1z M21 18 m0 0h1v1h-1z M22 18 m0 0h1v1h-1z M23 18 m0 0h1v1h-1z M25 18 m0 0h1v1h-1z M26 18 m0 0h1v1h-1z M10 19 m0 0h1v1h-1z M11 19 m0 0h1v1h-1z M12 19 m0 0h1v1h-1z M15 19 m0 0h1v1h-1z M16 19 m0 0h1v1h-1z M18 19 m0 0h1v1h-1z M22 19 m0 0h1v1h-1z M23 19 m0 0h1v1h-1z M24 19 m0 0h1v1h-1z M25 19 m0 0h1v1h-1z M26 19 m0 0h1v1h-1z M10 20 m0 0h1v1h-1z M12 20 m0 0h1v1h-1z M13 20 m0 0h1v1h-1z M18 20 m0 0h1v1h-1z M20 20 m0 0h1v1h-1z M22 20 m0 0h1v1h-1z M23 20 m0 0h1v1h-1z M26 20 m0 0h1v1h-1z M11 21 m0 0h1v1h-1z M15 21 m0 0h1v1h-1z M17 21 m0 0h1v1h-1z M18 21 m0 0h1v1h-1z M22 21 m0 0h1v1h-1z M23 21 m0 0h1v1h-1z M25 21 m0 0h1v1h-1z M26 21 m0 0h1v1h-1z M12 22 m0 0h1v1h-1z M13 22 m0 0h1v1h-1z M14 22 m0 0h1v1h-1z M15 22 m0 0h1v1h-1z M17 22 m0 0h1v1h-1z M18 22 m0 0h1v1h-1z M19 22 m0 0h1v1h-1z M20 22 m0 0h1v1h-1z M21 22 m0 0h1v1h-1z M22 22 m0 0h1v1h-1z M23 22 m0 0h1v1h-1z M11 23 m0 0h1v1h-1z M14 23 m0 0h1v1h-1z M19 23 m0 0h1v1h-1z M22 23 m0 0h1v1h-1z M23 23 m0 0h1v1h-1z M24 23 m0 0h1v1h-1z
+M10 24 m0 0h1v1h-1z M12 24 m0 0h1v1h-1z M14 24 m0 0h1v1h-1z M15 24 m0 0h1v1h-1z M16 24 m0 0h1v1h-1z M18 24 m0 0h1v1h-1z M20 24 m0 0h1v1h-1z M22 24 m0 0h1v1h-1z M25 24 m0 0h1v1h-1z M26 24 m0 0h1v1h-1z M11 25 m0 0h1v1h-1z M13 25 m0 0h1v1h-1z M14 25 m0 0h1v1h-1z M16 25 m0 0h1v1h-1z M22 25 m0 0h1v1h-1z M23 25 m0 0h1v1h-1z M10 26 m0 0h1v1h-1z M12 26 m0 0h1v1h-1z M15 26 m0 0h1v1h-1z M16 26 m0 0h1v1h-1z M18 26 m0 0h1v1h-1z M20 26 m0 0h1v1h-1z M21 26 m0 0h1v1h-1z M22 26 m0 0h1v1h-1z M26 26 m0 0h1v1h-1z"/>
+<path class="outer" fill="#1A1A1A" d="M2 2 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M2 2 m2 2h3v3h-3z"/>
+<path class="outer" fill="#1A1A1A" d="M2 20 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M2 20 m2 2h3v3h-3z"/>
+<path class="outer" fill="#1A1A1A" d="M20 2 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M20 2 m2 2h3v3h-3z"/>
+</svg>`,
+  ops: `<svg shape-rendering="geometricPrecision" xmlns="http://www.w3.org/2000/svg"  class="qrcode" viewBox="0 0 29 29" preserveAspectRatio="xMidYMid">
+<rect fill="#F5F0EB" width="100%" height="100%"/>
+<path class="modules" fill="#1A1A1A" d="M10 2 m0 0h1v1h-1z M14 2 m0 0h1v1h-1z M11 3 m0 0h1v1h-1z M13 3 m0 0h1v1h-1z M18 3 m0 0h1v1h-1z M14 4 m0 0h1v1h-1z M15 4 m0 0h1v1h-1z M17 4 m0 0h1v1h-1z M18 4 m0 0h1v1h-1z M10 5 m0 0h1v1h-1z M14 5 m0 0h1v1h-1z M16 5 m0 0h1v1h-1z M17 5 m0 0h1v1h-1z M18 5 m0 0h1v1h-1z M10 6 m0 0h1v1h-1z M15 6 m0 0h1v1h-1z M16 6 m0 0h1v1h-1z M18 6 m0 0h1v1h-1z M10 7 m0 0h1v1h-1z M11 7 m0 0h1v1h-1z M12 7 m0 0h1v1h-1z M13 7 m0 0h1v1h-1z M15 7 m0 0h1v1h-1z M16 7 m0 0h1v1h-1z M17 7 m0 0h1v1h-1z M10 8 m0 0h1v1h-1z M12 8 m0 0h1v1h-1z M14 8 m0 0h1v1h-1z M16 8 m0 0h1v1h-1z M18 8 m0 0h1v1h-1z M10 9 m0 0h1v1h-1z M12 9 m0 0h1v1h-1z M14 9 m0 0h1v1h-1z M16 9 m0 0h1v1h-1z M2 10 m0 0h1v1h-1z M6 10 m0 0h1v1h-1z M8 10 m0 0h1v1h-1z M9 10 m0 0h1v1h-1z M10 10 m0 0h1v1h-1z M13 10 m0 0h1v1h-1z M15 10 m0 0h1v1h-1z M16 10 m0 0h1v1h-1z M17 10 m0 0h1v1h-1z M19 10 m0 0h1v1h-1z M20 10 m0 0h1v1h-1z M21 10 m0 0h1v1h-1z M22 10 m0 0h1v1h-1z M23 10 m0 0h1v1h-1z M26 10 m0 0h1v1h-1z M2 11 m0 0h1v1h-1z M3 11 m0 0h1v1h-1z M4 11 m0 0h1v1h-1z M5 11 m0 0h1v1h-1z M7 11 m0 0h1v1h-1z M9 11 m0 0h1v1h-1z M13 11 m0 0h1v1h-1z M22 11 m0 0h1v1h-1z M23 11 m0 0h1v1h-1z M25 11 m0 0h1v1h-1z M2 12 m0 0h1v1h-1z M5 12 m0 0h1v1h-1z M6 12 m0 0h1v1h-1z M8 12 m0 0h1v1h-1z M9 12 m0 0h1v1h-1z M12 12 m0 0h1v1h-1z M13 12 m0 0h1v1h-1z M15 12 m0 0h1v1h-1z M16 12 m0 0h1v1h-1z M17 12 m0 0h1v1h-1z M21 12 m0 0h1v1h-1z M22 12 m0 0h1v1h-1z M23 12 m0 0h1v1h-1z M24 12 m0 0h1v1h-1z M2 13 m0 0h1v1h-1z M3 13 m0 0h1v1h-1z M4 13 m0 0h1v1h-1z M5 13 m0 0h1v1h-1z M10 13 m0 0h1v1h-1z M13 13 m0 0h1v1h-1z M15 13 m0 0h1v1h-1z M18 13 m0 0h1v1h-1z M19 13 m0 0h1v1h-1z M21 13 m0 0h1v1h-1z M22 13 m0 0h1v1h-1z M24 13 m0 0h1v1h-1z M25 13 m0 0h1v1h-1z M26 13 m0 0h1v1h-1z M2 14 m0 0h1v1h-1z M5 14 m0 0h1v1h-1z M6 14 m0 0h1v1h-1z M8 14 m0 0h1v1h-1z M10 14 m0 0h1v1h-1z M13 14 m0 0h1v1h-1z M14 14 m0 0h1v1h-1z M15 14 m0 0h1v1h-1z M18 14 m0 0h1v1h-1z M20 14 m0 0h1v1h-1z M21 14 m0 0h1v1h-1z M24 14 m0 0h1v1h-1z M26 14 m0 0h1v1h-1z
+M2 15 m0 0h1v1h-1z M4 15 m0 0h1v1h-1z M7 15 m0 0h1v1h-1z M9 15 m0 0h1v1h-1z M10 15 m0 0h1v1h-1z M11 15 m0 0h1v1h-1z M15 15 m0 0h1v1h-1z M16 15 m0 0h1v1h-1z M17 15 m0 0h1v1h-1z M19 15 m0 0h1v1h-1z M21 15 m0 0h1v1h-1z M22 15 m0 0h1v1h-1z M23 15 m0 0h1v1h-1z M24 15 m0 0h1v1h-1z M25 15 m0 0h1v1h-1z M6 16 m0 0h1v1h-1z M8 16 m0 0h1v1h-1z M9 16 m0 0h1v1h-1z M11 16 m0 0h1v1h-1z M17 16 m0 0h1v1h-1z M18 16 m0 0h1v1h-1z M19 16 m0 0h1v1h-1z M20 16 m0 0h1v1h-1z M21 16 m0 0h1v1h-1z M22 16 m0 0h1v1h-1z M5 17 m0 0h1v1h-1z M10 17 m0 0h1v1h-1z M11 17 m0 0h1v1h-1z M14 17 m0 0h1v1h-1z M16 17 m0 0h1v1h-1z M18 17 m0 0h1v1h-1z M21 17 m0 0h1v1h-1z M23 17 m0 0h1v1h-1z M24 17 m0 0h1v1h-1z M2 18 m0 0h1v1h-1z M3 18 m0 0h1v1h-1z M4 18 m0 0h1v1h-1z M7 18 m0 0h1v1h-1z M8 18 m0 0h1v1h-1z M10 18 m0 0h1v1h-1z M11 18 m0 0h1v1h-1z M13 18 m0 0h1v1h-1z M15 18 m0 0h1v1h-1z M16 18 m0 0h1v1h-1z M18 18 m0 0h1v1h-1z M19 18 m0 0h1v1h-1z M20 18 m0 0h1v1h-1z M21 18 m0 0h1v1h-1z M22 18 m0 0h1v1h-1z M24 18 m0 0h1v1h-1z M26 18 m0 0h1v1h-1z M10 19 m0 0h1v1h-1z M12 19 m0 0h1v1h-1z M14 19 m0 0h1v1h-1z M17 19 m0 0h1v1h-1z M18 19 m0 0h1v1h-1z M22 19 m0 0h1v1h-1z M23 19 m0 0h1v1h-1z M24 19 m0 0h1v1h-1z M25 19 m0 0h1v1h-1z M10 20 m0 0h1v1h-1z M13 20 m0 0h1v1h-1z M14 20 m0 0h1v1h-1z M15 20 m0 0h1v1h-1z M16 20 m0 0h1v1h-1z M18 20 m0 0h1v1h-1z M20 20 m0 0h1v1h-1z M22 20 m0 0h1v1h-1z M23 20 m0 0h1v1h-1z M11 21 m0 0h1v1h-1z M12 21 m0 0h1v1h-1z M13 21 m0 0h1v1h-1z M15 21 m0 0h1v1h-1z M17 21 m0 0h1v1h-1z M18 21 m0 0h1v1h-1z M22 21 m0 0h1v1h-1z M24 21 m0 0h1v1h-1z M26 21 m0 0h1v1h-1z M10 22 m0 0h1v1h-1z M11 22 m0 0h1v1h-1z M14 22 m0 0h1v1h-1z M15 22 m0 0h1v1h-1z M18 22 m0 0h1v1h-1z M19 22 m0 0h1v1h-1z M20 22 m0 0h1v1h-1z M21 22 m0 0h1v1h-1z M22 22 m0 0h1v1h-1z M24 22 m0 0h1v1h-1z M25 22 m0 0h1v1h-1z M12 23 m0 0h1v1h-1z M15 23 m0 0h1v1h-1z M16 23 m0 0h1v1h-1z M18 23 m0 0h1v1h-1z M20 23 m0 0h1v1h-1z M21 23 m0 0h1v1h-1z M23 23 m0 0h1v1h-1z M24 23 m0 0h1v1h-1z M26 23 m0 0h1v1h-1z M11 24 m0 0h1v1h-1z M17 24 m0 0h1v1h-1z
+M20 24 m0 0h1v1h-1z M21 24 m0 0h1v1h-1z M25 24 m0 0h1v1h-1z M11 25 m0 0h1v1h-1z M12 25 m0 0h1v1h-1z M14 25 m0 0h1v1h-1z M16 25 m0 0h1v1h-1z M18 25 m0 0h1v1h-1z M22 25 m0 0h1v1h-1z M24 25 m0 0h1v1h-1z M25 25 m0 0h1v1h-1z M10 26 m0 0h1v1h-1z M11 26 m0 0h1v1h-1z M13 26 m0 0h1v1h-1z M15 26 m0 0h1v1h-1z M16 26 m0 0h1v1h-1z M17 26 m0 0h1v1h-1z M21 26 m0 0h1v1h-1z M22 26 m0 0h1v1h-1z M23 26 m0 0h1v1h-1z M24 26 m0 0h1v1h-1z M25 26 m0 0h1v1h-1z M26 26 m0 0h1v1h-1z"/>
+<path class="outer" fill="#1A1A1A" d="M2 2 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M2 2 m2 2h3v3h-3z"/>
+<path class="outer" fill="#1A1A1A" d="M2 20 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M2 20 m2 2h3v3h-3z"/>
+<path class="outer" fill="#1A1A1A" d="M20 2 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M20 2 m2 2h3v3h-3z"/>
+</svg>`,
+  admin: `<svg shape-rendering="geometricPrecision" xmlns="http://www.w3.org/2000/svg"  class="qrcode" viewBox="0 0 29 29" preserveAspectRatio="xMidYMid">
+<rect fill="#F5F0EB" width="100%" height="100%"/>
+<path class="modules" fill="#1A1A1A" d="M12 2 m0 0h1v1h-1z M13 2 m0 0h1v1h-1z M15 2 m0 0h1v1h-1z M16 2 m0 0h1v1h-1z M17 2 m0 0h1v1h-1z M12 3 m0 0h1v1h-1z M14 3 m0 0h1v1h-1z M15 3 m0 0h1v1h-1z M16 3 m0 0h1v1h-1z M17 3 m0 0h1v1h-1z M18 3 m0 0h1v1h-1z M10 4 m0 0h1v1h-1z M11 4 m0 0h1v1h-1z M12 4 m0 0h1v1h-1z M13 4 m0 0h1v1h-1z M15 4 m0 0h1v1h-1z M17 4 m0 0h1v1h-1z M10 5 m0 0h1v1h-1z M11 5 m0 0h1v1h-1z M16 5 m0 0h1v1h-1z M17 5 m0 0h1v1h-1z M10 6 m0 0h1v1h-1z M11 6 m0 0h1v1h-1z M12 6 m0 0h1v1h-1z M17 6 m0 0h1v1h-1z M18 6 m0 0h1v1h-1z M10 7 m0 0h1v1h-1z M12 7 m0 0h1v1h-1z M13 7 m0 0h1v1h-1z M14 7 m0 0h1v1h-1z M10 8 m0 0h1v1h-1z M12 8 m0 0h1v1h-1z M14 8 m0 0h1v1h-1z M16 8 m0 0h1v1h-1z M18 8 m0 0h1v1h-1z M10 9 m0 0h1v1h-1z M11 9 m0 0h1v1h-1z M13 9 m0 0h1v1h-1z M14 9 m0 0h1v1h-1z M16 9 m0 0h1v1h-1z M18 9 m0 0h1v1h-1z M2 10 m0 0h1v1h-1z M4 10 m0 0h1v1h-1z M5 10 m0 0h1v1h-1z M6 10 m0 0h1v1h-1z M7 10 m0 0h1v1h-1z M8 10 m0 0h1v1h-1z M11 10 m0 0h1v1h-1z M12 10 m0 0h1v1h-1z M14 10 m0 0h1v1h-1z M20 10 m0 0h1v1h-1z M21 10 m0 0h1v1h-1z M22 10 m0 0h1v1h-1z M23 10 m0 0h1v1h-1z M24 10 m0 0h1v1h-1z M2 11 m0 0h1v1h-1z M4 11 m0 0h1v1h-1z M5 11 m0 0h1v1h-1z M7 11 m0 0h1v1h-1z M11 11 m0 0h1v1h-1z M12 11 m0 0h1v1h-1z M14 11 m0 0h1v1h-1z M15 11 m0 0h1v1h-1z M16 11 m0 0h1v1h-1z M17 11 m0 0h1v1h-1z M20 11 m0 0h1v1h-1z M21 11 m0 0h1v1h-1z M25 11 m0 0h1v1h-1z M2 12 m0 0h1v1h-1z M4 12 m0 0h1v1h-1z M8 12 m0 0h1v1h-1z M11 12 m0 0h1v1h-1z M13 12 m0 0h1v1h-1z M14 12 m0 0h1v1h-1z M15 12 m0 0h1v1h-1z M16 12 m0 0h1v1h-1z M17 12 m0 0h1v1h-1z M20 12 m0 0h1v1h-1z M21 12 m0 0h1v1h-1z M22 12 m0 0h1v1h-1z M23 12 m0 0h1v1h-1z M25 12 m0 0h1v1h-1z M26 12 m0 0h1v1h-1z M2 13 m0 0h1v1h-1z M7 13 m0 0h1v1h-1z M9 13 m0 0h1v1h-1z M11 13 m0 0h1v1h-1z M12 13 m0 0h1v1h-1z M13 13 m0 0h1v1h-1z M15 13 m0 0h1v1h-1z M17 13 m0 0h1v1h-1z M18 13 m0 0h1v1h-1z M19 13 m0 0h1v1h-1z M20 13 m0 0h1v1h-1z M21 13 m0 0h1v1h-1z M22 13 m0 0h1v1h-1z M2 14 m0 0h1v1h-1z M3 14 m0 0h1v1h-1z M7 14 m0 0h1v1h-1z M8 14 m0 0h1v1h-1z
+M10 14 m0 0h1v1h-1z M11 14 m0 0h1v1h-1z M13 14 m0 0h1v1h-1z M14 14 m0 0h1v1h-1z M16 14 m0 0h1v1h-1z M19 14 m0 0h1v1h-1z M20 14 m0 0h1v1h-1z M22 14 m0 0h1v1h-1z M23 14 m0 0h1v1h-1z M24 14 m0 0h1v1h-1z M26 14 m0 0h1v1h-1z M2 15 m0 0h1v1h-1z M4 15 m0 0h1v1h-1z M6 15 m0 0h1v1h-1z M7 15 m0 0h1v1h-1z M9 15 m0 0h1v1h-1z M12 15 m0 0h1v1h-1z M17 15 m0 0h1v1h-1z M18 15 m0 0h1v1h-1z M24 15 m0 0h1v1h-1z M25 15 m0 0h1v1h-1z M2 16 m0 0h1v1h-1z M5 16 m0 0h1v1h-1z M6 16 m0 0h1v1h-1z M8 16 m0 0h1v1h-1z M9 16 m0 0h1v1h-1z M10 16 m0 0h1v1h-1z M13 16 m0 0h1v1h-1z M14 16 m0 0h1v1h-1z M17 16 m0 0h1v1h-1z M19 16 m0 0h1v1h-1z M21 16 m0 0h1v1h-1z M22 16 m0 0h1v1h-1z M24 16 m0 0h1v1h-1z M25 16 m0 0h1v1h-1z M26 16 m0 0h1v1h-1z M2 17 m0 0h1v1h-1z M6 17 m0 0h1v1h-1z M7 17 m0 0h1v1h-1z M9 17 m0 0h1v1h-1z M10 17 m0 0h1v1h-1z M11 17 m0 0h1v1h-1z M12 17 m0 0h1v1h-1z M13 17 m0 0h1v1h-1z M16 17 m0 0h1v1h-1z M20 17 m0 0h1v1h-1z M21 17 m0 0h1v1h-1z M23 17 m0 0h1v1h-1z M25 17 m0 0h1v1h-1z M26 17 m0 0h1v1h-1z M2 18 m0 0h1v1h-1z M7 18 m0 0h1v1h-1z M8 18 m0 0h1v1h-1z M10 18 m0 0h1v1h-1z M11 18 m0 0h1v1h-1z M12 18 m0 0h1v1h-1z M13 18 m0 0h1v1h-1z M18 18 m0 0h1v1h-1z M19 18 m0 0h1v1h-1z M20 18 m0 0h1v1h-1z M21 18 m0 0h1v1h-1z M22 18 m0 0h1v1h-1z M23 18 m0 0h1v1h-1z M24 18 m0 0h1v1h-1z M26 18 m0 0h1v1h-1z M10 19 m0 0h1v1h-1z M11 19 m0 0h1v1h-1z M14 19 m0 0h1v1h-1z M15 19 m0 0h1v1h-1z M16 19 m0 0h1v1h-1z M18 19 m0 0h1v1h-1z M22 19 m0 0h1v1h-1z M24 19 m0 0h1v1h-1z M25 19 m0 0h1v1h-1z M12 20 m0 0h1v1h-1z M15 20 m0 0h1v1h-1z M16 20 m0 0h1v1h-1z M18 20 m0 0h1v1h-1z M20 20 m0 0h1v1h-1z M22 20 m0 0h1v1h-1z M23 20 m0 0h1v1h-1z M24 20 m0 0h1v1h-1z M25 20 m0 0h1v1h-1z M26 20 m0 0h1v1h-1z M10 21 m0 0h1v1h-1z M11 21 m0 0h1v1h-1z M14 21 m0 0h1v1h-1z M15 21 m0 0h1v1h-1z M18 21 m0 0h1v1h-1z M22 21 m0 0h1v1h-1z M25 21 m0 0h1v1h-1z M10 22 m0 0h1v1h-1z M14 22 m0 0h1v1h-1z M16 22 m0 0h1v1h-1z M17 22 m0 0h1v1h-1z M18 22 m0 0h1v1h-1z M19 22 m0 0h1v1h-1z M20 22 m0 0h1v1h-1z M21 22 m0 0h1v1h-1z M22 22 m0 0h1v1h-1z
+M23 22 m0 0h1v1h-1z M24 22 m0 0h1v1h-1z M25 22 m0 0h1v1h-1z M10 23 m0 0h1v1h-1z M11 23 m0 0h1v1h-1z M12 23 m0 0h1v1h-1z M18 23 m0 0h1v1h-1z M19 23 m0 0h1v1h-1z M20 23 m0 0h1v1h-1z M22 23 m0 0h1v1h-1z M24 23 m0 0h1v1h-1z M26 23 m0 0h1v1h-1z M10 24 m0 0h1v1h-1z M12 24 m0 0h1v1h-1z M13 24 m0 0h1v1h-1z M14 24 m0 0h1v1h-1z M18 24 m0 0h1v1h-1z M21 24 m0 0h1v1h-1z M24 24 m0 0h1v1h-1z M26 24 m0 0h1v1h-1z M13 25 m0 0h1v1h-1z M16 25 m0 0h1v1h-1z M17 25 m0 0h1v1h-1z M18 25 m0 0h1v1h-1z M22 25 m0 0h1v1h-1z M26 25 m0 0h1v1h-1z M10 26 m0 0h1v1h-1z M11 26 m0 0h1v1h-1z M12 26 m0 0h1v1h-1z M13 26 m0 0h1v1h-1z M24 26 m0 0h1v1h-1z M25 26 m0 0h1v1h-1z M26 26 m0 0h1v1h-1z"/>
+<path class="outer" fill="#1A1A1A" d="M2 2 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M2 2 m2 2h3v3h-3z"/>
+<path class="outer" fill="#1A1A1A" d="M2 20 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M2 20 m2 2h3v3h-3z"/>
+<path class="outer" fill="#1A1A1A" d="M20 2 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M20 2 m2 2h3v3h-3z"/>
+</svg>`,
+  foh: `<svg shape-rendering="geometricPrecision" xmlns="http://www.w3.org/2000/svg"  class="qrcode" viewBox="0 0 29 29" preserveAspectRatio="xMidYMid">
+<rect fill="#F5F0EB" width="100%" height="100%"/>
+<path class="modules" fill="#1A1A1A" d="M11 2 m0 0h1v1h-1z M12 2 m0 0h1v1h-1z M13 2 m0 0h1v1h-1z M15 2 m0 0h1v1h-1z M16 2 m0 0h1v1h-1z M17 2 m0 0h1v1h-1z M13 3 m0 0h1v1h-1z M14 3 m0 0h1v1h-1z M15 3 m0 0h1v1h-1z M16 3 m0 0h1v1h-1z M17 3 m0 0h1v1h-1z M18 3 m0 0h1v1h-1z M10 4 m0 0h1v1h-1z M15 4 m0 0h1v1h-1z M17 4 m0 0h1v1h-1z M10 5 m0 0h1v1h-1z M16 5 m0 0h1v1h-1z M17 5 m0 0h1v1h-1z M10 6 m0 0h1v1h-1z M12 6 m0 0h1v1h-1z M14 6 m0 0h1v1h-1z M17 6 m0 0h1v1h-1z M18 6 m0 0h1v1h-1z M10 7 m0 0h1v1h-1z M14 7 m0 0h1v1h-1z M10 8 m0 0h1v1h-1z M12 8 m0 0h1v1h-1z M14 8 m0 0h1v1h-1z M16 8 m0 0h1v1h-1z M18 8 m0 0h1v1h-1z M10 9 m0 0h1v1h-1z M11 9 m0 0h1v1h-1z M16 9 m0 0h1v1h-1z M18 9 m0 0h1v1h-1z M2 10 m0 0h1v1h-1z M4 10 m0 0h1v1h-1z M5 10 m0 0h1v1h-1z M6 10 m0 0h1v1h-1z M7 10 m0 0h1v1h-1z M8 10 m0 0h1v1h-1z M11 10 m0 0h1v1h-1z M12 10 m0 0h1v1h-1z M20 10 m0 0h1v1h-1z M21 10 m0 0h1v1h-1z M22 10 m0 0h1v1h-1z M23 10 m0 0h1v1h-1z M24 10 m0 0h1v1h-1z M4 11 m0 0h1v1h-1z M6 11 m0 0h1v1h-1z M7 11 m0 0h1v1h-1z M9 11 m0 0h1v1h-1z M10 11 m0 0h1v1h-1z M11 11 m0 0h1v1h-1z M13 11 m0 0h1v1h-1z M15 11 m0 0h1v1h-1z M16 11 m0 0h1v1h-1z M17 11 m0 0h1v1h-1z M19 11 m0 0h1v1h-1z M20 11 m0 0h1v1h-1z M21 11 m0 0h1v1h-1z M25 11 m0 0h1v1h-1z M2 12 m0 0h1v1h-1z M5 12 m0 0h1v1h-1z M6 12 m0 0h1v1h-1z M7 12 m0 0h1v1h-1z M8 12 m0 0h1v1h-1z M9 12 m0 0h1v1h-1z M11 12 m0 0h1v1h-1z M14 12 m0 0h1v1h-1z M15 12 m0 0h1v1h-1z M16 12 m0 0h1v1h-1z M17 12 m0 0h1v1h-1z M18 12 m0 0h1v1h-1z M19 12 m0 0h1v1h-1z M20 12 m0 0h1v1h-1z M21 12 m0 0h1v1h-1z M22 12 m0 0h1v1h-1z M23 12 m0 0h1v1h-1z M25 12 m0 0h1v1h-1z M26 12 m0 0h1v1h-1z M2 13 m0 0h1v1h-1z M3 13 m0 0h1v1h-1z M9 13 m0 0h1v1h-1z M11 13 m0 0h1v1h-1z M12 13 m0 0h1v1h-1z M13 13 m0 0h1v1h-1z M14 13 m0 0h1v1h-1z M15 13 m0 0h1v1h-1z M19 13 m0 0h1v1h-1z M21 13 m0 0h1v1h-1z M22 13 m0 0h1v1h-1z M2 14 m0 0h1v1h-1z M3 14 m0 0h1v1h-1z M4 14 m0 0h1v1h-1z M8 14 m0 0h1v1h-1z M9 14 m0 0h1v1h-1z M11 14 m0 0h1v1h-1z M13 14 m0 0h1v1h-1z M14 14 m0 0h1v1h-1z M16 14 m0 0h1v1h-1z
+M17 14 m0 0h1v1h-1z M18 14 m0 0h1v1h-1z M19 14 m0 0h1v1h-1z M20 14 m0 0h1v1h-1z M22 14 m0 0h1v1h-1z M23 14 m0 0h1v1h-1z M24 14 m0 0h1v1h-1z M26 14 m0 0h1v1h-1z M2 15 m0 0h1v1h-1z M3 15 m0 0h1v1h-1z M7 15 m0 0h1v1h-1z M10 15 m0 0h1v1h-1z M11 15 m0 0h1v1h-1z M19 15 m0 0h1v1h-1z M24 15 m0 0h1v1h-1z M25 15 m0 0h1v1h-1z M2 16 m0 0h1v1h-1z M4 16 m0 0h1v1h-1z M5 16 m0 0h1v1h-1z M6 16 m0 0h1v1h-1z M8 16 m0 0h1v1h-1z M12 16 m0 0h1v1h-1z M13 16 m0 0h1v1h-1z M14 16 m0 0h1v1h-1z M17 16 m0 0h1v1h-1z M21 16 m0 0h1v1h-1z M22 16 m0 0h1v1h-1z M24 16 m0 0h1v1h-1z M25 16 m0 0h1v1h-1z M26 16 m0 0h1v1h-1z M2 17 m0 0h1v1h-1z M5 17 m0 0h1v1h-1z M7 17 m0 0h1v1h-1z M10 17 m0 0h1v1h-1z M11 17 m0 0h1v1h-1z M12 17 m0 0h1v1h-1z M13 17 m0 0h1v1h-1z M16 17 m0 0h1v1h-1z M20 17 m0 0h1v1h-1z M21 17 m0 0h1v1h-1z M23 17 m0 0h1v1h-1z M25 17 m0 0h1v1h-1z M26 17 m0 0h1v1h-1z M2 18 m0 0h1v1h-1z M4 18 m0 0h1v1h-1z M6 18 m0 0h1v1h-1z M7 18 m0 0h1v1h-1z M8 18 m0 0h1v1h-1z M9 18 m0 0h1v1h-1z M13 18 m0 0h1v1h-1z M18 18 m0 0h1v1h-1z M19 18 m0 0h1v1h-1z M20 18 m0 0h1v1h-1z M21 18 m0 0h1v1h-1z M22 18 m0 0h1v1h-1z M23 18 m0 0h1v1h-1z M24 18 m0 0h1v1h-1z M26 18 m0 0h1v1h-1z M10 19 m0 0h1v1h-1z M11 19 m0 0h1v1h-1z M12 19 m0 0h1v1h-1z M14 19 m0 0h1v1h-1z M15 19 m0 0h1v1h-1z M16 19 m0 0h1v1h-1z M18 19 m0 0h1v1h-1z M22 19 m0 0h1v1h-1z M24 19 m0 0h1v1h-1z M25 19 m0 0h1v1h-1z M11 20 m0 0h1v1h-1z M12 20 m0 0h1v1h-1z M15 20 m0 0h1v1h-1z M16 20 m0 0h1v1h-1z M18 20 m0 0h1v1h-1z M20 20 m0 0h1v1h-1z M22 20 m0 0h1v1h-1z M23 20 m0 0h1v1h-1z M24 20 m0 0h1v1h-1z M25 20 m0 0h1v1h-1z M26 20 m0 0h1v1h-1z M10 21 m0 0h1v1h-1z M12 21 m0 0h1v1h-1z M14 21 m0 0h1v1h-1z M15 21 m0 0h1v1h-1z M18 21 m0 0h1v1h-1z M22 21 m0 0h1v1h-1z M25 21 m0 0h1v1h-1z M10 22 m0 0h1v1h-1z M14 22 m0 0h1v1h-1z M16 22 m0 0h1v1h-1z M17 22 m0 0h1v1h-1z M18 22 m0 0h1v1h-1z M19 22 m0 0h1v1h-1z M20 22 m0 0h1v1h-1z M21 22 m0 0h1v1h-1z M22 22 m0 0h1v1h-1z M23 22 m0 0h1v1h-1z M24 22 m0 0h1v1h-1z M25 22 m0 0h1v1h-1z M10 23 m0 0h1v1h-1z M17 23 m0 0h1v1h-1z
+M19 23 m0 0h1v1h-1z M20 23 m0 0h1v1h-1z M22 23 m0 0h1v1h-1z M24 23 m0 0h1v1h-1z M26 23 m0 0h1v1h-1z M10 24 m0 0h1v1h-1z M12 24 m0 0h1v1h-1z M13 24 m0 0h1v1h-1z M14 24 m0 0h1v1h-1z M17 24 m0 0h1v1h-1z M21 24 m0 0h1v1h-1z M24 24 m0 0h1v1h-1z M26 24 m0 0h1v1h-1z M13 25 m0 0h1v1h-1z M16 25 m0 0h1v1h-1z M18 25 m0 0h1v1h-1z M19 25 m0 0h1v1h-1z M20 25 m0 0h1v1h-1z M22 25 m0 0h1v1h-1z M26 25 m0 0h1v1h-1z M10 26 m0 0h1v1h-1z M11 26 m0 0h1v1h-1z M13 26 m0 0h1v1h-1z M17 26 m0 0h1v1h-1z M24 26 m0 0h1v1h-1z M25 26 m0 0h1v1h-1z M26 26 m0 0h1v1h-1z"/>
+<path class="outer" fill="#1A1A1A" d="M2 2 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M2 2 m2 2h3v3h-3z"/>
+<path class="outer" fill="#1A1A1A" d="M2 20 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M2 20 m2 2h3v3h-3z"/>
+<path class="outer" fill="#1A1A1A" d="M20 2 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M20 2 m2 2h3v3h-3z"/>
+</svg>`,
+  manager: `<svg shape-rendering="geometricPrecision" xmlns="http://www.w3.org/2000/svg"  class="qrcode" viewBox="0 0 29 29" preserveAspectRatio="xMidYMid">
+<rect fill="#F5F0EB" width="100%" height="100%"/>
+<path class="modules" fill="#1A1A1A" d="M11 2 m0 0h1v1h-1z M12 2 m0 0h1v1h-1z M13 2 m0 0h1v1h-1z M15 2 m0 0h1v1h-1z M16 2 m0 0h1v1h-1z M17 2 m0 0h1v1h-1z M11 3 m0 0h1v1h-1z M12 3 m0 0h1v1h-1z M13 3 m0 0h1v1h-1z M14 3 m0 0h1v1h-1z M15 3 m0 0h1v1h-1z M16 3 m0 0h1v1h-1z M17 3 m0 0h1v1h-1z M18 3 m0 0h1v1h-1z M10 4 m0 0h1v1h-1z M11 4 m0 0h1v1h-1z M15 4 m0 0h1v1h-1z M17 4 m0 0h1v1h-1z M10 5 m0 0h1v1h-1z M11 5 m0 0h1v1h-1z M12 5 m0 0h1v1h-1z M16 5 m0 0h1v1h-1z M17 5 m0 0h1v1h-1z M10 6 m0 0h1v1h-1z M12 6 m0 0h1v1h-1z M13 6 m0 0h1v1h-1z M17 6 m0 0h1v1h-1z M18 6 m0 0h1v1h-1z M10 7 m0 0h1v1h-1z M11 7 m0 0h1v1h-1z M12 7 m0 0h1v1h-1z M10 8 m0 0h1v1h-1z M12 8 m0 0h1v1h-1z M14 8 m0 0h1v1h-1z M16 8 m0 0h1v1h-1z M18 8 m0 0h1v1h-1z M10 9 m0 0h1v1h-1z M12 9 m0 0h1v1h-1z M13 9 m0 0h1v1h-1z M16 9 m0 0h1v1h-1z M18 9 m0 0h1v1h-1z M2 10 m0 0h1v1h-1z M4 10 m0 0h1v1h-1z M5 10 m0 0h1v1h-1z M6 10 m0 0h1v1h-1z M7 10 m0 0h1v1h-1z M8 10 m0 0h1v1h-1z M13 10 m0 0h1v1h-1z M14 10 m0 0h1v1h-1z M20 10 m0 0h1v1h-1z M21 10 m0 0h1v1h-1z M22 10 m0 0h1v1h-1z M23 10 m0 0h1v1h-1z M24 10 m0 0h1v1h-1z M2 11 m0 0h1v1h-1z M3 11 m0 0h1v1h-1z M7 11 m0 0h1v1h-1z M10 11 m0 0h1v1h-1z M14 11 m0 0h1v1h-1z M15 11 m0 0h1v1h-1z M16 11 m0 0h1v1h-1z M17 11 m0 0h1v1h-1z M19 11 m0 0h1v1h-1z M25 11 m0 0h1v1h-1z M2 12 m0 0h1v1h-1z M3 12 m0 0h1v1h-1z M5 12 m0 0h1v1h-1z M6 12 m0 0h1v1h-1z M8 12 m0 0h1v1h-1z M10 12 m0 0h1v1h-1z M12 12 m0 0h1v1h-1z M13 12 m0 0h1v1h-1z M15 12 m0 0h1v1h-1z M16 12 m0 0h1v1h-1z M17 12 m0 0h1v1h-1z M18 12 m0 0h1v1h-1z M20 12 m0 0h1v1h-1z M21 12 m0 0h1v1h-1z M22 12 m0 0h1v1h-1z M23 12 m0 0h1v1h-1z M25 12 m0 0h1v1h-1z M26 12 m0 0h1v1h-1z M2 13 m0 0h1v1h-1z M3 13 m0 0h1v1h-1z M4 13 m0 0h1v1h-1z M6 13 m0 0h1v1h-1z M12 13 m0 0h1v1h-1z M13 13 m0 0h1v1h-1z M14 13 m0 0h1v1h-1z M15 13 m0 0h1v1h-1z M17 13 m0 0h1v1h-1z M21 13 m0 0h1v1h-1z M22 13 m0 0h1v1h-1z M2 14 m0 0h1v1h-1z M3 14 m0 0h1v1h-1z M5 14 m0 0h1v1h-1z M6 14 m0 0h1v1h-1z M7 14 m0 0h1v1h-1z M8 14 m0 0h1v1h-1z M11 14 m0 0h1v1h-1z
+M12 14 m0 0h1v1h-1z M13 14 m0 0h1v1h-1z M14 14 m0 0h1v1h-1z M16 14 m0 0h1v1h-1z M17 14 m0 0h1v1h-1z M18 14 m0 0h1v1h-1z M19 14 m0 0h1v1h-1z M20 14 m0 0h1v1h-1z M22 14 m0 0h1v1h-1z M23 14 m0 0h1v1h-1z M24 14 m0 0h1v1h-1z M26 14 m0 0h1v1h-1z M2 15 m0 0h1v1h-1z M9 15 m0 0h1v1h-1z M10 15 m0 0h1v1h-1z M11 15 m0 0h1v1h-1z M17 15 m0 0h1v1h-1z M18 15 m0 0h1v1h-1z M19 15 m0 0h1v1h-1z M20 15 m0 0h1v1h-1z M24 15 m0 0h1v1h-1z M25 15 m0 0h1v1h-1z M2 16 m0 0h1v1h-1z M5 16 m0 0h1v1h-1z M6 16 m0 0h1v1h-1z M8 16 m0 0h1v1h-1z M9 16 m0 0h1v1h-1z M13 16 m0 0h1v1h-1z M14 16 m0 0h1v1h-1z M17 16 m0 0h1v1h-1z M18 16 m0 0h1v1h-1z M20 16 m0 0h1v1h-1z M21 16 m0 0h1v1h-1z M22 16 m0 0h1v1h-1z M24 16 m0 0h1v1h-1z M25 16 m0 0h1v1h-1z M26 16 m0 0h1v1h-1z M2 17 m0 0h1v1h-1z M6 17 m0 0h1v1h-1z M10 17 m0 0h1v1h-1z M11 17 m0 0h1v1h-1z M13 17 m0 0h1v1h-1z M16 17 m0 0h1v1h-1z M19 17 m0 0h1v1h-1z M20 17 m0 0h1v1h-1z M21 17 m0 0h1v1h-1z M23 17 m0 0h1v1h-1z M25 17 m0 0h1v1h-1z M26 17 m0 0h1v1h-1z M2 18 m0 0h1v1h-1z M5 18 m0 0h1v1h-1z M7 18 m0 0h1v1h-1z M8 18 m0 0h1v1h-1z M9 18 m0 0h1v1h-1z M10 18 m0 0h1v1h-1z M13 18 m0 0h1v1h-1z M17 18 m0 0h1v1h-1z M18 18 m0 0h1v1h-1z M19 18 m0 0h1v1h-1z M20 18 m0 0h1v1h-1z M21 18 m0 0h1v1h-1z M22 18 m0 0h1v1h-1z M23 18 m0 0h1v1h-1z M24 18 m0 0h1v1h-1z M26 18 m0 0h1v1h-1z M10 19 m0 0h1v1h-1z M11 19 m0 0h1v1h-1z M14 19 m0 0h1v1h-1z M15 19 m0 0h1v1h-1z M16 19 m0 0h1v1h-1z M18 19 m0 0h1v1h-1z M22 19 m0 0h1v1h-1z M24 19 m0 0h1v1h-1z M25 19 m0 0h1v1h-1z M12 20 m0 0h1v1h-1z M15 20 m0 0h1v1h-1z M16 20 m0 0h1v1h-1z M17 20 m0 0h1v1h-1z M18 20 m0 0h1v1h-1z M20 20 m0 0h1v1h-1z M22 20 m0 0h1v1h-1z M23 20 m0 0h1v1h-1z M24 20 m0 0h1v1h-1z M25 20 m0 0h1v1h-1z M26 20 m0 0h1v1h-1z M10 21 m0 0h1v1h-1z M12 21 m0 0h1v1h-1z M14 21 m0 0h1v1h-1z M15 21 m0 0h1v1h-1z M18 21 m0 0h1v1h-1z M22 21 m0 0h1v1h-1z M25 21 m0 0h1v1h-1z M10 22 m0 0h1v1h-1z M12 22 m0 0h1v1h-1z M14 22 m0 0h1v1h-1z M16 22 m0 0h1v1h-1z M17 22 m0 0h1v1h-1z M18 22 m0 0h1v1h-1z M19 22 m0 0h1v1h-1z M20 22 m0 0h1v1h-1z
+M21 22 m0 0h1v1h-1z M22 22 m0 0h1v1h-1z M23 22 m0 0h1v1h-1z M24 22 m0 0h1v1h-1z M25 22 m0 0h1v1h-1z M10 23 m0 0h1v1h-1z M17 23 m0 0h1v1h-1z M18 23 m0 0h1v1h-1z M19 23 m0 0h1v1h-1z M20 23 m0 0h1v1h-1z M22 23 m0 0h1v1h-1z M24 23 m0 0h1v1h-1z M26 23 m0 0h1v1h-1z M10 24 m0 0h1v1h-1z M11 24 m0 0h1v1h-1z M13 24 m0 0h1v1h-1z M14 24 m0 0h1v1h-1z M17 24 m0 0h1v1h-1z M18 24 m0 0h1v1h-1z M19 24 m0 0h1v1h-1z M21 24 m0 0h1v1h-1z M24 24 m0 0h1v1h-1z M26 24 m0 0h1v1h-1z M11 25 m0 0h1v1h-1z M12 25 m0 0h1v1h-1z M13 25 m0 0h1v1h-1z M16 25 m0 0h1v1h-1z M17 25 m0 0h1v1h-1z M18 25 m0 0h1v1h-1z M20 25 m0 0h1v1h-1z M22 25 m0 0h1v1h-1z M26 25 m0 0h1v1h-1z M10 26 m0 0h1v1h-1z M13 26 m0 0h1v1h-1z M24 26 m0 0h1v1h-1z M25 26 m0 0h1v1h-1z M26 26 m0 0h1v1h-1z"/>
+<path class="outer" fill="#1A1A1A" d="M2 2 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M2 2 m2 2h3v3h-3z"/>
+<path class="outer" fill="#1A1A1A" d="M2 20 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M2 20 m2 2h3v3h-3z"/>
+<path class="outer" fill="#1A1A1A" d="M20 2 m0 0h7.02v7.02h-7.02zm1.17 1.17v4.68h4.68v-4.68z"/>
+<path class="inner" fill="#1A1A1A" d="M20 2 m2 2h3v3h-3z"/>
+</svg>`
+};
+  var pages = [{"id": "qr-hub", "label": "Hub — All Tools", "icon": "🏠", "key": "hub", "role": "All Staff", "roleColor": "rgba(184,92,0,0.2)", "roleText": "#D4834A", "file": "index.html"}, {"id": "qr-bar", "label": "Bar Tools", "icon": "🍸", "key": "bar", "role": "Bar Staff", "roleColor": "rgba(139,74,68,0.25)", "roleText": "#C4A49A", "file": "pipa-bar.html"}, {"id": "qr-foh", "label": "Server Guide", "icon": "🫅", "key": "foh", "role": "Servers & FOH", "roleColor": "rgba(45,122,79,0.18)", "roleText": "#38966A", "file": "pipa-foh.html"}, {"id": "qr-manager", "label": "Manager Dashboard", "icon": "🔐", "key": "manager", "role": "Managers", "roleColor": "rgba(50,100,160,0.2)", "roleText": "#7AB0D8", "file": "pipa-manager.html"}, {"id": "qr-ops", "label": "PiPa Ops", "icon": "📋", "key": "ops", "role": "Ryan Only", "roleColor": "rgba(45,122,79,0.12)", "roleText": "#38966A", "file": "pipa-ops.html"}, {"id": "qr-admin", "label": "PiPa Admin", "icon": "⚙️", "key": "admin", "role": "Ryan Only", "roleColor": "rgba(74,32,112,0.2)", "roleText": "#A87ED8", "file": "pipa-admin.html"}];
+
+  el.innerHTML = '<div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:4px;">Share Access</div>' +
+    '<div style="font-size:0.688rem;color:var(--text3);margin-bottom:16px;">Tap any card to expand for scanning.</div>';
+
+  var staffLabel = document.createElement('div');
+  staffLabel.style.cssText = 'font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:10px;';
+  staffLabel.textContent = 'Staff Pages';
+  el.appendChild(staffLabel);
+  pages.slice(0,4).forEach(function(p) { el.appendChild(buildQRCard(p, SVGS[p.key])); });
+
+  var bevLabel = document.createElement('div');
+  bevLabel.style.cssText = 'font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin:20px 0 10px;';
+  bevLabel.textContent = 'Beverage Lead';
+  el.appendChild(bevLabel);
+  pages.slice(4).forEach(function(p) { el.appendChild(buildQRCard(p, SVGS[p.key])); });
+}
+
+function buildQRCard(p, svgStr) {
+  var div = document.createElement('div');
+  div.style.cssText = 'background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:16px;cursor:pointer;';
+  div.onclick = (function(svg, lbl){ return function(){ openQRFullscreen(svg, lbl); }; })(svgStr, p.label);
+
+  var qrWrap = document.createElement('div');
+  qrWrap.style.cssText = 'flex-shrink:0;border-radius:8px;overflow:hidden;background:#F5F0EB;width:90px;height:90px;';
+  qrWrap.innerHTML = svgStr || '';
+
+  var info = document.createElement('div');
+  info.style.cssText = 'flex:1;min-width:0;';
+  info.innerHTML =
+    '<div style="font-size:1.1rem;margin-bottom:4px;">' + p.icon + '</div>' +
+    '<div style="font-size:0.875rem;font-weight:700;color:var(--text);margin-bottom:4px;">' + p.label + '</div>' +
+    '<span style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;padding:2px 8px;border-radius:4px;display:inline-block;background:' + p.roleColor + ';color:' + p.roleText + ';">' + p.role + '</span>' +
+    '<div style="font-size:0.563rem;color:var(--text3);margin-top:6px;font-family:monospace;">' + p.file + '</div>';
+
+  div.appendChild(qrWrap);
+  div.appendChild(info);
+  return div;
+}
+
+
+function openQRFullscreen(svgStr, label) {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;';
+  overlay.onclick = function() { document.body.removeChild(overlay); };
+
+  var title = document.createElement('div');
+  title.textContent = label;
+  title.style.cssText = 'font-family:"DM Sans",sans-serif;font-size:1rem;font-weight:700;color:#F0EDE8;';
+
+  var qrWrap = document.createElement('div');
+  qrWrap.style.cssText = 'background:#F5F0EB;border-radius:16px;padding:20px;width:280px;height:280px;box-sizing:border-box;';
+  qrWrap.innerHTML = svgStr || '';
+
+  var hint = document.createElement('div');
+  hint.textContent = 'Tap anywhere to close';
+  hint.style.cssText = 'font-family:"DM Sans",sans-serif;font-size:0.688rem;color:#5A5650;';
+
+  overlay.appendChild(title);
+  overlay.appendChild(qrWrap);
+  overlay.appendChild(hint);
+  document.body.appendChild(overlay);
+}
+</script>
+
+
+
+
+</body>

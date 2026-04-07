@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PiPa FOH">
+<meta name="theme-color" content="#3B0D14">
+<title>PiPa KOP — Server</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#3B0D14;--surface:#501828;--surface2:#62202E;--surface3:#7A2E3C;
+  --text:#F5EDE8;--text2:#C4A49A;--text3:#8A6058;
+  --accent:#8B4A44;--accent-bright:#A85A52;--accent-dim:rgba(139,74,68,0.3);
+  --nav-bg:#F5EDE8;--nav-border:rgba(105,57,53,0.2);--nav-active:#693935;--nav-active-bg:rgba(105,57,53,0.1);
+  --green:#1E5C38;--green-dim:rgba(30,92,56,0.25);--green-bright:#38966A;
+  --red-dim:rgba(180,30,30,0.25);--red-bright:#E05050;
+  --yellow-dim:rgba(200,165,20,0.2);--yellow-bright:#D4A830;
+  --blue-dim:rgba(50,100,160,0.25);--blue-bright:#7AB0D8;
+  --radius:12px;--radius-sm:8px;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html{min-height:100vh;background:#3B0D14;}
+html,body{font-family:'DM Sans',sans-serif;background:#3B0D14;color:var(--text);height:100%;overflow:hidden;font-size:100%;-webkit-text-size-adjust:none;}
+.header{position:fixed;top:0;left:0;right:0;z-index:100;padding:calc(var(--safe-top) + 10px) 16px 0;background:var(--bg);border-bottom:1px solid var(--surface3);}
+.header-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;}
+.header-title{font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);}
+.header-date{font-size:0.688rem;color:var(--text2);font-family:'JetBrains Mono',monospace;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;padding:6px 4px calc(var(--safe-bottom) + 6px);background:var(--nav-bg);border-top:1px solid var(--nav-border);display:flex;gap:2px;}
+.bottom-nav::after{content:"";position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);background:var(--nav-bg);z-index:99;}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px;border-radius:10px;cursor:pointer;color:var(--nav-active);opacity:0.4;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;transition:all 0.15s;}
+.nav-tab .nav-icon{font-size:1.125rem;line-height:1;}
+.nav-tab.active{opacity:1;background:var(--nav-active-bg);}
+.scroll-area{position:fixed;top:calc(var(--safe-top) + 52px);bottom:calc(var(--safe-bottom) + 60px);left:0;right:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 24px;background:#3B0D14;}
+.view{display:none;background:#3B0D14;}.view.active{display:block;}
+.section-label{font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);padding:0 2px 8px;margin-top:18px;}
+.section-label:first-child{margin-top:0;}
+/* UPDATE CARDS */
+.update-card{background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:8px;}
+.update-tag{display:inline-flex;padding:3px 8px;border-radius:4px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+.tag-alert{background:rgba(180,80,0,0.3);color:#E08030;border:1px solid rgba(180,80,0,0.4);}
+.tag-86{background:var(--red-dim);color:var(--red-bright);}
+.tag-new{background:var(--green-dim);color:var(--green-bright);}
+.tag-spec{background:var(--accent-dim);color:var(--accent-bright);}
+.tag-ops{background:var(--blue-dim);color:var(--blue-bright);}
+.tag-info{background:var(--surface3);color:var(--text2);}
+.update-text{font-size:0.875rem;line-height:1.6;color:var(--text);}
+.update-sub{font-size:0.688rem;color:var(--text3);margin-top:6px;font-family:'JetBrains Mono',monospace;}
+/* WINE CARDS */
+.spec-search{width:100%;padding:11px 16px;background:var(--surface);border:1.5px solid var(--surface3);border-radius:24px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.875rem;outline:none;margin-bottom:10px;}
+.spec-search::placeholder{color:var(--text3);}
+.spec-filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none;}
+.spec-filters::-webkit-scrollbar{display:none;}
+.spec-filter{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:0.75rem;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text2);border:1.5px solid transparent;white-space:nowrap;}
+.spec-filter.active{border-color:var(--accent-bright);color:var(--text);background:var(--accent-dim);}
+.wine-card{background:var(--surface);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;cursor:pointer;}
+.wine-card-header{padding:16px 16px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.wine-card-left{flex:1;min-width:0;}
+.wine-name{font-size:1rem;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:4px;}
+.wine-appellation{font-size:0.688rem;color:var(--text2);font-family:'JetBrains Mono',monospace;}
+.wine-type-badge{flex-shrink:0;padding:4px 8px;border-radius:6px;font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-top:2px;}
+.wine-card-body{display:none;padding:0 16px 16px;border-top:1px solid var(--surface3);}
+.wine-card-body.open{display:block;}
+.wine-section{margin-top:14px;}
+.wine-section-label{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text2);margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid var(--surface3);}
+.wine-section-text{font-size:0.844rem;color:var(--text);line-height:1.6;}
+.wine-pairings{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
+.wine-pairing-tag{font-size:0.688rem;padding:4px 9px;border-radius:6px;background:var(--surface2);color:var(--text2);font-weight:500;}
+/* SUBMIT */
+.form-label{font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);display:block;margin-bottom:6px;}
+.form-input,.form-select{width:100%;padding:11px 12px;background:var(--surface2);border:1.5px solid var(--surface3);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.875rem;outline:none;-webkit-appearance:none;}
+.form-input:focus,.form-select:focus{border-color:var(--accent-bright);}
+.form-input::placeholder{color:var(--text3);}
+.form-select option{background:var(--surface2);}
+.form-group{margin-bottom:12px;}
+.bin-log-row{background:var(--surface);border-radius:var(--radius);padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-left:3px solid var(--green);}
+.bin-log-name{font-size:0.844rem;font-weight:500;color:var(--text);}
+.bin-log-meta{font-size:0.688rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+.bin-log-del{background:none;border:none;color:var(--text3);font-size:1.25rem;cursor:pointer;flex-shrink:0;}
+.btn-send{width:100%;padding:14px;border-radius:var(--radius);background:var(--green);color:#fff;border:none;font-size:0.875rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:8px;}
+.btn-clear-sm{width:100%;padding:10px;border-radius:var(--radius);background:var(--surface2);color:var(--text2);border:none;font-size:0.813rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+/* EMPTY & TOAST */
+.empty-state{text-align:center;padding:40px 24px;color:var(--text3);}
+.empty-icon{font-size:2.5rem;margin-bottom:10px;}
+.empty-text{font-size:0.813rem;line-height:1.6;}
+.toast{position:fixed;top:calc(var(--safe-top) + 64px);left:50%;transform:translateX(-50%) translateY(-14px);background:var(--green);color:#fff;padding:10px 20px;border-radius:20px;font-size:0.813rem;font-weight:600;opacity:0;transition:all 0.25s;z-index:999;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.coll-cat-header{display:flex;align-items:center;justify-content:space-between;padding:12px 4px 8px;cursor:pointer;user-select:none;font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-top:14px;}
+.coll-cat-body{overflow:hidden;max-height:2000px;transition:max-height 0.3s ease;}
+.coll-cat-body.collapsed{max-height:0;}
+.coll-cat-chevron{font-size:0.75rem;color:var(--text3);transition:transform 0.2s;margin-left:4px;display:inline-block;}
+.coll-cat-header.collapsed .coll-cat-chevron{transform:rotate(-90deg);}
+.coll-item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--surface);border-radius:var(--radius);margin-bottom:4px;cursor:pointer;border:1.5px solid transparent;transition:all 0.15s;}
+.coll-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--surface3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.813rem;}
+.coll-name{font-size:0.844rem;font-weight:500;flex:1;}
+.coll-qty{width:44px;height:34px;background:var(--bg);border:1.5px solid var(--surface3);border-radius:var(--radius-sm);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.938rem;text-align:center;outline:none;-webkit-appearance:none;}
+.coll-qty-wrap{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.add-custom-btn{width:100%;padding:12px;border-radius:var(--radius);background:var(--surface);border:1px dashed var(--surface3);color:var(--text2);font-size:0.813rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:4px;}
+.custom-input-row{display:flex;gap:8px;margin:8px 0;}
+
+.submit-section-title{font-size:0.813rem;font-weight:700;color:var(--text);margin:20px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--surface3);display:flex;align-items:center;justify-content:space-between;}
+.log-add-form{background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:10px;}
+.btn-add-entry{width:100%;padding:11px;border-radius:var(--radius-sm);background:var(--surface2);color:var(--accent-bright);border:1px dashed var(--accent-bright);font-size:0.813rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.form-label{font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);display:block;margin-bottom:6px;}
+.form-select{width:100%;padding:11px 12px;background:var(--surface2);border:1.5px solid var(--surface3);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;-webkit-appearance:none;}
+.send-bar{padding:10px 0 4px;}
+.btn-clear-sm{width:100%;padding:11px;border-radius:var(--radius);background:var(--surface2);color:var(--text2);border:none;font-size:0.75rem;font-weight:600;cursor:pointer;margin-top:8px;font-family:'DM Sans',sans-serif;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row" style="position:relative;display:flex;align-items:center;justify-content:space-between;">
+    <div class="header-title">Server</div>
+    <div style="position:absolute;left:50%;transform:translateX(-50%);height:64px;display:flex;align-items:center;"><svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" height="64" width="128" style="display:block;">
+  <g>
+    <path d="M56.345,61.26c.231-.019.374-.06.429-.124.056-.063.083-.216.083-.456v-2.461c0-.206-.031-.339-.093-.398-.062-.061-.202-.098-.42-.112v-.105h1.615v.105c-.222.011-.365.048-.43.11-.064.062-.097.195-.097.398v1.163c.349-.298.635-.551.857-.76.397-.378.596-.62.596-.728,0-.075-.034-.125-.101-.148-.067-.024-.163-.036-.287-.036v-.105h1.486v.105c-.181.018-.324.053-.429.104s-.249.166-.434.341l-1.107,1.027,1.351,1.46c.246.262.414.426.502.491.089.064.219.107.391.128v.097h-1.735v-.097c.157-.006.263-.019.319-.038.055-.02.083-.058.083-.115,0-.031-.018-.079-.054-.145-.036-.064-.093-.14-.17-.225l-1.093-1.181-.175.162v1.027c0,.211.032.345.096.401.063.056.203.094.417.112v.097h-1.601v-.097Z" fill="#F5EDE8"/>
+    <path d="M60.432,61.251c.231-.017.38-.051.449-.104.068-.052.103-.188.103-.406v-2.523c0-.209-.034-.344-.103-.403s-.218-.096-.449-.106v-.105h1.679v.105c-.231.011-.381.047-.449.106s-.102.194-.102.403v2.523c0,.219.034.354.102.406.068.053.218.087.449.104v.105h-1.679v-.105Z" fill="#F5EDE8"/>
+    <path d="M62.293,61.251c.235-.023.385-.077.452-.159.067-.082.1-.272.1-.571v-2.5l-.078-.091c-.083-.099-.154-.158-.212-.182s-.146-.036-.262-.04v-.105h.968l2.19,2.715v-1.886c0-.311-.046-.512-.139-.605-.061-.061-.196-.1-.404-.118v-.105h1.333v.105c-.216.021-.36.074-.432.157-.072.084-.108.273-.108.571v2.986h-.097l-2.51-3.111v2.209c0,.31.045.512.136.606.059.061.191.103.396.124v.105h-1.333v-.105Z" fill="#F5EDE8"/>
+    <path d="M69.076,57.627c.212.062.334.092.365.092.082,0,.139-.016.173-.047s.063-.077.087-.136h.125l.044,1.194h-.13c-.116-.275-.236-.48-.36-.615-.224-.236-.515-.354-.873-.354-.364,0-.684.138-.96.414-.276.276-.414.73-.414,1.364,0,.522.138.931.413,1.225.275.294.615.44,1.02.44.068,0,.148-.007.241-.02s.18-.033.263-.061c.135-.044.219-.083.252-.115.034-.032.05-.079.05-.142v-.904c0-.219-.031-.355-.093-.409-.062-.054-.197-.088-.406-.101v-.105h1.446v.105c-.14.01-.233.032-.28.069-.078.059-.116.181-.116.365v1.117c0,.066-.163.155-.489.266-.326.111-.64.166-.94.166-.554,0-1.021-.161-1.402-.484-.419-.356-.629-.835-.629-1.436,0-.528.167-.98.501-1.357.368-.415.855-.623,1.463-.623.22,0,.436.03.648.091Z" fill="#F5EDE8"/>
+    <path d="M72.583,58.023c.349-.334.778-.501,1.288-.501s.942.168,1.291.504c.379.364.568.849.568,1.454,0,.615-.196,1.104-.587,1.469-.351.325-.775.487-1.272.487-.532,0-.973-.18-1.324-.54-.356-.367-.535-.84-.535-1.416,0-.605.19-1.091.571-1.457ZM73.007,60.804c.235.285.523.428.865.428.335,0,.621-.139.858-.417.238-.277.356-.723.356-1.334,0-.618-.12-1.065-.36-1.341-.241-.274-.525-.412-.854-.412-.34,0-.628.143-.864.428-.236.285-.354.728-.354,1.325s.118,1.038.353,1.323Z" fill="#F5EDE8"/>
+    <path d="M76.004,61.251c.224-.023.363-.064.417-.122.055-.059.082-.21.082-.454v-2.457c0-.201-.031-.333-.091-.396-.061-.062-.197-.1-.408-.114v-.105h3.023l.019.812h-.158c-.039-.259-.112-.423-.219-.492-.107-.068-.319-.104-.635-.104h-.778c-.076,0-.125.013-.146.039-.021.025-.032.076-.032.152v1.266h.823c.242,0,.396-.035.463-.107.066-.071.12-.217.161-.436h.133v1.311h-.133c-.042-.22-.097-.365-.164-.437-.066-.07-.22-.106-.46-.106h-.823v1.241c0,.208.032.341.096.398.063.058.203.095.417.111v.105h-1.588v-.105Z" fill="#F5EDE8"/>
+    <path d="M80.606,61.251c.216-.021.351-.062.405-.128s.08-.215.08-.448v-2.457c0-.198-.029-.328-.09-.391-.06-.063-.192-.103-.395-.119v-.105h1.497c.48,0,.848.093,1.103.279.255.188.382.433.382.737,0,.386-.141.666-.424.84-.282.173-.636.26-1.061.26-.062,0-.14,0-.234-.004s-.166-.004-.212-.004v1.03c0,.213.033.348.099.402.065.056.212.091.438.107v.105h-1.587v-.105ZM82.521,57.918c-.16-.07-.363-.104-.609-.104-.116,0-.188.011-.215.034-.026.023-.04.074-.04.153v1.479c.102.01.168.016.199.017.031.002.062.003.092.003.261,0,.466-.037.615-.11.271-.135.407-.387.407-.757,0-.347-.149-.585-.449-.715Z" fill="#F5EDE8"/>
+    <path d="M83.734,61.251c.218-.021.354-.062.407-.127s.08-.214.08-.449v-2.457c0-.2-.029-.33-.09-.393-.06-.062-.192-.101-.397-.117v-.105h1.571c.326,0,.599.041.816.124.414.157.621.446.621.866,0,.282-.092.499-.275.65-.185.151-.434.251-.75.299l1.169,1.439c.072.088.145.152.217.192.071.041.164.066.276.077v.105h-.913l-1.42-1.748-.249.014v1.118c0,.21.032.343.096.399.064.056.203.093.417.111v.105h-1.576v-.105ZM85.674,59.284c.301-.124.451-.355.451-.697,0-.328-.135-.552-.404-.672-.144-.064-.335-.097-.573-.097-.161,0-.259.012-.295.035-.036.022-.055.076-.055.161v1.396c.408-.015.7-.057.876-.127Z" fill="#F5EDE8"/>
+    <path d="M89.142,57.603v.105c-.218.015-.358.051-.424.109-.064.058-.097.191-.097.4v1.814c0,.297.041.529.122.695.151.303.438.454.861.454.464,0,.775-.155.934-.465.089-.174.133-.441.133-.804v-1.477c0-.309-.036-.502-.11-.58-.074-.079-.214-.128-.421-.148v-.105h1.312v.105c-.22.023-.363.077-.431.159s-.101.271-.101.569v1.477c0,.392-.061.697-.181.917-.222.404-.643.606-1.263.606-.613,0-1.031-.199-1.253-.599-.12-.214-.18-.496-.18-.848v-1.772c0-.207-.032-.34-.096-.397-.063-.059-.202-.096-.417-.112v-.105h1.609Z" fill="#F5EDE8"/>
+    <path d="M91.918,60.215c.096.255.209.458.338.609.225.265.504.396.838.396.181,0,.337-.058.469-.172s.198-.274.198-.479c0-.185-.066-.345-.199-.481-.087-.087-.27-.218-.548-.391l-.483-.303c-.146-.092-.262-.186-.349-.279-.161-.18-.241-.377-.241-.593,0-.286.095-.524.285-.715s.442-.285.757-.285c.129,0,.284.031.467.096.182.063.285.095.312.095.07,0,.118-.017.146-.05.026-.033.047-.08.062-.141h.116l.124,1.208h-.136c-.092-.364-.24-.618-.444-.763-.204-.144-.406-.216-.605-.216-.155,0-.29.046-.405.138-.116.091-.174.218-.174.381,0,.146.045.271.133.374.089.104.226.215.412.329l.499.308c.312.192.531.368.659.529.126.162.189.354.189.576,0,.298-.112.546-.337.745s-.511.3-.86.3c-.175,0-.358-.033-.55-.101-.191-.066-.301-.1-.328-.1-.066,0-.111.021-.135.062-.022.04-.038.084-.045.13h-.125l-.169-1.208h.13Z" fill="#F5EDE8"/>
+    <path d="M95.073,60.215c.096.255.209.458.338.609.225.265.504.396.838.396.181,0,.337-.058.47-.172.132-.114.197-.274.197-.479,0-.185-.066-.345-.199-.481-.087-.087-.27-.218-.548-.391l-.483-.303c-.146-.092-.262-.186-.349-.279-.161-.18-.241-.377-.241-.593,0-.286.095-.524.285-.715s.442-.285.757-.285c.129,0,.284.031.467.096.182.063.286.095.312.095.07,0,.119-.017.146-.05s.048-.08.062-.141h.116l.125,1.208h-.136c-.093-.364-.241-.618-.445-.763-.204-.144-.406-.216-.605-.216-.155,0-.29.046-.405.138-.116.091-.174.218-.174.381,0,.146.045.271.133.374.089.104.226.215.412.329l.499.308c.312.192.531.368.659.529.127.162.189.354.189.576,0,.298-.112.546-.337.745-.224.199-.511.3-.86.3-.175,0-.358-.033-.55-.101-.191-.066-.301-.1-.328-.1-.066,0-.111.021-.135.062-.022.04-.038.084-.045.13h-.125l-.169-1.208h.13Z" fill="#F5EDE8"/>
+    <path d="M97.955,61.251c.23-.017.38-.051.448-.104.068-.052.103-.188.103-.406v-2.523c0-.209-.034-.344-.103-.403s-.218-.096-.448-.106v-.105h1.679v.105c-.231.011-.381.047-.449.106s-.103.194-.103.403v2.523c0,.219.034.354.103.406.068.053.218.087.449.104v.105h-1.679v-.105Z" fill="#F5EDE8"/>
+    <path d="M99.837,61.356v-.105c.146-.017.255-.071.328-.164.073-.094.198-.349.375-.767l1.182-2.784h.113l1.414,3.217c.094.213.169.345.226.395.057.051.15.085.284.104v.105h-1.443v-.105c.166-.015.272-.032.321-.054.048-.021.071-.073.071-.155,0-.028-.009-.076-.027-.146s-.044-.144-.078-.221l-.227-.546h-1.495c-.147.371-.235.598-.265.68-.028.082-.043.146-.043.194,0,.096.039.162.116.198.049.022.139.039.271.05v.105h-1.124ZM102.28,59.899l-.65-1.562-.653,1.562h1.304Z" fill="#F5EDE8"/>
+  </g>
+  <g>
+    <path d="M2.662,45.052c1.168-.123,1.925-.331,2.272-.624.346-.293.52-1.036.52-2.229v-14.129c0-1.126-.171-1.863-.512-2.21-.341-.346-1.102-.561-2.28-.644v-.589h16.874l.108,4.544h-.806c-.269-1.399-.672-2.305-1.21-2.717s-1.737-.617-3.598-.617h-4.324c-.467,0-.754.075-.863.225-.109.15-.164.432-.164.845v7.087h4.901c1.354,0,2.218-.2,2.59-.602.372-.401.672-1.214.899-2.438h.744v7.336h-.744c-.238-1.23-.543-2.045-.915-2.443-.373-.398-1.23-.597-2.575-.597h-4.901v7.863c0,.631.199,1.003.598,1.117.398.113,1.592.17,3.58.17,2.154,0,3.743-.234,4.768-.705s1.946-1.61,2.763-3.42h.884l-1.442,5.367H2.662v-.59Z" fill="#F5EDE8"/>
+    <path d="M28.378,45.642v-.59c.816-.092,1.429-.399,1.838-.922.408-.522,1.108-1.951,2.1-4.289l6.617-15.587h.632l7.914,18.006c.527,1.193.948,1.931,1.264,2.213.315.283.845.476,1.59.578v.59h-8.077v-.59c.928-.082,1.526-.183,1.795-.301.269-.118.403-.409.403-.872,0-.154-.052-.427-.155-.817-.104-.392-.248-.803-.434-1.235l-1.271-3.056h-8.371c-.825,2.078-1.318,3.347-1.478,3.805s-.24.82-.24,1.088c0,.535.217.905.651,1.111.269.123.774.216,1.517.277v.59h-6.293ZM42.058,37.483l-3.64-8.747-3.657,8.747h7.297Z" fill="#F5EDE8"/>
+    <path d="M57.113,24.626h17.959l.171,5.397h-.76c-.372-1.695-.845-2.799-1.419-3.311s-1.781-.768-3.621-.768h-1.768v16.253c0,1.224.191,1.982.574,2.275.382.293,1.22.485,2.512.578v.59h-9.259v-.59c1.344-.103,2.182-.324,2.513-.663.331-.34.496-1.194.496-2.562v-15.881h-1.784c-1.758,0-2.954.253-3.59.76-.636.507-1.114,1.613-1.435,3.319h-.775l.186-5.397Z" fill="#F5EDE8"/>
+    <path d="M82.008,45.642v-.59c.817-.092,1.43-.399,1.838-.922s1.108-1.951,2.101-4.289l6.617-15.587h.632l7.914,18.006c.527,1.193.948,1.931,1.264,2.213.315.283.846.476,1.59.578v.59h-8.077v-.59c.928-.082,1.526-.183,1.795-.301s.403-.409.403-.872c0-.154-.052-.427-.155-.817-.104-.392-.248-.803-.435-1.235l-1.271-3.056h-8.37c-.825,2.078-1.317,3.347-1.478,3.805-.161.458-.24.82-.24,1.088,0,.535.217.905.65,1.111.269.123.773.216,1.517.277v.59h-6.294ZM95.688,37.483l-3.641-8.747-3.656,8.747h7.297Z" fill="#F5EDE8"/>
+    <path d="M111.038,45.052c1.169-.123,1.926-.331,2.272-.624.346-.293.52-1.036.52-2.229v-14.129c0-1.126-.171-1.863-.512-2.21-.342-.346-1.102-.561-2.28-.644v-.589h8.965v.589c-1.169.062-1.952.253-2.35.574-.398.321-.598,1.008-.598,2.063v15.261c0,.352.06.628.179.83.119.201.381.328.784.38.238.031.489.052.753.062.264.011.759.016,1.483.016,2.825,0,4.735-.232,5.729-.697.994-.466,1.956-1.654,2.889-3.568h.807l-1.553,5.506h-17.089v-.59Z" fill="#F5EDE8"/>
+    <path d="M145.282,24.626v.589c-.745-.021-1.303.036-1.676.17-.372.135-.558.424-.558.869,0,.135.03.302.093.504.062.202.201.468.419.799l4.675,6.855,4.561-6.964c.186-.3.307-.548.363-.745.057-.196.086-.341.086-.434,0-.455-.243-.755-.729-.899-.29-.093-.786-.145-1.489-.155v-.589h6.94v.589c-.64.031-1.213.223-1.718.574-.785.548-1.667,1.566-2.647,3.055l-4.691,7.166v6.177c0,1.229.198,1.995.597,2.3s1.29.492,2.676.564v.59h-9.693v-.59c1.437-.082,2.329-.296,2.675-.643.347-.346.52-1.21.52-2.593v-5.512l-4.156-6.095c-1.437-2.099-2.445-3.445-3.024-4.04-.579-.594-1.281-.912-2.108-.954v-.589h8.887Z" fill="#F5EDE8"/>
+  </g>
+</svg></div>
+    <div class="header-date" id="headerDate"></div>
+  </div>
+</div>
+
+<div class="scroll-area">
+  <div class="view active" id="view-updates"></div>
+  <div class="view" id="view-wines"></div>
+  <div class="view" id="view-submit"></div>
+</div>
+
+<div class="bottom-nav">
+  <div class="nav-tab active" onclick="switchView('updates')" id="nav-updates">
+    <span class="nav-icon">&#x1F4E2;</span>Updates
+  </div>
+  <div class="nav-tab" onclick="switchView('wines')" id="nav-wines">
+    <span class="nav-icon">&#x1F377;</span>Wines
+  </div>
+  <div class="nav-tab" onclick="switchView('submit')" id="nav-submit">
+    <span class="nav-icon">&#x1F4DD;</span>Submit
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SUPA_URL = 'https://fhbusipvtxjnwidlgpaa.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
+var supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+var TODAY = new Date().toISOString().slice(0,10);
+var wineFilter = 'All';
+var wineSearch = '';
+
+var WINE_NOTES = [{"name": "Ronco Belvedere Prosecco", "type": "Sparkling", "appellation": "Prosecco DOC · Veneto", "tasting": "Pale straw, lively bubbles. Green apple, white peach, acacia blossom, fresh cream. Light-bodied, delicate stone fruit, citrus zest, clean slightly off-dry finish.", "selling": "The backbone of our Spritz menu. Made by Charmat method in Treviso. Slightly off-dry — gateway for unsure guests. Versatile for opening or closing a meal.", "producer": "Family estate in the Prosecco DOC zone, Treviso, Veneto. Charmat method preserves freshness. Veneto is Italy's most prolific DOC region. Prosecco has surpassed Champagne as the world's best-selling sparkling wine.", "pairings": "Burrata e Prosciutto, Focaccia, Arancinò, Salumi e Formaggi, Aperol Spritz, Campari Spritz, Limoncello Spritz"}, {"name": "Ronco Belvedere Lambrusco", "type": "Sparkling", "appellation": "Lambrusco DOC · Emilia-Romagna", "tasting": "Deep ruby, violet foam. Sour cherry, wild blackberry, dried violet, earthy note. Lively, juicy, bright acidity, dry slightly tannic finish. Nothing like sweet Lambrusco of the past.", "selling": "Dry sparkling red — serve chilled. High acidity and light tannin make it one of the best food wines on the menu. Great for guests beyond Prosecco but not ready for a full red. The sparkling red always starts a conversation.", "producer": "From Emilia-Romagna — home of Parmigiano-Reggiano, Prosciutto di Parma, and mortadella. Lambrusco has been the table wine here for centuries. Best modern examples are dry and complex.", "pairings": "Prosciutto e Burrata, Salumi e Formaggi, Tagliatelle Bolognese, Lasagna Emiliana, Salsicciotta pizza"}, {"name": "Lucci Lambrusco Reggiano DOC Secco", "type": "Sparkling", "appellation": "Lambrusco Reggiano DOC · Emilia-Romagna", "tasting": "Deep ruby, fine violet froth. Dark berries, red cherry, dried flowers. Juicy raspberry, cherry, wild blackberry with earthy undertones and bright acidity. Dry, lively finish.", "selling": "Serve chilled like a rosé — Italy's answer to sparkling red. James Suckling 91 pts. Low ABV. Great for guests who want something different from Prosecco or a still red.", "producer": "Co-founded by Ashley Graham, made by a fifth-generation winemaker in Emilia-Romagna. Charmat method in stainless steel. Region home to Parmigiano-Reggiano, prosciutto di Parma, and tortellini.", "pairings": "Prosciutto e Burrata, Salumi e Formaggi, Salsicciotta pizza, Tagliatelle al Fungo, Tagliatelle Bolognese, Lasagna Emiliana, Tonnarelli Cacio e Pepe"}, {"name": "Cascina Asinari Moscato d'Asti", "type": "Sparkling", "appellation": "Moscato d'Asti DOCG · Piemonte", "tasting": "Nearly crystalline, frizzante effervescence. Intensely aromatic: white peach, apricot, orange blossom, ripe pear, honeyed sweetness. Gently sweet, light (5.5% ABV), creamy, fresh finish.", "selling": "Low alcohol, gentle sweetness — accessible to almost anyone. Perfect dessert wine or for guests who prefer lighter and aromatic. DOCG — Italy's highest designation. Great for celebratory tables.", "producer": "Family estate in the Asti hills of Piemonte. Muscat Blanc a Petits Grains — one of the oldest cultivated varietals in the world. Fermented partway, leaving natural residual sugar, never aged.", "pairings": "Tiramisu, Panna Cotta, fresh fruit, aged cheeses, spicy dishes, or as a digestivo"}, {"name": "Cantine Ferrari Trento DOC Brut", "type": "Sparkling", "appellation": "Trento DOC · Trentino", "tasting": "Brilliant pale gold, fine persistent perlage. Complex and toasty: brioche, fresh citrus, green apple, white flowers, chalky mineral. Structured, creamy, vibrant acidity, almond and lemon curd, long elegant finish.", "selling": "Ferrari is Italy's most celebrated metodo classico producer. Same method as Champagne — second fermentation in bottle. The most prestigious sparkling appellation in Italy. For Champagne lovers wanting Italian. Consistently 90+ pts.", "producer": "Founded 1902 by Giulio Ferrari, Lunelli family since 1952. Trento DOC — in the Alps of Trentino, 400-700m elevation — is Italy's only sparkling appellation exclusively for metodo classico.", "pairings": "Burrata e Prosciutto, Crudo, Branzino alla Livornese, Salmone, celebrations and toasts"}, {"name": "Baglio di Grisi Grillo", "type": "White", "appellation": "Sicilia DOC · Sicilia", "tasting": "Pale straw, golden glints. Citrus blossom, lemon peel, ripe pear, clean saline note. Medium-bodied and round, stone fruit, fresh herbs, bright mineral finish. Fuller texture than Pinot Grigio with dry bitter almond aftertaste.", "selling": "Sicily's signature white grape. Great for guests who find Pinot Grigio too light or Chardonnay too heavy. Natural salinity from sea influence makes it one of the most versatile food wines on the list.", "producer": "Family estate in western Sicily. Grillo — a crossing of two native Sicilian grapes — was historically used in Marsala; today bottled as a serious varietal. Sicily's warm climate, sea breezes, and volcanic soils produce whites of real character.", "pairings": "Focaccia Bianca, Arancino, Burrata, Tonnarelli Cacio e Pepe, Linguine alle Vongole, Branzino alla Livornese, Insalata di Cavolo Nero"}, {"name": "Fontanafredda Arneis Pradalupo", "type": "White", "appellation": "Langhe DOC · Piemonte", "tasting": "Pale straw, light gold. Delicate and floral: white peach, pear, almond, wildflowers. Dry, medium-bodied, refreshingly crisp — stone fruit, citrus, bitter almond finish with light mineral texture.", "selling": "Arneis means little rascal in Piedmontese — notoriously difficult to grow. Fontanafredda is one of Piemonte's most historic estates (originally House of Savoy land). Great for guests who want distinctly Italian and off the beaten path.", "producer": "Founded 1878 on land belonging to the House of Savoy, Serralunga d'Alba, heart of the Barolo zone. Piemonte — foot of the mountains — home to Barolo, Barbaresco, and distinctive natives like Arneis and Moscato.", "pairings": "Fonduta al Burro di Tartufo, Salumi e Formaggi, Ravioli di Barbabietola, Gnocchi con Zucca, Pollo Milano-Cortina"}, {"name": "La Staffa Verdicchio Castello di Jesi", "type": "White", "appellation": "Verdicchio dei Castelli di Jesi DOC · Marche", "tasting": "Pale straw-gold, greenish highlights. Citrus blossom, grapefruit, green apple, fresh herbs, stony mineral. Dry, crisp, medium-bodied — grapefruit and pear with distinctive bitter-almond finish. Long, vibrant acidity.", "selling": "Verdicchio — from verde (green) — is one of Italy's great underappreciated whites. La Staffa is biodynamic. For guests who love mineral-driven whites like Chablis or Muscadet. The bitter-almond finish is a signature conversation starter.", "producer": "Small family-run biodynamic estate in the Marche hills near Jesi. Verdicchio was historically Italy's first white wine exported internationally in volume. The Castelli di Jesi zone produces Verdicchio of exceptional freshness and mineral precision.", "pairings": "Linguine alle Vongole, Branzino alla Livornese, Salmone alla Piastra, Burrata, Focaccia Bianca, Ravioli di Barbabietola"}, {"name": "Feudi di San Gregorio Falanghina", "type": "White", "appellation": "Falanghina del Sannio DOC · Campania", "tasting": "Bright golden yellow. Ripe citrus, white peach, apricot, fresh herbs, faint floral note. Full and round — generous fruit, good acidity, clean slightly mineral finish with touch of almonds.", "selling": "Falanghina is ancient — historians believe it was the basis of Falernum, the wine favored by Roman emperors. Feudi di San Gregorio is the benchmark producer. 90+ pts consistently. Full, fruited, and interesting without oak.", "producer": "Founded 1986, leading Campanian estate in the Irpinia hills. Works extensively with ancient Campanian native varieties. Campania is one of Italy's oldest wine regions — Greeks settled here in the 8th century BC.", "pairings": "Linguine alle Vongole, Branzino alla Livornese, Salmone alla Piastra, Burrata e Prosciutto, Gnocchi con Zucca e Fonduta, Pollo Milano-Cortina"}, {"name": "Jermann Pinot Grigio", "type": "White", "appellation": "Venezia Giulia IGT · Friuli-Venezia Giulia", "tasting": "Pale copper-gold, shimmering silver. Complex: ripe pear, peach, quince, honeysuckle, subtle spice. Round and generous — full-bodied for Pinot Grigio, rich stone fruit, toasted almond, long savory finish.", "selling": "Jermann is one of the most important names in Italian white wine — a pioneer of the Friuli quality movement in the 1970s and 80s. This pours BTG and also appears BTB. Will surprise guests who think they know Pinot Grigio.", "producer": "Founded 1881, became a legend under Silvio Jermann Jr. in the 1970s. Collio area near the Slovenian border. Friuli's warm days, cool nights, and glacial soils produce whites of remarkable depth and longevity.", "pairings": "Fonduta al Burro di Tartufo, Ravioli di Barbabietola, Branzino alla Livornese, Salmone, Burrata, Gnocchi con Zucca e Fonduta"}, {"name": "Argiolas Costamolino Vermentino", "type": "White", "appellation": "Vermentino di Sardegna DOC · Sardegna", "tasting": "Pale straw with gold hints. Floral and inviting — lemon zest, white peach, pine, fresh mint. Vibrant and textural with stone fruit, quince, touch of tangerine. Bright lingering acidity with subtle saline Mediterranean note.", "selling": "Sardinia's signature white at its most expressive. Consistently 91+ pts. Stainless steel, hillside vineyards 190m above sea. Great for guests who love Sauvignon Blanc but want something more textural. Citrus-driven and herbal.", "producer": "Sardinia's leading wine estate since 1938. Third-generation family, 600 acres of native varieties. Vermentino's aromatic character shaped by Sardinia's macchia — the wild herb scrubland of the Mediterranean.", "pairings": "Burrata e Prosciutto, Arancinò Milano-Cortina, Linguine alle Vongole, Ravioli di Barbabietola, Branzino alla Livornese, Salmone alla Piastra, Insalata di Cavolo Nero"}, {"name": "Attems Pinot Grigio", "type": "White", "appellation": "Friuli DOC · Friuli-Venezia Giulia", "tasting": "Pale straw, silver-green highlights. Ripe pear, green apple, lemon blossom, crushed limestone. Creamy yet bright — stone fruit and Meyer lemon with delicate minerality, clean crisp finish.", "selling": "Friuli is the benchmark for Italian Pinot Grigio. Attems is now part of the legendary Frescobaldi family. Drawn from three distinct soil types — real complexity. Consistently 88-90 pts. The answer for guests who think they don't like Pinot Grigio.", "producer": "Attems family has grown wine in Friuli since 1106 — nearly a millennium. Acquired by Marchesi de' Frescobaldi in 2000. Located in Collio and Isonzo near the Slovenian border. Warm days, cool nights produce whites of uncommon depth.", "pairings": "Fonduta al Burro di Tartufo, Focaccia Bianca, Ravioli di Barbabietola, Gnocchi con Zucca e Fonduta, Spaghetti Cacio e Pepe, Branzino alla Livornese, Pollo Milano-Cortina"}, {"name": "Elena Walch Chardonnay", "type": "White", "appellation": "Alto Adige DOC · Alto Adige / Südtirol", "tasting": "Bright straw yellow, golden highlights. Fresh apple, tropical fruit (pineapple, mango), white flowers, alpine mineral freshness. Medium-bodied, vibrant, juicy stone fruit, crisp clean finish. Stainless steel — no oak.", "selling": "Chardonnay as it tastes in the Alps — bright, unoaked, and alive. High-altitude vineyards up to 600m give natural tension. Wine Enthusiast highly rated. For guests who find California Chardonnay too buttery or French Burgundy too austere.", "producer": "Founded 1985 in Tramin by Elena Walch, architect turned wine revolutionary — earned the title Donna del Vino. Today run by daughters Julia and Karoline. Alto Adige is Italy's northernmost region, in the Dolomites.", "pairings": "Burrata, Prosciutto di Parma, Tagliatelle Verde al Fungo, Ravioli di Barbabietola, Spaetzle, Pollo Milano-Cortina, Branzino alla Livornese"}, {"name": "Tormaresca Califuria Rosato", "type": "Rosé", "appellation": "Salento IGT · Puglia", "tasting": "Pale blush with peachy-copper tones. Wild strawberry, red cherry, citrus peel, subtle floral. Dry and lively — cherry and raspberry, bright refreshing acidity, clean medium finish.", "selling": "Tormaresca is an Antinori estate — 600+ years of wine history. Made from Primitivo and Negroamaro, two of Puglia's great native reds. Consistent 88-90 pts. Crowd-pleasing without being boring.", "producer": "The southern Italian estate of the Marchesi Antinori. Focuses on native Puglian varieties — Primitivo, Negroamaro, Fiano. Puglia is Italy's heel, producing more wine by volume than any other single region.", "pairings": "Burrata e Prosciutto, Salumi e Formaggi, Arancinò, Insalata di Cavolo Nero, Salmone alla Piastra, Linguine alle Vongole"}, {"name": "La Mozza Cabernet Sauvignon I Perazzi", "type": "Red", "appellation": "Toscana IGT · Toscana", "tasting": "Deep ruby, violet highlights. Blackcurrant, plum, dark cherry, graphite, touch of eucalyptus. Medium-full-bodied — concentrated dark fruit, firm refined tannins, long finish with cedar and black pepper.", "selling": "La Mozza is a Mario Batali and Joe Bastianich collaboration. A bold, structured red for guests who want substance. Maremma has emerged as one of Italy's most exciting red zones — compared to Bolgheri (home of Sassicaia). Great choice for steak.", "producer": "Tuscan estate created by Mario Batali and Joe Bastianich in Maremma. Once swampland drained by Mussolini, now one of Italy's most exciting wine territories producing powerful sun-ripened reds.", "pairings": "Ribeye, Stinco di Maiale, Goulash, Tagliatelle Bolognese, Lasagna Emiliana, Salumi e Formaggi"}, {"name": "Planeta La Segreta Rosso", "type": "Red", "appellation": "Sicilia DOC · Sicilia", "tasting": "Ruby red, purple highlights. Bright and expressive: cherry, wild berries, violet, touch of chocolate, warm Mediterranean herbs. Medium-bodied and smooth — supple tannins, vibrant acidity, clean fruit-forward finish.", "selling": "Planeta is one of Sicily's most recognized names globally. La Segreta is their approachable flagship red — Nero d'Avola, Frappato, Merlot, Syrah blend. Consistent 88-90 pts, excellent value-to-quality. Bridges Italian and international palates.", "producer": "Founded 1985, within two decades became Sicily's most internationally celebrated estate. Nine estates across the island. Credited with sparking Sicily's quality revolution. La Segreta is their gateway wine — everyday excellence.", "pairings": "Tagliatelle al Fungo, Salsicciotta pizza, Salumi e Formaggi, Goulash, Lasagna Emiliana, Stinco di Maiale"}, {"name": "Valle Reale Montepulciano d'Abruzzo", "type": "Red", "appellation": "Montepulciano d'Abruzzo DOC · Abruzzo", "tasting": "Deep ruby, garnet rim. Rich and complex: dark plum, black cherry, dried herbs, leather, dark chocolate. Full-bodied, dense velvety tannins, concentrated dark fruit, long warming finish.", "selling": "Valle Reale is one of Abruzzo's leading organic estates. Montepulciano (the grape, not the Tuscan town) is Italy's great underrated red — naturally high in tannin and color. Consistently 90+ pts.", "producer": "Certified organic estate founded 2000 in the dramatic mountain valleys of Abruzzo, in the shadow of the Gran Sasso — Italy's highest mainland peak.", "pairings": "Tagliatelle Bolognese, Lasagna Emiliana, Stinco di Maiale, Goulash, Ribeye, Salumi e Formaggi"}, {"name": "Colombaio di Cencio Chianti Classico", "type": "Red", "appellation": "Chianti Classico DOCG · Toscana", "tasting": "Transparent ruby, garnet hints. Classic Sangiovese nose: tart cherry, dried rose, tobacco, leather, dried herbs. Medium-bodied — bright acidity, firm integrated tannins, long saline finish. Earthy, complex, unmistakably Tuscan.", "selling": "Chianti Classico is one of the world's great food wines — Sangiovese's naturally high acidity and firm tannins were designed by nature to complement food. The black rooster (Gallo Nero) on the label = mark of authenticity.", "producer": "Small family estate in Gaiole in Chianti, one of the three historic Classico communes. Chianti Classico occupies the hills between Florence and Siena — Italy's most storied wine landscape.", "pairings": "Tagliatelle Bolognese, Lasagna Emiliana, Bistecca, Salumi e Formaggi, Salsicciotta pizza, Tagliatelle al Fungo"}, {"name": "Fontanafredda Barbera Briccotondo", "type": "Red", "appellation": "Piemonte DOC · Piemonte", "tasting": "Deep ruby, purple highlights. Fresh and fruit-forward: cherry, plum, blackcurrant, violet, light earthy note with hint of spice. Medium-full-bodied with very soft tannins and Barbera's signature striking acidity. Juicy, generous, refreshing.", "selling": "Barbera is Piemonte's everyday red — more planted than Nebbiolo and loved for food versatility. Naturally high acidity makes it one of the best pizza and pasta reds on the list. For guests who want Italian red without the tannin weight of Barolo or Chianti.", "producer": "Founded 1878 on House of Savoy land, Serralunga d'Alba, heart of the Barolo zone. Barbera is the most widely planted grape in Piemonte — the everyday wine of the region.", "pairings": "Salsicciotta pizza, Tagliatelle Bolognese, Lasagna Emiliana, Tagliatelle al Fungo, Salumi e Formaggi, Stinco di Maiale"}, {"name": "Allegrini Valpolicella", "type": "Red", "appellation": "Valpolicella DOC · Veneto", "tasting": "Transparent ruby. Fresh and vibrant: cherry, raspberry, violet, light dried herbs and spice. Light to medium-bodied, lively acidity, soft tannins. Smooth, easy, and bright. Serve slightly cool.", "selling": "Allegrini is one of Valpolicella's most respected estates, best known for Amarone. Made from Corvina, Corvinone, and Rondinella. For guests who want something lighter and more food-friendly than Chianti or Barbera.", "producer": "Quality leader in Valpolicella for generations, based in Fumane in the Classico zone of Verona. Valpolicella produces Italy's full red wine range from one region — from light Valpolicella to monumental Amarone.", "pairings": "Tagliatelle al Fungo, Risotto (seasonal), Salumi e Formaggi, Pollo Milano-Cortina, Salsicciotta pizza, lighter pasta dishes"}, {"name": "Mirafiore Nebbiolo", "type": "Red", "appellation": "Langhe DOC · Piemonte", "tasting": "Translucent ruby with garnet-orange edge — characteristic of Nebbiolo. Dried rose, tar, red cherry, tobacco, dried herbs. Medium-bodied — Nebbiolo's trademark firm grippy tannins and bright high acidity. Long finish with spice and earthy mineral.", "selling": "Nebbiolo is the grape behind Barolo and Barbaresco — Italy's two most celebrated and expensive reds. This Langhe gives guests the same grape, same region at a fraction of the price. For wine lovers: Barolo without the Barolo price.", "producer": "One of Piemonte's most historic estates, founded in the 1870s in Serralunga d'Alba — named for Count Mirafiore, son of King Vittorio Emanuele II. Nebbiolo is the sole variety behind both Barolo and Barbaresco DOCG.", "pairings": "Tagliatelle Bolognese, Lasagna Emiliana, Ribeye, Stinco di Maiale, Salumi e Formaggi, aged cheeses"}, {"name": "Feudo Montoni Lagnusa Nero d'Avola", "type": "Red", "appellation": "Sicilia DOC · Sicilia", "tasting": "Transparent ruby red. Complex and perfumed: cherries in spirit, red plum, blackberry, rose petal, warm spices — cinnamon and clove — with a menthol lift. Soft and velvety, fine-grained tannins, vibrant acidity, long spiced finish.", "selling": "Certified organic. High-altitude from 35-year-old low-yielding old vines. Lagnusa means lazy in Sicilian dialect. Decanter 92-93 pts, Wine Spectator 91 pts. Proof that Sicily produces refined elegant reds. Great for guests who enjoy Sangiovese or lighter-style reds.", "producer": "Family-run organic estate in the interior of Sicily at high elevation. Owner Fabio Sireci describes it as an island within an island — ancient farmland that has naturally isolated the vineyard.", "pairings": "Salumi e Formaggi, Tagliatelle Bolognese, Lasagna Emiliana, Tonnarelli Cacio e Pepe, Stinco di Maiale, Goulash, Ribeye"}, {"name": "Canella Mimosa Granriviera", "type": "Specialty", "appellation": "Veneto IGT · Veneto", "tasting": "Pale gold, lightly sparkling. Fresh and citrus-driven — orange blossom, tangerine, lemon zest, light herbal note. Semi-sweet, light-bodied, low alcohol. Clean and refreshing with soft effervescence.", "selling": "BTG option for brunch and Mimosa service — purpose-built for the occasion. Canella is a Venetian sparkling specialist. Low alcohol, approachable sweetness. Guests get a wine made for exactly this purpose.", "producer": "Venetian sparkling wine producer based in San Dona di Piave, long history of making wines for aperitivo and brunch. One of the most recognized names in Italian spritz culture.", "pairings": "Brunch service, Mimosa cocktails, lighter pastries, fruit-based desserts"}, {"name": "Canella Bellini", "type": "Specialty", "appellation": "Veneto IGT · Veneto", "tasting": "Pale peachy-gold, soft gentle sparkle. Fresh white peach dominates — pure, ripe, fragrant with a hint of citrus and floral notes. Semi-sweet, very light, refreshing. Low alcohol.", "selling": "The original Bellini was invented at Harry's Bar in Venice in 1948 by Giuseppe Cipriani. Canella's white peach puree base is used in hotel bars and restaurants throughout Italy. Great upsell for the brunch guest who wants something festive.", "producer": "Canella has been producing sparkling wines and cocktail bases in the Veneto since the 1960s. Particularly well-known for white peach puree and Bellini base, exported to some of the world's most celebrated bars.", "pairings": "Brunch service, Bellini cocktails, light pastries, fresh fruit, oysters"}];
+
+var _hd = document.getElementById('headerDate');
+if (_hd) _hd.textContent = new Date().toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+
+function switchView(v) {
+  document.querySelectorAll('.view').forEach(function(x) { x.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(x) { x.classList.remove('active'); });
+  document.getElementById('view-' + v).classList.add('active');
+  document.getElementById('nav-' + v).classList.add('active');
+  var renders = { updates: renderUpdates, wines: renderWines, submit: renderSubmit };
+  if (renders[v]) renders[v]();
+}
+
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2200);
+}
+
+// ── UPDATES ──────────────────────────────────────────────────────
+function renderUpdates() {
+  var el = document.getElementById('view-updates');
+  el.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F4E1;</div><div class="empty-text">Loading...</div></div>';
+  var cutoff = new Date(Date.now() - 16 * 60 * 60 * 1000).toISOString();
+  var now = new Date();
+
+  supa.from('updates').select('*').eq('published', true).order('created_at', {ascending: false})
+    .then(function(result) {
+      var data = result.data || [];
+      var visible = data.filter(function(u) {
+        if (u.expires_at) return new Date(u.expires_at) > now;
+        return new Date(u.created_at) > new Date(cutoff);
+      });
+
+      if (!visible.length) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F4E2;</div><div class="empty-text">No updates in the last 16 hours.</div></div>';
+        return;
+      }
+
+      var tagLabel = { 'new': 'New Item', 'spec': 'Spec Update', 'ops': 'Ops', 'info': 'Info' };
+      var tagClass = { 'new': 'tag-new', 'spec': 'tag-spec', 'ops': 'tag-ops', 'info': 'tag-info' };
+
+      el.innerHTML = visible.map(function(u) {
+        var isAlert = !!u.expires_at;
+        var cls   = isAlert ? 'tag-alert' : (tagClass[u.tag] || 'tag-info');
+        var label = isAlert ? 'Alert' : (tagLabel[u.tag] || u.tag);
+        var mins  = isAlert ? Math.round((new Date(u.expires_at) - now) / 60000) : 0;
+        var sub   = isAlert
+          ? (mins >= 60 ? Math.round(mins / 60) + 'h left' : mins + 'min left')
+          : new Date(u.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+        var border = isAlert ? ' style="border-left:3px solid #E08030;"' : '';
+        return '<div class="update-card"' + border + '>' +
+          '<span class="update-tag ' + cls + '">' + label + (isAlert ? ' &middot; ' + sub : '') + '</span>' +
+          '<div class="update-text">' + u.text + '</div>' +
+          '<div class="update-sub">' + sub + '</div>' +
+        '</div>';
+      }).join('');
+    });
+}
+
+// ── WINES ────────────────────────────────────────────────────────
+function setWineFilter(t) { wineFilter = t; renderWines(); }
+
+function renderWines() {
+  var el = document.getElementById('view-wines');
+  var types = ['All', 'Sparkling', 'White', 'Rose', 'Red', 'Specialty'];
+  var typeLabels = { All:'All', Sparkling:'Sparkling', White:'White', Rose:'Ros\u00e9', Red:'Red', Specialty:'Specialty' };
+
+  var filtered = WINE_NOTES.filter(function(w) {
+    var search = wineSearch.toLowerCase();
+    var typeOK = wineFilter === 'All' || w.type === wineFilter || (wineFilter === 'Rose' && w.type === 'Ros\u00e9');
+    var searchOK = !wineSearch ||
+      w.name.toLowerCase().includes(search) ||
+      w.pairings.toLowerCase().includes(search) ||
+      w.appellation.toLowerCase().includes(search) ||
+      w.tasting.toLowerCase().includes(search);
+    return typeOK && searchOK;
+  });
+
+  var sticky = document.createElement('div');
+  sticky.style.cssText = 'position:sticky;top:-12px;z-index:10;background:var(--bg);padding:0 0 4px;';
+
+  var searchEl = document.createElement('input');
+  searchEl.className = 'spec-search';
+  searchEl.type = 'text';
+  searchEl.placeholder = 'Search wine, region, pairing...';
+  searchEl.value = wineSearch || '';
+  searchEl.oninput = function() { wineSearch = this.value; renderWines(); };
+
+  var filtersEl = document.createElement('div');
+  filtersEl.className = 'spec-filters';
+  types.forEach(function(t) {
+    var btn = document.createElement('div');
+    btn.className = 'spec-filter' + (wineFilter === t ? ' active' : '');
+    btn.textContent = typeLabels[t];
+    btn.onclick = function() { setWineFilter(t); };
+    filtersEl.appendChild(btn);
+  });
+
+  sticky.appendChild(searchEl);
+  sticky.appendChild(filtersEl);
+
+  var typeColorMap = {
+    Sparkling: {bg:'rgba(200,175,30,0.18)',color:'#C8AF1E'},
+    White:     {bg:'rgba(27,58,92,0.25)',  color:'#7AB0D8'},
+    'Ros\u00e9': {bg:'rgba(184,92,0,0.18)',  color:'#D4834A'},
+    Red:       {bg:'rgba(160,30,30,0.25)', color:'#E05050'},
+    Specialty: {bg:'rgba(30,92,56,0.25)',  color:'#38966A'},
+  };
+
+  var cardsHTML = filtered.map(function(w) {
+    var tc = typeColorMap[w.type] || {bg:'var(--surface3)',color:'var(--text2)'};
+    var pairingTags = w.pairings.split(',').map(function(p) {
+      return '<span class="wine-pairing-tag">' + p.trim() + '</span>';
+    }).join('');
+    return '<div class="wine-card" onclick="toggleWineCard(this)">' +
+      '<div class="wine-card-header">' +
+        '<div class="wine-card-left">' +
+          '<div class="wine-name">' + w.name + '</div>' +
+          '<div class="wine-appellation">' + w.appellation + '</div>' +
+        '</div>' +
+        '<div class="wine-type-badge" style="background:' + tc.bg + ';color:' + tc.color + ';">' + w.type + '</div>' +
+      '</div>' +
+      '<div class="wine-card-body">' +
+        '<div class="wine-section"><div class="wine-section-label">Tasting</div><div class="wine-section-text">' + w.tasting + '</div></div>' +
+        '<div class="wine-section"><div class="wine-section-label">Selling Point</div><div class="wine-section-text">' + w.selling + '</div></div>' +
+        '<div class="wine-section"><div class="wine-section-label">Producer</div><div class="wine-section-text">' + w.producer + '</div></div>' +
+        '<div class="wine-section"><div class="wine-section-label">Pairings</div><div class="wine-pairings">' + pairingTags + '</div></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  el.innerHTML = filtered.length ? cardsHTML : '<div class="empty-state"><div class="empty-icon">&#x1F377;</div><div class="empty-text">No wines match.</div></div>';
+  el.insertBefore(sticky, el.firstChild);
+}
+
+function toggleWineCard(card) {
+  var body = card.querySelector('.wine-card-body');
+  var isOpen = body.classList.contains('open');
+  document.querySelectorAll('.wine-card-body.open').forEach(function(b) { b.classList.remove('open'); });
+  if (!isOpen) body.classList.add('open');
+}
+
+// ── SUBMIT (BTG BIN Sales) ───────────────────────────────────────
+
+
+
+
+
+function recoverView() {
+  try {
+    var a = document.querySelector('.view.active');
+    if (a && _rm[a.id.replace('view-', '')]) _rm[a.id.replace('view-', '')]();
+  } catch(e) {}
+}
+document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'visible') setTimeout(recoverView, 150); });
+window.addEventListener('pageshow', function(e) { if (e.persisted) setTimeout(recoverView, 150); });
+setInterval(function() { var a = document.querySelector('.view.active'); if (a && a.children.length === 0) recoverView(); }, 2000);
+
+renderUpdates();
+
+// ─────────────────────────────────────────────
+// REALTIME
+// ─────────────────────────────────────────────
+function initRealtime() {
+  supa.channel('foh-updates')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'updates' }, function(payload) {
+      var active = document.querySelector('.view.active');
+      if (active && active.id === 'view-updates') renderUpdates();
+    })
+    .subscribe();
+
+  supa.channel('foh-pull-flags')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'pull_flags' }, function() {
+      var active = document.querySelector('.view.active');
+      if (active && active.id === 'view-86') render86();
+    })
+    .subscribe();
+}
+
+
+// ─────────────────────────────────────────────
+// SUBMIT TAB — BTB BOTTLE SALES + COLLATERAL
+// ─────────────────────────────────────────────
+const COLL_CATALOG = {
+  'Glassware': ['Rocks / Old Fashioned','Coupe','Nick & Nora','AP / Spritz Glass','Collins','Highball','Wine Glass','Irish Coffee Mug','Martini','Champagne Flute'],
+  'Bar Tools':  ['Jigger','Hawthorne Strainer','Fine Mesh Strainer','Bar Spoon','Muddler','Vegetable Peeler','Channel Knife','Cocktail Pick','Bottle Opener','Wine Key / Corkscrew'],
+  'Smallwares': ['Ice Bin','Speed Rail / Bottle Holder','Cutting Board','Bar Mat','Pour Spout','Cocktail Shaker','Mixing Glass','Ice Scoop','Squeeze Bottle','Garnish Tray'],
+};
+
+
+var bottleSales    = [];
+var fohCollat      = [];
+var fohCollCustom  = [];
+var fohCollOpen    = {};
+var fohCustomShow  = false;
+
+function renderSubmit() {
+  var el = document.getElementById('view-submit');
+
+  // Bottle sales log
+  var salesItems = bottleSales.map(function(s, i) {
+    return '<div class="bin-log-row">' +
+      '<div class="bin-log-info">' +
+        '<div class="bin-log-name">' + s.name + '</div>' +
+        '<div class="bin-log-meta">BIN ' + s.bin + ' &middot; ' + s.qty + ' bottle' + (s.qty > 1 ? 's' : '') + '</div>' +
+      '</div>' +
+      '<button class="bin-log-del" onclick="removeSale(' + i + ')">&times;</button>' +
+    '</div>';
+  }).join('');
+
+  // Collateral — exact same pattern as bar app
+  var collItems = '';
+  Object.keys(COLL_CATALOG).forEach(function(cat) {
+    var catItems = COLL_CATALOG[cat];
+    var selCount = catItems.filter(function(item) { return fohCollat.find(function(c) { return c.name === item; }); }).length;
+    var metaBadge = selCount ? ' <span style="font-size:0.625rem;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--accent-dim);color:var(--accent-bright);margin-left:6px;">' + selCount + ' selected</span>' : '';
+    var isOpen = !!fohCollOpen[cat];
+    collItems += '<div class="coll-cat-header' + (isOpen ? '' : ' collapsed') + '" onclick="toggleFOHCollCat(this)">' +
+      '<span>' + cat + metaBadge + '</span>' +
+      '<span class="coll-cat-chevron">&#x25BE;</span>' +
+    '</div>';
+    collItems += '<div class="coll-cat-body' + (isOpen ? '' : ' collapsed') + '" onclick="event.stopPropagation()">';
+    catItems.forEach(function(item) {
+      var ex       = fohCollat.find(function(c) { return c.name === item; });
+      var selected = !!ex;
+      var qty      = ex ? ex.qty : '1';
+      var enc      = encodeURIComponent(item);
+      collItems += '<div class="coll-item' + (selected ? ' selected' : '') + '" data-item="' + enc + '" onclick="toggleFOHColl(event)">' +
+        '<div class="coll-check">' + (selected ? '&#x2713;' : '') + '</div>' +
+        '<div class="coll-name">' + item + '</div>' +
+        (selected ? '<div class="coll-qty-wrap" onclick="event.stopPropagation()">' +
+          '<span style="font-size:11px;color:var(--text2);">Qty</span>' +
+          '<input class="coll-qty" type="number" inputmode="numeric" value="' + qty + '" data-item="' + enc + '" oninput="updateFOHCQ(this)">' +
+        '</div>' : '') +
+      '</div>';
+    });
+    collItems += '</div>';
+  });
+
+  if (fohCollCustom.length) {
+    collItems += '<div class="section-label" style="margin-top:8px;">Custom</div>';
+    fohCollCustom.forEach(function(item, i) {
+      collItems += '<div class="coll-item selected">' +
+        '<div class="coll-check">&#x2713;</div><div class="coll-name">' + item.name + '</div>' +
+        '<div class="coll-qty-wrap" onclick="event.stopPropagation()">' +
+          '<span style="font-size:11px;color:var(--text2);">Qty</span>' +
+          '<input class="coll-qty" type="number" inputmode="numeric" value="' + (item.qty||1) + '" data-ci="' + i + '" oninput="updateFOHCCQ(this)">' +
+        '</div>' +
+        '<button data-ci="' + i + '" onclick="removeFOHCC(this)" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;">&times;</button>' +
+      '</div>';
+    });
+  }
+
+  var totalItems = bottleSales.length + fohCollat.length + fohCollCustom.length;
+
+  el.innerHTML =
+    '<div class="submit-section-title">' +
+      '<span>BTB Bottle Sales</span>' +
+      '<span style="font-size:11px;color:var(--text2);">' + bottleSales.length + ' logged</span>' +
+    '</div>' +
+    (salesItems || '<div style="font-size:12px;color:var(--text3);margin-bottom:10px;">No bottle sales logged yet.</div>') +
+    '<div class="log-add-form">' +
+      '<div class="form-group" style="margin-bottom:8px;">' +
+        '<label class="form-label">Wine Name</label>' +
+        '<input class="form-input" id="btb-name" type="text" placeholder="e.g. Barolo Lazzarito 2017" autocomplete="off">' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">' +
+        '<div class="form-group">' +
+          '<label class="form-label">BIN / D365 #</label>' +
+          '<input class="form-input" id="btb-bin" type="text" inputmode="numeric" placeholder="e.g. 1159036">' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">Qty</label>' +
+          '<input class="form-input" id="btb-qty" type="number" inputmode="numeric" min="1" value="1" placeholder="1">' +
+        '</div>' +
+      '</div>' +
+      '<button class="btn-add-entry" onclick="addBottleSale()">+ Add Bottle Sale</button>' +
+    '</div>' +
+
+    '<div class="submit-section-title" style="margin-top:16px;">' +
+      '<span>Collateral Requests</span>' +
+      '<span style="font-size:11px;color:var(--text2);">' + (fohCollat.length + fohCollCustom.length) + ' selected</span>' +
+    '</div>' +
+    collItems +
+    '<button class="add-custom-btn" onclick="toggleFOHCI()">+ Add custom item</button>' +
+    (fohCustomShow ? '<div class="custom-input-row"><input type="text" id="fohCIInput" placeholder="e.g. Ice bucket, bar towels..."><button class="add-btn" onclick="addFOHCI()">Add</button></div>' : '') +
+
+    (totalItems > 0 ? '<div class="send-bar" style="margin-top:16px;">' +
+      '<button class="btn-send" style="margin-bottom:8px;" onclick="submitFOHReport()">Submit Report</button>' +
+      '<button class="btn-clear-sm" onclick="clearFOHSubmit()">Clear all entries</button>' +
+    '</div>' : '');
+}
+
+function toggleFOHCollCat(header) {
+  header.classList.toggle('collapsed');
+  header.nextElementSibling.classList.toggle('collapsed');
+  var span = header.querySelector('span:first-child');
+  if (span) {
+    var key = span.childNodes[0] ? span.childNodes[0].textContent.trim() : span.textContent.trim();
+    fohCollOpen[key] = !header.classList.contains('collapsed');
+  }
+}
+function toggleFOHColl(event) {
+  event.stopPropagation();
+  if (event.target.tagName === 'INPUT' || event.target.tagName === 'BUTTON') return;
+  var name = decodeURIComponent(event.currentTarget.getAttribute('data-item'));
+  var idx  = fohCollat.findIndex(function(c) { return c.name === name; });
+  if (idx >= 0) fohCollat.splice(idx, 1); else fohCollat.push({ name: name, qty: '1' });
+  renderSubmit();
+}
+function updateFOHCQ(input) {
+  var name = decodeURIComponent(input.getAttribute('data-item'));
+  var item = fohCollat.find(function(c) { return c.name === name; });
+  if (item) item.qty = input.value;
+}
+function toggleFOHCI() { fohCustomShow = !fohCustomShow; renderSubmit(); }
+function addFOHCI() {
+  var inp = document.getElementById('fohCIInput');
+  var val = inp ? inp.value.trim() : '';
+  if (!val) return;
+  fohCollCustom.push({ name: val, qty: '1' });
+  fohCustomShow = false;
+  renderSubmit();
+}
+function removeFOHCC(btn) {
+  fohCollCustom.splice(parseInt(btn.getAttribute('data-ci')), 1);
+  renderSubmit();
+}
+function updateFOHCCQ(input) {
+  var i = parseInt(input.getAttribute('data-ci'));
+  if (fohCollCustom[i]) fohCollCustom[i].qty = input.value;
+}
+function addBottleSale() {
+  var nameEl = document.getElementById('btb-name');
+  var binEl  = document.getElementById('btb-bin');
+  var nameVal = nameEl ? nameEl.value.trim() : '';
+  var binVal  = binEl  ? binEl.value.trim()  : '';
+  var qty = parseInt((document.getElementById('btb-qty') || {}).value) || 1;
+  if (!nameVal) { toast('Enter the wine name'); return; }
+  if (!binVal)  { toast('Enter the BIN / D365 number'); return; }
+  var existing = bottleSales.find(function(s) { return s.bin === binVal; });
+  if (existing) { existing.qty += qty; } else { bottleSales.push({ bin: binVal, name: nameVal, qty: qty }); }
+  if (nameEl) nameEl.value = '';
+  if (binEl)  binEl.value  = '';
+  toast(parts[1] + ' added');
+  renderSubmit();
+}
+function removeSale(i) { bottleSales.splice(i, 1); renderSubmit(); }
+function submitFOHReport() {
+  var promises = [];
+  bottleSales.forEach(function(s) {
+    promises.push(supa.from('bottle_log').insert({ wine: s.name, amount: s.qty + ' bottle' + (s.qty > 1 ? 's' : ''), shift_date: TODAY }));
+  });
+  var allCollat = fohCollat.concat(fohCollCustom);
+  if (allCollat.length) {
+    promises.push(supa.from('collateral_requests').insert({ items: JSON.stringify(allCollat), shift_date: TODAY }));
+  }
+  Promise.all(promises).then(function() {
+    toast('Report submitted');
+    bottleSales = []; fohCollat = []; fohCollCustom = [];
+    renderSubmit();
+  });
+}
+function clearFOHSubmit() {
+  if (!confirm('Clear all entries?')) return;
+  bottleSales = []; fohCollat = []; fohCollCustom = [];
+  renderSubmit();
+}
+
+initRealtime();
+
+</script>
+</body>
+</html>

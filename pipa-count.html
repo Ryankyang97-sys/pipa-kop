@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PiPa Count">
+<title>PiPa Count</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiUGlQYSBDb3VudCIsInNob3J0X25hbWUiOiJDb3VudCIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMEQwRDBEIiwidGhlbWVfY29sb3IiOiIjMEQwRDBEIn0=">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+:root {
+  --bg: #0D0D0D;
+  --surface: #1A1A1A;
+  --surface2: #242424;
+  --surface3: #2E2E2E;
+  --text: #F0EDE8;
+  --text2: #8A8680;
+  --accent: #B85C00;
+  --accent-dim: rgba(184,92,0,0.15);
+  --green: #2D7A4F;
+  --green-dim: rgba(45,122,79,0.15);
+  --red: #8B1A1A;
+  --red-dim: rgba(139,26,26,0.18);
+  --yellow: #7A6A10;
+  --yellow-dim: rgba(200,175,30,0.15);
+  --purple: #5B2D8E;
+  --purple-dim: rgba(91,45,142,0.18);
+  --blue: #1B3A5C;
+  --cellar: #B85C00;
+  --cage: #5B2D8E;
+  --walkin: #0D6E6E;
+  --bar: #E94560;
+  --radius: 12px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100%;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+/* ── TOP NAV ── */
+.top-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: calc(var(--safe-top) + 8px) 12px 0;
+  background: var(--bg);
+}
+.top-bar h1 {
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+  color: var(--text2); text-transform: uppercase; padding: 0 4px 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.header-link {
+  font-size: 11px; color: var(--text3); text-decoration: none;
+  padding: 5px 10px; border-radius: 20px;
+  border: 1px solid var(--surface3);
+  white-space: nowrap;
+}
+.top-bar h1 .date { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 12px; }
+.stop-tabs {
+  display: flex; gap: 6px; padding-bottom: 10px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.stop-tabs::-webkit-scrollbar { display:none; }
+.stop-tab {
+  flex-shrink: 0; padding: 8px 14px; border-radius: 20px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  background: var(--surface); color: var(--text2);
+  border: 1.5px solid transparent;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.stop-tab.active { color: var(--text); border-color: var(--accent); background: var(--accent-dim); }
+.stop-tab .badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  background: var(--surface3); padding: 2px 6px; border-radius: 8px;
+}
+.stop-tab.active .badge { background: var(--accent); color: #fff; }
+
+/* ── SECTION ACCORDION ── */
+.main-scroll {
+  position: fixed;
+  top: calc(var(--safe-top) + 82px);
+  bottom: calc(var(--safe-bottom) + 64px);
+  left: 0; right: 0;
+  overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 10px 20px;
+}
+.section-header {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--bg);
+  padding: 14px 6px 8px;
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer;
+}
+.section-header h2 {
+  font-size: 15px; font-weight: 700; color: var(--text);
+}
+.section-header .sub { font-size: 11px; color: var(--text2); margin-left: 8px; font-weight: 400; }
+.section-header .progress {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--green); background: var(--green-dim);
+  padding: 3px 8px; border-radius: 8px;
+}
+.section-header .chevron {
+  color: var(--text2); transition: transform 0.2s; font-size: 14px;
+}
+.section-header.collapsed .chevron { transform: rotate(-90deg); }
+.section-body { overflow: hidden; }
+.section-body.collapsed { display: none; }
+
+/* ── ITEM ROW ── */
+.item-row {
+  display: flex; align-items: center;
+  padding: 10px 8px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  margin-bottom: 4px;
+  gap: 8px;
+  min-height: 52px;
+  position: relative;
+}
+.item-row.counted { background: var(--surface2); }
+.item-row.counted .item-name { color: var(--text2); }
+
+/* Flag states */
+.item-row.flag-86 { border-left: 3px solid #c0392b; }
+.item-row.flag-low { border-left: 3px solid #c9a010; }
+.item-row.flag-reorder { border-left: 3px solid #8e44ad; }
+.item-row.has-note { border-right: 3px solid var(--accent); }
+
+.item-info { flex: 1; min-width: 0; }
+.item-name {
+  font-size: 13.5px; font-weight: 500; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.item-meta {
+  font-size: 10.5px; color: var(--text2);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 1px;
+  display: flex; align-items: center; gap: 6px;
+}
+.flag-badge {
+  font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 4px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.flag-badge.b86 { background: #c0392b; color: #fff; }
+.flag-badge.low { background: #c9a010; color: #fff; }
+.flag-badge.reorder { background: #8e44ad; color: #fff; }
+
+/* ── COUNT INPUT CLUSTER ── */
+.count-cluster { display: flex; gap: 4px; flex-shrink: 0; align-items: center; }
+.count-field {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.count-label {
+  font-size: 8.5px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text2);
+}
+.count-input {
+  width: 48px; height: 40px;
+  background: var(--bg); border: 1.5px solid var(--surface3);
+  border-radius: 8px; color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px; font-weight: 500;
+  text-align: center; outline: none;
+  -webkit-appearance: none;
+}
+.count-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
+}
+.count-input.has-value { border-color: var(--green); background: var(--green-dim); }
+
+/* ── FLAG BUTTON ── */
+.flag-btn {
+  width: 32px; height: 40px;
+  background: var(--surface3); border: none; border-radius: 8px;
+  color: var(--text2); font-size: 15px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.flag-btn:active { transform: scale(0.93); }
+.flag-btn.active { background: var(--accent-dim); color: var(--text); }
+
+/* ── BOTTOM ACTION BAR ── */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  padding: 10px 12px calc(var(--safe-bottom) + 10px);
+  background: linear-gradient(transparent, var(--bg) 20%);
+  display: flex; gap: 8px;
+}
+.btn {
+  flex: 1; padding: 14px; border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-export { background: var(--accent); color: #fff; }
+.btn-clear { background: var(--surface2); color: var(--text2); flex: 0.5; }
+.btn-summary { background: var(--green); color: #fff; flex: 0.5; }
+.btn-notes { background: var(--surface2); color: var(--text2); flex: 0.5; }
+.btn:active { transform: scale(0.97); }
+
+/* ── MODAL (Summary / Flag / Notes) ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  align-items: flex-end; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border-radius: 20px 20px 0 0;
+  width: 100%; max-height: 80vh; overflow-y: auto;
+  padding: 24px 16px calc(var(--safe-bottom) + 16px);
+}
+.modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+.modal-stat {
+  display: flex; justify-content: space-between; padding: 8px 0;
+  border-bottom: 1px solid var(--surface3);
+  font-size: 13px;
+}
+.modal-stat .val { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+.modal-close {
+  margin-top: 16px; width: 100%; padding: 14px;
+  background: var(--surface3); color: var(--text);
+  border: none; border-radius: var(--radius);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+}
+
+/* ── FLAG SHEET ── */
+.flag-sheet {
+  display: none; position: fixed; inset: 0; z-index: 210;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+  align-items: flex-end; justify-content: center;
+}
+.flag-sheet.open { display: flex; }
+.flag-panel {
+  background: var(--surface); border-radius: 20px 20px 0 0;
+  width: 100%; padding: 20px 16px calc(var(--safe-bottom) + 16px);
+}
+.flag-panel h4 {
+  font-size: 15px; font-weight: 700; margin-bottom: 6px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.flag-panel .flag-item-meta {
+  font-size: 11px; color: var(--text2); margin-bottom: 16px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.flag-options {
+  display: flex; gap: 8px; margin-bottom: 16px;
+}
+.flag-option {
+  flex: 1; padding: 14px 8px; border-radius: var(--radius);
+  border: 2px solid var(--surface3);
+  background: var(--surface2);
+  color: var(--text2); font-size: 13px; font-weight: 600;
+  cursor: pointer; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.flag-option .flag-icon { font-size: 20px; }
+.flag-option.selected-86 { border-color: #c0392b; background: rgba(192,57,43,0.18); color: #e74c3c; }
+.flag-option.selected-low { border-color: #c9a010; background: rgba(201,160,16,0.18); color: #f1c40f; }
+.flag-option.selected-reorder { border-color: #8e44ad; background: rgba(142,68,173,0.18); color: #9b59b6; }
+
+/* Note textarea inside flag panel */
+.flag-note-label {
+  font-size: 11px; font-weight: 600; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+.flag-note-input {
+  width: 100%; background: var(--bg); border: 1.5px solid var(--surface3);
+  border-radius: 10px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  padding: 12px; outline: none; resize: none; line-height: 1.4;
+  min-height: 80px;
+  margin-bottom: 12px;
+}
+.flag-note-input:focus { border-color: var(--accent); }
+.flag-note-input::placeholder { color: var(--text2); }
+
+.flag-save {
+  width: 100%; padding: 14px; border-radius: var(--radius);
+  background: var(--accent); color: #fff;
+  border: none; font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.flag-clear-btn {
+  width: 100%; padding: 12px; border-radius: var(--radius);
+  background: var(--surface3); color: var(--text2);
+  border: none; font-size: 13px; font-weight: 600; cursor: pointer;
+  margin-top: 8px;
+}
+
+/* ── SHIFT NOTES SHEET ── */
+.notes-sheet {
+  display: none; position: fixed; inset: 0; z-index: 210;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+  align-items: flex-end; justify-content: center;
+}
+.notes-sheet.open { display: flex; }
+.notes-panel {
+  background: var(--surface); border-radius: 20px 20px 0 0;
+  width: 100%; max-height: 80vh;
+  padding: 20px 16px calc(var(--safe-bottom) + 16px);
+  display: flex; flex-direction: column;
+}
+.notes-panel h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.notes-panel .notes-sub { font-size: 11px; color: var(--text2); margin-bottom: 14px; }
+.notes-textarea {
+  flex: 1; min-height: 160px; max-height: 280px;
+  background: var(--bg); border: 1.5px solid var(--surface3);
+  border-radius: 10px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  padding: 12px; outline: none; resize: none; line-height: 1.5;
+  margin-bottom: 12px;
+}
+.notes-textarea:focus { border-color: var(--accent); }
+.notes-textarea::placeholder { color: var(--text2); }
+.notes-save { 
+  padding: 14px; border-radius: var(--radius);
+  background: var(--accent); color: #fff;
+  border: none; font-size: 14px; font-weight: 700; cursor: pointer;
+  width: 100%;
+}
+.notes-close-btn {
+  padding: 12px; border-radius: var(--radius);
+  background: var(--surface3); color: var(--text2);
+  border: none; font-size: 13px; font-weight: 600; cursor: pointer;
+  width: 100%; margin-top: 8px;
+}
+.notes-indicator {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent); display: inline-block;
+  margin-right: 4px; vertical-align: middle;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; top: calc(var(--safe-top) + 90px);
+  left: 50%; transform: translateX(-50%) translateY(-20px);
+  background: var(--green); color: #fff;
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 600;
+  opacity: 0; transition: all 0.3s; z-index: 300; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>
+    <span>PiPa Count</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="date" id="dateLabel"></span>
+      <a class="header-link" href="pipa-ops.html">Ops →</a>
+      <a class="header-link" href="pipa-admin.html">Admin →</a>
+    </div>
+  </h1>
+  <div class="stop-tabs" id="stopTabs"></div>
+</div>
+
+<div class="main-scroll" id="mainScroll"></div>
+
+<div class="bottom-bar">
+  <button class="btn btn-clear" onclick="clearAll()">Clear</button>
+  <button class="btn btn-notes" id="notesBtn" onclick="openNotes()">📝 Notes</button>
+  <button class="btn btn-export" onclick="exportCSV()">Export CSV</button>
+    <button class="btn btn-export" id="supa-save-btn" onclick="saveCountToSupabase()" style="background:var(--accent,#B85C00);color:#fff;margin-left:6px;">Save to Trend</button>
+  <button class="btn btn-summary" onclick="showSummary()">Summary</button>
+</div>
+
+<!-- Summary Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeSummary(event)">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- Flag Sheet -->
+<div class="flag-sheet" id="flagSheet" onclick="closeFlagSheet(event)">
+  <div class="flag-panel" id="flagPanel">
+    <h4 id="flagItemName">Item</h4>
+    <div class="flag-item-meta" id="flagItemMeta"></div>
+    <div class="flag-options">
+      <div class="flag-option" id="flag-86" onclick="selectFlag('86')">
+        <span class="flag-icon">🚫</span>
+        86'd
+      </div>
+      <div class="flag-option" id="flag-low" onclick="selectFlag('low')">
+        <span class="flag-icon">⚠️</span>
+        Low
+      </div>
+      <div class="flag-option" id="flag-reorder" onclick="selectFlag('reorder')">
+        <span class="flag-icon">🔄</span>
+        Reorder
+      </div>
+    </div>
+    <div class="flag-note-label">Note (optional)</div>
+    <textarea class="flag-note-input" id="flagNoteInput" placeholder="e.g. Carpano Antica empty, need to 86 — or — Prosecco delivery came short 2 cases…" rows="3"></textarea>
+    <button class="flag-save" onclick="saveFlag()">Save Flag & Note</button>
+    <button class="flag-clear-btn" onclick="clearFlag()">Clear Flag</button>
+  </div>
+</div>
+
+<!-- Shift Notes Sheet -->
+<div class="notes-sheet" id="notesSheet" onclick="closeNotesSheet(event)">
+  <div class="notes-panel" onclick="event.stopPropagation()">
+    <h3>📝 Shift Notes</h3>
+    <div class="notes-sub">Jot anything mid-count. Exports with CSV.</div>
+    <textarea class="notes-textarea" id="shiftNotesTA" placeholder="Carpano Antica empty, need to 86&#10;Prosecco delivery came short 2 cases&#10;Brief staff on Cortina swap…"></textarea>
+    <button class="notes-save" onclick="saveNotes()">Save Notes</button>
+    <button class="notes-close-btn" onclick="closeNotes()">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// SUPABASE
+const SUPA_URL = 'https://fhbusipvtxjnwidlgpaa.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+
+// ── WALK ROUTE DATA (updated from BLC v11) ──
+const WALK_ROUTE = [
+{stop:"CELLAR",icon:"🍷",sections:[
+  {name:"BTB Wine Wall",subtitle:"By BIN number",items:[
+    {d365:"00670086",name:"Fontanafredda — Barolo Silver Label 2021",bin:"10003",fields:[{key:"cellar",label:"Cellar"}],row:3,sheet:"BTB WINE"},
+    {d365:"1159036",name:"Mirafiore — Barolo Lazzarito 2017",bin:"10005",fields:[{key:"cellar",label:"Cellar"}],row:4,sheet:"BTB WINE"},
+    {d365:"00676048",name:"Borgogno — Barolo Riserva 2015",bin:"10007",fields:[{key:"cellar",label:"Cellar"}],row:5,sheet:"BTB WINE"},
+    {d365:"521017",name:"Fontanafredda — Barolo La Villa 2005",bin:"10009",fields:[{key:"cellar",label:"Cellar"}],row:6,sheet:"BTB WINE"},
+    {d365:"1151916",name:"Produttori Del Barbaresco — Barbaresco 2020",bin:"10302",fields:[{key:"cellar",label:"Cellar"}],row:7,sheet:"BTB WINE"},
+    {d365:"1123125",name:"Aldo Conterno — Barbera Conca Tra Le Pile 2021",bin:"10501",fields:[{key:"cellar",label:"Cellar"}],row:8,sheet:"BTB WINE"},
+    {d365:"1140199",name:"Cascina Valle Asinari — Rosso Monferrato Ciuchino",bin:"10502",fields:[{key:"cellar",label:"Cellar"}],row:9,sheet:"BTB WINE"},
+    {d365:"1116147",name:"Fontanafredda — Barbera Raimonda 2022",bin:"10506",fields:[{key:"cellar",label:"Cellar"}],row:10,sheet:"BTB WINE"},
+    {d365:"1151358",name:"Le Piane — Boca 2019",bin:"10701",fields:[{key:"cellar",label:"Cellar"}],row:11,sheet:"BTB WINE"},
+    {d365:"1137393",name:"Trediberri — Nebbiolo 2021",bin:"10703",fields:[{key:"cellar",label:"Cellar"}],row:12,sheet:"BTB WINE"},
+    {d365:"1112868",name:"Borgogno — Freisa",bin:"10704",fields:[{key:"cellar",label:"Cellar"}],row:13,sheet:"BTB WINE"},
+    {d365:"1113958",name:"Fontanafredda — Gavi Di Gavi 2023",bin:"10802",fields:[{key:"cellar",label:"Cellar"}],row:14,sheet:"BTB WINE"},
+    {d365:"1112592",name:"Borgogno — Era Ora Riesling",bin:"10803",fields:[{key:"cellar",label:"Cellar"}],row:15,sheet:"BTB WINE"},
+    {d365:"1126510",name:"Valdicava — Rosso Di Montalcino 2023",bin:"11001",fields:[{key:"cellar",label:"Cellar"}],row:16,sheet:"BTB WINE"},
+    {d365:"1160644",name:"Le Ragnaie — Brunello di Montalcino 2019",bin:"11003",fields:[{key:"cellar",label:"Cellar"}],row:17,sheet:"BTB WINE"},
+    {d365:"1157466",name:"Col D'Orcia — Brunello di Montalcino 2018",bin:"11005",fields:[{key:"cellar",label:"Cellar"}],row:18,sheet:"BTB WINE"},
+    {d365:"1130819",name:"La Fiorita — Rosso Montalcino 2022",bin:"11007",fields:[{key:"cellar",label:"Cellar"}],row:19,sheet:"BTB WINE"},
+    {d365:"1163242",name:"Fontodi — Flaccianello 2021",bin:"11202",fields:[{key:"cellar",label:"Cellar"}],row:20,sheet:"BTB WINE"},
+    {d365:"1123172",name:"Grattamacco — Bolgheri Rosso 2023",bin:"11204",fields:[{key:"cellar",label:"Cellar"}],row:21,sheet:"BTB WINE"},
+    {d365:"1162641",name:"Antinori — Tignanello 2022",bin:"11206",fields:[{key:"cellar",label:"Cellar"}],row:22,sheet:"BTB WINE"},
+    {d365:"1114937",name:"Avignonesi — Vino Nobile 2020",bin:"11208",fields:[{key:"cellar",label:"Cellar"}],row:23,sheet:"BTB WINE"},
+    {d365:"1144088",name:"Carleone — Il Guercio 2022",bin:"11210",fields:[{key:"cellar",label:"Cellar"}],row:24,sheet:"BTB WINE"},
+    {d365:"1121193",name:"Ornellaia — Le Volte 2022",bin:"11212",fields:[{key:"cellar",label:"Cellar"}],row:25,sheet:"BTB WINE"},
+    {d365:"1118045",name:"Felsina — Chianti Classico Riserva Rancia 2019",bin:"11501",fields:[{key:"cellar",label:"Cellar"}],row:26,sheet:"BTB WINE"},
+    {d365:"1117344",name:"Castellare — Chianti Classico 2023",bin:"11503",fields:[{key:"cellar",label:"Cellar"}],row:27,sheet:"BTB WINE"},
+    {d365:"1111510",name:"Poggio al Tesoro — Vermentino 2023",bin:"11802",fields:[{key:"cellar",label:"Cellar"}],row:28,sheet:"BTB WINE"},
+    {d365:"1138775",name:"Buccia Nera — Toscana Bianco PA'RO' 2024",bin:"11804",fields:[{key:"cellar",label:"Cellar"}],row:29,sheet:"BTB WINE"},
+    {d365:"1139163",name:"Monteraponi — Rosato",bin:"11810",fields:[{key:"cellar",label:"Cellar"}],row:30,sheet:"BTB WINE"},
+    {d365:"1123404",name:"Noela Ricci — Sangiovese Superiore 2023",bin:"12002",fields:[{key:"cellar",label:"Cellar"}],row:31,sheet:"BTB WINE"},
+    {d365:"1115287",name:"Scacciadiavoli — Montefalco Rosso 2021",bin:"13002",fields:[{key:"cellar",label:"Cellar"}],row:32,sheet:"BTB WINE"},
+    {d365:"1132835",name:"La Staffa — Verdicchio Rincrocca 2021",bin:"13801",fields:[{key:"cellar",label:"Cellar"}],row:33,sheet:"BTB WINE"},
+    {d365:"1117059",name:"Otella — Lugana",bin:"14803",fields:[{key:"cellar",label:"Cellar"}],row:34,sheet:"BTB WINE"},
+    {d365:"1130146",name:"Nicodemi — Montepulciano Notari 2022",bin:"15002",fields:[{key:"cellar",label:"Cellar"}],row:35,sheet:"BTB WINE"},
+    {d365:"1132391",name:"Tiberio — Pecorino",bin:"15802",fields:[{key:"cellar",label:"Cellar"}],row:36,sheet:"BTB WINE"},
+    {d365:"1133015",name:"Feudi San Gregorio — Taurasi 2018",bin:"16002",fields:[{key:"cellar",label:"Cellar"}],row:37,sheet:"BTB WINE"},
+    {d365:"1118576",name:"Feudi San Gregorio — Greco Di Tufo",bin:"16803",fields:[{key:"cellar",label:"Cellar"}],row:38,sheet:"BTB WINE"},
+    {d365:"1136839",name:"Marco Tinessa — Ognostro Bianco 2022",bin:"16804",fields:[{key:"cellar",label:"Cellar"}],row:39,sheet:"BTB WINE"},
+    {d365:"1119979",name:"Castello Monaci — Primitivo Piluna 2021",bin:"19004",fields:[{key:"cellar",label:"Cellar"}],row:40,sheet:"BTB WINE"},
+    {d365:"1134131",name:"Punta Crena — Rossese 2023",bin:"21002",fields:[{key:"cellar",label:"Cellar"}],row:41,sheet:"BTB WINE"},
+    {d365:"1164264",name:"Ottaviano Lambruschi — Vermentino Costa Marina 2023",bin:"21802",fields:[{key:"cellar",label:"Cellar"}],row:42,sheet:"BTB WINE"},
+    {d365:"1116337",name:"Sella & Mosca — Tanca Fara Alghero 2018",bin:"22003",fields:[{key:"cellar",label:"Cellar"}],row:43,sheet:"BTB WINE"},
+    {d365:"1119309",name:"Argiolas — Vermentino Costamolino 2024",bin:"22801",fields:[{key:"cellar",label:"Cellar"}],row:44,sheet:"BTB WINE"},
+    {d365:"1115458",name:"Baglio di Grisi — Syrah",bin:"23002",fields:[{key:"cellar",label:"Cellar"}],row:45,sheet:"BTB WINE"},
+    {d365:"1121130",name:"Palmento Costanzo — Etna Rosso Monfete 2021",bin:"23004",fields:[{key:"cellar",label:"Cellar"}],row:46,sheet:"BTB WINE"},
+    {d365:"1120120",name:"Planeta — Chardonnay 2022",bin:"23802",fields:[{key:"cellar",label:"Cellar"}],row:47,sheet:"BTB WINE"},
+    {d365:"1127803",name:"Di Giovanna — Grillo Vurria 2024",bin:"23803",fields:[{key:"cellar",label:"Cellar"}],row:48,sheet:"BTB WINE"},
+    {d365:"1143268",name:"Idda — Etna Bianco 2023",bin:"23805",fields:[{key:"cellar",label:"Cellar"}],row:49,sheet:"BTB WINE"},
+    {d365:"1118923",name:"Planeta — Rosato 2024",bin:"23810",fields:[{key:"cellar",label:"Cellar"}],row:50,sheet:"BTB WINE"},
+    {d365:"1151609",name:"Coletrone — Sagrantino Memoria 2015",bin:"24001",fields:[{key:"cellar",label:"Cellar"}],row:51,sheet:"BTB WINE"},
+    {d365:"1117554",name:"Cervaro Della Sala — Cervaro Della Sala",bin:"24802",fields:[{key:"cellar",label:"Cellar"}],row:52,sheet:"BTB WINE"},
+    {d365:"1145420",name:"Annesanti — Rosato Nasciolo",bin:"24812",fields:[{key:"cellar",label:"Cellar"}],row:53,sheet:"BTB WINE"},
+    {d365:"1119956",name:"Abbazia di Novacella — Gruner Veltriner",bin:"25802",fields:[{key:"cellar",label:"Cellar"}],row:54,sheet:"BTB WINE"},
+    {d365:"1117837",name:"Elena Walch — Gewurztraminer 2023",bin:"25804",fields:[{key:"cellar",label:"Cellar"}],row:55,sheet:"BTB WINE"},
+    {d365:"1150623",name:"Mont Blanc — Blanc e Morgex 2022",bin:"26801",fields:[{key:"cellar",label:"Cellar"}],row:56,sheet:"BTB WINE"},
+    {d365:"1120284",name:"Brigaldara — Valpolicella 2023",bin:"27001",fields:[{key:"cellar",label:"Cellar"}],row:57,sheet:"BTB WINE"},
+    {d365:"1131849",name:"Bertani — Amarone Della Valpolicella 2011",bin:"27003",fields:[{key:"cellar",label:"Cellar"}],row:58,sheet:"BTB WINE"},
+    {d365:"1142549",name:"Dal Forno Romano — Valpolicella Classico 2018",bin:"27005",fields:[{key:"cellar",label:"Cellar"}],row:59,sheet:"BTB WINE"},
+    {d365:"1110519",name:"Pra — Soave Classico Monte Grande 2021",bin:"27801",fields:[{key:"cellar",label:"Cellar"}],row:60,sheet:"BTB WINE"},
+    {d365:"1141712",name:"Venica & Venica — Merlot 2024",bin:"28003",fields:[{key:"cellar",label:"Cellar"}],row:61,sheet:"BTB WINE"},
+    {d365:"1126508",name:"Vie De Romans — Pinot Grigio Dessemis",bin:"28802",fields:[{key:"cellar",label:"Cellar"}],row:62,sheet:"BTB WINE"},
+    {d365:"1112217",name:"Jermann — Pinot Grigio",bin:"28803",fields:[{key:"cellar",label:"Cellar"}],row:63,sheet:"BTB WINE"},
+    {d365:"1113375",name:"Jermann — Chardonnay Where Dreams 2022",bin:"28805",fields:[{key:"cellar",label:"Cellar"}],row:64,sheet:"BTB WINE"},
+    {d365:"1128425",name:"Attems — Pinot Grigio 2022",bin:"28807",fields:[{key:"cellar",label:"Cellar"}],row:65,sheet:"BTB WINE"},
+    {d365:"1116935",name:"Bastianich — Vespa Bianco 2018",bin:"28809",fields:[{key:"cellar",label:"Cellar"}],row:66,sheet:"BTB WINE"},
+    {d365:"1120835",name:"Le Vigne Di Zamo — Pinot Grigio Ramato",bin:"28810",fields:[{key:"cellar",label:"Cellar"}],row:67,sheet:"BTB WINE"},
+    {d365:"1159477",name:"Mirafiore — Alta Langa Brut",bin:"30002",fields:[{key:"cellar",label:"Cellar"}],row:68,sheet:"BTB WINE"},
+    {d365:"1161158",name:"Berlucchi — Franciacorta Extra Brut NV",bin:"30201",fields:[{key:"cellar",label:"Cellar"}],row:69,sheet:"BTB WINE"},
+    {d365:"802991",name:"Ca Del Bosco — Franciacorta Cuvee Prestige",bin:"30203",fields:[{key:"cellar",label:"Cellar"}],row:70,sheet:"BTB WINE"},
+    {d365:"1136499",name:"Ca Del Bosco — Franciacorta Anna Maria Clementi",bin:"30205",fields:[{key:"cellar",label:"Cellar"}],row:71,sheet:"BTB WINE"},
+    {d365:"1100291",name:"Col Vetoraz — Cartizze Superiore 2024",bin:"30301",fields:[{key:"cellar",label:"Cellar"}],row:72,sheet:"BTB WINE"},
+    {d365:"1121291",name:"Bisol — Prosecco Rosato",bin:"30303",fields:[{key:"cellar",label:"Cellar"}],row:73,sheet:"BTB WINE"},
+    {d365:"1132769",name:"Ferrari — Perle Rose",bin:"30402",fields:[{key:"cellar",label:"Cellar"}],row:74,sheet:"BTB WINE"},
+    {d365:"1132308",name:"Ferrari — Giulio Ferrari 2009",bin:"30404",fields:[{key:"cellar",label:"Cellar"}],row:75,sheet:"BTB WINE"},
+    {d365:"521093",name:"Ferrari — Perle Nero",bin:"30406",fields:[{key:"cellar",label:"Cellar"}],row:76,sheet:"BTB WINE"},
+    {d365:"1133373",name:"La Staffa — Mai Sentito Sparkling",bin:"30502",fields:[{key:"cellar",label:"Cellar"}],row:77,sheet:"BTB WINE"}
+  ]},
+  {name:"BTG Bulk Storage",subtitle:"Cage & cellar counts",items:[
+    {d365:"1136347",name:"Ronco Belvedere — Prosecco",fields:[{key:"cellar",label:"Cellar"}],row:3,sheet:"BTG WINE+BEER"},
+    {d365:"1136348",name:"Ronco Belvedere — Lambrusco",fields:[{key:"cellar",label:"Cellar"}],row:4,sheet:"BTG WINE+BEER"},
+    {d365:"00702794",name:"Lucci — Lambrusco Reggiano DOC Secco",fields:[{key:"cellar",label:"Cellar"}],row:5,sheet:"BTG WINE+BEER"},
+    {d365:"1151781",name:"Cascina Asinari — Moscato d'Asti",fields:[{key:"cellar",label:"Cellar"}],row:6,sheet:"BTG WINE+BEER"},
+    {d365:"200517",name:"Cantine Ferrari — Trento DOC",fields:[{key:"cellar",label:"Cellar"}],row:7,sheet:"BTG WINE+BEER"},
+    {d365:"1113651",name:"Baglio di Grisi — Grillo",fields:[{key:"cellar",label:"Cellar"}],row:8,sheet:"BTG WINE+BEER"},
+    {d365:"1119524",name:"Fontanafredda — Arneis Pradalupo",fields:[{key:"cellar",label:"Cellar"}],row:9,sheet:"BTG WINE+BEER"},
+    {d365:"1121887",name:"La Staffa — Verdicchio Castello di Jesi",fields:[{key:"cellar",label:"Cellar"}],row:10,sheet:"BTG WINE+BEER"},
+    {d365:"1120834",name:"Feudi di San Gregorio — Falanghina",fields:[{key:"cellar",label:"Cellar"}],row:11,sheet:"BTG WINE+BEER"},
+    {d365:"1112217",name:"Jermann — Pinot Grigio",fields:[{key:"cellar",label:"Cellar"}],row:12,sheet:"BTG WINE+BEER"},
+    {d365:"1114289",name:"Tormaresca — Califuria Rosato",fields:[{key:"cellar",label:"Cellar"}],row:13,sheet:"BTG WINE+BEER"},
+    {d365:"1122135",name:"La Mozza — Cabernet Sauvignon 'I Perazzi'",fields:[{key:"cellar",label:"Cellar"}],row:14,sheet:"BTG WINE+BEER"},
+    {d365:"1121578",name:"Planeta — La Segreta Rosso",fields:[{key:"cellar",label:"Cellar"}],row:15,sheet:"BTG WINE+BEER"},
+    {d365:"1114012",name:"Valle Reale — Montepulciano d'Abruzzo",fields:[{key:"cellar",label:"Cellar"}],row:16,sheet:"BTG WINE+BEER"},
+    {d365:"1140193",name:"Colombaio di Cencio — Chianti Classico",fields:[{key:"cellar",label:"Cellar"}],row:17,sheet:"BTG WINE+BEER"},
+    {d365:"1120559",name:"Fontanafredda — Barbera 'Briccotondo'",fields:[{key:"cellar",label:"Cellar"}],row:18,sheet:"BTG WINE+BEER"},
+    {d365:"1119793",name:"Allegrini — Valpolicella",fields:[{key:"cellar",label:"Cellar"}],row:19,sheet:"BTG WINE+BEER"},
+    {d365:"1109844",name:"Mirafiore — Nebbiolo",fields:[{key:"cellar",label:"Cellar"}],row:20,sheet:"BTG WINE+BEER"},
+    {d365:"1126687",name:"Feudo Montoni — Nero d'Avola Lagnusa",fields:[{key:"cellar",label:"Cellar"}],row:21,sheet:"BTG WINE+BEER"},
+    {d365:"1107052",name:"Fontanafredda — Nebbiolo Langhe Ebbio 2013",fields:[{key:"cellar",label:"Cellar"}],row:22,sheet:"BTG WINE+BEER"},
+    {d365:"1133781",name:"Elena Walch — Chardonnay",fields:[{key:"cellar",label:"Cellar"}],row:23,sheet:"BTG WINE+BEER"},
+    {d365:"00671872",name:"Canella — Mimosa Granriviera 750",fields:[{key:"cellar",label:"Cellar"}],row:24,sheet:"BTG WINE+BEER"},
+    {d365:"521709",name:"Canella — Bellini",fields:[{key:"cellar",label:"Cellar"}],row:25,sheet:"BTG WINE+BEER"},
+    {d365:"1119309",name:"Argiolas — Costamolino Vermentino",fields:[{key:"cellar",label:"Cellar"}],row:26,sheet:"BTG WINE+BEER"}
+  ]},
+  {name:"N.A. Bulk Storage",subtitle:"Water, soda, coffee, tea",items:[
+    {d365:"1144705",name:"San Pellegrino 750ml Sparkling",fields:[{key:"count",label:"Count"}],row:17,sheet:"NA BEV & GARNISH"},
+    {d365:"1163669",name:"San Benedetto 25.4oz Still",fields:[{key:"count",label:"Count"}],row:18,sheet:"NA BEV & GARNISH"},
+    {d365:"800017",name:"S. Pellegrino 11.15oz Aranciata Rossa",fields:[{key:"count",label:"Count"}],row:19,sheet:"NA BEV & GARNISH"},
+    {d365:"800016",name:"S. Pellegrino 11.15oz Pompelmo",fields:[{key:"count",label:"Count"}],row:20,sheet:"NA BEV & GARNISH"},
+    {d365:"1126712",name:"S. Pellegrino 11.15oz Limonata",fields:[{key:"count",label:"Count"}],row:21,sheet:"NA BEV & GARNISH"},
+    {d365:"1164662",name:"Fever Tree Tonic 16.9oz",fields:[{key:"count",label:"Count"}],row:22,sheet:"NA BEV & GARNISH"},
+    {d365:"1124369",name:"Fever Tree Club Soda 16.9oz",fields:[{key:"count",label:"Count"}],row:23,sheet:"NA BEV & GARNISH"},
+    {d365:"1142758",name:"Fever Tree Ginger Beer 16.9oz",fields:[{key:"count",label:"Count"}],row:24,sheet:"NA BEV & GARNISH"},
+    {d365:"1148781",name:"Ginger Ale",fields:[{key:"count",label:"Count"}],row:25,sheet:"NA BEV & GARNISH"},
+    {d365:"00675723",name:"EPL Limonata",fields:[{key:"count",label:"Count"}],row:29,sheet:"NA BEV & GARNISH"},
+    {d365:"00675722",name:"EPL Vivace (Orange)",fields:[{key:"count",label:"Count"}],row:30,sheet:"NA BEV & GARNISH"},
+    {d365:"00675724",name:"EPL Cola Classic",fields:[{key:"count",label:"Count"}],row:31,sheet:"NA BEV & GARNISH"},
+    {d365:"00675725",name:"EPL Cola Sugar-Free",fields:[{key:"count",label:"Count"}],row:32,sheet:"NA BEV & GARNISH"},
+    {d365:"00184029",name:"Molecola Cola Classic",fields:[{key:"count",label:"Count"}],row:33,sheet:"NA BEV & GARNISH"},
+    {d365:"00184028",name:"Molecola Cola SF",fields:[{key:"count",label:"Count"}],row:34,sheet:"NA BEV & GARNISH"},
+    {d365:"506485",name:"Espresso Pod (Single)",fields:[{key:"count",label:"Count"}],row:38,sheet:"NA BEV & GARNISH"},
+    {d365:"1134996",name:"Espresso Pod (Decaf)",fields:[{key:"count",label:"Count"}],row:39,sheet:"NA BEV & GARNISH"},
+    {d365:"1163762",name:"Earl Grey Tea",fields:[{key:"count",label:"Count"}],row:40,sheet:"NA BEV & GARNISH"},
+    {d365:"1163750",name:"English Breakfast Tea",fields:[{key:"count",label:"Count"}],row:41,sheet:"NA BEV & GARNISH"}
+  ]}
+]},
+{stop:"LIQUOR CAGE",icon:"🥃",sections:[
+  {name:"BTG Wine — Cage",subtitle:"Cage stock",items:[
+    {d365:"1136347",name:"Ronco Belvedere — Prosecco",fields:[{key:"cage",label:"Cage"}],row:3,sheet:"BTG WINE+BEER"},
+    {d365:"1136348",name:"Ronco Belvedere — Lambrusco",fields:[{key:"cage",label:"Cage"}],row:4,sheet:"BTG WINE+BEER"},
+    {d365:"00702794",name:"Lucci — Lambrusco Reggiano DOC Secco",fields:[{key:"cage",label:"Cage"}],row:5,sheet:"BTG WINE+BEER"},
+    {d365:"1151781",name:"Cascina Asinari — Moscato d'Asti",fields:[{key:"cage",label:"Cage"}],row:6,sheet:"BTG WINE+BEER"},
+    {d365:"200517",name:"Cantine Ferrari — Trento DOC",fields:[{key:"cage",label:"Cage"}],row:7,sheet:"BTG WINE+BEER"},
+    {d365:"1113651",name:"Baglio di Grisi — Grillo",fields:[{key:"cage",label:"Cage"}],row:8,sheet:"BTG WINE+BEER"},
+    {d365:"1119524",name:"Fontanafredda — Arneis Pradalupo",fields:[{key:"cage",label:"Cage"}],row:9,sheet:"BTG WINE+BEER"},
+    {d365:"1121887",name:"La Staffa — Verdicchio Castello di Jesi",fields:[{key:"cage",label:"Cage"}],row:10,sheet:"BTG WINE+BEER"},
+    {d365:"1120834",name:"Feudi di San Gregorio — Falanghina",fields:[{key:"cage",label:"Cage"}],row:11,sheet:"BTG WINE+BEER"},
+    {d365:"1112217",name:"Jermann — Pinot Grigio",fields:[{key:"cage",label:"Cage"}],row:12,sheet:"BTG WINE+BEER"},
+    {d365:"1114289",name:"Tormaresca — Califuria Rosato",fields:[{key:"cage",label:"Cage"}],row:13,sheet:"BTG WINE+BEER"},
+    {d365:"1122135",name:"La Mozza — Cabernet Sauvignon 'I Perazzi'",fields:[{key:"cage",label:"Cage"}],row:14,sheet:"BTG WINE+BEER"},
+    {d365:"1121578",name:"Planeta — La Segreta Rosso",fields:[{key:"cage",label:"Cage"}],row:15,sheet:"BTG WINE+BEER"},
+    {d365:"1114012",name:"Valle Reale — Montepulciano d'Abruzzo",fields:[{key:"cage",label:"Cage"}],row:16,sheet:"BTG WINE+BEER"},
+    {d365:"1140193",name:"Colombaio di Cencio — Chianti Classico",fields:[{key:"cage",label:"Cage"}],row:17,sheet:"BTG WINE+BEER"},
+    {d365:"1120559",name:"Fontanafredda — Barbera 'Briccotondo'",fields:[{key:"cage",label:"Cage"}],row:18,sheet:"BTG WINE+BEER"},
+    {d365:"1119793",name:"Allegrini — Valpolicella",fields:[{key:"cage",label:"Cage"}],row:19,sheet:"BTG WINE+BEER"},
+    {d365:"1109844",name:"Mirafiore — Nebbiolo",fields:[{key:"cage",label:"Cage"}],row:20,sheet:"BTG WINE+BEER"},
+    {d365:"1126687",name:"Feudo Montoni — Nero d'Avola Lagnusa",fields:[{key:"cage",label:"Cage"}],row:21,sheet:"BTG WINE+BEER"},
+    {d365:"1107052",name:"Fontanafredda — Nebbiolo Langhe Ebbio 2013",fields:[{key:"cage",label:"Cage"}],row:22,sheet:"BTG WINE+BEER"},
+    {d365:"1133781",name:"Elena Walch — Chardonnay",fields:[{key:"cage",label:"Cage"}],row:23,sheet:"BTG WINE+BEER"},
+    {d365:"1119309",name:"Argiolas — Costamolino Vermentino",fields:[{key:"cage",label:"Cage"}],row:26,sheet:"BTG WINE+BEER"}
+  ]},
+  {name:"VODKA",subtitle:"7 items",items:[
+    {d365:"1132118",name:"Tito's",fields:[{key:"count",label:"Count"}],row:3,sheet:"LIQUOR"},
+    {d365:"505335",name:"Ketel One",fields:[{key:"count",label:"Count"}],row:4,sheet:"LIQUOR"},
+    {d365:"505324",name:"Belvedere",fields:[{key:"count",label:"Count"}],row:5,sheet:"LIQUOR"},
+    {d365:"505329",name:"Grey Goose",fields:[{key:"count",label:"Count"}],row:6,sheet:"LIQUOR"},
+    {d365:"1161573",name:"Grey Goose Poire 1L",fields:[{key:"count",label:"Count"}],row:7,sheet:"LIQUOR"},
+    {d365:"1151951",name:"Grey Goose L'Orange 1L",fields:[{key:"count",label:"Count"}],row:8,sheet:"LIQUOR"},
+    {d365:"00690713",name:"Altamura Distilleries",fields:[{key:"count",label:"Count"}],row:9,sheet:"LIQUOR"}
+  ]},
+  {name:"GIN",subtitle:"7 items",items:[
+    {d365:"1109414",name:"Bulldog",fields:[{key:"count",label:"Count"}],row:13,sheet:"LIQUOR"},
+    {d365:"1155529",name:"Drumshanbo Gunpowder Sardinian Citrus",fields:[{key:"count",label:"Count"}],row:14,sheet:"LIQUOR"},
+    {d365:"1126978",name:"Malfy Originale",fields:[{key:"count",label:"Count"}],row:15,sheet:"LIQUOR"},
+    {d365:"1133046",name:"Malfy Rosa",fields:[{key:"count",label:"Count"}],row:16,sheet:"LIQUOR"},
+    {d365:"1116814",name:"Hendricks",fields:[{key:"count",label:"Count"}],row:17,sheet:"LIQUOR"},
+    {d365:"505347",name:"Tanqueray",fields:[{key:"count",label:"Count"}],row:18,sheet:"LIQUOR"},
+    {d365:"1161085",name:"The Botanist",fields:[{key:"count",label:"Count"}],row:19,sheet:"LIQUOR"}
+  ]},
+  {name:"RUM",subtitle:"4 items",items:[
+    {d365:"1105087",name:"Flor de Cana 4yr Silver",fields:[{key:"count",label:"Count"}],row:23,sheet:"LIQUOR"},
+    {d365:"1127215",name:"Diplomatico Exclusiva",fields:[{key:"count",label:"Count"}],row:24,sheet:"LIQUOR"},
+    {d365:"1117004",name:"Bacardi Gold",fields:[{key:"count",label:"Count"}],row:25,sheet:"LIQUOR"},
+    {d365:"506914",name:"Zacapa 23yr",fields:[{key:"count",label:"Count"}],row:26,sheet:"LIQUOR"}
+  ]},
+  {name:"TEQUILA",subtitle:"4 items",items:[
+    {d365:"1106803",name:"Espolon Blanco",fields:[{key:"count",label:"Count"}],row:30,sheet:"LIQUOR"},
+    {d365:"1154461",name:"Altos Anejo",fields:[{key:"count",label:"Count"}],row:31,sheet:"LIQUOR"},
+    {d365:"00693580",name:"Cazadores Reposado",fields:[{key:"count",label:"Count"}],row:32,sheet:"LIQUOR"},
+    {d365:"1138246",name:"Espolon Reposado",fields:[{key:"count",label:"Count"}],row:33,sheet:"LIQUOR"}
+  ]},
+  {name:"MEZCAL",subtitle:"3 items",items:[
+    {d365:"1142594",name:"Montelobos Espadin Joven",fields:[{key:"count",label:"Count"}],row:37,sheet:"LIQUOR"},
+    {d365:"1142593",name:"Ilegal Reposado",fields:[{key:"count",label:"Count"}],row:38,sheet:"LIQUOR"},
+    {d365:"1146056",name:"400 Conejos Reposado",fields:[{key:"count",label:"Count"}],row:39,sheet:"LIQUOR"}
+  ]},
+  {name:"WHISKEY",subtitle:"8 items",items:[
+    {d365:"1158859",name:"Wild Turkey 81",fields:[{key:"count",label:"Count"}],row:43,sheet:"LIQUOR"},
+    {d365:"1163625",name:"Michter's Rye",fields:[{key:"count",label:"Count"}],row:44,sheet:"LIQUOR"},
+    {d365:"1162883",name:"Wild Turkey 101 Rye",fields:[{key:"count",label:"Count"}],row:45,sheet:"LIQUOR"},
+    {d365:"1117498",name:"Russell's Reserve Rye 6yr",fields:[{key:"count",label:"Count"}],row:46,sheet:"LIQUOR"},
+    {d365:"1119851",name:"Woodford Reserve Double Oaked",fields:[{key:"count",label:"Count"}],row:47,sheet:"LIQUOR"},
+    {d365:"1160159",name:"Tullamore Dew Irish",fields:[{key:"count",label:"Count"}],row:48,sheet:"LIQUOR"},
+    {d365:"1131626",name:"Maker's Mark",fields:[{key:"count",label:"Count"}],row:49,sheet:"LIQUOR"},
+    {d365:"1121891",name:"Russell's Reserve 10yr",fields:[{key:"count",label:"Count"}],row:50,sheet:"LIQUOR"}
+  ]},
+  {name:"SCOTCH",subtitle:"7 items",items:[
+    {d365:"519635",name:"Johnnie Walker Black",fields:[{key:"count",label:"Count"}],row:54,sheet:"LIQUOR"},
+    {d365:"1106149",name:"Macallan 12yr",fields:[{key:"count",label:"Count"}],row:55,sheet:"LIQUOR"},
+    {d365:"505339",name:"Macallan 18yr",fields:[{key:"count",label:"Count"}],row:56,sheet:"LIQUOR"},
+    {d365:"1122404",name:"Johnnie Walker Blue",fields:[{key:"count",label:"Count"}],row:57,sheet:"LIQUOR"},
+    {d365:"801172",name:"Laphroaig 10yr",fields:[{key:"count",label:"Count"}],row:58,sheet:"LIQUOR"},
+    {d365:"1157433",name:"The Dalmore 12yr",fields:[{key:"count",label:"Count"}],row:59,sheet:"LIQUOR"},
+    {d365:"508285",name:"Oban 14",fields:[{key:"count",label:"Count"}],row:60,sheet:"LIQUOR"}
+  ]},
+  {name:"VERMOUTH",subtitle:"3 items",items:[
+    {d365:"200624",name:"Carpano Antica Formula",fields:[{key:"count",label:"Count"}],row:64,sheet:"LIQUOR"},
+    {d365:"1153120",name:"Cocchi Extra Dry",fields:[{key:"count",label:"Count"}],row:65,sheet:"LIQUOR"},
+    {d365:"1123390",name:"Bordiga Vermouth Rosso",fields:[{key:"count",label:"Count"}],row:66,sheet:"LIQUOR"}
+  ]},
+  {name:"APERITIVO",subtitle:"6 items",items:[
+    {d365:"1120691",name:"Aperol",fields:[{key:"count",label:"Count"}],row:70,sheet:"LIQUOR"},
+    {d365:"505680",name:"Campari",fields:[{key:"count",label:"Count"}],row:71,sheet:"LIQUOR"},
+    {d365:"505707",name:"Cynar",fields:[{key:"count",label:"Count"}],row:72,sheet:"LIQUOR"},
+    {d365:"1135347",name:"Nonino Aperitivo",fields:[{key:"count",label:"Count"}],row:73,sheet:"LIQUOR"},
+    {d365:"1121476",name:"Italicus",fields:[{key:"count",label:"Count"}],row:74,sheet:"LIQUOR"},
+    {d365:"1100333",name:"Cappelletti Aperitivo",fields:[{key:"count",label:"Count"}],row:75,sheet:"LIQUOR"}
+  ]},
+  {name:"AMARO",subtitle:"10 items",items:[
+    {d365:"1104213",name:"Averna",fields:[{key:"count",label:"Count"}],row:79,sheet:"LIQUOR"},
+    {d365:"1100046",name:"Ramazzotti Amaro",fields:[{key:"count",label:"Count"}],row:80,sheet:"LIQUOR"},
+    {d365:"1100243",name:"Braulio",fields:[{key:"count",label:"Count"}],row:81,sheet:"LIQUOR"},
+    {d365:"506706",name:"Nonino Quintessentia",fields:[{key:"count",label:"Count"}],row:82,sheet:"LIQUOR"},
+    {d365:"1126513",name:"Montenegro Amaro",fields:[{key:"count",label:"Count"}],row:83,sheet:"LIQUOR"},
+    {d365:"100342",name:"Lucano",fields:[{key:"count",label:"Count"}],row:84,sheet:"LIQUOR"},
+    {d365:"1113282",name:"Cocchi Dopo Teatro Vermouth Amaro",fields:[{key:"count",label:"Count"}],row:85,sheet:"LIQUOR"},
+    {d365:"1116712",name:"Zucca Amaro Rabarbaro",fields:[{key:"count",label:"Count"}],row:86,sheet:"LIQUOR"},
+    {d365:"200627",name:"Punt e Mes",fields:[{key:"count",label:"Count"}],row:87,sheet:"LIQUOR"},
+    {d365:"1152746",name:"Amaro dell'Etna",fields:[{key:"count",label:"Count"}],row:88,sheet:"LIQUOR"}
+  ]},
+  {name:"COGNAC",subtitle:"1 item",items:[
+    {d365:"1163334",name:"Remy Martin VSOP",fields:[{key:"count",label:"Count"}],row:92,sheet:"LIQUOR"}
+  ]},
+  {name:"LIQUEUR",subtitle:"16 items",items:[
+    {d365:"100400",name:"Meletti Limoncello",fields:[{key:"count",label:"Count"}],row:96,sheet:"LIQUOR"},
+    {d365:"100413",name:"Meletti Sambuca",fields:[{key:"count",label:"Count"}],row:97,sheet:"LIQUOR"},
+    {d365:"200609",name:"Branca Menta",fields:[{key:"count",label:"Count"}],row:98,sheet:"LIQUOR"},
+    {d365:"200615",name:"Fernet Branca",fields:[{key:"count",label:"Count"}],row:99,sheet:"LIQUOR"},
+    {d365:"505314",name:"Frangelico",fields:[{key:"count",label:"Count"}],row:100,sheet:"LIQUOR"},
+    {d365:"00669922",name:"Carpano Classico",fields:[{key:"count",label:"Count"}],row:101,sheet:"LIQUOR"},
+    {d365:"1137938",name:"Ramazzotti Rosato",fields:[{key:"count",label:"Count"}],row:102,sheet:"LIQUOR"},
+    {d365:"200765",name:"Cocchi Americano Bianco",fields:[{key:"count",label:"Count"}],row:103,sheet:"LIQUOR"},
+    {d365:"100401",name:"Pallini Limoncello",fields:[{key:"count",label:"Count"}],row:104,sheet:"LIQUOR"},
+    {d365:"1116389",name:"Luxardo Espresso",fields:[{key:"count",label:"Count"}],row:105,sheet:"LIQUOR"},
+    {d365:"505286",name:"Luxardo Maraschino",fields:[{key:"count",label:"Count"}],row:106,sheet:"LIQUOR"},
+    {d365:"1116710",name:"Luxardo Bitter Bianco",fields:[{key:"count",label:"Count"}],row:107,sheet:"LIQUOR"},
+    {d365:"1100061",name:"Luxardo Amaretto",fields:[{key:"count",label:"Count"}],row:108,sheet:"LIQUOR"},
+    {d365:"1119514",name:"Luxardo Triple Sec",fields:[{key:"count",label:"Count"}],row:109,sheet:"LIQUOR"},
+    {d365:"505343",name:"St Germain",fields:[{key:"count",label:"Count"}],row:110,sheet:"LIQUOR"},
+    {d365:"00676382",name:"Luxardo Del Santo",fields:[{key:"count",label:"Count"}],row:111,sheet:"LIQUOR"}
+  ]},
+  {name:"N.A. SPIRITS",subtitle:"4 items",items:[
+    {d365:"1152568",name:"Lyre's NA Sparkling",fields:[{key:"count",label:"Count"}],row:120,sheet:"LIQUOR"},
+    {d365:"1151638",name:"Lyre's Italian Orange",fields:[{key:"count",label:"Count"}],row:121,sheet:"LIQUOR"},
+    {d365:"1152567",name:"Lyre's London Dry",fields:[{key:"count",label:"Count"}],row:122,sheet:"LIQUOR"},
+    {d365:"1155641",name:"Lyre's Rosso",fields:[{key:"count",label:"Count"}],row:123,sheet:"LIQUOR"}
+  ]},
+  {name:"Syrups & Bitters",subtitle:"8 items",items:[
+    {d365:"1142565",name:"Agave",fields:[{key:"count",label:"Count"}],row:55,sheet:"NA BEV & GARNISH"},
+    {d365:"101508",name:"Honey",fields:[{key:"count",label:"Count"}],row:56,sheet:"NA BEV & GARNISH"},
+    {d365:"1107496",name:"Maple Syrup",fields:[{key:"count",label:"Count"}],row:57,sheet:"NA BEV & GARNISH"},
+    {d365:"1148329",name:"Pomegranate Puree",fields:[{key:"count",label:"Count"}],row:58,sheet:"NA BEV & GARNISH"},
+    {d365:"101461",name:"Grenadine",fields:[{key:"count",label:"Count"}],row:59,sheet:"NA BEV & GARNISH"},
+    {d365:"00692026",name:"Filthy Spicy Agave Syrup",fields:[{key:"count",label:"Count"}],row:62,sheet:"NA BEV & GARNISH"},
+    {d365:"100353",name:"Angostura Bitters",fields:[{key:"count",label:"Count"}],row:64,sheet:"NA BEV & GARNISH"},
+    {d365:"100354",name:"Orange Bitters",fields:[{key:"count",label:"Count"}],row:65,sheet:"NA BEV & GARNISH"}
+  ]}
+]},
+{stop:"WALK-IN",icon:"🧊",sections:[
+  {name:"Prosecco & Sparkling",subtitle:"Bulk walk-in stock",items:[
+    {d365:"1136347",name:"Ronco Belvedere — Prosecco",fields:[{key:"cage",label:"Cage"},{key:"cellar",label:"Cellar"}],row:3,sheet:"BTG WINE+BEER"},
+    {d365:"00671872",name:"Canella — Mimosa Granriviera 750",fields:[{key:"cage",label:"Cage"},{key:"cellar",label:"Cellar"}],row:24,sheet:"BTG WINE+BEER"},
+    {d365:"521709",name:"Canella — Bellini",fields:[{key:"cage",label:"Cage"},{key:"cellar",label:"Cellar"}],row:25,sheet:"BTG WINE+BEER"}
+  ]},
+  {name:"Beer & Keg",subtitle:"9 items",items:[
+    {d365:"1100467",name:"Peroni — Nastro Azzurro — Italian Lager 5%",fields:[{key:"count",label:"Count"}],row:30,sheet:"BTG WINE+BEER"},
+    {d365:"00692737",name:"Yards — Philadelphia Pale Ale 4.6%",fields:[{key:"count",label:"Count"}],row:31,sheet:"BTG WINE+BEER"},
+    {d365:"00692736",name:"Bru Daddy — Haze Daddy — Hazy IPA 6.3%",fields:[{key:"count",label:"Count"}],row:32,sheet:"BTG WINE+BEER"},
+    {d365:"00692735",name:"1911 — Honeycrisp — Cider 5.5%",fields:[{key:"count",label:"Count"}],row:33,sheet:"BTG WINE+BEER"},
+    {d365:"100321",name:"Peroni (Btls — If Needed) — Nastro Azzurro",fields:[{key:"count",label:"Count"}],row:34,sheet:"BTG WINE+BEER"},
+    {d365:"00687694",name:"Von C — OG Pils — Philly Lager 4.9%",fields:[{key:"count",label:"Count"}],row:35,sheet:"BTG WINE+BEER"},
+    {d365:"00687699",name:"Von C — Walking on Clouds IPA",fields:[{key:"count",label:"Count"}],row:36,sheet:"BTG WINE+BEER"},
+    {d365:"1155723",name:"Peroni — 0.0 — Zero Proof",fields:[{key:"count",label:"Count"}],row:37,sheet:"BTG WINE+BEER"},
+    {d365:"00698704",name:"Yards — Brawler 1/6 Keg",fields:[{key:"count",label:"Count"}],row:38,sheet:"BTG WINE+BEER"}
+  ]},
+  {name:"Juices",subtitle:"5 items",items:[
+    {d365:"101457",name:"Orange Juice",fields:[{key:"count",label:"Count"}],row:3,sheet:"NA BEV & GARNISH"},
+    {d365:"1111723",name:"Lemon Juice",fields:[{key:"count",label:"Count"}],row:4,sheet:"NA BEV & GARNISH"},
+    {d365:"101455",name:"Lime Juice",fields:[{key:"count",label:"Count"}],row:5,sheet:"NA BEV & GARNISH"},
+    {d365:"1119342",name:"Pineapple Juice",fields:[{key:"count",label:"Count"}],row:6,sheet:"NA BEV & GARNISH"},
+    {d365:"101454",name:"Cranberry Juice",fields:[{key:"count",label:"Count"}],row:7,sheet:"NA BEV & GARNISH"}
+  ]},
+  {name:"Dairy & Milk",subtitle:"3 items",items:[
+    {d365:"1159135",name:"Whole Milk",fields:[{key:"count",label:"Count"}],row:11,sheet:"NA BEV & GARNISH"},
+    {d365:"1125252",name:"Oat Milk",fields:[{key:"count",label:"Count"}],row:12,sheet:"NA BEV & GARNISH"},
+    {d365:"1159137",name:"Half & Half",fields:[{key:"count",label:"Count"}],row:13,sheet:"NA BEV & GARNISH"}
+  ]},
+  {name:"Water & Soda",subtitle:"9 items",items:[
+    {d365:"1144705",name:"San Pellegrino 750ml Sparkling",fields:[{key:"count",label:"Count"}],row:17,sheet:"NA BEV & GARNISH"},
+    {d365:"1163669",name:"San Benedetto 25.4oz Still",fields:[{key:"count",label:"Count"}],row:18,sheet:"NA BEV & GARNISH"},
+    {d365:"800017",name:"S. Pellegrino 11.15oz Aranciata Rossa",fields:[{key:"count",label:"Count"}],row:19,sheet:"NA BEV & GARNISH"},
+    {d365:"800016",name:"S. Pellegrino 11.15oz Pompelmo",fields:[{key:"count",label:"Count"}],row:20,sheet:"NA BEV & GARNISH"},
+    {d365:"1126712",name:"S. Pellegrino 11.15oz Limonata",fields:[{key:"count",label:"Count"}],row:21,sheet:"NA BEV & GARNISH"},
+    {d365:"1164662",name:"Fever Tree Tonic 16.9oz",fields:[{key:"count",label:"Count"}],row:22,sheet:"NA BEV & GARNISH"},
+    {d365:"1124369",name:"Fever Tree Club Soda 16.9oz",fields:[{key:"count",label:"Count"}],row:23,sheet:"NA BEV & GARNISH"},
+    {d365:"1142758",name:"Fever Tree Ginger Beer 16.9oz",fields:[{key:"count",label:"Count"}],row:24,sheet:"NA BEV & GARNISH"},
+    {d365:"1148781",name:"Ginger Ale",fields:[{key:"count",label:"Count"}],row:25,sheet:"NA BEV & GARNISH"}
+  ]},
+  {name:"EPL & Molecola",subtitle:"6 items",items:[
+    {d365:"00675723",name:"EPL Limonata",fields:[{key:"count",label:"Count"}],row:29,sheet:"NA BEV & GARNISH"},
+    {d365:"00675722",name:"EPL Vivace (Orange)",fields:[{key:"count",label:"Count"}],row:30,sheet:"NA BEV & GARNISH"},
+    {d365:"00675724",name:"EPL Cola Classic",fields:[{key:"count",label:"Count"}],row:31,sheet:"NA BEV & GARNISH"},
+    {d365:"00675725",name:"EPL Cola Sugar-Free",fields:[{key:"count",label:"Count"}],row:32,sheet:"NA BEV & GARNISH"},
+    {d365:"00184029",name:"Molecola Cola Classic",fields:[{key:"count",label:"Count"}],row:33,sheet:"NA BEV & GARNISH"},
+    {d365:"00184028",name:"Molecola Cola SF",fields:[{key:"count",label:"Count"}],row:34,sheet:"NA BEV & GARNISH"}
+  ]},
+  {name:"Garnish & Produce",subtitle:"7 items",items:[
+    {d365:"1164566",name:"Oranges",fields:[{key:"count",label:"Count"}],row:45,sheet:"NA BEV & GARNISH"},
+    {d365:"102068",name:"Lemons",fields:[{key:"count",label:"Count"}],row:46,sheet:"NA BEV & GARNISH"},
+    {d365:"102091",name:"Limes",fields:[{key:"count",label:"Count"}],row:47,sheet:"NA BEV & GARNISH"},
+    {d365:"102098",name:"Mint Fresh",fields:[{key:"count",label:"Count"}],row:48,sheet:"NA BEV & GARNISH"},
+    {d365:"1103107",name:"Castelvetrano Olives",fields:[{key:"count",label:"Count"}],row:49,sheet:"NA BEV & GARNISH"},
+    {d365:"1115772",name:"Luxardo Cherries",fields:[{key:"count",label:"Count"}],row:50,sheet:"NA BEV & GARNISH"},
+    {d365:"00698708",name:"Filthy Bloody Mary Mix",fields:[{key:"count",label:"Count"}],row:51,sheet:"NA BEV & GARNISH"}
+  ]}
+]},
+{stop:"BACK BAR",icon:"🍸",sections:[
+  {name:"BTG Wine — Floor",subtitle:"Open/in-use bottles",items:[
+    {d365:"1136347",name:"Ronco Belvedere — Prosecco",fields:[{key:"floor",label:"Floor"}],row:3,sheet:"BTG WINE+BEER"},
+    {d365:"1136348",name:"Ronco Belvedere — Lambrusco",fields:[{key:"floor",label:"Floor"}],row:4,sheet:"BTG WINE+BEER"},
+    {d365:"00702794",name:"Lucci — Lambrusco Reggiano DOC Secco",fields:[{key:"floor",label:"Floor"}],row:5,sheet:"BTG WINE+BEER"},
+    {d365:"1151781",name:"Cascina Asinari — Moscato d'Asti",fields:[{key:"floor",label:"Floor"}],row:6,sheet:"BTG WINE+BEER"},
+    {d365:"200517",name:"Cantine Ferrari — Trento DOC",fields:[{key:"floor",label:"Floor"}],row:7,sheet:"BTG WINE+BEER"},
+    {d365:"1113651",name:"Baglio di Grisi — Grillo",fields:[{key:"floor",label:"Floor"}],row:8,sheet:"BTG WINE+BEER"},
+    {d365:"1119524",name:"Fontanafredda — Arneis Pradalupo",fields:[{key:"floor",label:"Floor"}],row:9,sheet:"BTG WINE+BEER"},
+    {d365:"1121887",name:"La Staffa — Verdicchio Castello di Jesi",fields:[{key:"floor",label:"Floor"}],row:10,sheet:"BTG WINE+BEER"},
+    {d365:"1120834",name:"Feudi di San Gregorio — Falanghina",fields:[{key:"floor",label:"Floor"}],row:11,sheet:"BTG WINE+BEER"},
+    {d365:"1112217",name:"Jermann — Pinot Grigio",fields:[{key:"floor",label:"Floor"}],row:12,sheet:"BTG WINE+BEER"},
+    {d365:"1114289",name:"Tormaresca — Califuria Rosato",fields:[{key:"floor",label:"Floor"}],row:13,sheet:"BTG WINE+BEER"},
+    {d365:"1122135",name:"La Mozza — Cabernet Sauvignon 'I Perazzi'",fields:[{key:"floor",label:"Floor"}],row:14,sheet:"BTG WINE+BEER"},
+    {d365:"1121578",name:"Planeta — La Segreta Rosso",fields:[{key:"floor",label:"Floor"}],row:15,sheet:"BTG WINE+BEER"},
+    {d365:"1114012",name:"Valle Reale — Montepulciano d'Abruzzo",fields:[{key:"floor",label:"Floor"}],row:16,sheet:"BTG WINE+BEER"},
+    {d365:"1140193",name:"Colombaio di Cencio — Chianti Classico",fields:[{key:"floor",label:"Floor"}],row:17,sheet:"BTG WINE+BEER"},
+    {d365:"1120559",name:"Fontanafredda — Barbera 'Briccotondo'",fields:[{key:"floor",label:"Floor"}],row:18,sheet:"BTG WINE+BEER"},
+    {d365:"1119793",name:"Allegrini — Valpolicella",fields:[{key:"floor",label:"Floor"}],row:19,sheet:"BTG WINE+BEER"},
+    {d365:"1109844",name:"Mirafiore — Nebbiolo",fields:[{key:"floor",label:"Floor"}],row:20,sheet:"BTG WINE+BEER"},
+    {d365:"1126687",name:"Feudo Montoni — Nero d'Avola Lagnusa",fields:[{key:"floor",label:"Floor"}],row:21,sheet:"BTG WINE+BEER"},
+    {d365:"1107052",name:"Fontanafredda — Nebbiolo Langhe Ebbio 2013",fields:[{key:"floor",label:"Floor"}],row:22,sheet:"BTG WINE+BEER"},
+    {d365:"1133781",name:"Elena Walch — Chardonnay",fields:[{key:"floor",label:"Floor"}],row:23,sheet:"BTG WINE+BEER"},
+    {d365:"00671872",name:"Canella — Mimosa Granriviera 750",fields:[{key:"floor",label:"Floor"}],row:24,sheet:"BTG WINE+BEER"},
+    {d365:"521709",name:"Canella — Bellini",fields:[{key:"floor",label:"Floor"}],row:25,sheet:"BTG WINE+BEER"},
+    {d365:"1119309",name:"Argiolas — Costamolino Vermentino",fields:[{key:"floor",label:"Floor"}],row:26,sheet:"BTG WINE+BEER"}
+  ]},
+
+  {name:"Vodka — Back Bar",subtitle:"6 items",items:[
+    {d365:"1132118",name:"Tito's — Handmade Vodka",fields:[{key:"floor",label:"Floor"}],row:3,sheet:"LIQUOR"},
+    {d365:"505335",name:"Ketel One",fields:[{key:"floor",label:"Floor"}],row:4,sheet:"LIQUOR"},
+    {d365:"505324",name:"Belvedere",fields:[{key:"floor",label:"Floor"}],row:5,sheet:"LIQUOR"},
+    {d365:"505329",name:"Grey Goose",fields:[{key:"floor",label:"Floor"}],row:6,sheet:"LIQUOR"},
+    {d365:"1161573",name:"Grey Goose — Poire 1L",fields:[{key:"floor",label:"Floor"}],row:7,sheet:"LIQUOR"},
+    {d365:"1151951",name:"Grey Goose — L'Orange 1L",fields:[{key:"floor",label:"Floor"}],row:8,sheet:"LIQUOR"}
+  ]},
+  {name:"Gin — Back Bar",subtitle:"4 items",items:[
+    {d365:"1155529",name:"Drumshanbo — Gunpowder Sardinian Citrus",fields:[{key:"floor",label:"Floor"}],row:14,sheet:"LIQUOR"},
+    {d365:"1133046",name:"Malfy — Rosa",fields:[{key:"floor",label:"Floor"}],row:16,sheet:"LIQUOR"},
+    {d365:"1116814",name:"Hendricks",fields:[{key:"floor",label:"Floor"}],row:17,sheet:"LIQUOR"},
+    {d365:"505347",name:"Tanqueray",fields:[{key:"floor",label:"Floor"}],row:18,sheet:"LIQUOR"}
+  ]},
+  {name:"Rum — Back Bar",subtitle:"2 items",items:[
+    {d365:"1127215",name:"Diplomatico — Exclusiva 80 Proof",fields:[{key:"floor",label:"Floor"}],row:24,sheet:"LIQUOR"},
+    {d365:"506914",name:"Zacapa — 23yr",fields:[{key:"floor",label:"Floor"}],row:26,sheet:"LIQUOR"}
+  ]},
+  {name:"Tequila — Back Bar",subtitle:"3 items",items:[
+    {d365:"1154461",name:"Altos — Anejo",fields:[{key:"floor",label:"Floor"}],row:31,sheet:"LIQUOR"},
+    {d365:"00693580",name:"Cazadores — Reposado",fields:[{key:"floor",label:"Floor"}],row:32,sheet:"LIQUOR"},
+    {d365:"1138246",name:"Espolon — Reposado",fields:[{key:"floor",label:"Floor"}],row:33,sheet:"LIQUOR"}
+  ]},
+  {name:"Mezcal — Back Bar",subtitle:"2 items",items:[
+    {d365:"1142593",name:"Ilegal — Reposado",fields:[{key:"floor",label:"Floor"}],row:38,sheet:"LIQUOR"},
+    {d365:"1146056",name:"400 Conejos — Reposado 80 Proof",fields:[{key:"floor",label:"Floor"}],row:39,sheet:"LIQUOR"}
+  ]},
+  {name:"Whiskey — Back Bar",subtitle:"8 items",items:[
+    {d365:"508285",name:"Oban — 14yr",fields:[{key:"floor",label:"Floor"}],row:60,sheet:"LIQUOR"},
+    {d365:"1163625",name:"Michter's — Rye",fields:[{key:"floor",label:"Floor"}],row:44,sheet:"LIQUOR"},
+    {d365:"1162883",name:"Wild Turkey — 101 Rye",fields:[{key:"floor",label:"Floor"}],row:45,sheet:"LIQUOR"},
+    {d365:"1117498",name:"Russell's Reserve — Rye 6yr",fields:[{key:"floor",label:"Floor"}],row:46,sheet:"LIQUOR"},
+    {d365:"1119851",name:"Woodford Reserve — Double Oaked",fields:[{key:"floor",label:"Floor"}],row:47,sheet:"LIQUOR"},
+    {d365:"1160159",name:"Tullamore Dew — Irish Whiskey",fields:[{key:"floor",label:"Floor"}],row:48,sheet:"LIQUOR"},
+    {d365:"1131626",name:"Maker's Mark",fields:[{key:"floor",label:"Floor"}],row:49,sheet:"LIQUOR"},
+    {d365:"1121891",name:"Russell's Reserve — 10yr",fields:[{key:"floor",label:"Floor"}],row:50,sheet:"LIQUOR"}
+  ]},
+  {name:"Scotch — Back Bar",subtitle:"6 items",items:[
+    {d365:"519635",name:"Johnnie Walker — Black",fields:[{key:"floor",label:"Floor"}],row:54,sheet:"LIQUOR"},
+    {d365:"1106149",name:"Macallan — 12yr",fields:[{key:"floor",label:"Floor"}],row:55,sheet:"LIQUOR"},
+    {d365:"505339",name:"Macallan — 18yr",fields:[{key:"floor",label:"Floor"}],row:56,sheet:"LIQUOR"},
+    {d365:"1122404",name:"Johnnie Walker — Blue",fields:[{key:"floor",label:"Floor"}],row:57,sheet:"LIQUOR"},
+    {d365:"801172",name:"Laphroaig — 10yr Malt",fields:[{key:"floor",label:"Floor"}],row:58,sheet:"LIQUOR"},
+    {d365:"1157433",name:"The Dalmore — 12yr",fields:[{key:"floor",label:"Floor"}],row:59,sheet:"LIQUOR"}
+  ]},
+  {name:"Vermouth & Amaro — Back Bar",subtitle:"11 items",items:[
+    {d365:"1123390",name:"Bordiga — Vermouth Rosso",fields:[{key:"floor",label:"Floor"}],row:66,sheet:"LIQUOR"},
+    {d365:"1104213",name:"Averna — Amaro Siciliano",fields:[{key:"floor",label:"Floor"}],row:79,sheet:"LIQUOR"},
+    {d365:"1100046",name:"Ramazzotti — Amaro",fields:[{key:"floor",label:"Floor"}],row:80,sheet:"LIQUOR"},
+    {d365:"1100243",name:"Braulio",fields:[{key:"floor",label:"Floor"}],row:81,sheet:"LIQUOR"},
+    {d365:"506706",name:"Nonino — Quintessentia",fields:[{key:"floor",label:"Floor"}],row:82,sheet:"LIQUOR"},
+    {d365:"1126513",name:"Montenegro — Amaro",fields:[{key:"floor",label:"Floor"}],row:83,sheet:"LIQUOR"},
+    {d365:"100342",name:"Lucano — Amaro",fields:[{key:"floor",label:"Floor"}],row:84,sheet:"LIQUOR"},
+    {d365:"1113282",name:"Cocchi — Dopo Teatro Vermouth Amaro",fields:[{key:"floor",label:"Floor"}],row:85,sheet:"LIQUOR"},
+    {d365:"1116712",name:"Zucca — Amaro Rabarbaro",fields:[{key:"floor",label:"Floor"}],row:86,sheet:"LIQUOR"},
+    {d365:"200627",name:"Punt e Mes",fields:[{key:"floor",label:"Floor"}],row:87,sheet:"LIQUOR"},
+    {d365:"1152746",name:"Amaro dell'Etna",fields:[{key:"floor",label:"Floor"}],row:88,sheet:"LIQUOR"}
+  ]},
+  {name:"Cognac & Grappa — Back Bar",subtitle:"3 items",items:[
+    {d365:"1163334",name:"Remy Martin — VSOP",fields:[{key:"floor",label:"Floor"}],row:92,sheet:"LIQUOR"},
+    {d365:"513847",name:"Nonino — Grappa Chardonnay",fields:[{key:"floor",label:"Floor"}],row:115,sheet:"LIQUOR"},
+    {d365:"1108445",name:"Poli Sarpa Oro — Grappa",fields:[{key:"floor",label:"Floor"}],row:116,sheet:"LIQUOR"}
+  ]},
+  {name:"Liqueur — Back Bar",subtitle:"7 items",items:[
+    {d365:"100400",name:"Meletti — Limoncello",fields:[{key:"floor",label:"Floor"}],row:96,sheet:"LIQUOR"},
+    {d365:"100413",name:"Meletti — Sambuca",fields:[{key:"floor",label:"Floor"}],row:97,sheet:"LIQUOR"},
+    {d365:"200609",name:"Branca — Menta",fields:[{key:"floor",label:"Floor"}],row:98,sheet:"LIQUOR"},
+    {d365:"200615",name:"Fernet Branca",fields:[{key:"floor",label:"Floor"}],row:99,sheet:"LIQUOR"},
+    {d365:"505314",name:"Frangelico",fields:[{key:"floor",label:"Floor"}],row:100,sheet:"LIQUOR"},
+    {d365:"00669922",name:"Carpano — Classico (Rosso)",fields:[{key:"floor",label:"Floor"}],row:101,sheet:"LIQUOR"},
+    {d365:"00676382",name:"Luxardo — Del Santo Liqueur",fields:[{key:"floor",label:"Floor"}],row:111,sheet:"LIQUOR"}
+  ]},
+  {name:"Cortina Items",subtitle:"2 spirits + 5 garnish",items:[
+    {d365:"SALERS",name:"Salers — Gentiane Aperitif",fields:[{key:"floor",label:"Floor"}],row:115,sheet:"BAR PAR"},
+    {d365:"ROCKEYS",name:"Rockey's Botanical",fields:[{key:"floor",label:"Floor"}],row:116,sheet:"BAR PAR"},
+    {d365:"00696426",name:"Rosemary",fields:[{key:"count",label:"Count"}],row:61,sheet:"NA BEV & GARNISH"},
+    {d365:"1148329",name:"Pomegranate Puree",fields:[{key:"count",label:"Count"}],row:58,sheet:"NA BEV & GARNISH"},
+    {d365:"101508",name:"Honey",fields:[{key:"count",label:"Count"}],row:56,sheet:"NA BEV & GARNISH"},
+    {d365:"1142565",name:"Agave",fields:[{key:"count",label:"Count"}],row:55,sheet:"NA BEV & GARNISH"},
+    {d365:"1107496",name:"Maple Syrup",fields:[{key:"count",label:"Count"}],row:57,sheet:"NA BEV & GARNISH"}
+  ]},
+  {name:"Garnish & Produce",subtitle:"7 items",items:[
+    {d365:"1164566",name:"Oranges",fields:[{key:"count",label:"Count"}],row:45,sheet:"NA BEV & GARNISH"},
+    {d365:"102068",name:"Lemons",fields:[{key:"count",label:"Count"}],row:46,sheet:"NA BEV & GARNISH"},
+    {d365:"102091",name:"Limes",fields:[{key:"count",label:"Count"}],row:47,sheet:"NA BEV & GARNISH"},
+    {d365:"102098",name:"Mint Fresh",fields:[{key:"count",label:"Count"}],row:48,sheet:"NA BEV & GARNISH"},
+    {d365:"1103107",name:"Castelvetrano Olives",fields:[{key:"count",label:"Count"}],row:49,sheet:"NA BEV & GARNISH"},
+    {d365:"1115772",name:"Luxardo Cherries",fields:[{key:"count",label:"Count"}],row:50,sheet:"NA BEV & GARNISH"},
+    {d365:"00698708",name:"Filthy Bloody Mary Mix",fields:[{key:"count",label:"Count"}],row:51,sheet:"NA BEV & GARNISH"}
+  ]},
+  {name:"Bar Juices & Dairy",subtitle:"8 items",items:[
+    {d365:"101457",name:"Orange Juice",fields:[{key:"count",label:"Count"}],row:3,sheet:"NA BEV & GARNISH"},
+    {d365:"1111723",name:"Lemon Juice",fields:[{key:"count",label:"Count"}],row:4,sheet:"NA BEV & GARNISH"},
+    {d365:"101455",name:"Lime Juice",fields:[{key:"count",label:"Count"}],row:5,sheet:"NA BEV & GARNISH"},
+    {d365:"1119342",name:"Pineapple Juice",fields:[{key:"count",label:"Count"}],row:6,sheet:"NA BEV & GARNISH"},
+    {d365:"101454",name:"Cranberry Juice",fields:[{key:"count",label:"Count"}],row:7,sheet:"NA BEV & GARNISH"},
+    {d365:"1159135",name:"Whole Milk",fields:[{key:"count",label:"Count"}],row:11,sheet:"NA BEV & GARNISH"},
+    {d365:"1125252",name:"Oat Milk",fields:[{key:"count",label:"Count"}],row:12,sheet:"NA BEV & GARNISH"},
+    {d365:"1159137",name:"Half & Half",fields:[{key:"count",label:"Count"}],row:13,sheet:"NA BEV & GARNISH"}
+  ]},
+  {name:"Syrups, Bitters & Coffee",subtitle:"11 items",items:[
+    {d365:"1142565",name:"Agave",fields:[{key:"count",label:"Count"}],row:55,sheet:"NA BEV & GARNISH"},
+    {d365:"101508",name:"Honey",fields:[{key:"count",label:"Count"}],row:56,sheet:"NA BEV & GARNISH"},
+    {d365:"1107496",name:"Maple Syrup",fields:[{key:"count",label:"Count"}],row:57,sheet:"NA BEV & GARNISH"},
+    {d365:"1148329",name:"Pomegranate Puree",fields:[{key:"count",label:"Count"}],row:58,sheet:"NA BEV & GARNISH"},
+    {d365:"101461",name:"Grenadine",fields:[{key:"count",label:"Count"}],row:59,sheet:"NA BEV & GARNISH"},
+    {d365:"00692026",name:"Filthy Spicy Agave Syrup",fields:[{key:"count",label:"Count"}],row:62,sheet:"NA BEV & GARNISH"},
+    {d365:"00692027",name:"Filthy Olive Juice Brine",fields:[{key:"count",label:"Count"}],row:63,sheet:"NA BEV & GARNISH"},
+    {d365:"100353",name:"Angostura Bitters",fields:[{key:"count",label:"Count"}],row:64,sheet:"NA BEV & GARNISH"},
+    {d365:"100354",name:"Orange Bitters",fields:[{key:"count",label:"Count"}],row:65,sheet:"NA BEV & GARNISH"},
+    {d365:"506485",name:"Espresso Pod (Single)",fields:[{key:"count",label:"Count"}],row:38,sheet:"NA BEV & GARNISH"},
+    {d365:"1134996",name:"Espresso Pod (Decaf)",fields:[{key:"count",label:"Count"}],row:39,sheet:"NA BEV & GARNISH"}
+  ]}
+]}
+];
+
+// ── STATE ──
+let currentStop = 0;
+let counts = {};   // "sheet|row|field" -> number
+let flags = {};    // "sheet|row" -> {type: '86'|'low'|'reorder', note: string}
+let shiftNotes = '';
+let activeFlagItem = null; // {item, flagKey}
+const TODAY = new Date().toISOString().slice(0,10);
+const STORAGE_KEY = 'pipa-count-' + TODAY;
+const FLAGS_KEY   = 'pipa-flags-' + TODAY;
+const NOTES_KEY   = 'pipa-notes-' + TODAY;
+
+try { const s = localStorage.getItem(STORAGE_KEY); if (s) counts = JSON.parse(s); } catch(e){}
+try { const s = localStorage.getItem(FLAGS_KEY);   if (s) flags  = JSON.parse(s); } catch(e){}
+try { const s = localStorage.getItem(NOTES_KEY);   if (s) shiftNotes = s; } catch(e){}
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(counts)); } catch(e){}
+}
+function saveFlags() {
+  try { localStorage.setItem(FLAGS_KEY, JSON.stringify(flags)); } catch(e){}
+}
+function saveNotesStorage() {
+  try { localStorage.setItem(NOTES_KEY, shiftNotes); } catch(e){}
+}
+
+function countKey(item, fieldKey) { return `${item.sheet}|${item.row}|${fieldKey}`; }
+function flagKey(item)            { return `${item.sheet}|${item.row}`; }
+
+// ── DATE ──
+document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('en-US', {
+  weekday:'short', month:'short', day:'numeric'
+});
+
+// ── NOTES BUTTON INDICATOR ──
+function updateNotesBtn() {
+  const btn = document.getElementById('notesBtn');
+  btn.innerHTML = shiftNotes.trim()
+    ? `<span class="notes-indicator"></span>📝 Notes`
+    : '📝 Notes';
+}
+updateNotesBtn();
+
+// ── RENDER TABS ──
+function renderTabs() {
+  const container = document.getElementById('stopTabs');
+  container.innerHTML = WALK_ROUTE.map((stop, i) => {
+    const totalItems = stop.sections.reduce((s, sec) => s + sec.items.length, 0);
+    const counted = stop.sections.reduce((s, sec) =>
+      s + sec.items.filter(item =>
+        item.fields.some(f => counts[countKey(item, f.key)] !== undefined)
+      ).length
+    , 0);
+    const flagged = stop.sections.reduce((s, sec) =>
+      s + sec.items.filter(item => flags[flagKey(item)]).length
+    , 0);
+    const active = i === currentStop ? 'active' : '';
+    return `<div class="stop-tab ${active}" onclick="switchStop(${i})">
+      ${stop.icon} ${stop.stop}
+      <span class="badge">${counted}/${totalItems}${flagged ? ' 🚩' : ''}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER SECTIONS ──
+function renderSections() {
+  const stop = WALK_ROUTE[currentStop];
+  const container = document.getElementById('mainScroll');
+
+  // Save scroll position and which sections are collapsed
+  const savedScroll = container.scrollTop;
+  const collapsedSections = new Set();
+  container.querySelectorAll('.section-header.collapsed').forEach(function(h) {
+    var nameEl = h.querySelector('h2');
+    if (nameEl) collapsedSections.add(nameEl.textContent.trim().split('\n')[0].trim());
+  });
+
+  container.innerHTML = stop.sections.map((sec, si) => {
+    const counted = sec.items.filter(item =>
+      item.fields.some(f => counts[countKey(item, f.key)] !== undefined)
+    ).length;
+    const total = sec.items.length;
+    if (total === 0) return '';
+
+    const itemsHTML = sec.items.map((item) => {
+      const hasCounts = item.fields.some(f => counts[countKey(item, f.key)] !== undefined);
+      const fk = flagKey(item);
+      const flagData = flags[fk];
+
+      // Flag class
+      let flagClass = '';
+      let flagBadge = '';
+      if (flagData) {
+        if (flagData.type === '86') { flagClass = 'flag-86'; flagBadge = '<span class="flag-badge b86">86\'d</span>'; }
+        if (flagData.type === 'low') { flagClass = 'flag-low'; flagBadge = '<span class="flag-badge low">Low</span>'; }
+        if (flagData.type === 'reorder') { flagClass = 'flag-reorder'; flagBadge = '<span class="flag-badge reorder">Reorder</span>'; }
+      }
+      const hasNote = flagData && flagData.note && flagData.note.trim();
+      const noteClass = hasNote ? 'has-note' : '';
+
+      const fieldsHTML = item.fields.map(f => {
+        const key = countKey(item, f.key);
+        const val = counts[key] !== undefined ? counts[key] : '';
+        const hasVal = val !== '';
+        return `<div class="count-field">
+          <span class="count-label">${f.label}</span>
+          <input type="number" inputmode="numeric" pattern="[0-9]*"
+            class="count-input ${hasVal ? 'has-value' : ''}"
+            value="${val}"
+            data-key="${key}"
+            onfocus="this.select()"
+            oninput="onCount(this)"
+            placeholder="–">
+        </div>`;
+      }).join('');
+
+      const meta = item.bin ? `BIN ${item.bin}` : item.d365;
+      const flagIconActive = flagData ? '🚩' : '⚑';
+
+      return `<div class="item-row ${hasCounts ? 'counted' : ''} ${flagClass} ${noteClass}" data-fk="${fk}">
+        <div class="item-info">
+          <div class="item-name">${item.name}</div>
+          <div class="item-meta">${meta} ${flagBadge}</div>
+        </div>
+        <div class="count-cluster">
+          ${fieldsHTML}
+          <button class="flag-btn ${flagData ? 'active' : ''}"
+            onclick="openFlagSheet(${si}, '${fk}', '${item.name.replace(/'/g,"\\'")}', '${meta}')"
+            title="Flag item">
+            ${flagData ? '🚩' : '⚑'}
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div>
+      <div class="section-header" onclick="toggleSection(this)">
+        <div>
+          <h2>${sec.name}<span class="sub">${sec.subtitle || ''}</span></h2>
+        </div>
+        <span class="progress">${counted}/${total}</span>
+      </div>
+      <div class="section-body">${itemsHTML}</div>
+    </div>`;
+  }).join('');
+
+  // Restore collapsed state
+  container.querySelectorAll('.section-header').forEach(function(h) {
+    var nameEl = h.querySelector('h2');
+    if (!nameEl) return;
+    var secName = nameEl.textContent.trim().split('\n')[0].trim();
+    if (collapsedSections.has(secName)) {
+      h.classList.add('collapsed');
+      var body = h.nextElementSibling;
+      if (body) body.classList.add('collapsed');
+    }
+  });
+
+  // Restore scroll position (requestAnimationFrame ensures DOM is ready)
+  requestAnimationFrame(function() { container.scrollTop = savedScroll; });
+}
+
+function switchStop(i) {
+  currentStop = i;
+  // When switching stops, reset scroll — no preserved state needed
+  var container = document.getElementById('mainScroll');
+  if (container) container.scrollTop = 0;
+  renderTabs();
+  renderSections();
+}
+
+function toggleSection(header) {
+  header.classList.toggle('collapsed');
+  header.nextElementSibling.classList.toggle('collapsed');
+}
+
+function onCount(input) {
+  const key = input.dataset.key;
+  const val = input.value.trim();
+  if (val === '') {
+    delete counts[key];
+    input.classList.remove('has-value');
+  } else {
+    counts[key] = parseInt(val) || 0;
+    input.classList.add('has-value');
+  }
+  save();
+  const row = input.closest('.item-row');
+  const allInputs = row.querySelectorAll('.count-input');
+  const anyCounted = Array.from(allInputs).some(inp => inp.value.trim() !== '');
+  row.classList.toggle('counted', anyCounted);
+  clearTimeout(window._tabTimer);
+  window._tabTimer = setTimeout(renderTabs, 300);
+}
+
+// ── FLAG SHEET ──
+function openFlagSheet(sectionIdx, fk, itemName, itemMeta) {
+  activeFlagItem = { fk };
+  document.getElementById('flagItemName').textContent = itemName;
+  document.getElementById('flagItemMeta').textContent = itemMeta;
+
+  // Reset option highlight
+  document.getElementById('flag-86').className = 'flag-option';
+  document.getElementById('flag-low').className = 'flag-option';
+  document.getElementById('flag-reorder').className = 'flag-option';
+
+  const existing = flags[fk];
+  if (existing) {
+    if (existing.type === '86')      document.getElementById('flag-86').classList.add('selected-86');
+    if (existing.type === 'low')     document.getElementById('flag-low').classList.add('selected-low');
+    if (existing.type === 'reorder') document.getElementById('flag-reorder').classList.add('selected-reorder');
+    document.getElementById('flagNoteInput').value = existing.note || '';
+  } else {
+    document.getElementById('flagNoteInput').value = '';
+  }
+
+  document.getElementById('flagSheet').classList.add('open');
+}
+
+function closeFlagSheet(e) {
+  if (e && e.target !== document.getElementById('flagSheet')) return;
+  document.getElementById('flagSheet').classList.remove('open');
+  activeFlagItem = null;
+}
+
+function selectFlag(type) {
+  const classMap = { '86': 'selected-86', 'low': 'selected-low', 'reorder': 'selected-reorder' };
+  document.getElementById('flag-86').className = 'flag-option';
+  document.getElementById('flag-low').className = 'flag-option';
+  document.getElementById('flag-reorder').className = 'flag-option';
+  document.getElementById('flag-' + type).classList.add(classMap[type]);
+  document.getElementById('flag-' + type).dataset.selected = 'true';
+  // Store temporary selection
+  if (activeFlagItem) activeFlagItem.type = type;
+}
+
+function saveFlag() {
+  if (!activeFlagItem) return;
+  const fk = activeFlagItem.fk;
+  const note = document.getElementById('flagNoteInput').value.trim();
+
+  // Determine which option is selected
+  let type = null;
+  if (document.getElementById('flag-86').classList.contains('selected-86'))       type = '86';
+  if (document.getElementById('flag-low').classList.contains('selected-low'))     type = 'low';
+  if (document.getElementById('flag-reorder').classList.contains('selected-reorder')) type = 'reorder';
+
+  if (!type && !note) {
+    delete flags[fk];
+  } else {
+    flags[fk] = { type: type || 'low', note };
+  }
+  saveFlags();
+  document.getElementById('flagSheet').classList.remove('open');
+  activeFlagItem = null;
+  renderTabs();
+  renderSections();
+  toast('Flag saved');
+}
+
+function clearFlag() {
+  if (!activeFlagItem) return;
+  delete flags[activeFlagItem.fk];
+  saveFlags();
+  document.getElementById('flagSheet').classList.remove('open');
+  activeFlagItem = null;
+  renderTabs();
+  renderSections();
+  toast('Flag cleared');
+}
+
+// ── SHIFT NOTES ──
+function openNotes() {
+  document.getElementById('shiftNotesTA').value = shiftNotes;
+  document.getElementById('notesSheet').classList.add('open');
+  setTimeout(() => document.getElementById('shiftNotesTA').focus(), 100);
+}
+
+function closeNotesSheet(e) {
+  if (e.target === document.getElementById('notesSheet')) closeNotes();
+}
+
+function closeNotes() {
+  document.getElementById('notesSheet').classList.remove('open');
+}
+
+function saveNotes() {
+  shiftNotes = document.getElementById('shiftNotesTA').value;
+  saveNotesStorage();
+  updateNotesBtn();
+  closeNotes();
+  toast('Notes saved');
+}
+
+// ── EXPORT CSV ──
+function exportCSV() {
+  const date = TODAY;
+  let rows = ['Date,Sheet,Row,D365#,Item,Field,Count,Flag,Note'];
+
+  WALK_ROUTE.forEach(stop => {
+    stop.sections.forEach(sec => {
+      sec.items.forEach(item => {
+        const fk = flagKey(item);
+        const fd = flags[fk];
+        item.fields.forEach(f => {
+          const key = countKey(item, f.key);
+          if (counts[key] !== undefined) {
+            const name = item.name.replace(/,/g, ';');
+            const flagStr = fd ? fd.type : '';
+            const noteStr = fd && fd.note ? fd.note.replace(/,/g, ';').replace(/\n/g, ' ') : '';
+            rows.push(`${date},${item.sheet},${item.row},${item.d365},${name},${f.key},${counts[key]},${flagStr},${noteStr}`);
+          }
+        });
+      });
+    });
+  });
+
+  // All flagged items (even if not counted)
+  let flagRows = ['','--- FLAGGED ITEMS ---', 'D365#,Item,Flag,Note'];
+  Object.entries(flags).forEach(([fk, fd]) => {
+    // Find item by fk
+    let foundItem = null;
+    WALK_ROUTE.forEach(stop => stop.sections.forEach(sec =>
+      sec.items.forEach(item => { if (flagKey(item) === fk) foundItem = item; })
+    ));
+    if (foundItem && fd.type) {
+      flagRows.push(`${foundItem.d365},${foundItem.name.replace(/,/g,';')},${fd.type},${(fd.note||'').replace(/,/g,';').replace(/\n/g,' ')}`);
+    }
+  });
+
+  // Shift notes
+  let noteRows = [];
+  if (shiftNotes.trim()) {
+    noteRows = ['', '--- SHIFT NOTES ---', shiftNotes.replace(/\n/g, ' | ')];
+  }
+
+  if (rows.length <= 1 && flagRows.length <= 2 && !shiftNotes.trim()) {
+    toast('Nothing to export yet');
+    return;
+  }
+
+  const allRows = [...rows, ...flagRows, ...noteRows];
+  const blob = new Blob([allRows.join('\n')], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+
+  if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) {
+    const file = new File([blob], `pipa-count-${date}.csv`, { type: 'text/csv' });
+    navigator.share({ files: [file], title: `PiPa Count ${date}` })
+      .then(() => toast('Shared!'))
+      .catch(() => downloadFallback(url, date));
+  } else {
+    downloadFallback(url, date);
+  }
+}
+
+function downloadFallback(url, date) {
+  const a = document.createElement('a');
+  a.href = url; a.download = `pipa-count-${date}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('CSV downloaded');
+}
+
+// ── SUMMARY ──
+function showSummary() {
+  const modal = document.getElementById('modalContent');
+  let totalItems = 0, totalCounted = 0, totalFlagged = 0;
+  let stopStats = [];
+
+  WALK_ROUTE.forEach(stop => {
+    let sItems = 0, sCounted = 0, sFlagged = 0;
+    stop.sections.forEach(sec => {
+      sItems += sec.items.length;
+      sCounted += sec.items.filter(item =>
+        item.fields.some(f => counts[countKey(item, f.key)] !== undefined)
+      ).length;
+      sFlagged += sec.items.filter(item => flags[flagKey(item)]).length;
+    });
+    totalItems += sItems;
+    totalCounted += sCounted;
+    totalFlagged += sFlagged;
+    stopStats.push({ name: `${stop.icon} ${stop.stop}`, counted: sCounted, total: sItems, flagged: sFlagged });
+  });
+
+  const pct = totalItems > 0 ? Math.round((totalCounted / totalItems) * 100) : 0;
+
+  // Collect flagged items
+  const flaggedList = [];
+  WALK_ROUTE.forEach(stop => stop.sections.forEach(sec => sec.items.forEach(item => {
+    const fd = flags[flagKey(item)];
+    if (fd) flaggedList.push({ name: item.name, type: fd.type, note: fd.note });
+  })));
+
+  const flagHTML = flaggedList.length ? `
+    <div style="margin-top:16px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">🚩 Flagged Items (${flaggedList.length})</div>
+      ${flaggedList.map(f => {
+        const col = f.type === '86' ? '#c0392b' : f.type === 'low' ? '#c9a010' : '#8e44ad';
+        return `<div style="padding:6px 0;border-bottom:1px solid var(--surface3);font-size:12px;">
+          <span style="color:${col};font-weight:700;text-transform:uppercase;">${f.type}</span>
+          <span style="color:var(--text);margin-left:8px;">${f.name}</span>
+          ${f.note ? `<div style="color:var(--text2);font-size:11px;margin-top:2px;">${f.note}</div>` : ''}
+        </div>`;
+      }).join('')}
+    </div>` : '';
+
+  const notesHTML = shiftNotes.trim() ? `
+    <div style="margin-top:16px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:6px;">📝 Shift Notes</div>
+      <div style="font-size:12px;color:var(--text2);white-space:pre-wrap;background:var(--surface2);padding:10px;border-radius:8px;">${shiftNotes}</div>
+    </div>` : '';
+
+  modal.innerHTML = `
+    <h3>Count Summary — ${new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</h3>
+    <div class="modal-stat" style="font-size:15px;font-weight:700;">
+      <span>Overall Progress</span>
+      <span class="val">${totalCounted} / ${totalItems} (${pct}%)</span>
+    </div>
+    ${stopStats.map(s => `
+      <div class="modal-stat">
+        <span>${s.name}</span>
+        <span class="val">${s.counted}/${s.total}${s.flagged ? ` · 🚩${s.flagged}` : ''}</span>
+      </div>`).join('')}
+    ${flagHTML}
+    ${notesHTML}
+    <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('open')">Close</button>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeSummary(e) {
+  if (e.target === document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function clearAll() {
+  if (!confirm('Clear all counts for today? (Flags & notes will be kept)')) return;
+  counts = {};
+  save();
+  renderTabs();
+  renderSections();
+  toast('Counts cleared');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+
+// ── SUPABASE SYNC ──
+async function saveCountToSupabase() {
+  var rows = [];
+  WALK_ROUTE.forEach(function(stop) {
+    stop.sections.forEach(function(sec) {
+      sec.items.forEach(function(item) {
+        var total = 0, hasAny = false;
+        item.fields.forEach(function(f) {
+          var val = counts[countKey(item, f.key)];
+          if (val !== undefined) { total += parseFloat(val) || 0; hasAny = true; }
+        });
+        if (hasAny) {
+          rows.push({
+            snap_date: TODAY,
+            d365:      item.d365,
+            item_name: item.name.replace(/—/g,'-'),
+            category:  item.sheet || '',
+            vendor:    '',
+            par:       null,
+            count:     total
+          });
+        }
+      });
+    });
+  });
+
+  if (!rows.length) { toast('No counts to save'); return; }
+
+  var btn = document.getElementById('supa-save-btn');
+  if (btn) btn.textContent = 'Saving...';
+
+  // Deduplicate rows by d365 — sum counts if same d365 appears in multiple fields/sections
+  var deduped = {};
+  rows.forEach(function(row) {
+    if (deduped[row.d365]) {
+      deduped[row.d365].count += row.count;
+    } else {
+      deduped[row.d365] = Object.assign({}, row);
+    }
+  });
+  var dedupedRows = Object.values(deduped);
+
+  var result = await supa.from('inventory_trend')
+    .upsert(dedupedRows, { onConflict: 'snap_date,d365' });
+
+  if (btn) btn.textContent = 'Save to Supabase';
+
+  if (result.error) {
+    toast('Error: ' + result.error.message);
+  } else {
+    toast('Saved ' + dedupedRows.length + ' items to trend ✓');
+  }
+}
+
+// ── INIT ──
+renderTabs();
+renderSections();
+</script>
+</body>
+</html>

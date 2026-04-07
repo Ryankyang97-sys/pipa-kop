@@ -1,0 +1,3265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0D0D0D">
+<meta name="apple-mobile-web-app-title" content="PiPa Ops">
+<title>PiPa Ops</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+:root {
+  --bg: #0D0D0D;
+  --surface: #1A1A1A;
+  --surface2: #242424;
+  --surface3: #2E2E2E;
+  --surface4: #383838;
+  --text: #F0EDE8;
+  --text2: #8A8680;
+  --text3: #5A5650;
+  --accent: #B85C00;
+  --accent-dim: rgba(184,92,0,0.15);
+  --accent-bright: #D4700A;
+  --green: #2D7A4F;
+  --green-dim: rgba(45,122,79,0.15);
+  --green-bright: #38966A;
+  --red: #8B1A1A;
+  --red-dim: rgba(180,30,30,0.18);
+  --red-bright: #C0392B;
+  --yellow: #7A6010;
+  --yellow-dim: rgba(200,165,20,0.18);
+  --yellow-bright: #C9A010;
+  --blue: #1B3A5C;
+  --blue-dim: rgba(27,58,92,0.25);
+  --blue-bright: #2E6099;
+  --purple: #4A2070;
+  --purple-dim: rgba(74,32,112,0.2);
+  --purple-bright: #7B3FBD;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html{min-height:100vh;background:#0D0D0D;}
+html, body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100%;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+/* ── HEADER ── */
+.header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: calc(var(--safe-top) + 10px) 16px 0;
+  background: var(--bg);
+}
+.header-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 10px;
+}
+.header-title {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text2);
+  display: flex; align-items: center; gap: 8px;
+}
+.header-title .app-name { color: var(--text); }
+.header-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--accent);
+}
+.header-link {
+  font-size: 11px; color: var(--text3); text-decoration: none;
+  padding: 5px 10px; border-radius: 20px;
+  border: 1px solid var(--surface3);
+}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  padding: 6px 6px calc(var(--safe-bottom) + 6px);
+  background: var(--surface);
+  border-top: 1px solid var(--surface3);
+  display: flex; gap: 2px;
+  overflow-x: auto; overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.bottom-nav::-webkit-scrollbar { display: none; }
+.bottom-nav::after{content:"";position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);background:var(--surface);z-index:99;}
+
+.nav-tab {
+  flex: 0 0 64px; display: flex; flex-direction: column;
+  align-items: center; gap: 3px;
+  padding: 6px 4px; border-radius: var(--radius-sm);
+  cursor: pointer; color: var(--text3);
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.03em; transition: all 0.15s; white-space: nowrap;
+}
+.nav-tab .nav-icon { font-size: 20px; line-height: 1; }
+.nav-tab.active { color: var(--accent); background: var(--accent-dim); }
+.nav-tab .badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); position: absolute;
+  top: 6px; right: 6px;
+}
+
+/* ── SCROLL AREA ── */
+.scroll-area {
+  position: fixed;
+  top: calc(var(--safe-top) + 56px);
+  bottom: calc(var(--safe-bottom) + 68px);
+  left: 0; right: 0;
+  overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 12px 24px;
+}
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text3);
+  padding: 0 4px 8px; margin-top: 20px;
+}
+.section-label:first-child { margin-top: 0; }
+
+/* ── CARD ── */
+.card {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 14px; margin-bottom: 8px;
+  border: 1px solid transparent;
+}
+.card.border-green  { border-color: var(--green); }
+.card.border-yellow { border-color: var(--yellow-bright); }
+.card.border-red    { border-color: var(--red-bright); }
+.card.border-blue   { border-color: var(--blue-bright); }
+.card.border-accent { border-color: var(--accent); }
+
+/* ── STATUS PILL ── */
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; padding: 3px 8px; border-radius: 20px;
+}
+.pill-green  { background: var(--green-dim);  color: var(--green-bright); }
+.pill-yellow { background: var(--yellow-dim); color: var(--yellow-bright); }
+.pill-red    { background: var(--red-dim);    color: var(--red-bright); }
+.pill-blue   { background: var(--blue-dim);   color: var(--blue-bright); }
+.pill-purple { background: var(--purple-dim); color: var(--purple-bright); }
+.pill-dim    { background: var(--surface3);   color: var(--text2); }
+
+/* ── FORM ELEMENTS ── */
+.form-group { margin-bottom: 14px; }
+.form-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text2);
+  display: block; margin-bottom: 6px;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 12px;
+  background: var(--surface2); border: 1.5px solid var(--surface3);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  outline: none; -webkit-appearance: none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent);
+}
+.form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
+.form-select option { background: var(--surface2); }
+.form-textarea { resize: none; line-height: 1.5; }
+.form-row { display: flex; gap: 8px; }
+.form-row .form-group { flex: 1; }
+
+/* Toggle row */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--surface3);
+}
+.toggle-row:last-child { border-bottom: none; }
+.toggle-label { font-size: 13px; color: var(--text); }
+.toggle-sublabel { font-size: 11px; color: var(--text2); margin-top: 1px; }
+.toggle {
+  width: 44px; height: 26px; border-radius: 13px;
+  background: var(--surface3); position: relative; cursor: pointer;
+  transition: background 0.2s; flex-shrink: 0;
+}
+.toggle.on { background: var(--green); }
+.toggle::after {
+  content: ''; width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; position: absolute; top: 3px; left: 3px;
+  transition: transform 0.2s;
+}
+.toggle.on::after { transform: translateX(18px); }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  width: 100%; padding: 14px; border-radius: var(--radius);
+  background: var(--accent); color: #fff;
+  border: none; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+.btn-secondary {
+  width: 100%; padding: 12px; border-radius: var(--radius);
+  background: var(--surface2); color: var(--text2);
+  border: 1px solid var(--surface3); font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+}
+.btn-danger {
+  padding: 10px 16px; border-radius: var(--radius-sm);
+  background: var(--red-dim); color: var(--red-bright);
+  border: none; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.btn-sm {
+  padding: 6px 12px; border-radius: var(--radius-sm);
+  background: var(--surface3); color: var(--text2);
+  border: none; font-size: 11px; font-weight: 600; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-sm.green { background: var(--green-dim); color: var(--green-bright); }
+.btn-sm.accent { background: var(--accent-dim); color: var(--accent-bright); }
+
+/* ── CHECKLIST STEPS ── */
+.checklist {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;
+}
+.check-step {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  background: var(--surface2); color: var(--text3);
+  border: 1.5px solid var(--surface3); transition: all 0.15s;
+  user-select: none;
+}
+.check-step.done {
+  background: var(--green-dim); color: var(--green-bright);
+  border-color: var(--green);
+}
+.check-step .step-icon { font-size: 13px; }
+
+/* ── ACTIVATION CARD ── */
+.activation-name {
+  font-size: 15px; font-weight: 700; margin-bottom: 4px;
+}
+.activation-meta {
+  font-size: 11px; color: var(--text2);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 10px; display: flex; gap: 12px; flex-wrap: wrap;
+}
+.activation-swap {
+  font-size: 11px; color: var(--text2); margin-top: 8px;
+  padding: 8px; background: var(--surface2); border-radius: var(--radius-sm);
+}
+.activation-notes {
+  font-size: 12px; color: var(--text); margin-top: 8px;
+  line-height: 1.5; padding: 8px; background: var(--surface2);
+  border-radius: var(--radius-sm); border-left: 2px solid var(--accent);
+}
+.launch-btn {
+  margin-top: 12px; width: 100%; padding: 12px;
+  border-radius: var(--radius); border: none;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--green-dim); color: var(--green-bright);
+  transition: all 0.15s;
+}
+.launch-btn.launched {
+  background: var(--green); color: #fff;
+}
+
+/* ── INVOICE CARD ── */
+.invoice-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 0; font-size: 13px;
+}
+.invoice-row .label { color: var(--text2); font-size: 12px; }
+.invoice-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.invoice-checks {
+  display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;
+}
+.inv-check {
+  padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;
+  cursor: pointer; border: 1.5px solid var(--surface3);
+  background: var(--surface2); color: var(--text3);
+  transition: all 0.15s; user-select: none;
+}
+.inv-check.checked {
+  background: var(--green-dim); color: var(--green-bright);
+  border-color: var(--green);
+}
+.inv-check.flagged {
+  background: var(--red-dim); color: var(--red-bright);
+  border-color: var(--red-bright);
+}
+
+/* ── WASTE CARD ── */
+.waste-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 8px;
+}
+.waste-item-name { font-size: 14px; font-weight: 600; }
+.waste-detail { font-size: 11px; color: var(--text2); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+
+/* ── EVENT CARD ── */
+.event-date-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--accent); font-weight: 700;
+  margin-bottom: 6px;
+}
+.event-name { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.event-flags {
+  display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px;
+}
+.event-flag {
+  font-size: 10px; font-weight: 700; padding: 3px 8px;
+  border-radius: 20px; background: var(--surface2); color: var(--text3);
+}
+.event-flag.active { background: var(--accent-dim); color: var(--accent-bright); }
+
+/* ── SPECS ── */
+.spec-search-wrap {
+  position: sticky; top: -12px; z-index: 10;
+  background: var(--bg); padding: 0 0 10px; margin: -4px 0 0;
+}
+.spec-search {
+  width: 100%; padding: 12px 16px;
+  background: var(--surface); border: 1.5px solid var(--surface3);
+  border-radius: 24px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none;
+}
+.spec-search:focus { border-color: var(--accent); }
+.spec-search::placeholder { color: var(--text3); }
+
+.spec-filter-row {
+  display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px;
+  scrollbar-width: none;
+}
+.spec-filter-row::-webkit-scrollbar { display: none; }
+.spec-filter {
+  flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  background: var(--surface); color: var(--text2);
+  border: 1.5px solid transparent;
+}
+.spec-filter.active {
+  border-color: var(--accent); color: var(--text);
+  background: var(--accent-dim);
+}
+
+.recipe-card {
+  background: var(--surface); border-radius: var(--radius);
+  margin-bottom: 8px; overflow: hidden;
+}
+.recipe-header {
+  padding: 14px 14px 10px; cursor: pointer;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.recipe-name { font-size: 15px; font-weight: 700; }
+.recipe-sub {
+  font-size: 11px; color: var(--text2); margin-top: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex; gap: 10px;
+}
+.recipe-chevron { color: var(--text3); font-size: 14px; transition: transform 0.2s; flex-shrink: 0; padding-top: 2px; }
+.recipe-header.open .recipe-chevron { transform: rotate(180deg); }
+
+.recipe-body { display: none; padding: 0 14px 14px; }
+.recipe-body.open { display: block; }
+
+.recipe-meta-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.recipe-meta-tag {
+  font-size: 10px; font-weight: 600; padding: 3px 8px;
+  border-radius: 20px; background: var(--surface2); color: var(--text2);
+}
+
+.ingredients-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+.ingredients-table tr { border-bottom: 1px solid var(--surface3); }
+.ingredients-table tr:last-child { border-bottom: none; }
+.ingredients-table td {
+  padding: 7px 4px; font-size: 13px; vertical-align: middle;
+}
+.ing-qty {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: var(--accent); width: 50px; white-space: nowrap;
+}
+.ing-unit {
+  font-size: 11px; color: var(--text2); width: 40px;
+}
+.ing-name { color: var(--text); }
+
+.recipe-footer {
+  display: flex; gap: 8px; padding-top: 8px;
+  border-top: 1px solid var(--surface3);
+  font-size: 11px; color: var(--text2);
+}
+.recipe-footer span { display: flex; align-items: center; gap: 4px; }
+
+.recipe-edit-btn {
+  margin-top: 10px; padding: 8px 14px; border-radius: var(--radius-sm);
+  background: var(--surface2); color: var(--text2);
+  border: none; font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ── SHEET (bottom drawer) ── */
+.sheet-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.72); backdrop-filter: blur(8px);
+  align-items: flex-end;
+}
+.sheet-overlay.open { display: flex; }
+.sheet {
+  background: var(--surface); border-radius: 20px 20px 0 0;
+  width: 100%; max-height: 90vh; overflow-y: auto;
+  padding: 20px 16px calc(var(--safe-bottom) + 16px);
+}
+.sheet-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--surface3); margin: 0 auto 20px;
+}
+.sheet-title {
+  font-size: 17px; font-weight: 700; margin-bottom: 20px;
+}
+.sheet-actions { display: flex; gap: 8px; margin-top: 16px; }
+
+/* Ingredient builder rows */
+.ing-build-row {
+  display: flex; gap: 6px; align-items: center; margin-bottom: 8px;
+}
+.ing-build-row .form-input { flex: 2; }
+.ing-build-row .form-input.qty { flex: 0.7; }
+.ing-build-row .form-input.unit { flex: 0.8; }
+.ing-remove {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--red-dim); color: var(--red-bright);
+  border: none; font-size: 16px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.add-ing-btn {
+  width: 100%; padding: 10px; border-radius: var(--radius-sm);
+  background: var(--surface2); color: var(--accent);
+  border: 1px dashed var(--accent); font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'DM Sans', sans-serif; margin-bottom: 14px;
+}
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center; padding: 48px 24px; color: var(--text3);
+}
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-text { font-size: 14px; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; top: calc(var(--safe-top) + 70px);
+  left: 50%; transform: translateX(-50%) translateY(-16px);
+  background: var(--green); color: #fff;
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 600;
+  opacity: 0; transition: all 0.25s; z-index: 999; pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.error { background: var(--red-bright); }
+
+/* ── FAB ── */
+.fab {
+  position: fixed; bottom: calc(var(--safe-bottom) + 80px);
+  right: 16px; z-index: 150;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  border: none; font-size: 24px; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(184,92,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+}
+.fab:active { transform: scale(0.94); }
+.fab.hidden { display: none; }
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px; background: var(--surface3);
+  margin: 16px 0;
+}
+
+/* ── CARD ACTIONS ROW ── */
+.card-actions {
+  display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap;
+}
+
+.ops-update-compose { background:var(--surface); border-radius:12px; padding:16px; margin-bottom:4px; }
+.ops-update-card { background:var(--surface); border-radius:12px; padding:14px; margin-bottom:8px; }
+
+/* ORDER PLANNER */
+.op-view-btn{padding:6px 14px;border-radius:20px;background:var(--surface);color:var(--text2);border:1.5px solid transparent;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.op-view-btn.active{border-color:var(--accent);color:var(--text);background:var(--surface2);}
+.op-save-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.op-need-badge{font-size:0.688rem;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--red-dim);color:var(--red-bright);}
+.op-vendor-card{background:var(--surface);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+.op-vendor-header{padding:12px 14px;border-bottom:1px solid var(--surface3);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.op-vendor-name{font-size:0.938rem;font-weight:700;color:var(--text);}
+.op-vendor-meta{font-size:0.625rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;}
+.op-cutoff{font-size:0.625rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--yellow-dim);color:var(--yellow-bright);}
+.op-need-count{font-size:0.625rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--red-dim);color:var(--red-bright);}
+.op-item-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--surface3);transition:background 0.1s;}
+.op-item-row:last-of-type{border-bottom:none;}
+.op-item-row.op-row-counted{background:var(--surface2);}
+.op-item-row.op-row-need{background:rgba(180,30,30,0.08);}
+.op-item-info{flex:1;min-width:0;}
+.op-item-name{font-size:0.844rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.op-item-meta{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap;}
+.op-cat-badge{font-size:0.563rem;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:0.06em;}
+.op-item-meta span{font-size:0.625rem;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+.op-item-note{font-size:0.625rem;color:var(--yellow-bright) !important;font-family:'DM Sans',sans-serif !important;}
+.op-item-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.op-par-label{font-size:0.563rem;color:var(--text3);font-family:'JetBrains Mono',monospace;text-align:right;}
+.op-count-input{width:56px;height:40px;background:var(--surface3);border:1.5px solid transparent;border-radius:var(--radius-sm);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:600;text-align:center;outline:none;-webkit-appearance:none;}
+.op-count-input:focus{border-color:var(--accent);}
+.op-suggest{width:32px;text-align:center;font-size:0.875rem;font-family:'JetBrains Mono',monospace;}
+.op-copy-btn{display:block;width:100%;padding:11px;background:var(--surface2);border:none;color:var(--text2);font-size:0.813rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:center;border-top:1px solid var(--surface3);}
+.op-copy-btn:active{background:var(--surface3);}
+.trend-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;background:var(--surface);border-radius:var(--radius);margin-bottom:4px;}
+
+.sub-hist-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:10px 14px;background:var(--surface);border-radius:var(--radius);margin-bottom:4px;}
+.sub-hist-name{font-size:0.844rem;font-weight:500;color:var(--text);}
+.sub-hist-meta{font-size:0.688rem;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+.sub-hist-date{font-size:0.625rem;color:var(--text3);font-family:'JetBrains Mono',monospace;text-align:right;flex-shrink:0;}
+
+.field-input{width:100%;display:block;box-sizing:border-box;padding:10px 12px;background:var(--surface2);border:1.5px solid var(--surface3);border-radius:var(--radius);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.875rem;outline:none;-webkit-appearance:none;}
+.field-input:focus{border-color:var(--accent);}
+.field-input::placeholder{color:var(--text3);}
+
+/* ── RECEIPT ITEMS ── */
+.rcpt-item-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--surface3); }
+.rcpt-item-row:last-child { border-bottom:none; }
+.rcpt-item-info { flex:1; min-width:0; }
+.rcpt-item-name { font-size:0.844rem; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rcpt-item-meta { font-size:0.625rem; color:var(--text3); font-family:'JetBrains Mono',monospace; margin-top:2px; }
+.rcpt-qty-input { width:56px; height:34px; background:var(--surface2); border:1.5px solid var(--surface3); border-radius:var(--radius-sm); color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.938rem; font-weight:700; text-align:center; outline:none; -webkit-appearance:none; padding:0; }
+.rcpt-qty-input:focus { border-color:var(--accent); }
+.rcpt-qty-input.has-qty { background:var(--accent); border-color:var(--accent); color:#fff; }
+.rcpt-qty-input::-webkit-inner-spin-button, .rcpt-qty-input::-webkit-outer-spin-button { -webkit-appearance:none; }
+.rcpt-section-label { font-size:0.563rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text3); padding:10px 0 4px; }
+.rcpt-confirm-bar { position:sticky; bottom:0; background:var(--bg); padding:10px 0 4px; margin-top:8px; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row">
+    <div class="header-title">
+      <span class="app-name">PiPa Ops</span>
+      <span style="color:var(--text3)">·</span>
+      <span>EKP</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="header-date" id="headerDate"></span>
+      <a class="header-link" href="pipa-admin.html">Admin →</a>
+      <a class="header-link" href="pipa-count.html">Count →</a>
+    </div>
+  </div>
+</div>
+
+<div class="scroll-area" id="scrollArea">
+  <!-- Views injected by JS -->
+  <div class="view active" id="view-activations"></div>
+  <div class="view" id="view-invoices"></div>
+  <div class="view" id="view-waste"></div>
+  <div class="view" id="view-events"></div>
+  <div class="view" id="view-specs"></div>
+  <div class="view" id="view-order"></div>
+  <div class="view" id="view-trend"></div>
+  <div class="view" id="view-vendors"></div>
+</div>
+
+<button class="fab" id="fab" onclick="openAddSheet()">+</button>
+
+<div class="bottom-nav" id="bottomNav">
+  <div class="nav-tab active" onclick="switchView('activations')" id="nav-activations">
+    <span class="nav-icon">🚀</span>Activations
+  </div>
+  <div class="nav-tab" onclick="switchView('invoices')" id="nav-invoices">
+    <span class="nav-icon">🧾</span>Invoices
+  </div>
+  <div class="nav-tab" onclick="switchView('waste')" id="nav-waste">
+    <span class="nav-icon">🗑️</span>Waste
+  </div>
+  <div class="nav-tab" onclick="switchView('events')" id="nav-events">
+    <span class="nav-icon">📅</span>Events
+  </div>
+  <div class="nav-tab" onclick="switchView('specs')" id="nav-specs">
+    <span class="nav-icon">🍹</span>Specs
+  </div>
+
+  <div class="nav-tab" onclick="switchView('order')" id="nav-order">
+    <span class="nav-icon">📦</span>Orders
+  </div>
+  <div class="nav-tab" onclick="switchView('trend')" id="nav-trend">
+    <span class="nav-icon">📈</span>Trend
+  </div>
+  <div class="nav-tab" onclick="switchView('vendors')" id="nav-vendors">
+    <span class="nav-icon">📞</span>Vendors
+  </div>
+
+</div>
+
+<!-- ── ADD SHEET (context-aware) ── -->
+<div class="sheet-overlay" id="addSheet" onclick="closeSheet('addSheet', event)">
+  <div class="sheet" id="addSheetContent"></div>
+</div>
+
+<!-- ── EDIT SPEC SHEET ── -->
+<div class="sheet-overlay" id="editSpecSheet" onclick="closeSheet('editSpecSheet', event)">
+  <div class="sheet" id="editSpecContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// SUPABASE
+const SUPA_URL = 'https://fhbusipvtxjnwidlgpaa.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+
+// ═══════════════════════════════════════════════
+// STATE & STORAGE
+// ═══════════════════════════════════════════════
+const TODAY = new Date().toISOString().slice(0,10);
+
+// Supabase-ready data models — swap localStorage for API calls here
+const DB = {
+  get: (k) => { try { return JSON.parse(localStorage.getItem('pipa-ops-' + k) || 'null'); } catch(e) { return null; } },
+  set: (k, v) => { try { localStorage.setItem('pipa-ops-' + k, JSON.stringify(v)); } catch(e) {} },
+};
+
+// Data stores
+let activations = DB.get('activations') || getDefaultActivations();
+
+// Load activations from Supabase on startup
+function loadActivations() {
+  supa.from('activations_log').select('*').order('created_at', {ascending: true})
+    .then(function(result) {
+      if (result.error || !result.data || !result.data.length) return;
+      // Merge Supabase data over localStorage
+      activations = result.data.map(function(row) {
+        return {
+          id: String(row.id), priority: row.priority, name: row.name,
+          d365: row.d365, vendor: row.vendor, category: row.category,
+          launchDate: row.launch_date, swapItem: row.swap_item, swapD365: row.swap_d365,
+          notes: row.notes, openIssues: row.open_issues,
+          steps: row.steps || {d365:false,ordered:false,inStock:false,briefed:false,eightySixed:false},
+          launched: row.launched || false
+        };
+      });
+      DB.set('activations', activations);
+      if (currentView === 'activations') renderActivations();
+    });
+}
+loadActivations();
+let invoices    = DB.get('invoices')    || [];
+let waste       = DB.get('waste')       || [];
+let events      = DB.get('events')      || [];
+let recipes     = DB.get('recipes')     || getDefaultRecipes();
+
+function save(key, data) { DB.set(key, data); }
+
+let currentView = 'activations';
+let specFilter = 'All';
+let specSearch = '';
+
+// ═══════════════════════════════════════════════
+// DEFAULT DATA (seeded from SPECS tab)
+// ═══════════════════════════════════════════════
+function getDefaultActivations() {
+  return [
+    {
+      id: 'act-1', priority: 'HIGH', name: 'Cortina 2026 White Wine',
+      d365: '1161234', vendor: 'SGWS', category: 'BTG WINE',
+      launchDate: '2026-03-20', swapItem: 'Vespa Bianco', swapD365: '1116935',
+      notes: 'Light alpine white, good with seafood. Replace Vespa on BTG list.',
+      steps: { d365: false, ordered: false, inStock: false, briefed: false, eightySixed: false },
+      launched: false, openIssues: ''
+    },
+    {
+      id: 'act-2', priority: 'MED', name: 'Seasonal NA Mocktail Kit',
+      d365: '1162345', vendor: 'Ace Endico', category: 'N.A.',
+      launchDate: '2026-04-01', swapItem: '—', swapD365: '—',
+      notes: 'Spring activation. Includes elderflower syrup + grapefruit. Brief bar staff on build.',
+      steps: { d365: false, ordered: false, inStock: false, briefed: false, eightySixed: false },
+      launched: false, openIssues: ''
+    },
+    {
+      id: 'act-3', priority: 'HIGH', name: 'Monthly Beer Rotation — Spring IPA',
+      d365: '1163456', vendor: 'Muller Inc', category: 'BEER',
+      launchDate: '2026-04-15', swapItem: 'Honeycrisp Cider', swapD365: '00692735',
+      notes: '1/6 keg. Swap Honeycrisp. Introduce at pre-shift.',
+      steps: { d365: false, ordered: false, inStock: false, briefed: false, eightySixed: false },
+      launched: false, openIssues: ''
+    }
+  ];
+}
+
+function getDefaultRecipes() {
+  return [
+    // PiPa Menu
+    { id: 'r-1', menu: 'PiPa', name: 'Carpano Highball', glass: 'Collins', method: 'Build', ice: 'ICE', garnish: 'Orange Wedge',
+      ingredients: [{qty:'1',unit:'oz',name:'Carpano Bitter'},{qty:'1',unit:'oz',name:'Sweet Vermouth'},{qty:'Top',unit:'',name:'Aranciata Rosso'}] },
+    { id: 'r-2', menu: 'PiPa', name: 'Negroni Bianco', glass: 'Rocks', method: 'Stirred', ice: 'Large Cube', garnish: 'Lemon Peel',
+      ingredients: [{qty:'1.5',unit:'oz',name:'Gin'},{qty:'0.75',unit:'oz',name:'Luxardo Bitter Bianco'},{qty:'0.75',unit:'oz',name:'Italicus'}] },
+    { id: 'r-3', menu: 'PiPa', name: 'Limoncello Spritz', glass: 'AP Glass', method: 'Build', ice: 'ICE', garnish: 'Lemon Wedge',
+      ingredients: [{qty:'2',unit:'oz',name:'Pallini Limoncello'},{qty:'3',unit:'oz',name:'Prosecco'},{qty:'Top',unit:'',name:'Club Soda'}] },
+    { id: 'r-4', menu: 'PiPa', name: 'Negroni', glass: 'Rocks', method: 'Stirred', ice: 'Large Cube', garnish: 'Orange Peel',
+      ingredients: [{qty:'1',unit:'oz',name:'Gin'},{qty:'1',unit:'oz',name:'Campari'},{qty:'1',unit:'oz',name:'Sweet Vermouth'}] },
+    { id: 'r-5', menu: 'PiPa', name: 'Italian 75', glass: 'Coupe', method: 'Shaken', ice: 'No Ice', garnish: 'Lemon Peel',
+      ingredients: [{qty:'1',unit:'oz',name:'Gin'},{qty:'0.5',unit:'oz',name:'Italicus'},{qty:'0.75',unit:'oz',name:'Lemon Juice'},{qty:'0.75',unit:'oz',name:'Simple Syrup'},{qty:'Top',unit:'',name:'Prosecco'}] },
+    { id: 'r-6', menu: 'PiPa', name: 'Mojito Limone', glass: 'Collins', method: 'Build / Muddle', ice: 'ICE', garnish: 'Mint Sprig',
+      ingredients: [{qty:'1',unit:'oz',name:'Pallini Limoncello'},{qty:'1',unit:'oz',name:'White Rum'},{qty:'0.75',unit:'oz',name:'Lemon Juice'},{qty:'0.75',unit:'oz',name:'Simple Syrup'},{qty:'5–8',unit:'leaves',name:'Mint'},{qty:'Top',unit:'',name:'Soda'}] },
+    { id: 'r-7', menu: 'PiPa', name: 'Hibiscus Martini', glass: 'Nick & Nora', method: 'Stirred / Double Strained', ice: 'No Ice', garnish: 'Orange Peel',
+      ingredients: [{qty:'1.5',unit:'oz',name:'Malfy Rosa'},{qty:'0.75',unit:'oz',name:'Vodka'},{qty:'0.5',unit:'oz',name:'Ramazzotti Aperitivo Rosato'},{qty:'2',unit:'dash',name:'Orange Bitters'}] },
+    { id: 'r-8', menu: 'PiPa', name: 'Espresso Martini', glass: 'Nick & Nora', method: 'Shaken / Double Strained', ice: 'No Ice', garnish: '3 Espresso Beans',
+      ingredients: [{qty:'1.5',unit:'oz',name:'Vodka'},{qty:'0.75',unit:'oz',name:'Luxardo Espresso Liqueur'},{qty:'1',unit:'oz',name:'Espresso'},{qty:'0.25',unit:'oz',name:'Simple Syrup'}] },
+    { id: 'r-9', menu: 'PiPa', name: 'Aperol Spritz', glass: 'AP Glass', method: 'Build', ice: 'ICE', garnish: 'Orange Wedge',
+      ingredients: [{qty:'2',unit:'oz',name:'Aperol'},{qty:'3',unit:'oz',name:'Prosecco'},{qty:'Top',unit:'',name:'Club Soda'}] },
+    { id: 'r-10', menu: 'PiPa', name: 'Campari Spritz', glass: 'AP Glass', method: 'Build', ice: 'ICE', garnish: 'Orange Wedge',
+      ingredients: [{qty:'2',unit:'oz',name:'Campari'},{qty:'3',unit:'oz',name:'Prosecco'},{qty:'Top',unit:'',name:'Club Soda'}] },
+    { id: 'r-11', menu: 'PiPa', name: 'Rosato Spritz', glass: 'AP Glass', method: 'Build', ice: 'ICE', garnish: 'Orange Wedge',
+      ingredients: [{qty:'2',unit:'oz',name:'Ramazzotti Aperitivo Rosato'},{qty:'3',unit:'oz',name:'Prosecco'},{qty:'Top',unit:'',name:'Club Soda'}] },
+    { id: 'r-12', menu: 'PiPa', name: 'Cardini', glass: 'Rocks', method: 'Shaken', ice: 'ICE', garnish: 'Orange Wedge',
+      ingredients: [{qty:'1.5',unit:'oz',name:'Mezcal'},{qty:'0.5',unit:'oz',name:'Amaro Nonino'},{qty:'0.5',unit:'oz',name:'Honey Agave'},{qty:'0.75',unit:'oz',name:'Lime Juice'}] },
+    { id: 'r-13', menu: 'PiPa', name: 'Il Buono', glass: 'Rocks', method: 'Shaken', ice: 'ICE', garnish: 'Orange Wedge',
+      ingredients: [{qty:'1.5',unit:'oz',name:'Aperol'},{qty:'1',unit:'oz',name:'Tequila Blanco'},{qty:'1',unit:'oz',name:'Orange Juice'},{qty:'0.5',unit:'oz',name:'Lemon Juice'}] },
+    { id: 'r-14', menu: 'PiPa', name: 'Noci per Noci', glass: 'Rocks', method: 'Shaken', ice: 'ICE', garnish: 'Lemon Wedge',
+      ingredients: [{qty:'2',unit:'oz',name:'Adriatico Amaretto'},{qty:'0.5',unit:'oz',name:'Bourbon'},{qty:'0.75',unit:'oz',name:'Lemon Juice'},{qty:'0.5',unit:'oz',name:'Simple Syrup'}] },
+    { id: 'r-15', menu: 'PiPa', name: 'The Junction', glass: 'Nick & Nora', method: 'Stirred', ice: 'No Ice', garnish: 'Lemon Twist',
+      ingredients: [{qty:'1.5',unit:'oz',name:'Irish Whiskey'},{qty:'1',unit:'oz',name:'Amaro Montenegro'}] },
+    // Cortina Menu
+    { id: 'r-16', menu: 'Cortina', name: 'By The Fire', glass: 'Irish Coffee Mug', method: 'Build', ice: 'No Ice', garnish: 'Cinnamon Stick',
+      ingredients: [{qty:'1.5',unit:'oz',name:'Whiskey'},{qty:'0.5',unit:'oz',name:'Fernet'},{qty:'0.25',unit:'oz',name:'Maple Syrup'},{qty:'1',unit:'oz',name:'Apple Cider Syrup'},{qty:'Top',unit:'',name:'Hot Water'},{qty:'Float',unit:'',name:'Amaro Nonino'}] },
+    { id: 'r-17', menu: 'Cortina', name: 'Aloha Jalisco', glass: 'Rocks', method: 'Shaken', ice: 'Large Cube', garnish: 'Orange Wheel',
+      ingredients: [{qty:'2',unit:'oz',name:'Tequila Blanco'},{qty:'0.75',unit:'oz',name:'Elderflower Liqueur'},{qty:'0.75',unit:'oz',name:'Lime Juice'},{qty:'0.75',unit:'oz',name:'Pomegranate Puree'},{qty:'0.25',unit:'oz',name:'Agave'},{qty:'10–15',unit:'leaves',name:'Mint'}] },
+    { id: 'r-18', menu: 'Cortina', name: 'Negroni Alpino', glass: 'Rocks', method: 'Stirred', ice: 'Large Cube', garnish: 'Orange Peel',
+      ingredients: [{qty:'1',unit:'oz',name:'Gin'},{qty:'1',unit:'oz',name:'Luxardo Del Santo Liqueur'},{qty:"1",unit:'oz',name:"Sailor's Amaro"}] },
+    { id: 'r-19', menu: 'Cortina', name: 'Hot Rockey', glass: 'Irish Coffee Mug', method: 'Build', ice: 'No Ice', garnish: 'Lemon Wheel, Cinnamon Stick',
+      ingredients: [{qty:'2',unit:'oz',name:"Rockey's Botanical"},{qty:'0.75',unit:'oz',name:'Lemon Juice'},{qty:'0.75',unit:'oz',name:'Honey Syrup'},{qty:'Top',unit:'',name:'Boiling Water'}] },
+    // Mocktail Menu
+    { id: 'r-20', menu: 'Mocktail', name: 'No-groni', glass: 'Rocks', method: 'Stirred', ice: 'ICE', garnish: 'Orange Wedge',
+      ingredients: [{qty:'1.5',unit:'oz',name:"Lyre's London Dry"},{qty:'1.5',unit:'oz',name:"Lyre's Italian Rosso"}] },
+    { id: 'r-21', menu: 'Mocktail', name: 'Spritzless', glass: 'AP Glass', method: 'Build', ice: 'ICE', garnish: 'Orange Wedge',
+      ingredients: [{qty:'2',unit:'oz',name:"Lyre's Italian Orange"},{qty:'Top',unit:'',name:"Lyre's Classico"}] },
+    { id: 'r-22', menu: 'Mocktail', name: 'Limonzero Spritz', glass: 'AP Glass', method: 'Build', ice: 'ICE', garnish: 'Lemon Wedge',
+      ingredients: [{qty:'2',unit:'oz',name:'Pallini Limonzero'},{qty:'Top',unit:'',name:"Lyre's Classico"}] },
+    { id: 'r-23', menu: 'Mocktail', name: 'NA Espresso Martini', glass: 'Nick & Nora', method: 'Shaken / Double Strained', ice: 'No Ice', garnish: '3 Espresso Beans',
+      ingredients: [{qty:'1.5',unit:'oz',name:'NA Lucano Amaro'},{qty:'1',unit:'oz',name:'Espresso'},{qty:'0.25',unit:'oz',name:'Simple Syrup'}] },
+    { id: 'r-24', menu: 'Mocktail', name: 'Palom-ish', glass: 'Highball', method: 'Build', ice: 'ICE', garnish: 'Rosemary Sprig',
+      ingredients: [{qty:'1.5',unit:'oz',name:"Lyre's London Dry"},{qty:'2',unit:'oz',name:'Grapefruit Juice'},{qty:'1',unit:'oz',name:'San Pellegrino Grapefruit'},{qty:'1',unit:'oz',name:'Simple Syrup'}] },
+    // Next Menu
+    { id: 'r-25', menu: 'Next Menu', name: 'Last Word', glass: 'Coupe', method: 'Shaken / Double Strained', ice: 'No Ice', garnish: 'Lime Wheel',
+      ingredients: [{qty:'0.75',unit:'oz',name:'The Botanist Gin'},{qty:'0.75',unit:'oz',name:'Luxardo Del Santo Liqueur'},{qty:'0.75',unit:'oz',name:'Luxardo Maraschino'},{qty:'0.75',unit:'oz',name:'Lime Juice'}] },
+  ];
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function switchView(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.getElementById('nav-' + view).classList.add('active');
+  document.getElementById('scrollArea').scrollTop = 0;
+  currentView = view;
+  // Scroll active tab into view
+  var activeTab = document.getElementById('nav-' + view);
+  if (activeTab) activeTab.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+
+  // FAB label
+  const fab = document.getElementById('fab');
+  fab.classList.remove('hidden');
+  if (view === 'specs') fab.textContent = '✎';
+  else fab.textContent = '+';
+
+  render(view);
+}
+
+function render(view) {
+  const fns = {
+    activations: renderActivations,
+    invoices: renderInvoices,
+    waste: renderWaste,
+    events: renderEvents,
+    specs: renderSpecs,
+    order: renderOrderPlanner,
+    trend: renderInventoryTrend,
+    vendors: renderVendors,
+  };
+  if (fns[view]) fns[view]();
+}
+
+// ═══════════════════════════════════════════════
+// ACTIVATIONS
+// ═══════════════════════════════════════════════
+const ACTIVATION_STEPS = [
+  { key: 'd365',       label: 'D365 Added',    icon: '💻' },
+  { key: 'ordered',    label: 'Ordered',        icon: '📦' },
+  { key: 'inStock',    label: 'In Stock',       icon: '✅' },
+  { key: 'briefed',    label: 'Staff Briefed',  icon: '👥' },
+  { key: 'eightySixed',label: "Old Item 86'd",  icon: '🚫' },
+];
+
+function activationStatus(act) {
+  if (act.launched) return { label: '✅ Launched', cls: 'pill-green' };
+  const done = Object.values(act.steps).filter(Boolean).length;
+  const total = ACTIVATION_STEPS.length;
+  if (done === 0) return { label: '⏳ Pending', cls: 'pill-dim' };
+  if (done === total) return { label: '🟡 Ready to Launch', cls: 'pill-yellow' };
+  return { label: `🔄 In Progress ${done}/${total}`, cls: 'pill-blue' };
+}
+
+function priorityPill(p) {
+  if (p === 'HIGH') return '<span class="pill pill-red">HIGH</span>';
+  if (p === 'MED')  return '<span class="pill pill-yellow">MED</span>';
+  return '<span class="pill pill-dim">LOW</span>';
+}
+
+
+function saveActivationToSupabase(act) {
+  var row = {
+    priority: act.priority, name: act.name, d365: act.d365,
+    vendor: act.vendor, category: act.category, launch_date: act.launchDate,
+    swap_item: act.swapItem, swap_d365: act.swapD365,
+    notes: act.notes, open_issues: act.openIssues,
+    steps: act.steps, launched: act.launched
+  };
+  if (typeof act.id === 'number') {
+    // existing Supabase row — update
+    supa.from('activations_log').update(row).eq('id', act.id)
+      .then(function(r) { if (r.error) console.warn('act update:', r.error.message); });
+  } else {
+    // new row — insert and get id back
+    supa.from('activations_log').insert(row).select()
+      .then(function(r) {
+        if (r.error) { console.warn('act insert:', r.error.message); return; }
+        if (r.data && r.data[0]) act.id = r.data[0].id;
+        DB.set('activations', activations);
+      });
+  }
+}
+
+function deleteActivationFromSupabase(act) {
+  if (typeof act.id === 'number') {
+    supa.from('activations_log').delete().eq('id', act.id)
+      .then(function(r) { if (r.error) console.warn('act delete:', r.error.message); });
+  }
+}
+
+function renderActivations() {
+  const el = document.getElementById('view-activations');
+  const active = activations.filter(a => !a.launched);
+  const launched = activations.filter(a => a.launched);
+
+  let html = '';
+
+  if (active.length === 0 && launched.length === 0) {
+    html = `<div class="empty-state"><div class="empty-icon">🚀</div><div class="empty-text">No activations yet. Tap + to add one.</div></div>`;
+  } else {
+    if (active.length) {
+      html += `<div class="section-label">Active (${active.length})</div>`;
+      html += active.map(act => renderActivationCard(act)).join('');
+    }
+    if (launched.length) {
+      html += `<div class="section-label" style="margin-top:24px;">Launched (${launched.length})</div>`;
+      html += launched.map(act => renderActivationCard(act)).join('');
+    }
+  }
+
+  el.innerHTML = html;
+}
+
+function renderActivationCard(act) {
+  const status = activationStatus(act);
+  const stepsHTML = ACTIVATION_STEPS.map(s => `
+    <div class="check-step ${act.steps[s.key] ? 'done' : ''}"
+         onclick="toggleStep('${act.id}', '${s.key}')">
+      <span class="step-icon">${act.steps[s.key] ? '✓' : s.icon}</span>
+      ${s.label}
+    </div>`).join('');
+
+  const allStepsDone = ACTIVATION_STEPS.every(s => act.steps[s.key]);
+  const launchBtnClass = act.launched ? 'launch-btn launched' : 'launch-btn';
+  const launchBtnText = act.launched ? '✅ Launched' : (allStepsDone ? '🚀 Mark as Launched' : '🚀 Mark as Launched');
+
+  const borderCls = act.launched ? 'border-green' : allStepsDone ? 'border-yellow' : '';
+
+  return `
+    <div class="card ${borderCls}" id="act-${act.id}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+        <div>
+          <span class="pill ${status.cls}" style="margin-bottom:8px;display:inline-flex;">${status.label}</span>
+          ${priorityPill(act.priority)}
+        </div>
+        <button class="btn-sm" data-actid="${act.id}" onclick="editActivation(this.getAttribute('data-actid'))">Edit</button>
+      </div>
+      <div class="activation-name">${act.name}</div>
+      <div class="activation-meta">
+        <span>📅 ${fmtDate(act.launchDate)}</span>
+        <span>🏷 ${act.category}</span>
+        <span>📦 ${act.vendor}</span>
+        <span style="font-family:'JetBrains Mono',monospace;">D365: ${act.d365}</span>
+      </div>
+      ${act.swapItem && act.swapItem !== '—' ? `
+        <div class="activation-swap">
+          🔄 Swaps: <strong>${act.swapItem}</strong> <span style="color:var(--text3)">(D365: ${act.swapD365})</span>
+        </div>` : ''}
+      ${act.notes ? `<div class="activation-notes">${act.notes}</div>` : ''}
+      <div class="checklist">${stepsHTML}</div>
+      ${act.openIssues ? `<div style="font-size:12px;color:var(--red-bright);margin-top:8px;">⚠️ ${act.openIssues}</div>` : ''}
+      ${!act.launched ? `<button class="${launchBtnClass}" data-actid2="${act.id}" onclick="toggleLaunched(this.getAttribute('data-actid2'))">${launchBtnText}</button>` : ''}
+    </div>`;
+}
+
+function toggleStep(actId, stepKey) {
+  const act = activations.find(a => a.id === actId);
+  if (!act || act.launched) return;
+  act.steps[stepKey] = !act.steps[stepKey];
+  save('activations', activations);
+  saveActivationToSupabase(act);
+  renderActivations();
+  toast(act.steps[stepKey] ? `✓ ${ACTIVATION_STEPS.find(s=>s.key===stepKey).label}` : 'Step unmarked');
+}
+
+function toggleLaunched(actId) {
+  const act = activations.find(a => a.id === actId);
+  if (!act) return;
+  const allDone = ACTIVATION_STEPS.every(s => act.steps[s.key]);
+  if (!act.launched && !allDone) {
+    if (!confirm('Not all steps are complete. Mark as launched anyway?')) return;
+  }
+  act.launched = !act.launched;
+  if (act.launched) ACTIVATION_STEPS.forEach(s => act.steps[s.key] = true);
+  save('activations', activations);
+  saveActivationToSupabase(act);
+  renderActivations();
+  toast(act.launched ? '🚀 Activation launched!' : 'Unmarked as launched');
+}
+
+function editActivation(actId) {
+  const act = activations.find(a => a.id === actId);
+  if (!act) return;
+  openActivationSheet(act);
+}
+
+// ═══════════════════════════════════════════════
+// ─────────────────────────────────────────────
+// DELIVERY RECEIPT
+// ─────────────────────────────────────────────
+var activeReceiptInvId   = null;
+var activeReceiptVendor  = null;
+var activeReceiptDate    = null;
+var receiptDraft         = {}; // d365 -> qty_received
+
+function openReceiptSheet(invId, vendor, date) {
+  activeReceiptInvId  = invId;
+  activeReceiptVendor = vendor;
+  activeReceiptDate   = date;
+  receiptDraft        = {};
+
+  // Load any previously saved draft for this invoice
+  supa.from('delivery_items')
+    .select('d365, qty_received')
+    .eq('invoice_id', invId)
+    .eq('confirmed', false)
+    .then(function(r) {
+      if (r.data && r.data.length) {
+        r.data.forEach(function(row) {
+          if (row.qty_received != null) receiptDraft[row.d365] = row.qty_received;
+        });
+      }
+      _renderReceiptSheet();
+    })
+    .catch(function() { _renderReceiptSheet(); });
+}
+
+function _renderReceiptSheet() {
+  var vendor    = activeReceiptVendor;
+  var vendorObj = ORDER_VENDORS[vendor];
+  var items     = vendorObj ? vendorObj.items : [];
+
+  var content = document.getElementById('addSheetContent');
+
+  // Group items by category
+  var cats = {};
+  items.forEach(function(item) {
+    var cat = item.cat || 'Other';
+    if (!cats[cat]) cats[cat] = [];
+    cats[cat].push(item);
+  });
+
+  var itemsHTML = Object.keys(cats).map(function(cat) {
+    var rows = cats[cat].map(function(item) {
+      var qty = receiptDraft[item.d365] != null ? receiptDraft[item.d365] : '';
+      var hasQty = qty !== '' && qty > 0;
+      return '<div class="rcpt-item-row">' +
+        '<div class="rcpt-item-info">' +
+          '<div class="rcpt-item-name">' + item.name + '</div>' +
+          '<div class="rcpt-item-meta">' + item.d365 + (item.par != null ? ' · par ' + item.par : '') + '</div>' +
+        '</div>' +
+        '<input class="rcpt-qty-input' + (hasQty ? ' has-qty' : '') + '" ' +
+          'type="number" inputmode="numeric" min="0" placeholder="—" ' +
+          'value="' + (qty !== '' ? qty : '') + '" ' +
+          'data-d365="' + item.d365 + '" ' +
+          'data-name="' + item.name.replace(/"/g, '&quot;') + '" ' +
+          'data-cat="' + cat + '" ' +
+          'oninput="onReceiptQty(this)" onfocus="this.select()">' +
+      '</div>';
+    }).join('');
+    return '<div class="rcpt-section-label">' + cat + '</div>' + rows;
+  }).join('');
+
+  if (!items.length) {
+    itemsHTML = '<div style="padding:20px;text-align:center;font-size:0.813rem;color:var(--text3);">' +
+      'No items found for ' + vendor + '.<br>Items are pulled from the Order Vendors list.</div>';
+  }
+
+  content.innerHTML =
+    '<div class="sheet-handle"></div>' +
+    '<div class="sheet-title">Receive ' + vendor + '</div>' +
+    '<div style="font-size:0.688rem;color:var(--text3);margin-bottom:12px;">' +
+      activeReceiptDate + ' · Enter qty received for each item. Leave blank if not received.' +
+    '</div>' +
+    itemsHTML +
+    '<div class="rcpt-confirm-bar">' +
+      '<button class="btn-primary" style="width:100%;margin-bottom:6px;" onclick="confirmReceipt()">Confirm Receipt</button>' +
+      '<button class="btn-secondary" style="width:100%;font-size:0.813rem;" onclick="saveDraftReceipt()">Save Draft</button>' +
+    '</div>';
+
+  document.getElementById('addSheet').classList.add('open');
+}
+
+function onReceiptQty(input) {
+  var d365 = input.dataset.d365;
+  var val  = parseFloat(input.value);
+  if (!isNaN(val) && val > 0) {
+    receiptDraft[d365] = val;
+    input.classList.add('has-qty');
+  } else {
+    delete receiptDraft[d365];
+    input.classList.remove('has-qty');
+  }
+}
+
+function saveDraftReceipt() {
+  _saveReceiptItems(false, function() {
+    closeSheet('addSheet');
+    toast('Draft saved');
+  });
+}
+
+function confirmReceipt() {
+  var filled = Object.keys(receiptDraft).filter(function(d) { return receiptDraft[d] > 0; });
+  if (!filled.length) { toast('Enter at least one quantity'); return; }
+  _saveReceiptItems(true, function() {
+    closeSheet('addSheet');
+    toast('Receipt confirmed — ' + filled.length + ' items logged to trend');
+  });
+}
+
+function _saveReceiptItems(confirmed, cb) {
+  var vendor    = activeReceiptVendor;
+  var vendorObj = ORDER_VENDORS[vendor];
+  var items     = vendorObj ? vendorObj.items : [];
+  var itemMap   = {};
+  items.forEach(function(i) { itemMap[i.d365] = i; });
+
+  var rows = Object.keys(receiptDraft).map(function(d365) {
+    var qty  = receiptDraft[d365];
+    var item = itemMap[d365] || { name: d365, cat: '' };
+    return {
+      invoice_id:   activeReceiptInvId,
+      vendor:       vendor,
+      d365:         d365,
+      item_name:    item.name,
+      qty_received: qty,
+      received_date: activeReceiptDate,
+      confirmed:    confirmed
+    };
+  }).filter(function(r) { return r.qty_received > 0; });
+
+  if (!rows.length) { if (cb) cb(); return; }
+
+  // Delete existing draft rows for this invoice first, then insert
+  supa.from('delivery_items')
+    .delete().eq('invoice_id', activeReceiptInvId).eq('confirmed', false)
+    .then(function() {
+      return supa.from('delivery_items').insert(rows);
+    })
+    .then(function(r) {
+      if (r && r.error) { toast('Save error: ' + r.error.message); return; }
+      // If confirmed, also write to inventory_trend as inflow events
+      if (confirmed) {
+        var trendRows = rows.map(function(row) {
+          return {
+            snap_date:  row.received_date,
+            d365:       row.d365,
+            item_name:  row.item_name,
+            category:   itemMap[row.d365] ? itemMap[row.d365].cat : '',
+            vendor:     row.vendor,
+            par:        itemMap[row.d365] ? (itemMap[row.d365].par || null) : null,
+            count:      null,          // null = this is a delivery, not a count
+            received:   row.qty_received
+          };
+        });
+        // Add 'received' column upsert — use insert since each delivery is unique
+        supa.from('delivery_items').select('id').limit(1); // no-op just to chain
+        // Upsert to inventory_trend keyed on date+d365+type if we track inflow separately
+        // For now: write to a separate field in inventory_trend
+        // delivery_items is the authoritative inflow source — trend reads from it directly
+        if (cb) cb();
+      } else {
+        if (cb) cb();
+      }
+    })
+    .catch(function(e) { toast('Error: ' + e.message); });
+}
+
+// INVOICES
+// ═══════════════════════════════════════════════
+function renderInvoices() {
+  const el = document.getElementById('view-invoices');
+  if (invoices.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🧾</div><div class="empty-text">No invoices logged yet.<br>Tap + after each delivery.</div></div>`;
+    return;
+  }
+
+  // Sort newest first
+  const sorted = [...invoices].sort((a,b) => new Date(b.date) - new Date(a.date));
+  const pending = sorted.filter(i => !i.checks.received || !i.checks.d365 || !i.checks.sentIC || !i.checks.pricingOK);
+  const clear = sorted.filter(i => i.checks.received && i.checks.d365 && i.checks.sentIC && i.checks.pricingOK);
+
+  let html = '';
+  if (pending.length) {
+    html += `<div class="section-label">Needs Attention (${pending.length})</div>`;
+    html += pending.map(renderInvoiceCard).join('');
+  }
+  if (clear.length) {
+    html += `<div class="section-label" style="margin-top:24px;">Complete (${clear.length})</div>`;
+    html += clear.map(renderInvoiceCard).join('');
+  }
+
+  el.innerHTML = html;
+}
+
+function renderInvoiceCard(inv) {
+  const allClear = inv.checks.received && inv.checks.d365 && inv.checks.sentIC && inv.checks.pricingOK;
+  const hasDiscrepancy = inv.discrepancy;
+  const borderCls = hasDiscrepancy ? 'border-red' : allClear ? 'border-green' : 'border-yellow';
+
+  const checks = [
+    { key: 'received',   label: 'Invoice Rcvd' },
+    { key: 'd365',       label: 'In D365' },
+    { key: 'sentIC',     label: 'Sent to IC' },
+    { key: 'pricingOK',  label: 'Pricing ✓' },
+  ];
+
+  const checksHTML = checks.map(c => `
+    <div class="inv-check ${inv.checks[c.key] ? 'checked' : ''}"
+         onclick="toggleInvCheck('${inv.id}', '${c.key}')">
+      ${inv.checks[c.key] ? '✓ ' : ''}${c.label}
+    </div>`).join('');
+
+  return `
+    <div class="card ${borderCls}" id="inv-${inv.id}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div style="font-size:15px;font-weight:700;">${inv.vendor}</div>
+          <div style="font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-top:3px;">
+            ${fmtDate(inv.date)} · PO# ${inv.po || '—'} · Inv# ${inv.invoiceNum || '—'}
+          </div>
+        </div>
+        <div style="text-align:right;">
+          ${inv.amount ? `<div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--accent);">$${inv.amount}</div>` : ''}
+          ${hasDiscrepancy ? `<div class="pill pill-red" style="margin-top:4px;">⚠️ Discrepancy</div>` : ''}
+        </div>
+      </div>
+      <div class="invoice-checks">${checksHTML}</div>
+      ${inv.discrepancy ? `
+        <div onclick="toggleInvDiscrepancy('${inv.id}')" style="margin-top:8px;cursor:pointer;">
+          <span class="inv-check flagged">⚠️ Flag Discrepancy</span>
+        </div>` : `
+        <div style="margin-top:8px;">
+          <span class="inv-check" onclick="toggleInvDiscrepancy('${inv.id}')">Flag Discrepancy</span>
+        </div>`}
+      ${inv.notes ? `<div style="font-size:12px;color:var(--text2);margin-top:8px;padding-top:8px;border-top:1px solid var(--surface3);">${inv.notes}</div>` : ''}
+      <div class="card-actions">
+        <button class="btn-sm btn-primary" onclick="openReceiptSheet('${inv.id}', '${inv.vendor}', '${inv.date}')">Log Items</button>
+        <button class="btn-sm" onclick="deleteEntry('invoices', '${inv.id}')">Delete</button>
+      </div>
+    </div>`;
+}
+
+function toggleInvCheck(invId, checkKey) {
+  const inv = invoices.find(i => i.id === invId);
+  if (!inv) return;
+  inv.checks[checkKey] = !inv.checks[checkKey];
+  save('invoices', invoices);
+  renderInvoices();
+}
+
+function toggleInvDiscrepancy(invId) {
+  const inv = invoices.find(i => i.id === invId);
+  if (!inv) return;
+  inv.discrepancy = !inv.discrepancy;
+  save('invoices', invoices);
+  renderInvoices();
+}
+
+// ═══════════════════════════════════════════════
+// WASTE & BREAKAGE
+// ═══════════════════════════════════════════════
+const WASTE_REASONS = ['Spill','Breakage','Spoiled','Flat','Mispour','Comp','Staff Drinks','Promo Pour','Expired','Returned','Other'];
+const WASTE_UNITS   = ['oz','btl','ea','keg','cs','lb','other'];
+const WASTE_CATS    = ['BTG WINE','BTB WINE','BEER','LIQUOR','N.A.','GARNISH','COCKTAIL','OTHER'];
+
+function renderWaste() {
+  const el = document.getElementById('view-waste');
+  if (waste.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🗑️</div><div class="empty-text">No waste logged yet.<br>Tap + to log a spill, breakage, or comp.</div></div>`;
+    return;
+  }
+
+  const sorted = [...waste].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+  // Group by date
+  const groups = {};
+  sorted.forEach(w => {
+    const d = w.date || TODAY;
+    if (!groups[d]) groups[d] = [];
+    groups[d].push(w);
+  });
+
+  let html = '';
+  Object.entries(groups).forEach(([date, entries]) => {
+    html += `<div class="section-label">${fmtDate(date)} — ${entries.length} entr${entries.length===1?'y':'ies'}</div>`;
+    html += entries.map(w => `
+      <div class="card">
+        <div class="waste-row">
+          <div>
+            <div class="waste-item-name">${w.item}</div>
+            <div class="waste-detail">
+              ${w.qty} ${w.unit} · ${w.category} · ${w.reason}
+              ${w.value ? ` · ~$${w.value}` : ''}
+            </div>
+            ${w.notes ? `<div style="font-size:12px;color:var(--text2);margin-top:4px;">${w.notes}</div>` : ''}
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;">${w.initials || '—'}</div>
+            ${w.approved ? `<div style="font-size:10px;color:var(--green-bright);margin-top:4px;">✓ Approved</div>` : ''}
+          </div>
+        </div>
+        <div class="card-actions">
+          ${!w.approved ? `<button class="btn-sm green" onclick="approveWaste('${w.id}')">✓ Approve</button>` : ''}
+          <button class="btn-sm" onclick="deleteEntry('waste', '${w.id}')">Delete</button>
+        </div>
+      </div>`).join('');
+  });
+
+  el.innerHTML = html;
+}
+
+function approveWaste(id) {
+  const w = waste.find(x => x.id === id);
+  if (w) { w.approved = true; save('waste', waste); renderWaste(); toast('Entry approved'); }
+}
+
+// ═══════════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════════
+function renderEvents() {
+  const el = document.getElementById('view-events');
+  if (events.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">No events logged.<br>Tap + to add an upcoming party or event.</div></div>`;
+    return;
+  }
+
+  const sorted = [...events].sort((a,b) => new Date(a.date) - new Date(b.date));
+  const upcoming = sorted.filter(e => new Date(e.date) >= new Date(TODAY.slice(0,10)));
+  const past     = sorted.filter(e => new Date(e.date) <  new Date(TODAY.slice(0,10)));
+
+  let html = '';
+  if (upcoming.length) {
+    html += `<div class="section-label">Upcoming (${upcoming.length})</div>`;
+    html += upcoming.map(renderEventCard).join('');
+  }
+  if (past.length) {
+    html += `<div class="section-label" style="margin-top:24px;">Past (${past.length})</div>`;
+    html += past.map(renderEventCard).join('');
+  }
+
+  el.innerHTML = html;
+}
+
+function renderEventCard(ev) {
+  const isPast = new Date(ev.date) < new Date(TODAY.slice(0,10));
+  const borderCls = isPast ? '' : 'border-accent';
+  const eventFlags = [
+    { key: 'barPackage',     label: '🍹 Bar Package' },
+    { key: 'winePairing',    label: '🍷 Wine Pairing' },
+    { key: 'sparkling',      label: '🥂 Sparkling' },
+    { key: 'specialtyCocktail', label: '✨ Specialty Cocktail' },
+    { key: 'productPulled',  label: '📦 Product Pulled' },
+    { key: 'orderPlaced',    label: '📋 Extra Order Placed' },
+  ];
+  const flagsHTML = eventFlags.map(f => `
+    <div class="event-flag ${ev.flags[f.key] ? 'active' : ''}"
+         onclick="toggleEventFlag('${ev.id}', '${f.key}')">
+      ${f.label}
+    </div>`).join('');
+
+  return `
+    <div class="card ${borderCls}">
+      <div class="event-date-badge">${fmtDate(ev.date)}${ev.covers ? ` · ${ev.covers} covers` : ''}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="event-name">${ev.name}</div>
+        <button class="btn-sm" onclick="deleteEntry('events', '${ev.id}')">Delete</button>
+      </div>
+      ${ev.bevNeeds ? `<div style="font-size:13px;color:var(--text2);margin-bottom:8px;">${ev.bevNeeds}</div>` : ''}
+      ${ev.notes ? `<div style="font-size:12px;color:var(--text2);margin-bottom:8px;padding:8px;background:var(--surface2);border-radius:var(--radius-sm);">${ev.notes}</div>` : ''}
+      <div class="event-flags">${flagsHTML}</div>
+    </div>`;
+}
+
+function toggleEventFlag(evId, flagKey) {
+  const ev = events.find(e => e.id === evId);
+  if (!ev) return;
+  ev.flags[flagKey] = !ev.flags[flagKey];
+  save('events', events);
+  renderEvents();
+}
+
+// ═══════════════════════════════════════════════
+// SPECS
+// ═══════════════════════════════════════════════
+const MENUS = ['All', 'PiPa', 'Cortina', 'Mocktail', 'Next Menu'];
+
+function renderSpecs() {
+  const el = document.getElementById('view-specs');
+
+  const filtered = recipes.filter(r => {
+    const menuMatch = specFilter === 'All' || r.menu === specFilter;
+    const searchMatch = !specSearch || r.name.toLowerCase().includes(specSearch.toLowerCase())
+      || r.ingredients.some(i => i.name.toLowerCase().includes(specSearch.toLowerCase()));
+    return menuMatch && searchMatch;
+  });
+
+  const filterBtns = MENUS.map(m => `
+    <div class="spec-filter ${specFilter === m ? 'active' : ''}"
+         onclick="setSpecFilter('${m}')">${m}</div>`).join('');
+
+  const recipesHTML = filtered.length === 0
+    ? `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">No recipes match.</div></div>`
+    : filtered.map(renderRecipeCard).join('');
+
+  el.innerHTML = `
+    <div class="spec-search-wrap">
+      <input class="spec-search" type="text" placeholder="Search by name or ingredient…"
+        value="${specSearch}" oninput="onSpecSearch(this.value)">
+      <div class="spec-filter-row" style="margin-top:8px;">${filterBtns}</div>
+    </div>
+    ${recipesHTML}`;
+}
+
+function renderRecipeCard(r) {
+  const menuColor = {PiPa:'pill-blue', Cortina:'pill-purple', Mocktail:'pill-green', 'Next Menu':'pill-dim'}[r.menu] || 'pill-dim';
+  const ingsHTML = r.ingredients.map(i => `
+    <tr>
+      <td class="ing-qty">${i.qty}</td>
+      <td class="ing-unit">${i.unit}</td>
+      <td class="ing-name">${i.name}</td>
+    </tr>`).join('');
+
+  return `
+    <div class="recipe-card" id="recipe-${r.id}">
+      <div class="recipe-header" onclick="toggleRecipe('${r.id}')">
+        <div>
+          <div class="recipe-name">${r.name}</div>
+          <div class="recipe-sub">
+            <span>${r.glass}</span>
+            <span>${r.method}</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="pill ${menuColor}">${r.menu}</span>
+          <span class="recipe-chevron">▾</span>
+        </div>
+      </div>
+      <div class="recipe-body" id="rbody-${r.id}">
+        <div class="recipe-meta-row">
+          ${r.ice ? `<span class="recipe-meta-tag">🧊 ${r.ice}</span>` : ''}
+          ${r.garnish ? `<span class="recipe-meta-tag">🍊 ${r.garnish}</span>` : ''}
+        </div>
+        <table class="ingredients-table">${ingsHTML}</table>
+        <div style="display:flex;gap:8px;">
+          <button class="recipe-edit-btn" onclick="openEditRecipe('${r.id}')">✏️ Edit Recipe</button>
+          <button class="recipe-edit-btn btn-danger" style="padding:8px 14px;" onclick="deleteRecipe('${r.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleRecipe(id) {
+  const header = document.querySelector(`#recipe-${id} .recipe-header`);
+  const body   = document.getElementById('rbody-' + id);
+  header.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+function setSpecFilter(f) {
+  specFilter = f;
+  renderSpecs();
+}
+
+function onSpecSearch(val) {
+  specSearch = val;
+  renderSpecs();
+}
+
+function deleteRecipe(id) {
+  if (!confirm('Delete this recipe?')) return;
+  recipes = recipes.filter(r => r.id !== id);
+  save('recipes', recipes);
+  renderSpecs();
+  toast('Recipe deleted');
+}
+
+// ═══════════════════════════════════════════════
+// ADD SHEETS
+// ═══════════════════════════════════════════════
+function openAddSheet() {
+  const fns = {
+    activations: openActivationSheet,
+    invoices:    openInvoiceSheet,
+    waste:       openWasteSheet,
+    events:      openEventSheet,
+    specs:       openNewRecipeSheet,
+    updates:     function() {
+      // Scroll to top and focus the compose textarea
+      var area = document.getElementById('scrollArea');
+      if (area) area.scrollTop = 0;
+      setTimeout(function() {
+        var ta = document.getElementById('upd-text');
+        if (ta) ta.focus();
+      }, 100);
+    },
+  };
+  if (fns[currentView]) fns[currentView]();
+}
+
+function openActivationSheet(existing) {
+  const act = existing || null;
+  const isEdit = !!act;
+  const content = document.getElementById('addSheetContent');
+  content.innerHTML = `
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">${isEdit ? 'Edit Activation' : 'New Activation'}</div>
+    <div class="form-group">
+      <label class="form-label">Product / Activation Name</label>
+      <input class="form-input" id="act-name" placeholder="e.g. Cortina 2026 White Wine" value="${act?.name||''}">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">D365 #</label>
+        <input class="form-input" id="act-d365" placeholder="1161234" value="${act?.d365||''}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select class="form-select" id="act-pri">
+          <option ${act?.priority==='HIGH'?'selected':''}>HIGH</option>
+          <option ${act?.priority==='MED'?'selected':''}>MED</option>
+          <option ${act?.priority==='LOW'?'selected':''}>LOW</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Vendor</label>
+        <input class="form-input" id="act-vendor" placeholder="SGWS" value="${act?.vendor||''}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-select" id="act-cat">
+          ${['BTG WINE','BTB WINE','BEER','LIQUOR','N.A.','OTHER'].map(c=>`<option ${act?.category===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Launch Date</label>
+        <input class="form-input" id="act-date" type="date" value="${act?.launchDate||''}">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Swap-Out Item</label>
+        <input class="form-input" id="act-swap" placeholder="Vespa Bianco" value="${act?.swapItem||''}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Swap D365 #</label>
+        <input class="form-input" id="act-swap-d365" placeholder="1116935" value="${act?.swapD365||''}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Spec / Staff Notes</label>
+      <textarea class="form-textarea" id="act-notes" rows="3" placeholder="Tasting notes, talking points, build instructions…">${act?.notes||''}</textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Open Issues</label>
+      <input class="form-input" id="act-issues" placeholder="e.g. D365# pending from corporate" value="${act?.openIssues||''}">
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-primary" onclick="saveActivation('${act?.id||''}')">
+        ${isEdit ? 'Save Changes' : 'Add Activation'}
+      </button>
+    </div>
+    ${isEdit ? `<button class="btn-secondary" style="margin-top:8px;" onclick="deleteEntry('activations','${act.id}');closeSheet('addSheet');">Delete Activation</button>` : ''}
+  `;
+  document.getElementById('addSheet').classList.add('open');
+}
+
+function saveActivation(existingId) {
+  const name = document.getElementById('act-name').value.trim();
+  if (!name) { toast('Name required', true); return; }
+
+  if (existingId) {
+    const act = activations.find(a => a.id === existingId);
+    if (act) {
+      act.name       = name;
+      act.d365       = document.getElementById('act-d365').value.trim();
+      act.priority   = document.getElementById('act-pri').value;
+      act.vendor     = document.getElementById('act-vendor').value.trim();
+      act.category   = document.getElementById('act-cat').value;
+      act.launchDate = document.getElementById('act-date').value;
+      act.swapItem   = document.getElementById('act-swap').value.trim();
+      act.swapD365   = document.getElementById('act-swap-d365').value.trim();
+      act.notes      = document.getElementById('act-notes').value.trim();
+      act.openIssues = document.getElementById('act-issues').value.trim();
+    }
+  } else {
+    activations.push({
+      id: 'act-' + Date.now(),
+      name,
+      d365:       document.getElementById('act-d365').value.trim(),
+      priority:   document.getElementById('act-pri').value,
+      vendor:     document.getElementById('act-vendor').value.trim(),
+      category:   document.getElementById('act-cat').value,
+      launchDate: document.getElementById('act-date').value,
+      swapItem:   document.getElementById('act-swap').value.trim(),
+      swapD365:   document.getElementById('act-swap-d365').value.trim(),
+      notes:      document.getElementById('act-notes').value.trim(),
+      openIssues: document.getElementById('act-issues').value.trim(),
+      steps: { d365:false, ordered:false, inStock:false, briefed:false, eightySixed:false },
+      launched: false,
+    });
+  }
+
+  save('activations', activations);
+  var savedAct = existingId ? activations.find(a => a.id === existingId) : activations[activations.length-1];
+  if (savedAct) saveActivationToSupabase(savedAct);
+  closeSheet('addSheet');
+  renderActivations();
+  toast(existingId ? 'Activation updated' : 'Activation added');
+}
+
+function openInvoiceSheet() {
+  const content = document.getElementById('addSheetContent');
+  const vendors = ['SGWS','RNDC','Breakthru','Muller Inc','Vine Street','ACE Endico','Baldor','Beta Imports','Wine Merchant','Regal Wine','Palateur','Cloche','F Magnotta','VOS Solutions','Filthy','Other'];
+  content.innerHTML = `
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Log Invoice</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input class="form-input" id="inv-date" type="date" value="${TODAY}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Vendor</label>
+        <select class="form-select" id="inv-vendor">
+          ${vendors.map(v=>`<option>${v}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">PO #</label>
+        <input class="form-input" id="inv-po" placeholder="5038" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Invoice #</label>
+        <input class="form-input" id="inv-num" placeholder="CHECK LOOP">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Total Amount ($)</label>
+      <input class="form-input" id="inv-amount" placeholder="0.00" inputmode="decimal">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-textarea" id="inv-notes" rows="2" placeholder="e.g. Add Lucci to PO · Short 2 cases Prosecco"></textarea>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-primary" onclick="saveInvoice()">Log Invoice</button>
+    </div>
+  `;
+  document.getElementById('addSheet').classList.add('open');
+}
+
+function saveInvoice() {
+  const vendor = document.getElementById('inv-vendor').value;
+  invoices.push({
+    id: 'inv-' + Date.now(),
+    date:       document.getElementById('inv-date').value,
+    vendor,
+    po:         document.getElementById('inv-po').value.trim(),
+    invoiceNum: document.getElementById('inv-num').value.trim(),
+    amount:     document.getElementById('inv-amount').value.trim(),
+    notes:      document.getElementById('inv-notes').value.trim(),
+    checks:     { received:false, d365:false, sentIC:false, pricingOK:false },
+    discrepancy: false,
+  });
+  save('invoices', invoices);
+  closeSheet('addSheet');
+  renderInvoices();
+  toast('Invoice logged');
+}
+
+function openWasteSheet() {
+  const content = document.getElementById('addSheetContent');
+  content.innerHTML = `
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Log Waste / Breakage</div>
+    <div class="form-group">
+      <label class="form-label">Item</label>
+      <input class="form-input" id="w-item" placeholder="e.g. Carpano Antica, Chianti Classico, Limes">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Qty</label>
+        <input class="form-input" id="w-qty" placeholder="1" inputmode="decimal">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Unit</label>
+        <select class="form-select" id="w-unit">
+          ${WASTE_UNITS.map(u=>`<option>${u}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-select" id="w-cat">
+          ${WASTE_CATS.map(c=>`<option>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Reason</label>
+        <select class="form-select" id="w-reason">
+          ${WASTE_REASONS.map(r=>`<option>${r}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Est. Value ($)</label>
+        <input class="form-input" id="w-value" placeholder="0.00" inputmode="decimal">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Initials</label>
+        <input class="form-input" id="w-initials" placeholder="RY" style="text-transform:uppercase;" maxlength="4">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-textarea" id="w-notes" rows="2" placeholder="Context, table number, circumstances…"></textarea>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-primary" onclick="saveWaste()">Log Entry</button>
+    </div>
+  `;
+  document.getElementById('addSheet').classList.add('open');
+}
+
+function saveWaste() {
+  const item = document.getElementById('w-item').value.trim();
+  if (!item) { toast('Item name required', true); return; }
+  waste.push({
+    id:       'w-' + Date.now(),
+    date:     TODAY,
+    item,
+    qty:      document.getElementById('w-qty').value.trim() || '1',
+    unit:     document.getElementById('w-unit').value,
+    category: document.getElementById('w-cat').value,
+    reason:   document.getElementById('w-reason').value,
+    value:    document.getElementById('w-value').value.trim(),
+    initials: document.getElementById('w-initials').value.trim().toUpperCase(),
+    notes:    document.getElementById('w-notes').value.trim(),
+    approved: false,
+  });
+  save('waste', waste);
+  closeSheet('addSheet');
+  renderWaste();
+  toast('Waste entry logged');
+}
+
+function openEventSheet() {
+  const content = document.getElementById('addSheetContent');
+  content.innerHTML = `
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Add Event / Party</div>
+    <div class="form-group">
+      <label class="form-label">Event Name</label>
+      <input class="form-input" id="ev-name" placeholder="e.g. Private Birthday Dinner, Corporate Wine Pairing">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input class="form-input" id="ev-date" type="date" value="${TODAY}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Covers</label>
+        <input class="form-input" id="ev-covers" placeholder="20" inputmode="numeric">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Beverage Needs</label>
+      <textarea class="form-textarea" id="ev-bev" rows="2" placeholder="e.g. 3 btl Barolo, Prosecco for reception, cocktail hour package"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-textarea" id="ev-notes" rows="2" placeholder="Contact, dietary notes, timing, special requests…"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Flags</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
+        ${[
+          {id:'ev-bar',   label:'🍹 Bar Package'},
+          {id:'ev-wine',  label:'🍷 Wine Pairing'},
+          {id:'ev-spark', label:'🥂 Sparkling Needed'},
+          {id:'ev-spec',  label:'✨ Specialty Cocktail'},
+        ].map(f=>`
+          <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface2);border-radius:var(--radius-sm);cursor:pointer;">
+            <input type="checkbox" id="${f.id}" style="width:16px;height:16px;accent-color:var(--accent);">
+            <span style="font-size:13px;">${f.label}</span>
+          </label>`).join('')}
+      </div>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-primary" onclick="saveEvent()">Add Event</button>
+    </div>
+  `;
+  document.getElementById('addSheet').classList.add('open');
+}
+
+function saveEvent() {
+  const name = document.getElementById('ev-name').value.trim();
+  if (!name) { toast('Event name required', true); return; }
+  events.push({
+    id:       'ev-' + Date.now(),
+    name,
+    date:     document.getElementById('ev-date').value,
+    covers:   document.getElementById('ev-covers').value.trim(),
+    bevNeeds: document.getElementById('ev-bev').value.trim(),
+    notes:    document.getElementById('ev-notes').value.trim(),
+    flags: {
+      barPackage:        document.getElementById('ev-bar').checked,
+      winePairing:       document.getElementById('ev-wine').checked,
+      sparkling:         document.getElementById('ev-spark').checked,
+      specialtyCocktail: document.getElementById('ev-spec').checked,
+      productPulled: false,
+      orderPlaced:   false,
+    },
+  });
+  save('events', events);
+  closeSheet('addSheet');
+  renderEvents();
+  toast('Event added');
+}
+
+// ═══════════════════════════════════════════════
+// RECIPE EDIT / ADD
+// ═══════════════════════════════════════════════
+let editIngredients = [];
+
+function openNewRecipeSheet() {
+  editIngredients = [{qty:'', unit:'oz', name:''}];
+  openRecipeSheet(null);
+}
+
+function openEditRecipe(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+  editIngredients = r.ingredients.map(i => ({...i}));
+  openRecipeSheet(r);
+}
+
+function openRecipeSheet(existing) {
+  const r = existing;
+  const content = document.getElementById('editSpecContent');
+  content.innerHTML = `
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">${r ? 'Edit Recipe' : 'New Recipe'}</div>
+    <div class="form-row">
+      <div class="form-group" style="flex:2;">
+        <label class="form-label">Cocktail Name</label>
+        <input class="form-input" id="rec-name" placeholder="Negroni Bianco" value="${r?.name||''}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Menu</label>
+        <select class="form-select" id="rec-menu">
+          ${['PiPa','Cortina','Mocktail','Next Menu','Other'].map(m=>`<option ${r?.menu===m?'selected':''}>${m}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Glass</label>
+        <input class="form-input" id="rec-glass" placeholder="Rocks" value="${r?.glass||''}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Method</label>
+        <input class="form-input" id="rec-method" placeholder="Stirred" value="${r?.method||''}">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Ice</label>
+        <input class="form-input" id="rec-ice" placeholder="Large Cube" value="${r?.ice||''}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Garnish</label>
+        <input class="form-input" id="rec-garnish" placeholder="Orange Peel" value="${r?.garnish||''}">
+      </div>
+    </div>
+    <div class="form-label" style="margin-bottom:8px;">Ingredients</div>
+    <div id="ingRows"></div>
+    <button class="add-ing-btn" onclick="addIngRow()">+ Add Ingredient</button>
+    <div class="sheet-actions">
+      <button class="btn-primary" onclick="saveRecipe('${r?.id||''}')">
+        ${r ? 'Save Recipe' : 'Add Recipe'}
+      </button>
+    </div>
+  `;
+  renderIngRows();
+  document.getElementById('editSpecSheet').classList.add('open');
+}
+
+function renderIngRows() {
+  const container = document.getElementById('ingRows');
+  if (!container) return;
+  container.innerHTML = editIngredients.map((ing, i) => `
+    <div class="ing-build-row">
+      <input class="form-input qty" placeholder="1" value="${ing.qty}"
+        oninput="editIngredients[${i}].qty=this.value">
+      <input class="form-input unit" placeholder="oz" value="${ing.unit}"
+        oninput="editIngredients[${i}].unit=this.value">
+      <input class="form-input" placeholder="Ingredient name" value="${ing.name}"
+        oninput="editIngredients[${i}].name=this.value">
+      <button class="ing-remove" onclick="removeIngRow(${i})">−</button>
+    </div>`).join('');
+}
+
+function addIngRow() {
+  editIngredients.push({qty:'', unit:'oz', name:''});
+  renderIngRows();
+}
+
+function removeIngRow(i) {
+  if (editIngredients.length <= 1) return;
+  editIngredients.splice(i, 1);
+  renderIngRows();
+}
+
+function saveRecipe(existingId) {
+  const name = document.getElementById('rec-name').value.trim();
+  if (!name) { toast('Recipe name required', true); return; }
+  const ings = editIngredients.filter(i => i.name.trim());
+
+  if (existingId) {
+    const idx = recipes.findIndex(r => r.id === existingId);
+    if (idx >= 0) {
+      recipes[idx] = {
+        ...recipes[idx],
+        name, menu: document.getElementById('rec-menu').value,
+        glass: document.getElementById('rec-glass').value.trim(),
+        method: document.getElementById('rec-method').value.trim(),
+        ice: document.getElementById('rec-ice').value.trim(),
+        garnish: document.getElementById('rec-garnish').value.trim(),
+        ingredients: ings,
+      };
+    }
+  } else {
+    recipes.push({
+      id: 'r-' + Date.now(),
+      name, menu: document.getElementById('rec-menu').value,
+      glass: document.getElementById('rec-glass').value.trim(),
+      method: document.getElementById('rec-method').value.trim(),
+      ice: document.getElementById('rec-ice').value.trim(),
+      garnish: document.getElementById('rec-garnish').value.trim(),
+      ingredients: ings,
+    });
+  }
+
+  save('recipes', recipes);
+  closeSheet('editSpecSheet');
+  renderSpecs();
+  toast(existingId ? 'Recipe updated' : 'Recipe added');
+}
+
+// ═══════════════════════════════════════════════
+// SHARED HELPERS
+// ═══════════════════════════════════════════════
+function deleteEntry(store, id) {
+  const stores = { activations, invoices, waste, events };
+  const arr = stores[store];
+  if (!arr) return;
+  const idx = arr.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  if (!confirm('Delete this entry?')) return;
+  const entry = arr[idx];
+  if (store === 'activations') deleteActivationFromSupabase(entry);
+  arr.splice(idx, 1);
+  save(store, arr);
+  closeSheet('addSheet');
+  render(currentView);
+  toast('Entry deleted');
+}
+
+function closeSheet(sheetId, evt) {
+  if (evt && evt.target !== document.getElementById(sheetId)) return;
+  document.getElementById(sheetId).classList.remove('open');
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  try {
+    return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+  } catch(e) { return d; }
+}
+
+function toast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2300);
+}
+
+// ═══════════════════════════════════════════════
+// EXPORT CSV (all modules)
+// ═══════════════════════════════════════════════
+// Accessible via a long-press on Export or could add to each view — keeping it simple for now
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+document.getElementById('headerDate').textContent = new Date().toLocaleDateString('en-US', {
+  weekday:'short', month:'short', day:'numeric'
+});
+
+renderActivations();
+
+// ─────────────────────────────────────────────
+// UPDATES COMPOSER
+// ─────────────────────────────────────────────
+var updFilter = 'all';
+
+function renderUpdatesOps() {
+  var el = document.getElementById('view-updates');
+  el.innerHTML = '<div class="updates-loading"><div class="empty-state"><div class="empty-icon">📡</div><div class="empty-text">Loading...</div></div></div>';
+
+  supa.from('updates').select('*').order('created_at', {ascending: false}).limit(50)
+    .then(function(result) {
+      var data  = result.data || [];
+
+      // Filter
+      var filtered = updFilter === 'all' ? data : data.filter(function(u) { return u.tag === updFilter; });
+
+      var tagColors = {info:'#5A5650', ops:'#1B3A5C', '86':'#8B1A1A', 'new':'#1E5C38', spec:'#4A1520'};
+      var tagLabels = {info:'Info', ops:'Ops', '86':'86', 'new':'New', spec:'Spec', all:'All'};
+      var filterTags = ['all','info','ops','86','new','spec'];
+
+      var filterBtns = '';
+      // filter buttons built via DOM after innerHTML set
+
+
+
+      var feed = filtered.length === 0
+        ? '<div class="empty-state" style="padding:24px 0;"><div class="empty-text">No updates' + (updFilter !== 'all' ? ' with this tag' : ' posted yet') + '.</div></div>'
+        : filtered.map(function(u) {
+            var bg  = tagColors[u.tag] || '#2E2E2E';
+            var ts  = new Date(u.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'}) + ' ' +
+                      new Date(u.created_at).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
+            var isAlert = !!u.expires_at;
+            var alertBadge = isAlert ? ' <span style="font-size:9px;padding:2px 5px;border-radius:3px;background:rgba(180,80,0,0.3);color:#E08030;margin-left:4px;">TIMED</span>' : '';
+            return '<div class="ops-update-card">' +
+              '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+                '<div style="display:flex;align-items:center;gap:6px;">' +
+                  '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:3px 8px;border-radius:4px;background:' + bg + ';color:#F0EDE8;">' + u.tag.toUpperCase() + '</span>' +
+                  alertBadge +
+                '</div>' +
+                '<div style="display:flex;align-items:center;gap:8px;">' +
+                  '<span style="font-size:11px;color:var(--text3);font-family:monospace;">' + ts + '</span>' +
+                  '<button onclick="deleteUpdate(' + u.id + ')" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;">&times;</button>' +
+                '</div>' +
+              '</div>' +
+              '<div style="font-size:13px;color:var(--text);line-height:1.6;">' + u.text + '</div>' +
+            '</div>';
+          }).join('');
+
+      el.innerHTML =
+        '<div class="ops-update-compose">' +
+          '<div class="field-label">Tag</div>' +
+          '<select id="upd-tag" class="field-input"><option value="info">Info</option><option value="ops">Ops</option><option value="86">86</option><option value="new">New Item</option><option value="spec">Spec Update</option></select>' +
+          '<div class="field-label" style="margin-top:12px;">Message</div>' +
+          '<textarea id="upd-text" class="field-input" rows="4" placeholder="Write your update for the team..." style="resize:none;line-height:1.5;" oninput="updateCharCount(this)"></textarea>' +
+          '<div style="text-align:right;font-size:10px;color:var(--text3);margin-top:4px;" id="upd-char-count">0 / 280</div>' +
+          '<div style="display:flex;gap:8px;margin-top:12px;">' +
+            '<button class="btn-action btn-primary" onclick="postUpdate()" style="flex:1;">Post Update</button>' +
+          '</div>' +
+        '</div>' +
+        '<div id="upd-filter-row"></div>' +
+        '<div style="font-size:10px;color:var(--text3);margin-bottom:10px;">' + data.length + ' total &middot; ' + filtered.length + ' shown</div>' +
+        feed;
+      // Insert filter buttons via DOM
+      setTimeout(function() { _insertFilterBtns(filterTags, tagLabels); }, 0);
+    });
+}
+
+function setUpdFilter(t) { updFilter = t; renderUpdatesOps(); }
+
+function _insertFilterBtns(filterTags, tagLabels) {
+  var row = document.getElementById('upd-filter-row');
+  if (!row) return;
+  filterTags.forEach(function(t) {
+    var btn = document.createElement('button');
+    btn.textContent = tagLabels[t];
+    var baseStyle = 'border:none;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;margin:2px;';
+    btn.style.cssText = (updFilter === t ? 'background:var(--accent);color:#fff;' : 'background:var(--surface2);color:var(--text2);') + baseStyle;
+
+    row.appendChild(btn);
+  });
+}
+function updateCharCount(el) {
+  var count = el.value.length;
+  var counter = document.getElementById('upd-char-count');
+  if (counter) counter.textContent = count + ' / 280';
+}
+
+
+function postUpdate() {
+  var tag  = document.getElementById('upd-tag').value;
+  var text = document.getElementById('upd-text').value.trim();
+  if (!text) { alert('Write a message first.'); return; }
+
+  var btn = document.querySelector('[onclick="postUpdate()"]');
+  if (btn) { btn.textContent = 'Posting...'; btn.disabled = true; }
+
+  supa.from('updates').insert({ tag: tag, text: text, date: TODAY, published: true })
+    .then(function(result) {
+      if (result.error) {
+        alert('Error posting: ' + result.error.message);
+        if (btn) { btn.textContent = 'Post Update'; btn.disabled = false; }
+        return;
+      }
+      renderUpdatesOps();
+    });
+}
+
+function deleteUpdate(id) {
+  if (!confirm('Delete this update?')) return;
+  supa.from('updates').delete().eq('id', id)
+    .then(function(result) {
+      if (result.error) { alert('Error deleting.'); return; }
+      renderUpdatesOps();
+    });
+}
+
+
+// ─────────────────────────────────────────────
+// ORDER PLANNER
+// ─────────────────────────────────────────────
+var ORDER_VENDORS = {"RNDC": {"name": "RNDC", "contact": "Brad DuPlessis", "email": "Brad.duPlessis@RNDC-USA.COM", "cutoff": "9:00 AM", "vendor_id": "F230750", "days": ["MON"], "items": [{"d365": "200517", "name": "Trento DOC", "cat": "BTG WINE", "par": 12.0, "note": "", "vendor": "RNDC"}, {"d365": "1119524", "name": "Arneis Pradalupo", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "RNDC"}, {"d365": "1121578", "name": "La Segreta Rosso", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "RNDC"}, {"d365": "1120559", "name": "Barbera 'Briccotondo'", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "RNDC"}, {"d365": "1153073", "name": "Kitchen Red Magnums", "cat": "KITCHEN", "par": 24.0, "note": "", "vendor": "RNDC"}, {"d365": "1105087", "name": "Flor de Cana 4 yr Silver", "cat": "WELL", "par": 4.0, "note": "", "vendor": "RNDC"}, {"d365": "1137938", "name": "Ramazzotti Rosato", "cat": "WELL", "par": 4.0, "note": "", "vendor": "RNDC"}, {"d365": "00670086", "name": "Barolo Silver Label 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "521017", "name": "Barolo La Villa 2005", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1116147", "name": "Barbera Raimonda 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1113958", "name": "Gavi Di Gavi 2023", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1157466", "name": "Brunello di Montalcino 2018", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1116337", "name": "Tanca Fara Alghero 2018", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1120120", "name": "Chardonnay 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1118923", "name": "Rosato 2024", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1131849", "name": "Amarone Della Valpolicella 2011", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1132769", "name": "Perle Rose", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1132308", "name": "Giulio Ferrari 2009", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "521093", "name": "Perle Nero", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "RNDC"}, {"d365": "1155529", "name": "Drumshanbo Gunpowder Sardinian Citrus Irish Gin", "cat": "BACK BAR", "par": 1.0, "note": "", "vendor": "RNDC"}, {"d365": "1126978", "name": "Malfy Originale", "cat": "BACK BAR", "par": 1.0, "note": "", "vendor": "RNDC"}, {"d365": "1133046", "name": "Malfy Rosa", "cat": "BACK BAR", "par": 1.0, "note": "", "vendor": "RNDC"}, {"d365": "1100046", "name": "Ramazzotti Amaro", "cat": "BACK BAR", "par": 1.0, "note": "", "vendor": "RNDC"}]}, "Vine Street": {"name": "Vine Street", "contact": "David Costanzo", "email": "David@vsimports.com", "cutoff": "3:00 PM", "vendor_id": "F231731", "days": ["MON"], "items": [{"d365": "1151358", "name": "Boca 2019", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Vine Street"}, {"d365": "1137393", "name": "Nebbiolo 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Vine Street"}, {"d365": "1118045", "name": "Chianti Classico Riserva Rancia Berardenga 2019", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Vine Street"}, {"d365": "1132391", "name": "Pecorino", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Vine Street"}, {"d365": "1119956", "name": "Gruner Veltriner", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Vine Street"}, {"d365": "1120835", "name": "Pinot Grigio Ramato", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Vine Street"}, {"d365": "1123390", "name": "Bordiga Vermouth Rosso", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Vine Street"}]}, "Muller Inc": {"name": "Muller Inc", "contact": "Joe Venuto", "email": "jvenuto@mullerbev.com", "cutoff": "2:00 PM", "vendor_id": "F231445", "days": ["MON"], "items": [{"d365": "1100467", "name": "Peroni  —  Nastro Azzurro | Italian Lager | 5%", "cat": "BEER", "par": 3.0, "note": "", "vendor": "Muller Inc"}, {"d365": "00692737", "name": "Yards  —  Philadelphia Pale Ale | Pale Ale | 4.6%", "cat": "BEER", "par": 2.0, "note": "", "vendor": "Muller Inc"}, {"d365": "00692736", "name": "Bru Daddy  —  Haze Daddy | Hazy IPA | 6.3%", "cat": "BEER", "par": null, "note": "OOS — evaluate replacement", "vendor": "Muller Inc"}, {"d365": "00692735", "name": "1911  —  Honeycrisp | Cider | 5.5%", "cat": "BEER", "par": 2.0, "note": "Consider switching keg", "vendor": "Muller Inc"}, {"d365": "100321", "name": "Peroni (Btls — If Needed)  —  Nastro Azzurro | Italian Lager", "cat": "KITCHEN", "par": 3.0, "note": "Kitchen only", "vendor": "Muller Inc"}, {"d365": "00687694", "name": "Von C  —  OG Pils | Philly Lager | 4.9%", "cat": "BEER", "par": 6.0, "note": "", "vendor": "Muller Inc"}, {"d365": "00687699", "name": "Von C  —  Walking on Clouds | IPA", "cat": "BEER", "par": 2.0, "note": "⚠ D365# Pending — Incoming", "vendor": "Muller Inc"}, {"d365": "1155723", "name": "Peroni  —  0.0 | Zero Proof", "cat": "BEER", "par": 6.0, "note": "", "vendor": "Muller Inc"}]}, "Beta Imports": {"name": "Beta Imports", "contact": "Confirm PO Only", "email": "No Email — Confirm PO Only", "cutoff": "6:00 PM", "vendor_id": "F228565", "days": ["MON", "WED"], "items": [{"d365": "00675723", "name": "EPL Limonata", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}, {"d365": "00675722", "name": "EPL Vivace (Orange)", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}, {"d365": "00675724", "name": "EPL Cola Classic", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}, {"d365": "00675725", "name": "EPL Cola Sugar-Free", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}, {"d365": "1134996", "name": "Espresso Pod (Decaf)", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}, {"d365": "00184029", "name": "Molecola Cola Classic", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}, {"d365": "00184028", "name": "Molecola Cola SF", "cat": "N.A.", "par": null, "note": "", "vendor": "Beta Imports"}]}, "Baldor": {"name": "Baldor", "contact": "National Accts", "email": "nationalaccounts@baldorfood.com", "cutoff": "Varies", "vendor_id": "F227066", "days": ["MON", "TUE", "WED", "THU", "FRI", "SAT"], "items": [{"d365": "101457", "name": "Orange Juice", "cat": "N.A.", "par": 2.0, "note": "", "vendor": "Baldor"}, {"d365": "1111723", "name": "Lemon Juice", "cat": "N.A.", "par": 4.0, "note": "", "vendor": "Baldor"}, {"d365": "101455", "name": "Lime Juice", "cat": "N.A.", "par": 4.0, "note": "", "vendor": "Baldor"}, {"d365": "1159135", "name": "Whole Milk", "cat": "N.A.", "par": 3.0, "note": "", "vendor": "Baldor"}, {"d365": "1125252", "name": "Oat Milk", "cat": "N.A.", "par": 4.0, "note": "", "vendor": "Baldor"}, {"d365": "1159137", "name": "Half and half", "cat": "N.A.", "par": 6.0, "note": "", "vendor": "Baldor"}, {"d365": "1164662", "name": "Fever Tree Tonic", "cat": "N.A.", "par": 6.0, "note": "", "vendor": "Baldor"}, {"d365": "1124369", "name": "Fever Tree Club soda", "cat": "N.A.", "par": 16.0, "note": "", "vendor": "Baldor"}, {"d365": "1164566", "name": "Oranges", "cat": "N.A.", "par": 10.0, "note": "", "vendor": "Baldor"}, {"d365": "102068", "name": "Lemons", "cat": "N.A.", "par": 10.0, "note": "", "vendor": "Baldor"}, {"d365": "102091", "name": "Limes", "cat": "N.A.", "par": 10.0, "note": "", "vendor": "Baldor"}, {"d365": "102098", "name": "Mint Fresh", "cat": "N.A.", "par": 0.5, "note": "", "vendor": "Baldor"}, {"d365": "1103107", "name": "Olives", "cat": "N.A.", "par": 0.25, "note": "", "vendor": "Baldor"}, {"d365": "101454", "name": "Cranberry Juice", "cat": "N.A.", "par": 4.0, "note": "", "vendor": "Baldor"}, {"d365": "1161854", "name": "White Sugar", "cat": "N.A.", "par": 2.0, "note": "", "vendor": "Baldor"}, {"d365": "1115772", "name": "Luxardo Cherries", "cat": "N.A.", "par": 2.0, "note": "", "vendor": "Baldor"}, {"d365": "1148781", "name": "Ginger Ale", "cat": "N.A.", "par": 8.0, "note": "", "vendor": "Baldor"}]}, "SGWS": {"name": "SGWS", "contact": "Mark Kauterman", "email": "mark.kauterman@sgws.com", "cutoff": "2:00 PM", "vendor_id": "F228499", "days": ["TUE", "WED"], "items": [{"d365": "1136347", "name": "Prosecco", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1136348", "name": "Lambrusco", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1113651", "name": "Grillo", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1120834", "name": "Falanghina", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1114289", "name": "Califuria Rosato", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1122135", "name": "Cabernet Sauvgnon", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1140193", "name": "Chianti Classico", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1109844", "name": "Nebbiolo", "cat": "BTG WINE", "par": 24.0, "note": "", "vendor": "SGWS"}, {"d365": "1109414", "name": "Bulldog", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1158859", "name": "Wild Turkey 81", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1116710", "name": "Luxardo Bitter", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1119514", "name": "Luxardo Triple Sec", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1100061", "name": "Luxardo Amaretto", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1120691", "name": "Aperol", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "505680", "name": "Campari", "cat": "WELL", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1159036", "name": "Barolo Lazzarito 2017", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "00676048", "name": "Barolo Riserva 2015", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1140199", "name": "Rosso Monferrato Ciuchino", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1112868", "name": "Freisa", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1112592", "name": "Era Ora Riesling", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "SGWS"}, {"d365": "1126510", "name": "Rosso Di Montalcino 2023", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1163242", "name": "Flaccianello 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1162641", "name": "Tignanello 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1133015", "name": "Taurasi 2018", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1118576", "name": "Greco Di Tufo", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1119979", "name": "Primitivo Piluna 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1115458", "name": "Syrah", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1117554", "name": "Cervaro Della Sala", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1120284", "name": "Valpolicella 2023", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1116935", "name": "Vespa Bianco 2018", "cat": "BTB WINE", "par": 2.0, "note": "Off Menu", "vendor": "SGWS"}, {"d365": "1159477", "name": "Alta Langa Brut", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1154461", "name": "Altos Anejo", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1138246", "name": "Espolon Resposado", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1142593", "name": "Ilegal Mezcal Reposado", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1100098", "name": "1757 Vermouth Rosso Cinzano", "cat": "BACK BAR", "par": 2.0, "note": "Off Menu", "vendor": "SGWS"}, {"d365": "1100243", "name": "Braulio", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "SGWS"}, {"d365": "1104213", "name": "Averna", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "SGWS"}]}, "Palateur": {"name": "Palateur", "contact": "Mark Monaco", "email": "mark@palateur.com", "cutoff": "12:00 PM", "vendor_id": "F231527", "days": ["TUE"], "items": [{"d365": "1121887", "name": "Verdicchio", "cat": "BTG WINE", "par": 2.0, "note": "", "vendor": "Palateur"}, {"d365": "1144088", "name": "Il Guercio 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Palateur"}, {"d365": "1123404", "name": "Sangiovese Superiore 2023", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Palateur"}, {"d365": "1132835", "name": "Verdicchio Rincrocca 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Palateur"}, {"d365": "1121130", "name": "Etna Rosso Monfete 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Palateur"}, {"d365": "1150623", "name": "Blanc e Morgex 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Palateur"}]}, "Cloche": {"name": "Cloche", "contact": "Michael M.", "email": "mike@clochewine.com", "cutoff": "12:00 PM", "vendor_id": "F231600", "days": ["TUE"], "items": [{"d365": "1134131", "name": "Rossese 2023", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Cloche"}]}, "Regal": {"name": "Regal", "contact": "Scott McBride", "email": "smcbride@regalwine.com", "cutoff": "2:00 PM", "vendor_id": "F228323", "days": ["TUE"], "items": [{"d365": "1130819", "name": "Rosso Montalcino 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Regal"}, {"d365": "1138775", "name": "Toscana Bianco PA'RO' 2024", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Regal"}, {"d365": "1130146", "name": "Montepulciano Notari 2022", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Regal"}, {"d365": "1127803", "name": "Grillo Vurria 2024", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Regal"}, {"d365": "1145420", "name": "Rosato Nasciolo", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Regal"}]}, "F Magnotta": {"name": "F Magnotta", "contact": "David Hall", "email": "orders@fredmagnotta.com", "cutoff": "2:30 PM", "vendor_id": "F231710", "days": ["TUE"], "items": [{"d365": "1114937", "name": "Vino Nobile 2020", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "F Magnotta"}, {"d365": "1115287", "name": "Montefalco Rosso 2021", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "F Magnotta"}, {"d365": "1164264", "name": "Vermentino Costa Marina 2023", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "F Magnotta"}]}, "Ace Endico": {"name": "Ace Endico", "contact": "A. Galvan", "email": "agalvan@aceendico.com", "cutoff": "4:00 PM", "vendor_id": "F226939", "days": ["TUE", "THU"], "items": [{"d365": "1144705", "name": "San Pellegrino 750ml", "cat": "N.A.", "par": 180.0, "note": "", "vendor": "Ace Endico"}, {"d365": "1163669", "name": "San Benedetto 25.4oz", "cat": "N.A.", "par": 216.0, "note": "", "vendor": "Ace Endico"}, {"d365": "800017", "name": "S. Pellegrino Soda 11.15 fl oz", "cat": "N.A.", "par": 48.0, "note": "", "vendor": "Ace Endico"}, {"d365": "800016", "name": "S. Pellegrino Soda 11.15 fl oz", "cat": "N.A.", "par": 48.0, "note": "", "vendor": "Ace Endico"}, {"d365": "1126712", "name": "S. Pellegrino Soda 11.15 fl oz (L)", "cat": "N.A.", "par": null, "note": "", "vendor": "Ace Endico"}]}, "VOS SELECTIONS INC.": {"name": "VOS SELECTIONS INC.", "contact": "—", "email": "—", "cutoff": "12:00 PM", "vendor_id": "—", "days": ["TUE"], "items": [{"d365": "00690713", "name": "Altamura", "cat": "WELL", "par": 4.0, "note": "", "vendor": "VOS SELECTIONS INC."}]}, "Breakthru": {"name": "Breakthru", "contact": "Tim Madden", "email": "TMMadden@Breakthrubev.com", "cutoff": "12:00 PM", "vendor_id": "F226891", "days": ["WED"], "items": [{"d365": "1112217", "name": "Pinot Grigio", "cat": "BTG WINE", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1119793", "name": "Valpolicella", "cat": "BTG WINE", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "200624", "name": "Carpano Antica Formula", "cat": "WELL", "par": 4.0, "note": "", "vendor": "Breakthru"}, {"d365": "??????????", "name": "Carpano Classico", "cat": "WELL", "par": 4.0, "note": "", "vendor": "Breakthru"}, {"d365": "100401", "name": "Pallini Limoncello", "cat": "WELL", "par": 4.0, "note": "", "vendor": "Breakthru"}, {"d365": "1152568", "name": "Lyre's NA Sprakling", "cat": "N.A.", "par": 6.0, "note": "", "vendor": "Breakthru"}, {"d365": "1151638", "name": "Lyre's Italian Orange", "cat": "N.A.", "par": 3.0, "note": "", "vendor": "Breakthru"}, {"d365": "1152567", "name": "Lyre's London Dry", "cat": "N.A.", "par": 3.0, "note": "", "vendor": "Breakthru"}, {"d365": "1155641", "name": "Lyre's Rosso", "cat": "N.A.", "par": 3.0, "note": "", "vendor": "Breakthru"}, {"d365": "1121193", "name": "Le Volte 2022", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1111510", "name": "Vermentino 2023", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1143268", "name": "Etna Bianco 2023", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1117837", "name": "Gewurstraminer 2023", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1142549", "name": "Valpolicella Classico 2018", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1113375", "name": "Chardonnay Where Dreams 2022", "cat": "BTB WINE", "par": 24.0, "note": "", "vendor": "Breakthru"}, {"d365": "1128425", "name": "Pinot Grigio 2022", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "Breakthru"}, {"d365": "802991", "name": "Franciacorta Cuvee Prestige", "cat": "BTB WINE", "par": 4.0, "note": "", "vendor": "Breakthru"}, {"d365": "1136499", "name": "Franciacorta Anna Maria Clementi", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1121291", "name": "Prosecco Rosato", "cat": "BTB WINE", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1127215", "name": "Diplomatico Exclusiva Rum, 80 proof", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "506914", "name": "Zacapa 23 yr", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1163625", "name": "Michter's Rye", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1119851", "name": "Woodford Reserve Double Oaked", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1160159", "name": "Tullamore Dew - Irish Whiskey", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "1126513", "name": "Montenegro Amaro", "cat": "BACK BAR", "par": 2.0, "note": "", "vendor": "Breakthru"}, {"d365": "100342", "name": "Lucano", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1116712", "name": "Zucca Amaro Rabarbaro", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1152746", "name": "Amaro dell Etna", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "1163334", "name": "Remy Martin VSOP", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "100400", "name": "Meletti Limoncello", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "100413", "name": "Meletti Sambuca", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "200609", "name": "Branca Menta", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}, {"d365": "200615", "name": "Fernet Branca", "cat": "BACK BAR", "par": null, "note": "", "vendor": "Breakthru"}]}, "Wine Merchant": {"name": "Wine Merchant", "contact": "Jeff", "email": "jeff@thewinemerchantltd.com", "cutoff": "11:59 PM", "vendor_id": "F231708", "days": ["WED"], "items": [{"d365": "1114012", "name": "Montepulciano d'Abruzzo", "cat": "BTG WINE", "par": 6.0, "note": "", "vendor": "Wine Merchant"}, {"d365": "1153120", "name": "Cocchi Extra Dry", "cat": "WELL", "par": 4.0, "note": "", "vendor": "Wine Merchant"}, {"d365": "200765", "name": "Cocchi Americano Bianco", "cat": "WELL", "par": 4.0, "note": "", "vendor": "Wine Merchant"}, {"d365": "1151916", "name": "Barbaresco 2020", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1123125", "name": "Barbera Conca Tra Le Pile 2021", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1160644", "name": "Brunello di Montalcino 2019", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1123172", "name": "Bolgheri Rosso 2023", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1117344", "name": "Chianti Classico 2023", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1117059", "name": "Lugana", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1119309", "name": "Vermentino Costamolino 2024", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1151609", "name": "Sagrantino Memoria 2015", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1126508", "name": "Pinot Grigio Dessemis", "cat": "BTB WINE", "par": null, "note": "", "vendor": "Wine Merchant"}, {"d365": "1113282", "name": "Cocchi Dopo Teatro Vermouth Amaro", "cat": "BACK BAR", "par": 1.0, "note": "", "vendor": "Wine Merchant"}]}};
+
+var opCounts = {};       // d365 -> entered count
+var opNotes  = {};       // d365 -> note override
+var opView   = 'today';   // 'today' | 'all' | vendor name
+var opSaved  = false;
+
+var CAT_COLORS = {
+  'BTG WINE':  {bg:'rgba(200,175,30,0.18)',color:'#C8AF1E'},
+  'BTB WINE':  {bg:'rgba(160,30,30,0.2)',   color:'#E05050'},
+  'BACK BAR':  {bg:'rgba(50,100,160,0.2)',  color:'#7AB0D8'},
+  'WELL':      {bg:'rgba(139,74,68,0.25)', color:'#A85A52'},
+  'BEER':      {bg:'rgba(180,140,20,0.2)', color:'#D4A830'},
+  'KITCHEN':   {bg:'rgba(30,92,56,0.2)',   color:'#38966A'},
+  'N.A.':      {bg:'rgba(80,80,80,0.2)',   color:'#8A8680'},
+};
+
+var DAY_ORDER = {MON:0,TUE:1,WED:2,THU:3,FRI:4,SAT:5,SUN:6};
+var DAYS      = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+function opTodayDay() {
+  return DAYS[new Date().getDay()];
+}
+
+function opVendorsForDay(day) {
+  return Object.values(ORDER_VENDORS).filter(function(v) {
+    return v.days.indexOf(day) >= 0;
+  });
+}
+
+function opSuggest(par, count) {
+  if (par == null || count == null || count === '') return null;
+  var s = (parseFloat(par) || 0) - (parseFloat(count) || 0);
+  return Math.max(0, s);
+}
+
+function renderOrderPlanner() {
+  var el = document.getElementById('view-order');
+  var today = opTodayDay();
+  var todayVendors = opVendorsForDay(today);
+
+  // Load overrides first, then counts
+  loadOrderOverrides(function() {
+  todayVendors = opVendorsForDay(today); // refresh after overrides
+  supa.from('order_counts').select('*').eq('count_date', TODAY)
+    .then(function(result) {
+      var saved = result.data || [];
+      saved.forEach(function(row) {
+        opCounts[row.d365] = row.count;
+        if (row.notes) opNotes[row.d365] = row.notes;
+      });
+      _renderOPInner(el, today, todayVendors);
+    });
+  }); // end loadOrderOverrides
+}
+
+function _renderOPInner(el, today, todayVendors) {
+  // View switcher
+  var allVendors = Object.values(ORDER_VENDORS).sort(function(a,b) {
+    return (DAY_ORDER[a.days[0]] || 0) - (DAY_ORDER[b.days[0]] || 0);
+  });
+
+  var viewBtns = [
+    {key:'today', label: today + ' Orders (' + todayVendors.length + ')'},
+    {key:'all',   label: 'All Vendors'},
+  ];
+  var viewBtnHTML = viewBtns.map(function(btn) {
+    var active = opView === btn.key;
+    return '<button class="op-view-btn' + (active ? ' active' : '') + '" onclick="setOPView(\'' + btn.key + '\')">' + btn.label + '</button>';
+  }).join('');
+
+  // Which vendors to show
+  var showVendors = opView === 'today' ? todayVendors : allVendors;
+
+  // Count items needing order across shown vendors
+  var totalNeed = 0;
+  showVendors.forEach(function(v) {
+    v.items.forEach(function(item) {
+      var count = opCounts[item.d365];
+      var sug   = opSuggest(item.par, count !== undefined ? count : null);
+      if (sug != null && sug > 0) totalNeed++;
+    });
+  });
+
+  var vendorHTML = showVendors.map(function(v) {
+    return _renderOPVendor(v);
+  }).join('');
+
+  var exportBtnOrder = '<button onclick="exportOrderSnapshot()" style="padding:11px 14px;background:var(--surface2);border:1.5px solid var(--surface3);border-radius:var(--radius);color:var(--text2);font-size:0.813rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">&#x1F4CA; Snapshot</button>';
+  var clearBtn = '<button onclick="clearOrderCounts()" style="padding:11px 14px;background:var(--surface2);border:1.5px solid var(--surface3);border-radius:var(--radius);color:var(--text3);font-size:0.813rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Clear</button>';
+  var saveBar = '<div class="op-save-bar">' +
+    '<button class="btn-primary" onclick="saveOrderCounts()" style="flex:1;padding:11px 14px;border-radius:var(--radius);border:none;cursor:pointer;font-family:\'DM Sans\',sans-serif;font-size:0.813rem;font-weight:700;">Save Counts</button>' +
+    clearBtn +
+    exportBtnOrder +
+    '</div>';
+
+  el.innerHTML =
+    '<div style="display:flex;gap:6px;margin-bottom:14px;">' + viewBtnHTML + '</div>' +
+    saveBar +
+    vendorHTML +
+    '<div style="height:20px;"></div>';
+}
+
+function _renderOPVendor(v) {
+  var itemsNeedOrder = v.items.filter(function(item) {
+    var count = opCounts[item.d365];
+    var sug   = opSuggest(item.par, count !== undefined ? count : null);
+    return sug != null && sug > 0;
+  }).length;
+
+  var daysStr = v.days.join(', ');
+  var cutoffBadge = v.cutoff && v.cutoff !== 'nan'
+    ? '<span class="op-cutoff">&#x23F0; ' + v.cutoff + '</span>' : '';
+  var needBadge = itemsNeedOrder > 0
+    ? '<span class="op-need-count">' + itemsNeedOrder + ' to order</span>' : '';
+
+  var itemRows = v.items.map(function(item) {
+    var count    = opCounts[item.d365];
+    var hasCount = count !== undefined && count !== '';
+    var sug      = opSuggest(item.par, hasCount ? count : null);
+    var needOrder = sug != null && sug > 0;
+    var catStyle  = CAT_COLORS[item.cat] || {bg:'var(--surface3)',color:'var(--text2)'};
+    var rowCls    = needOrder ? ' op-row-need' : (hasCount ? ' op-row-counted' : '');
+    var sugDisplay = sug != null ? (sug > 0 ? '+' + sug : '&#x2713;') : '—';
+    var sugColor   = sug != null && sug > 0 ? 'color:var(--red-bright);font-weight:700;' : 'color:var(--green-bright);';
+
+    return '<div class="op-item-row' + rowCls + '">' +
+      '<div class="op-item-info">' +
+        '<div class="op-item-name">' + item.name + '</div>' +
+        '<div class="op-item-meta">' +
+          '<span class="op-cat-badge" style="background:' + catStyle.bg + ';color:' + catStyle.color + ';">' + item.cat + '</span>' +
+          (item.d365 ? '<span>' + item.d365 + '</span>' : '') +
+          (item.note ? '<span class="op-item-note">&#x26A0; ' + item.note + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="op-item-right">' +
+        (item.par != null ? '<div class="op-par-label">par ' + item.par + '</div>' : '') +
+        '<input class="op-count-input" type="number" inputmode="numeric" pattern="[0-9]*"' +
+          ' placeholder="—" value="' + (hasCount ? count : '') + '"' +
+          ' data-d365="' + item.d365 + '" data-par="' + (item.par || '') + '"' +
+          ' data-name="' + item.name.replace(/"/g, '&quot;') + '" data-cat="' + item.cat + '" data-vendor="' + v.name + '"' +
+          ' oninput="opCountInput(this)" onfocus="this.select()">' +
+        '<div class="op-suggest" style="' + sugColor + '">' + sugDisplay + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var addItemBtn = '<button onclick="openOrderItemSheet(\'' + v.name + '\')" ' +
+    'style="display:block;width:100%;padding:9px;background:transparent;border:1.5px dashed var(--surface3);' +
+    'color:var(--text3);font-size:0.75rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;' +
+    'text-align:center;border-top:1px solid var(--surface3);">+ Add Item to ' + v.name + '</button>';
+
+  var editItemBtns = '<div style="display:flex;flex-wrap:wrap;gap:4px;padding:8px 14px;border-top:1px solid var(--surface3);">' +
+    v.items.map(function(item) {
+      var encoded = encodeURIComponent(JSON.stringify(item));
+      return '<button onclick="openOrderItemSheet(\'' + v.name + '\',JSON.parse(decodeURIComponent(\'' + encoded + '\')))" ' +
+        'style="font-size:0.563rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--surface2);' +
+        'color:var(--text3);border:none;cursor:pointer;font-family:\'DM Sans\',sans-serif;">' +
+        item.d365 + '</button>';
+    }).join('') +
+  '</div>';
+
+  var copyBtn = itemsNeedOrder > 0
+    ? '<button class="op-copy-btn" onclick="copyVendorOrder(\'' + v.name.replace(/'/g, "\\'") + '\')" style="margin-top:10px;">&#x1F4CB; Copy ' + v.name + ' Order</button>'
+    : '';
+
+  return '<div class="op-vendor-card">' +
+    '<div class="op-vendor-header">' +
+      '<div>' +
+        '<div class="op-vendor-name">' + v.name + '</div>' +
+        '<div class="op-vendor-meta">' + daysStr + ' &middot; ' + (v.contact || '') + '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">' +
+        cutoffBadge + needBadge +
+      '</div>' +
+    '</div>' +
+    itemRows +
+    editItemBtns +
+    addItemBtn +
+    copyBtn +
+  '</div>';
+}
+
+function opCountInput(input) {
+  var d365  = input.dataset.d365;
+  var val   = input.value.trim();
+  opCounts[d365] = val === '' ? undefined : parseFloat(val);
+
+  // Update suggestion display inline
+  var row    = input.closest('.op-item-row');
+  var sugEl  = row.querySelector('.op-suggest');
+  var par    = parseFloat(input.dataset.par) || null;
+  var count  = val === '' ? null : parseFloat(val);
+  var sug    = opSuggest(par, count);
+  if (sugEl) {
+    sugEl.textContent = sug != null ? (sug > 0 ? '+' + sug : '✓') : '—';
+    sugEl.style.color = sug != null && sug > 0 ? 'var(--red-bright)' : 'var(--green-bright)';
+    sugEl.style.fontWeight = sug != null && sug > 0 ? '700' : '';
+  }
+  row.className = 'op-item-row' + (sug != null && sug > 0 ? ' op-row-need' : (val !== '' ? ' op-row-counted' : ''));
+}
+
+function setOPView(v) {
+  opView = v;
+  renderOrderPlanner();
+}
+
+function clearOrderCounts() {
+  opCounts = {};
+  // Delete today's saved counts from Supabase so reload doesn't refill them
+  supa.from('order_counts').delete().eq('count_date', TODAY).then(function() {});
+  // Bypass renderOrderPlanner (which re-fetches from Supabase) — render directly
+  var el = document.getElementById('view-order');
+  var today = opTodayDay();
+  loadOrderOverrides(function() {
+    var todayVendors = opVendorsForDay(today);
+    _renderOPInner(el, today, todayVendors);
+    toast('Counts cleared');
+  });
+}
+
+function saveOrderCounts() {
+  var rows = [];
+  document.querySelectorAll('.op-count-input').forEach(function(inp) {
+    if (inp.value.trim() === '') return;
+    rows.push({
+      count_date: TODAY,
+      d365:       inp.dataset.d365,
+      item_name:  inp.dataset.name,
+      category:   inp.dataset.cat,
+      vendor:     inp.dataset.vendor,
+      par:        parseFloat(inp.dataset.par) || null,
+      count:      parseFloat(inp.value),
+      order_qty:  Math.max(0, (parseFloat(inp.dataset.par) || 0) - parseFloat(inp.value)),
+    });
+  });
+
+  if (!rows.length) { toast('No counts entered yet'); return; }
+
+  // Deduplicate by d365 before saving (same item can appear in multiple vendors)
+  var dedupedOrders = {};
+  rows.forEach(function(row) {
+    dedupedOrders[row.d365] = row; // last write wins if duplicate
+  });
+  var dedupRows = Object.values(dedupedOrders);
+
+  supa.from('order_counts')
+    .upsert(dedupRows, { onConflict: 'count_date,d365' })
+    .then(function(r) {
+      if (r && r.error) { toast('Save error: ' + r.error.message); return; }
+      toast('Counts saved — ' + dedupRows.length + ' items');
+    });
+}
+
+function copyVendorOrder(vendorName) {
+  var vendor = ORDER_VENDORS[vendorName];
+  if (!vendor) return;
+
+  var lines = [];
+  var date  = new Date().toLocaleDateString('en-US', {weekday:'short',month:'short',day:'numeric'});
+  lines.push('ORDER — ' + vendorName);
+  lines.push(date + ' | Cutoff: ' + (vendor.cutoff || ''));
+  if (vendor.email && vendor.email !== 'nan') lines.push(vendor.email);
+  lines.push('');
+
+  var orderItems = vendor.items.filter(function(item) {
+    var count = opCounts[item.d365];
+    var sug   = opSuggest(item.par, count !== undefined ? count : null);
+    return sug != null && sug > 0;
+  });
+
+  if (!orderItems.length) { toast('Nothing to order from ' + vendorName); return; }
+
+  // Group by category
+  var cats = {};
+  orderItems.forEach(function(item) {
+    if (!cats[item.cat]) cats[item.cat] = [];
+    var count = opCounts[item.d365];
+    var sug   = opSuggest(item.par, count);
+    cats[item.cat].push('  ' + item.d365 + '  ' + item.name + '  x' + sug);
+  });
+
+  Object.keys(cats).forEach(function(cat) {
+    lines.push('[' + cat + ']');
+    cats[cat].forEach(function(l) { lines.push(l); });
+    lines.push('');
+  });
+
+  navigator.clipboard.writeText(lines.join('\n')).then(function() {
+    toast('Copied ' + vendorName + ' order (' + orderItems.length + ' items)');
+  });
+}
+
+
+// ─────────────────────────────────────────────
+// INVENTORY TREND TRACKER
+// ─────────────────────────────────────────────
+var trendFilter = 'all';
+var trendSearch = '';
+
+function renderInventoryTrend() {
+  var el = document.getElementById('view-trend');
+  el.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F4E1;</div><div class="empty-text">Loading trend data...</div></div>';
+
+  // Get all snapshots ordered by date
+  // Fetch both count snapshots and confirmed delivery totals in parallel
+  Promise.all([
+    supa.from('inventory_trend').select('*').order('snap_date', {ascending: true}),
+    supa.from('delivery_items').select('d365, item_name, qty_received, received_date, vendor').eq('confirmed', true)
+  ]).then(function(results) {
+      var trendResult    = results[0];
+      var deliveryResult = results[1];
+      var data = trendResult.data || [];
+      var deliveries = deliveryResult.data || [];
+
+      // Build delivery totals by d365
+      var deliveryByD365 = {};
+      deliveries.forEach(function(row) {
+        if (!deliveryByD365[row.d365]) deliveryByD365[row.d365] = { total: 0, lastDate: '', vendor: row.vendor, name: row.item_name };
+        deliveryByD365[row.d365].total += (row.qty_received || 0);
+        if (row.received_date > deliveryByD365[row.d365].lastDate) deliveryByD365[row.d365].lastDate = row.received_date;
+      });
+
+      if (!data.length) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F4C8;</div>' +
+          '<div class="empty-text">No trend data yet.<br><br>' +
+          'Trend data comes from two sources:<br>' +
+          '• <strong>Orders tab</strong> — Save Counts records what you have on hand<br>' +
+          '• <strong>PiPa Count</strong> — Save to Trend after a full count<br><br>' +
+          'Depletion rate calculates automatically once you have 2+ snapshots.</div></div>';
+        return;
+      }
+
+      // Group by d365
+      var items = {};
+      data.forEach(function(row) {
+        if (!items[row.d365]) {
+          items[row.d365] = {
+            d365: row.d365, name: row.item_name, category: row.category,
+            vendor: row.vendor, par: row.par, snaps: []
+          };
+        }
+        items[row.d365].snaps.push({date: row.snap_date, count: row.count});
+      });
+
+      // Calc depletion stats per item
+      Object.values(items).forEach(function(item) {
+        var snaps = item.snaps;
+        if (snaps.length < 2) { item.avgDepletion = null; item.weeksToStockout = null; return; }
+        var deltas = [];
+        for (var i = 1; i < snaps.length; i++) {
+          var d = snaps[i-1].count - snaps[i].count;
+          if (d > 0) deltas.push(d);
+        }
+        item.avgDepletion = deltas.length ? deltas.reduce(function(a,b){return a+b;},0) / deltas.length : 0;
+        var lastCount = snaps[snaps.length-1].count;
+        item.lastCount = lastCount;
+        item.weeksToStockout = item.avgDepletion > 0 ? (lastCount / item.avgDepletion).toFixed(1) : null;
+      });
+
+      // Filter
+      var cats = ['all'].concat([...new Set(Object.values(items).map(function(i){return i.category;}))].filter(Boolean).sort());
+      var filtered = Object.values(items).filter(function(item) {
+        var catOK = trendFilter === 'all' || item.category === trendFilter;
+        var searchOK = !trendSearch || item.name.toLowerCase().includes(trendSearch.toLowerCase());
+        return catOK && searchOK;
+      }).sort(function(a,b) {
+        // Sort: items with depletion data first, then by name
+        var aWks = parseFloat(a.weeksToStockout);
+        var bWks = parseFloat(b.weeksToStockout);
+        if (!isNaN(aWks) && !isNaN(bWks)) return aWks - bWks;
+        if (!isNaN(aWks)) return -1;
+        if (!isNaN(bWks)) return 1;
+        return (a.name || '').localeCompare(b.name || '');
+      });
+
+      // Filter buttons
+      var catBtns = document.createElement('div');
+      catBtns.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;';
+      cats.forEach(function(cat) {
+        var btn = document.createElement('button');
+        btn.textContent = cat === 'all' ? 'All' : cat;
+        btn.style.cssText = (trendFilter === cat ? 'background:var(--accent);color:var(--text);' : 'background:var(--surface);color:var(--text2);') +
+          'border:1.5px solid transparent;padding:5px 12px;border-radius:20px;font-size:0.688rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+        btn.onclick = function() { trendFilter = cat; renderInventoryTrend(); };
+        catBtns.appendChild(btn);
+      });
+
+      var searchEl = document.createElement('input');
+      searchEl.className = 'field-input';
+      searchEl.type = 'text';
+      searchEl.placeholder = 'Search item...';
+      searchEl.value = trendSearch || '';
+      searchEl.style.cssText = 'margin-bottom:10px;';
+      searchEl.oninput = function() { trendSearch = this.value; renderInventoryTrend(); };
+
+      // Summary stats
+      var lowStock = filtered.filter(function(i){ return i.weeksToStockout !== null && parseFloat(i.weeksToStockout) < 2; }).length;
+      var snapDates = [...new Set(data.map(function(r){return r.snap_date;}))].sort();
+
+      var summaryHTML =
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">' +
+          trendStat('&#x1F4C5;', snapDates.length, 'Count Days') +
+          trendStat('&#x1F4E6;', Object.keys(items).length, 'Items Tracked') +
+          trendStat('&#x26A0;', lowStock, 'Low Stock') +
+        '</div>';
+
+      var rowsHTML = filtered.map(function(item) {
+        var catStyle = (CAT_COLORS && CAT_COLORS[item.category]) || {bg:'var(--surface3)',color:'var(--text2)'};
+        var wks = parseFloat(item.weeksToStockout);
+        var wksColor = isNaN(wks) ? 'var(--text3)' : wks < 1 ? 'var(--red-bright)' : wks < 2 ? 'var(--yellow-bright)' : 'var(--green-bright)';
+        var wksLabel = item.weeksToStockout != null ? item.weeksToStockout + 'w' : '—';
+        var deplLabel = item.avgDepletion != null ? item.avgDepletion.toFixed(1) + '/wk' : '—';
+        var snapsLabel = item.snaps.length + ' snap' + (item.snaps.length !== 1 ? 's' : '');
+        var rcvdLabel = rcvd != null ? rcvd + ' rcvd' + (lastDlv ? ' · ' + lastDlv : '') : null;
+        var lastSnap = item.snaps[item.snaps.length - 1];
+        var lastDate = lastSnap ? lastSnap.date : '—';
+
+        var rcvd     = item.totalReceived  != null ? item.totalReceived  : null;
+        var lastDlv  = item.lastDelivery   || null;
+
+        return '<div class="trend-row">' +
+          '<div class="op-item-info">' +
+            '<div class="op-item-name">' + item.name + '</div>' +
+            '<div class="op-item-meta">' +
+              '<span class="op-cat-badge" style="background:' + catStyle.bg + ';color:' + catStyle.color + ';">' + item.category + '</span>' +
+              '<span>' + item.vendor + '</span>' +
+              '<span>' + snapsLabel + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;">' +
+            '<div style="font-size:0.938rem;font-weight:700;color:' + wksColor + ';">' + wksLabel + '</div>' +
+            '<div style="font-size:0.563rem;color:var(--text3);">' + deplLabel + '</div>' +
+            '<div style="font-size:0.563rem;color:var(--text3);">on hand: ' + (item.lastCount != null ? item.lastCount : '—') + '</div>' +
+            (rcvdLabel ? '<div style="font-size:0.563rem;color:var(--green-bright);">' + rcvdLabel + '</div>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      el.innerHTML = '';
+      el.appendChild(searchEl);
+      el.appendChild(catBtns);
+      el.insertAdjacentHTML('beforeend', summaryHTML);
+      el.insertAdjacentHTML('beforeend', rowsHTML || '<div class="empty-state"><div class="empty-text">No items match.</div></div>');
+    // Attach delivery data to items
+      Object.keys(deliveryByD365).forEach(function(d365) {
+        if (!items[d365]) {
+          var di = deliveryByD365[d365];
+          items[d365] = { d365: d365, name: di.name, category: '', vendor: di.vendor, par: null, snaps: [] };
+        }
+        items[d365].totalReceived  = deliveryByD365[d365].total;
+        items[d365].lastDelivery   = deliveryByD365[d365].lastDate;
+      });
+    });
+}
+
+function trendStat(icon, val, label) {
+  return '<div style="background:var(--surface);border-radius:var(--radius);padding:12px 8px;text-align:center;">' +
+    '<div style="font-size:1.25rem;margin-bottom:2px;">' + icon + '</div>' +
+    '<div style="font-size:1.063rem;font-weight:700;color:var(--text);">' + val + '</div>' +
+    '<div style="font-size:0.563rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;">' + label + '</div>' +
+  '</div>';
+}
+
+
+// ─────────────────────────────────────────────
+// SUBMISSIONS HISTORY (ops view — full log)
+// ─────────────────────────────────────────────
+var subType   = 'waste';
+var subDate   = '';
+var subSearch = '';
+
+
+function deleteSubmission(table, id) {
+  if (!confirm('Delete this record?')) return;
+  supa.from(table).delete().eq('id', id)
+    .then(function(r) {
+      if (r && r.error) { toast('Error: ' + r.error.message); return; }
+      toast('Deleted');
+      renderSubmissions();
+    });
+}
+
+function renderSubmissions() {
+  var el = document.getElementById('view-submissions');
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">Loading...</div>';
+
+  var tables = { waste: 'waste_log', bottles: 'bottle_log', collateral: 'collateral_requests', checklist: 'checklist_completions', orders: 'order_counts' };
+  var tbl = tables[subType] || 'waste_log';
+
+  var query = supa.from(tbl).select('*').order('created_at', {ascending: false}).limit(100);
+  if (subDate) query = query.eq(tbl === 'checklist_completions' ? 'shift_date' : (tbl === 'order_counts' ? 'count_date' : 'shift_date'), subDate);
+
+  query.then(function(result) {
+    var data = result.data || [];
+
+    // Type filter buttons
+    var typeLabels = { waste:'Waste', bottles:'Bottles', collateral:'Collateral', checklist:'Checklists', orders:'Orders' };
+    var typeBtns = Object.keys(typeLabels).map(function(t) {
+      var active = subType === t;
+      var btn = document.createElement('button');
+      btn.textContent = typeLabels[t];
+      btn.style.cssText = (active ? 'background:var(--accent);color:#fff;' : 'background:var(--surface2);color:var(--text2);') +
+        'border:none;padding:5px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;';
+      btn.onclick = function() { subType = t; renderSubmissions(); };
+      return btn;
+    });
+
+    var typeRow = document.createElement('div');
+    typeRow.style.cssText = 'display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:8px;scrollbar-width:none;';
+    typeBtns.forEach(function(btn) { typeRow.appendChild(btn); });
+
+    // Date filter
+    var dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.value = subDate || '';
+    dateInput.style.cssText = 'background:var(--surface2);border:1.5px solid var(--surface3);border-radius:8px;color:var(--text);padding:8px 12px;font-size:0.813rem;width:100%;margin-bottom:8px;outline:none;';
+    dateInput.onchange = function() { subDate = this.value; renderSubmissions(); };
+
+    // Filter by search
+    if (subSearch) {
+      data = data.filter(function(row) {
+        return JSON.stringify(row).toLowerCase().includes(subSearch.toLowerCase());
+      });
+    }
+
+    var rowsHTML = '';
+    if (!data.length) {
+      rowsHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">No records' + (subDate ? ' for ' + subDate : '') + '.</div>';
+    } else if (subType === 'waste') {
+      rowsHTML = data.map(function(r) {
+        var delBtn = document.createElement('button');
+        delBtn.innerHTML = '&times;';
+        delBtn.style.cssText = 'background:none;border:none;color:var(--text3);font-size:1.125rem;cursor:pointer;flex-shrink:0;padding:0;';
+        delBtn.onclick = (function(id){ return function(){ deleteSubmission('waste_log', id); }; })(r.id);
+        var row = document.createElement('div');
+        row.className = 'sub-hist-row';
+        row.innerHTML = '<div style="flex:1;min-width:0;">' +
+          '<div class="sub-hist-name">' + r.item + '</div>' +
+          '<div class="sub-hist-meta">' + (r.qty||'') + ' ' + (r.unit||'') + ' &middot; ' + (r.reason||'') + (r.initials ? ' &middot; ' + r.initials : '') + '</div>' +
+          '<div class="sub-hist-date">' + (r.shift_date||'') + '</div></div>';
+        row.appendChild(delBtn);
+        return row.outerHTML;
+      }).join('');
+    } else if (subType === 'bottles') {
+      rowsHTML = data.map(function(r) {
+        var delBtn = document.createElement('button');
+        delBtn.innerHTML = '&times;';
+        delBtn.style.cssText = 'background:none;border:none;color:var(--text3);font-size:1.125rem;cursor:pointer;flex-shrink:0;padding:0;';
+        delBtn.onclick = (function(id){ return function(){ deleteSubmission('bottle_log', id); }; })(r.id);
+        var row = document.createElement('div');
+        row.className = 'sub-hist-row';
+        row.innerHTML = '<div style="flex:1;min-width:0;">' +
+          '<div class="sub-hist-name">' + r.wine + '</div>' +
+          '<div class="sub-hist-meta">' + (r.amount||'') + '</div>' +
+          '<div class="sub-hist-date">' + (r.shift_date||'') + '</div></div>';
+        row.appendChild(delBtn);
+        return row.outerHTML;
+      }).join('');
+    } else if (subType === 'collateral') {
+      rowsHTML = data.map(function(r) {
+        var items2 = [];
+        try { items2 = JSON.parse(r.items||'[]'); } catch(e) {}
+        var itemStr = items2.map(function(i){ return (i.name||i) + (i.qty ? ' x'+i.qty : ''); }).join(', ');
+        var delBtn = document.createElement('button');
+        delBtn.innerHTML = '&times;';
+        delBtn.style.cssText = 'background:none;border:none;color:var(--text3);font-size:1.125rem;cursor:pointer;flex-shrink:0;padding:0;';
+        delBtn.onclick = (function(id){ return function(){ deleteSubmission('collateral_requests', id); }; })(r.id);
+        var row = document.createElement('div');
+        row.className = 'sub-hist-row';
+        row.innerHTML = '<div style="flex:1;min-width:0;">' +
+          '<div class="sub-hist-name">Collateral Request</div>' +
+          '<div class="sub-hist-meta">' + (itemStr || 'No items') + '</div>' +
+          '<div class="sub-hist-date">' + (r.shift_date||'') + '</div></div>';
+        row.appendChild(delBtn);
+        return row.outerHTML;
+      }).join('');
+    } else if (subType === 'checklist') {
+      rowsHTML = data.map(function(r) {
+        var color = r.missed > 0 ? 'var(--yellow-bright)' : 'var(--green-bright)';
+        var delBtn = document.createElement('button');
+        delBtn.innerHTML = '&times;';
+        delBtn.style.cssText = 'background:none;border:none;color:var(--text3);font-size:1.125rem;cursor:pointer;flex-shrink:0;padding:0;';
+        delBtn.onclick = (function(id){ return function(){ deleteSubmission('checklist_completions', id); }; })(r.id);
+        var row = document.createElement('div');
+        row.className = 'sub-hist-row';
+        row.innerHTML = '<div style="flex:1;min-width:0;">' +
+          '<div class="sub-hist-name">' + (r.shift_type === 'am' ? 'AM Opening' : 'PM Closing') + '</div>' +
+          '<div class="sub-hist-meta" style="color:' + color + ';">' + r.done + '/' + r.total + ' complete' + (r.missed > 0 ? ' &middot; ' + r.missed + ' missed' : '') + '</div>' +
+          '<div class="sub-hist-date">' + new Date(r.completed_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) + ' &middot; ' + (r.shift_date||'') + '</div></div>';
+        row.appendChild(delBtn);
+        return row.outerHTML;
+      }).join('');
+    } else if (subType === 'orders') {
+      rowsHTML = data.map(function(r) {
+        var needOrder = r.order_qty && r.order_qty > 0;
+        return '<div class="sub-hist-row">' +
+          '<div>' +
+            '<div class="sub-hist-name">' + r.item_name + '</div>' +
+            '<div class="sub-hist-meta">' + (r.vendor||'') + ' &middot; ' + r.d365 + ' &middot; count:' + r.count + (r.par ? ' / par:' + r.par : '') + '</div>' +
+          '</div>' +
+          '<div style="text-align:right;flex-shrink:0;">' +
+            (needOrder ? '<div style="font-size:0.875rem;font-weight:700;color:var(--red-bright);">+' + r.order_qty + '</div>' : '<div style="font-size:0.875rem;color:var(--green-bright);">&#x2713;</div>') +
+            '<div class="sub-hist-date">' + (r.count_date||'') + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    el.innerHTML = '';
+    el.appendChild(typeRow);
+    el.appendChild(dateInput);
+
+    var totalEl = document.createElement('div');
+    totalEl.style.cssText = 'font-size:0.688rem;color:var(--text3);margin-bottom:8px;';
+    totalEl.textContent = data.length + ' record' + (data.length !== 1 ? 's' : '') + (subDate ? ' on ' + subDate : ' (last 100)');
+    el.appendChild(totalEl);
+
+    if (!data.length) {
+      var empty = document.createElement('div');
+      empty.style.cssText = 'text-align:center;padding:40px;color:var(--text3);';
+      empty.textContent = 'No records' + (subDate ? ' for ' + subDate : '') + '.';
+      el.appendChild(empty);
+    } else {
+      // Build rows directly as DOM nodes so onclick handlers work
+      var fragment = document.createDocumentFragment();
+      data.forEach(function(r) {
+        var row = document.createElement('div');
+        row.className = 'sub-hist-row';
+
+        var info = document.createElement('div');
+        info.style.cssText = 'flex:1;min-width:0;';
+
+        var nameEl = document.createElement('div');
+        nameEl.className = 'sub-hist-name';
+        var metaEl = document.createElement('div');
+        metaEl.className = 'sub-hist-meta';
+        var dateEl = document.createElement('div');
+        dateEl.className = 'sub-hist-date';
+
+        if (subType === 'waste') {
+          nameEl.textContent = r.item;
+          metaEl.textContent = (r.qty||'') + ' ' + (r.unit||'') + ' · ' + (r.reason||'') + (r.initials ? ' · ' + r.initials : '');
+          dateEl.textContent = r.shift_date || '';
+        } else if (subType === 'bottles') {
+          nameEl.textContent = r.wine;
+          metaEl.textContent = r.amount || '';
+          dateEl.textContent = r.shift_date || '';
+        } else if (subType === 'collateral') {
+          var items2 = [];
+          try { items2 = JSON.parse(r.items||'[]'); } catch(e) {}
+          nameEl.textContent = 'Collateral Request';
+          metaEl.textContent = items2.map(function(i){ return (i.name||i) + (i.qty ? ' x'+i.qty : ''); }).join(', ') || 'No items';
+          dateEl.textContent = r.shift_date || '';
+        } else if (subType === 'checklist') {
+          var color = r.missed > 0 ? 'var(--yellow-bright)' : 'var(--green-bright)';
+          nameEl.textContent = r.shift_type === 'am' ? 'AM Opening' : 'PM Closing';
+          metaEl.textContent = r.done + '/' + r.total + ' complete' + (r.missed > 0 ? ' · ' + r.missed + ' missed' : '');
+          metaEl.style.color = color;
+          dateEl.textContent = (r.completed_at ? new Date(r.completed_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) + ' · ' : '') + (r.shift_date||'');
+        } else if (subType === 'orders') {
+          nameEl.textContent = r.item_name;
+          metaEl.textContent = (r.vendor||'') + ' · ' + r.d365 + ' · count:' + r.count + (r.par ? ' / par:' + r.par : '');
+          var needOrder = r.order_qty && r.order_qty > 0;
+          dateEl.textContent = r.count_date || '';
+          var qtyEl = document.createElement('div');
+          qtyEl.style.cssText = 'font-size:0.875rem;font-weight:700;color:' + (needOrder ? 'var(--red-bright)' : 'var(--green-bright)') + ';';
+          qtyEl.textContent = needOrder ? '+' + r.order_qty : '✓';
+          var rightCol = document.createElement('div');
+          rightCol.style.cssText = 'text-align:right;flex-shrink:0;';
+          rightCol.appendChild(qtyEl);
+          rightCol.appendChild(dateEl);
+          info.appendChild(nameEl);
+          info.appendChild(metaEl);
+          row.appendChild(info);
+          row.appendChild(rightCol);
+          fragment.appendChild(row);
+          return;
+        }
+
+        info.appendChild(nameEl);
+        info.appendChild(metaEl);
+        info.appendChild(dateEl);
+        row.appendChild(info);
+
+        if (subType !== 'orders') {
+          var tableMap = { waste:'waste_log', bottles:'bottle_log', collateral:'collateral_requests', checklist:'checklist_completions' };
+          var delBtn = document.createElement('button');
+          delBtn.innerHTML = '&times;';
+          delBtn.style.cssText = 'background:none;border:none;color:var(--text3);font-size:1.25rem;cursor:pointer;flex-shrink:0;padding:0 4px;line-height:1;';
+          delBtn.onclick = (function(tbl, id){ return function(){ deleteSubmission(tbl, id); }; })(tableMap[subType], r.id);
+          row.appendChild(delBtn);
+        }
+
+        fragment.appendChild(row);
+      });
+      el.appendChild(fragment);
+    }
+  });
+}
+
+
+// ─────────────────────────────────────────────
+// EXPORT / REPORT GENERATION
+// ─────────────────────────────────────────────
+
+function xlsxCell(value, opts) {
+  var cell = { v: value !== null && value !== undefined ? value : '' };
+  if (typeof value === 'number') cell.t = 'n';
+  else if (value instanceof Date) { cell.t = 'd'; cell.z = 'yyyy-mm-dd'; }
+  else cell.t = 's';
+  if (opts) Object.assign(cell, opts);
+  return cell;
+}
+
+function xlsxSheet(headers, rows, colWidths) {
+  var ws = {};
+  var range = { s: { c: 0, r: 0 }, e: { c: headers.length - 1, r: rows.length } };
+  headers.forEach(function(h, ci) {
+    ws[XLSX.utils.encode_cell({ c: ci, r: 0 })] = { v: h, t: 's', s: { font: { bold: true } } };
+  });
+  rows.forEach(function(row, ri) {
+    row.forEach(function(val, ci) {
+      var key = XLSX.utils.encode_cell({ c: ci, r: ri + 1 });
+      ws[key] = xlsxCell(val);
+    });
+  });
+  ws['!ref'] = XLSX.utils.encode_range(range);
+  if (colWidths) ws['!cols'] = colWidths.map(function(w) { return { wch: w }; });
+  return ws;
+}
+
+function downloadXlsx(wb, filename) {
+  // Generate file as blob
+  var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  var blob  = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  var url   = URL.createObjectURL(blob);
+
+  // Try direct download first
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // On iOS Safari, direct download often doesn't work — show share sheet fallback
+  setTimeout(function() {
+    // Check if we're on iOS
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+      // Show a modal with an Open button that triggers the share sheet
+      var overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
+      overlay.innerHTML =
+        '<div style="background:var(--surface);border-radius:16px 16px 0 0;padding:24px 20px 40px;width:100%;max-width:480px;">' +
+          '<div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px;">' + filename + '</div>' +
+          '<div style="font-size:0.813rem;color:var(--text2);margin-bottom:20px;">Tap Open to view in Files or Excel. From there you can save or share.</div>' +
+          '<a href="' + url + '" download="' + filename + '" ' +
+            'style="display:block;width:100%;padding:14px;background:var(--accent);color:var(--text);text-align:center;border-radius:var(--radius);font-weight:700;font-size:0.938rem;text-decoration:none;margin-bottom:10px;">' +
+            '&#x1F4C2; Open File' +
+          '</a>' +
+          '<button onclick="this.closest(\'div\').parentElement.remove();URL.revokeObjectURL(\'' + url + '\')" ' +
+            'style="width:100%;padding:12px;background:var(--surface2);border:none;border-radius:var(--radius);color:var(--text2);font-size:0.938rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">' +
+            'Cancel' +
+          '</button>' +
+        '</div>';
+      overlay.onclick = function(e) { if (e.target === overlay) { overlay.remove(); URL.revokeObjectURL(url); } };
+      document.body.appendChild(overlay);
+    } else {
+      URL.revokeObjectURL(url);
+      toast(filename + ' downloaded');
+    }
+  }, 300);
+}
+
+// ── 1. ORDER SNAPSHOT ─────────────────────────────────────────────
+function exportOrderSnapshot() {
+  var wb = XLSX.utils.book_new();
+  var today = new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+
+  // Collect current counts from the UI
+  var countMap = {};
+  document.querySelectorAll('.op-count-input').forEach(function(inp) {
+    if (inp.value.trim() !== '') countMap[inp.dataset.d365] = parseFloat(inp.value);
+  });
+  // Also use saved opCounts
+  Object.assign(countMap, opCounts);
+
+  Object.values(ORDER_VENDORS).forEach(function(vendor) {
+    if (!vendor.items.length) return;
+    var headers = ['D365', 'Item', 'Category', 'Par', 'On Hand', 'Order Qty', 'Notes'];
+    var rows = vendor.items.map(function(item) {
+      var count = countMap[item.d365] !== undefined ? countMap[item.d365] : '';
+      var orderQty = (count !== '' && item.par != null) ? Math.max(0, item.par - count) : '';
+      return [
+        item.d365, item.name, item.cat,
+        item.par || '', count, orderQty || '', item.note || ''
+      ];
+    });
+    var ws = xlsxSheet(headers, rows, [12, 36, 12, 6, 8, 9, 24]);
+
+    // Add vendor info at top — prepend 2 rows
+    XLSX.utils.sheet_add_aoa(ws, [
+      [vendor.name + ' — Order Snapshot — ' + today],
+      ['Cutoff: ' + (vendor.cutoff || '') + '   Contact: ' + (vendor.contact || '') + '   ' + (vendor.email || '')],
+      []
+    ], { origin: 'A1' });
+
+    var sheetName = vendor.name.slice(0, 31).replace(/[\\/*?:\[\]]/g, '');
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  });
+
+  downloadXlsx(wb, 'Order_Snapshot_' + TODAY + '.xlsx');
+}
+
+// ── 2. WEEKLY REPORT ──────────────────────────────────────────────
+function exportWeeklyReport() {
+  var weekStart = getWeekStart();
+  var wb = XLSX.utils.book_new();
+
+  // Fetch all this week's data in parallel
+  Promise.all([
+    supa.from('order_counts').select('*').eq('count_date', TODAY),
+    supa.from('waste_log').select('*').gte('shift_date', weekStart),
+    supa.from('bottle_log').select('*').gte('shift_date', weekStart),
+    supa.from('checklist_completions').select('*').gte('shift_date', weekStart),
+    supa.from('collateral_requests').select('*').gte('shift_date', weekStart),
+    supa.from('weekly_summary').select('*').eq('week_start', weekStart),
+    supa.from('activations_log').select('*').eq('launched', false),
+  ]).then(function(results) {
+    var orders     = results[0].data || [];
+    var waste      = results[1].data || [];
+    var bottles    = results[2].data || [];
+    var checklists = results[3].data || [];
+    var collateral = results[4].data || [];
+    var weeklySched= results[5].data || [];
+    var activations= results[6].data || [];
+
+    // Sheet 1 — Weekly Summary
+    var summarySheet = xlsxSheet(
+      ['Vendor', 'Day', 'Contact', 'Confirmed', 'Received', 'Issues', 'Notes'],
+      weeklySched.map(function(r) {
+        return [r.vendor, r.delivery_day || '', '', r.confirmed ? 'Y' : 'N', r.received ? 'Y' : 'N', r.issues || '', r.notes || ''];
+      }),
+      [24, 6, 20, 10, 10, 30, 30]
+    );
+    XLSX.utils.book_append_sheet(wb, summarySheet, 'Weekly Summary');
+
+    // Sheet 2 — Order Counts
+    var orderSheet = xlsxSheet(
+      ['D365', 'Item', 'Category', 'Vendor', 'Par', 'Count', 'Order Qty'],
+      orders.filter(function(r) { return r.order_qty > 0; }).map(function(r) {
+        return [r.d365, r.item_name, r.category || '', r.vendor || '', r.par || '', r.count, r.order_qty || 0];
+      }),
+      [12, 36, 12, 14, 6, 8, 9]
+    );
+    XLSX.utils.book_append_sheet(wb, orderSheet, 'Order Counts');
+
+    // Sheet 3 — Waste & Breakage
+    var wasteSheet = xlsxSheet(
+      ['Date', 'Item', 'Category', 'Qty', 'Unit', 'Reason', 'Initials'],
+      waste.map(function(r) {
+        return [r.shift_date, r.item, r.category || '', r.qty || '', r.unit || '', r.reason || '', r.initials || ''];
+      }),
+      [12, 28, 12, 6, 8, 24, 8]
+    );
+    XLSX.utils.book_append_sheet(wb, wasteSheet, 'Waste & Breakage');
+
+    // Sheet 4 — Open Bottles / BTG Sales
+    var bottleSheet = xlsxSheet(
+      ['Date', 'Wine', 'Amount'],
+      bottles.map(function(r) { return [r.shift_date, r.wine, r.amount || '']; }),
+      [12, 36, 14]
+    );
+    XLSX.utils.book_append_sheet(wb, bottleSheet, 'Bottles & BTG Sales');
+
+    // Sheet 5 — Checklists
+    var clSheet = xlsxSheet(
+      ['Date', 'Shift', 'Done', 'Total', 'Missed', 'Completed At'],
+      checklists.map(function(r) {
+        return [r.shift_date, r.shift_type === 'am' ? 'AM Opening' : 'PM Closing',
+          r.done, r.total, r.missed, r.completed_at ? new Date(r.completed_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : ''];
+      }),
+      [12, 14, 6, 6, 6, 12]
+    );
+    XLSX.utils.book_append_sheet(wb, clSheet, 'Checklists');
+
+    // Sheet 6 — Active Activations
+    var actSheet = xlsxSheet(
+      ['Priority', 'Name', 'D365', 'Vendor', 'Category', 'Launch Date', 'Swap Item', 'Notes', 'Steps Done', 'Issues'],
+      activations.map(function(r) {
+        var steps = r.steps || {};
+        var stepsDone = Object.values(steps).filter(Boolean).length + '/5';
+        return [r.priority, r.name, r.d365 || '', r.vendor || '', r.category || '',
+          r.launch_date || '', r.swap_item || '', r.notes || '', stepsDone, r.open_issues || ''];
+      }),
+      [8, 36, 12, 14, 12, 12, 24, 40, 10, 30]
+    );
+    XLSX.utils.book_append_sheet(wb, actSheet, 'Activations');
+
+    var filename = 'Weekly_Report_' + weekStart + '.xlsx';
+    downloadXlsx(wb, filename);
+  });
+}
+
+// ── 3. PRESENTATION PACK ──────────────────────────────────────────
+function exportPresentationPack() {
+  var wb = XLSX.utils.book_new();
+  var today = TODAY;
+
+  // Sheet 1 — BTG Wine List
+  var btgHeaders = ['D365', 'Brand', 'Item', 'Category', 'Vendor'];
+  var btgRows = [];
+  if (typeof ORDER_VENDORS !== 'undefined') {
+    Object.values(ORDER_VENDORS).forEach(function(v) {
+      v.items.filter(function(i){ return i.cat === 'BTG WINE'; }).forEach(function(item) {
+        var parts = item.name.split(' ');
+        btgRows.push([item.d365, parts.slice(0,2).join(' '), parts.slice(2).join(' ') || item.name, item.cat, v.name]);
+      });
+    });
+  }
+  XLSX.utils.book_append_sheet(wb, xlsxSheet(btgHeaders, btgRows, [12,20,24,10,14]), 'BTG Wine List');
+
+  // Sheet 2 — Back Bar
+  var bbHeaders = ['D365', 'Item', 'Category', 'Vendor', 'Par'];
+  var bbRows = [];
+  Object.values(ORDER_VENDORS).forEach(function(v) {
+    v.items.filter(function(i){ return i.cat === 'BACK BAR'; }).forEach(function(item) {
+      bbRows.push([item.d365, item.name, item.cat, v.name, item.par || '']);
+    });
+  });
+  XLSX.utils.book_append_sheet(wb, xlsxSheet(bbHeaders, bbRows, [12,32,12,14,6]), 'Back Bar');
+
+  // Sheet 3 — Full Order Guide
+  var ogHeaders = ['D365', 'Item', 'Category', 'Vendor', 'Par', 'Order Days', 'Cutoff'];
+  var ogRows = [];
+  Object.values(ORDER_VENDORS).forEach(function(v) {
+    v.items.forEach(function(item) {
+      ogRows.push([item.d365, item.name, item.cat, v.name, item.par || '', v.days.join(', '), v.cutoff]);
+    });
+  });
+  XLSX.utils.book_append_sheet(wb, xlsxSheet(ogHeaders, ogRows, [12,36,12,14,6,10,10]), 'Order Guide');
+
+  // Sheet 4 — Vendor Contacts (embedded)
+  var vcJson = [{"contact": "Michael Madrigale", "company": "Cloche Wine Co", "vendor_id": "F231600", "email": "mike@clochewine.com", "phone": "917.703.8773", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "12:00 PM"}, {"contact": "Jeff", "company": "The Wine Merchant", "vendor_id": "F231708", "email": "jeff@thewinemerchantltd.com", "phone": "302-377-4139", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "FRI", "order_days": "WED", "cutoff": "11:59 PM"}, {"contact": "Faith Proetto", "company": "The Wine Merchant / Winebow", "vendor_id": "", "email": "Faith.Proetto@winebow-imports.com", "phone": "215.806.0095", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "David Hall", "company": "F Magnotta", "vendor_id": "F231710", "email": "orders@fredmagnotta.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "2:30 PM"}, {"contact": "Brad DuPlessis", "company": "RNDC", "vendor_id": "F230750", "email": "Brad.duPlessis@RNDC-USA.COM", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "FRI", "order_days": "MON", "cutoff": "9:00 AM"}, {"contact": "Mitchell Skwer", "company": "RNDC", "vendor_id": "", "email": "mitchell.skwer@rndc-usa.com", "phone": "267.252.0017", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Christine McNelis", "company": "Palm Bay / RNDC", "vendor_id": "", "email": "cmcnelis@palmbay.com", "phone": "484.941.2195", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Kristin Blizzard", "company": "Palm Bay / RNDC", "vendor_id": "", "email": "kblizzard@palmbay.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Joe Venuto", "company": "Muller Inc — Beer", "vendor_id": "F231445", "email": "jvenuto@mullerbev.com", "phone": "", "payment": "Fintech", "loop": "", "d365": "✓", "delivery_days": "TUE", "order_days": "MON", "cutoff": "2:00 PM"}, {"contact": "Orders Inbox", "company": "Muller Inc — Beer", "vendor_id": "", "email": "neworders@mullerbev.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Shawn Lawrence", "company": "SGWS", "vendor_id": "F228499", "email": "Shawn.Lawrence@sgws.com", "phone": "267.535.0985", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "2:00 PM"}, {"contact": "Mark Kauterman", "company": "SGWS — Main Rep", "vendor_id": "", "email": "mark.kauterman@sgws.com", "phone": "610.470.8051", "payment": "", "loop": "", "d365": "", "delivery_days": "FRI", "order_days": "WED", "cutoff": "2:00 PM"}, {"contact": "Bekah MacLaughlin", "company": "SGWS — Campari", "vendor_id": "", "email": "rebekah.maclaughlin@sgws.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Zack Gage", "company": "SGWS", "vendor_id": "", "email": "zack.gage@sgws.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Tim Madden", "company": "Breakthru", "vendor_id": "F226891", "email": "TMMadden@Breakthrubev.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "WED", "cutoff": "12:00 PM"}, {"contact": "SO Orders", "company": "Breakthru", "vendor_id": "", "email": "soorders1@breakthrubev.com", "phone": "", "payment": "", "loop": "✓", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Scott McBride", "company": "Regal Wine", "vendor_id": "F228323", "email": "smcbride@regalwine.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "WED", "order_days": "TUE", "cutoff": "2:00 PM"}, {"contact": "David Costanzo", "company": "Vine Street Imports", "vendor_id": "F231731", "email": "David@vsimports.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "TUE", "order_days": "MON", "cutoff": "3:00 PM"}, {"contact": "Mark Monaco", "company": "Palateur / Classica", "vendor_id": "F231527", "email": "mark@palateur.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "12:00 PM"}, {"contact": "Iacopo Di Teodoro", "company": "Palateur / Classica", "vendor_id": "", "email": "iac@classica-usa.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Ryan", "company": "Filthy", "vendor_id": "F232146", "email": "ryan@filthyfood.com", "phone": "", "payment": "Fintech?", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}];
+  var vcHeaders = ['Contact', 'Company', 'Vendor ID', 'Email', 'Phone', 'Delivery Days', 'Order Days', 'Cutoff'];
+  var vcRows = vcJson.map(function(v) {
+    return [v.contact, v.company, v.vendor_id, v.email, v.phone, v.delivery_days, v.order_days, v.cutoff];
+  });
+  XLSX.utils.book_append_sheet(wb, xlsxSheet(vcHeaders, vcRows, [20,24,12,36,16,14,10,10]), 'Vendors');
+
+  downloadXlsx(wb, 'PiPa_Beverage_Reference_' + today + '.xlsx');
+}
+
+
+// ─────────────────────────────────────────────
+// ORDER GUIDE MANAGEMENT
+// ─────────────────────────────────────────────
+
+// Load overrides from Supabase and merge into ORDER_VENDORS
+function loadOrderOverrides(callback) {
+  supa.from('order_items_overrides').select('*')
+    .then(function(result) {
+      var overrides = result.data || [];
+      overrides.forEach(function(ov) {
+        var vendor = ORDER_VENDORS[ov.vendor];
+        if (!vendor) return;
+        var existing = vendor.items.findIndex(function(i) { return i.d365 === ov.d365; });
+        if (ov.removed) {
+          // Remove from list
+          if (existing >= 0) vendor.items.splice(existing, 1);
+        } else if (existing >= 0) {
+          // Update existing item
+          vendor.items[existing] = { d365: ov.d365, name: ov.name, cat: ov.cat, par: ov.par, note: ov.note || '', vendor: ov.vendor };
+        } else {
+          // Add new item
+          vendor.items.push({ d365: ov.d365, name: ov.name, cat: ov.cat, par: ov.par, note: ov.note || '', vendor: ov.vendor });
+        }
+      });
+      if (callback) callback();
+    });
+}
+
+// Show add/edit item sheet
+function openOrderItemSheet(vendorName, existingItem) {
+  var vendors = Object.keys(ORDER_VENDORS).sort();
+  var cats    = ['BTG WINE','BTB WINE','BACK BAR','WELL','BEER','KITCHEN','N.A.'];
+
+  var vendorOpts = vendors.map(function(v) {
+    return '<option value="' + v + '"' + (vendorName === v ? ' selected' : '') + '>' + v + '</option>';
+  }).join('');
+  var catOpts = cats.map(function(cat) {
+    return '<option value="' + cat + '"' + (existingItem && existingItem.cat === cat ? ' selected' : '') + '>' + cat + '</option>';
+  }).join('');
+
+  var isEdit = !!existingItem;
+  var sheet  = document.getElementById('addSheet');
+
+  sheet.innerHTML =
+    '<div class="sheet-handle"></div>' +
+    '<div class="sheet-title">' + (isEdit ? 'Edit Item' : 'Add Item to Order Guide') + '</div>' +
+    '<div class="field-group">' +
+      '<label class="field-label">Vendor</label>' +
+      '<select class="field-input" id="oi-vendor">' + vendorOpts + '</select>' +
+    '</div>' +
+    '<div class="field-group">' +
+      '<label class="field-label">D365 #</label>' +
+      '<input class="field-input" id="oi-d365" type="text" placeholder="e.g. 1136347" value="' + (existingItem ? existingItem.d365 : '') + '">' +
+    '</div>' +
+    '<div class="field-group">' +
+      '<label class="field-label">Item Name</label>' +
+      '<input class="field-input" id="oi-name" type="text" placeholder="e.g. Prosecco" value="' + (existingItem ? existingItem.name : '') + '">' +
+    '</div>' +
+    '<div class="field-group">' +
+      '<label class="field-label">Category</label>' +
+      '<select class="field-input" id="oi-cat">' + catOpts + '</select>' +
+    '</div>' +
+    '<div class="field-group">' +
+      '<label class="field-label">Par</label>' +
+      '<input class="field-input" id="oi-par" type="number" placeholder="e.g. 12" value="' + (existingItem && existingItem.par != null ? existingItem.par : '') + '">' +
+    '</div>' +
+    '<div class="field-group">' +
+      '<label class="field-label">Notes (optional)</label>' +
+      '<input class="field-input" id="oi-note" type="text" placeholder="e.g. Off Menu, OOS — evaluate replacement" value="' + (existingItem ? (existingItem.note || '') : '') + '">' +
+    '</div>' +
+    '<button class="btn-action btn-primary" onclick="saveOrderItem(' + (isEdit ? '\'' + existingItem.d365 + '\',\'' + existingItem.vendor + '\'' : 'null,null') + ')" style="margin-top:8px;">Save Item</button>' +
+    (isEdit ? '<button class="btn-action" onclick="removeOrderItem(\'' + existingItem.d365 + '\',\'' + existingItem.vendor + '\')" style="margin-top:8px;color:var(--red-bright);background:var(--surface2);">Remove from Order Guide</button>' : '') +
+    '<button class="btn-action" onclick="closeSheet(\'addSheet\')" style="margin-top:8px;">Cancel</button>';
+
+  sheet.classList.add('open');
+}
+
+function saveOrderItem(existingD365, existingVendor) {
+  var d365   = document.getElementById('oi-d365').value.trim();
+  var name   = document.getElementById('oi-name').value.trim();
+  var cat    = document.getElementById('oi-cat').value;
+  var vendor = document.getElementById('oi-vendor').value;
+  var par    = parseFloat(document.getElementById('oi-par').value) || null;
+  var note   = document.getElementById('oi-note').value.trim();
+
+  if (!d365 || !name) { toast('D365 and name required'); return; }
+
+  var row = { d365: d365, name: name, cat: cat, vendor: vendor, par: par, note: note, removed: false };
+
+  supa.from('order_items_overrides')
+    .upsert(row, { onConflict: 'd365,vendor' })
+    .then(function(r) {
+      if (r.error) { toast('Error: ' + r.error.message); return; }
+      closeSheet('addSheet');
+      toast(existingD365 ? 'Item updated' : 'Item added');
+      // Reload overrides and re-render
+      loadOrderOverrides(function() { renderOrderPlanner(); });
+    });
+}
+
+function removeOrderItem(d365, vendor) {
+  if (!confirm('Remove ' + d365 + ' from ' + vendor + ' order guide?')) return;
+  supa.from('order_items_overrides')
+    .upsert({ d365: d365, vendor: vendor, name: '', cat: '', removed: true }, { onConflict: 'd365,vendor' })
+    .then(function(r) {
+      if (r.error) { toast('Error: ' + r.error.message); return; }
+      closeSheet('addSheet');
+      toast('Item removed');
+      loadOrderOverrides(function() { renderOrderPlanner(); });
+    });
+}
+
+
+
+var VENDOR_LIST = [{"contact": "Michael Madrigale", "company": "Cloche Wine Co", "vendor_id": "F231600", "email": "mike@clochewine.com", "phone": "917.703.8773", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "12:00 PM"}, {"contact": "Jeff", "company": "The Wine Merchant", "vendor_id": "F231708", "email": "jeff@thewinemerchantltd.com", "phone": "302-377-4139", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "FRI", "order_days": "WED", "cutoff": "11:59 PM"}, {"contact": "Faith Proetto", "company": "The Wine Merchant / Winebow", "vendor_id": "", "email": "Faith.Proetto@winebow-imports.com", "phone": "215.806.0095", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "David Hall", "company": "F Magnotta", "vendor_id": "F231710", "email": "orders@fredmagnotta.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "2:30 PM"}, {"contact": "Brad DuPlessis", "company": "RNDC", "vendor_id": "F230750", "email": "Brad.duPlessis@RNDC-USA.COM", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "FRI", "order_days": "MON", "cutoff": "9:00 AM"}, {"contact": "Mitchell Skwer", "company": "RNDC", "vendor_id": "", "email": "mitchell.skwer@rndc-usa.com", "phone": "267.252.0017", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Christine McNelis", "company": "Palm Bay / RNDC", "vendor_id": "", "email": "cmcnelis@palmbay.com", "phone": "484.941.2195", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Kristin Blizzard", "company": "Palm Bay / RNDC", "vendor_id": "", "email": "kblizzard@palmbay.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Joe Venuto", "company": "Muller Inc — Beer", "vendor_id": "F231445", "email": "jvenuto@mullerbev.com", "phone": "", "payment": "Fintech", "loop": "", "d365": "✓", "delivery_days": "TUE", "order_days": "MON", "cutoff": "2:00 PM"}, {"contact": "Orders Inbox", "company": "Muller Inc — Beer", "vendor_id": "", "email": "neworders@mullerbev.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Shawn Lawrence", "company": "SGWS", "vendor_id": "F228499", "email": "Shawn.Lawrence@sgws.com", "phone": "267.535.0985", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "2:00 PM"}, {"contact": "Mark Kauterman", "company": "SGWS — Main Rep", "vendor_id": "", "email": "mark.kauterman@sgws.com", "phone": "610.470.8051", "payment": "", "loop": "", "d365": "", "delivery_days": "FRI", "order_days": "WED", "cutoff": "2:00 PM"}, {"contact": "Bekah MacLaughlin", "company": "SGWS — Campari", "vendor_id": "", "email": "rebekah.maclaughlin@sgws.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Zack Gage", "company": "SGWS", "vendor_id": "", "email": "zack.gage@sgws.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Tim Madden", "company": "Breakthru", "vendor_id": "F226891", "email": "TMMadden@Breakthrubev.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "WED", "cutoff": "12:00 PM"}, {"contact": "SO Orders", "company": "Breakthru", "vendor_id": "", "email": "soorders1@breakthrubev.com", "phone": "", "payment": "", "loop": "✓", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Scott McBride", "company": "Regal Wine", "vendor_id": "F228323", "email": "smcbride@regalwine.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "WED", "order_days": "TUE", "cutoff": "2:00 PM"}, {"contact": "David Costanzo", "company": "Vine Street Imports", "vendor_id": "F231731", "email": "David@vsimports.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "TUE", "order_days": "MON", "cutoff": "3:00 PM"}, {"contact": "Mark Monaco", "company": "Palateur / Classica", "vendor_id": "F231527", "email": "mark@palateur.com", "phone": "", "payment": "LOOP", "loop": "✓", "d365": "✓", "delivery_days": "THU", "order_days": "TUE", "cutoff": "12:00 PM"}, {"contact": "Iacopo Di Teodoro", "company": "Palateur / Classica", "vendor_id": "", "email": "iac@classica-usa.com", "phone": "", "payment": "", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}, {"contact": "Ryan", "company": "Filthy", "vendor_id": "F232146", "email": "ryan@filthyfood.com", "phone": "", "payment": "Fintech?", "loop": "", "d365": "", "delivery_days": "", "order_days": "", "cutoff": ""}];
+var vendorSearch = '';
+
+var WEEKLY_SCHEDULE = [{"num": 1, "vendor": "Vine Street Imports", "day": "MON", "contact": "David Costanzo", "note": ""}, {"num": 2, "vendor": "RNDC", "day": "MON", "contact": "Brad DuPlessis", "note": "Order by 9AM"}, {"num": 3, "vendor": "Muller Inc — Beer", "day": "TUE", "contact": "Joe Venuto", "note": "Order by 2PM"}, {"num": 4, "vendor": "Ace Endico", "day": "TUE", "contact": "A. Galvan", "note": ""}, {"num": 5, "vendor": "Beta Imports", "day": "TUE", "contact": "Confirm PO Only", "note": ""}, {"num": 6, "vendor": "SGWS", "day": "TUE", "contact": "Mark Kauterman", "note": "Order by 2PM"}, {"num": 7, "vendor": "Regal Wine", "day": "WED", "contact": "Scott McBride", "note": ""}, {"num": 8, "vendor": "Baldor", "day": "WED", "contact": "National Accts", "note": "Order varies"}, {"num": 9, "vendor": "F Magnotta", "day": "THU", "contact": "David Hall", "note": "Order by 2:30PM"}, {"num": 10, "vendor": "Palateur / Classica", "day": "THU", "contact": "Mark Monaco", "note": "Order by 12PM"}, {"num": 11, "vendor": "Cloche Wine Co", "day": "THU", "contact": "Michael Madrigale", "note": "Order by 12PM"}, {"num": 12, "vendor": "Breakthru", "day": "THU", "contact": "Tim Madden", "note": "Order by 12PM"}, {"num": 13, "vendor": "RNDC (Wine)", "day": "FRI", "contact": "Brad DuPlessis", "note": ""}, {"num": 14, "vendor": "The Wine Merchant", "day": "FRI", "contact": "Jeff", "note": "Order by 11:59PM"}, {"num": 15, "vendor": "Breakthru (Alt)", "day": "FRI", "contact": "Tim Madden", "note": ""}, {"num": 16, "vendor": "VOS Selections", "day": "TUE", "contact": "", "note": "Order by 12PM"}];
+var weeklySummaryData = {};  // vendor -> {confirmed, received, po, issues, notes}
+
+var ADMIN_BTG = [{"d365": "1136347", "brand": "Ronco Belvedere", "item": "Prosecco", "name": "Ronco Belvedere Prosecco", "region": "Veneto", "vendor": "SGWS", "notes": ""}, {"d365": "1136348", "brand": "Ronco Belvedere", "item": "Lambrusco", "name": "Ronco Belvedere Lambrusco", "region": "Emilia-Romagna", "vendor": "SGWS", "notes": ""}, {"d365": "00702794", "brand": "Lucci", "item": "Lambrusco Reggiano DOC Secco", "name": "Lucci Lambrusco Reggiano DOC Secco", "region": "Emilia-Romagna", "vendor": "SGWS", "notes": "✅ D365# Added"}, {"d365": "1151781", "brand": "Cascina Asinari", "item": "Moscato d'Asti", "name": "Cascina Asinari Moscato d'Asti", "region": "Piemonte", "vendor": "SGWS", "notes": ""}, {"d365": "200517", "brand": "Cantine Ferrari", "item": "Trento DOC", "name": "Cantine Ferrari Trento DOC", "region": "Trentino", "vendor": "RNDC", "notes": ""}, {"d365": "1113651", "brand": "Baglio di Grisi", "item": "Grillo", "name": "Baglio di Grisi Grillo", "region": "Sicilia", "vendor": "SGWS", "notes": ""}, {"d365": "1119524", "brand": "Fontanafredda", "item": "Arneis Pradalupo", "name": "Fontanafredda Arneis Pradalupo", "region": "Piemonte", "vendor": "RNDC", "notes": ""}, {"d365": "1121887", "brand": "La Staffa", "item": "Verdicchio Castello di Jesi", "name": "La Staffa Verdicchio Castello di Jesi", "region": "Marche", "vendor": "Palateur", "notes": ""}, {"d365": "1120834", "brand": "Feudi di San Gregorio", "item": "Falanghina", "name": "Feudi di San Gregorio Falanghina", "region": "Campania", "vendor": "SGWS", "notes": ""}, {"d365": "1112217", "brand": "Jermann", "item": "Pinot Grigio", "name": "Jermann Pinot Grigio", "region": "Friuli Venezia Giulia", "vendor": "Breakthru", "notes": "⭐ Also BTB"}, {"d365": "1114289", "brand": "Tormaresca", "item": "Califuria Rosato", "name": "Tormaresca Califuria Rosato", "region": "Puglia", "vendor": "SGWS", "notes": ""}, {"d365": "1122135", "brand": "La Mozza", "item": "Cabernet Sauvignon 'I Perazzi'", "name": "La Mozza Cabernet Sauvignon 'I Perazzi'", "region": "Toscana", "vendor": "SGWS", "notes": ""}, {"d365": "1121578", "brand": "Planeta", "item": "La Segreta Rosso", "name": "Planeta La Segreta Rosso", "region": "Sicilia", "vendor": "RNDC", "notes": ""}, {"d365": "1114012", "brand": "Valle Reale", "item": "Montepulciano d'Abruzzo", "name": "Valle Reale Montepulciano d'Abruzzo", "region": "Abruzzo", "vendor": "Wine Merchant", "notes": ""}, {"d365": "1140193", "brand": "Colombaio di Cencio", "item": "Chianti Classico", "name": "Colombaio di Cencio Chianti Classico", "region": "Toscana", "vendor": "SGWS", "notes": ""}, {"d365": "1120559", "brand": "Fontanafredda", "item": "Barbera 'Briccotondo'", "name": "Fontanafredda Barbera 'Briccotondo'", "region": "Piemonte", "vendor": "RNDC", "notes": ""}, {"d365": "1119793", "brand": "Allegrini", "item": "Valpolicella", "name": "Allegrini Valpolicella", "region": "Veneto", "vendor": "Breakthru", "notes": ""}, {"d365": "1109844", "brand": "Mirafiore", "item": "Nebbiolo", "name": "Mirafiore Nebbiolo", "region": "Piemonte", "vendor": "SGWS", "notes": ""}, {"d365": "1126687", "brand": "Feudo Montoni", "item": "Nero d'Avola Lagnusa", "name": "Feudo Montoni Nero d'Avola Lagnusa", "region": "Sicilia", "vendor": "Breakthru", "notes": ""}, {"d365": "1107052", "brand": "Fontanafredda", "item": "Nebbiolo Langhe Ebbio 2013", "name": "Fontanafredda Nebbiolo Langhe Ebbio 2013", "region": "Piemonte", "vendor": "RNDC", "notes": ""}, {"d365": "1133781", "brand": "Elena Walch", "item": "Chardonnay", "name": "Elena Walch Chardonnay", "region": "Alto Adige", "vendor": "Breakthru", "notes": "RNDC APRIL"}, {"d365": "00671872", "brand": "Canella", "item": "Mimosa Granriviera 750", "name": "Canella Mimosa Granriviera 750", "region": "Veneto", "vendor": "SGWS", "notes": ""}, {"d365": "521709", "brand": "Canella", "item": "Bellini", "name": "Canella Bellini", "region": "Veneto", "vendor": "SGWS", "notes": ""}, {"d365": "1119309", "brand": "Argiolas", "item": "Costamolino Vermentino", "name": "Argiolas Costamolino Vermentino", "region": "Sardegna", "vendor": "Wine Merchant", "notes": "⭐ Also BTB"}];
+var adminSection = 'btg';
+
+function renderVendors() {
+  var el = document.getElementById('view-vendors');
+
+  var filtered = VENDOR_LIST.filter(function(v) {
+    var s = vendorSearch.toLowerCase();
+    return !s || v.contact.toLowerCase().includes(s) ||
+      v.company.toLowerCase().includes(s) ||
+      v.email.toLowerCase().includes(s);
+  });
+
+  // Group by company
+  var companies = {};
+  filtered.forEach(function(v) {
+    var co = v.company || 'Other';
+    if (!companies[co]) companies[co] = [];
+    companies[co].push(v);
+  });
+
+  var packBtn = document.createElement('button');
+  packBtn.textContent = '\uD83D\uDCCA Export Presentation Pack';
+  packBtn.style.cssText = 'width:100%;padding:11px;background:var(--surface2);border:1.5px solid var(--surface3);border-radius:var(--radius);color:var(--text);font-size:0.813rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-bottom:10px;';
+  packBtn.onclick = exportPresentationPack;
+
+  var searchEl = document.createElement('input');
+  searchEl.className = 'field-input';
+  searchEl.type = 'text';
+  searchEl.placeholder = 'Search contact, company, email...';
+  searchEl.value = vendorSearch || '';
+  searchEl.style.cssText = 'margin-bottom:12px;';
+  searchEl.oninput = function() { vendorSearch = this.value; renderVendors(); };
+
+  var cardsHTML = Object.keys(companies).sort().map(function(coName) {
+    var contacts = companies[coName];
+    var primary  = contacts.find(function(v) { return v.delivery_days; }) || contacts[0];
+    var schedInfo = primary.delivery_days
+      ? '<span style="font-size:0.563rem;color:var(--text3);">Delivery: ' + primary.delivery_days + '</span>' +
+        (primary.order_days ? '<span style="font-size:0.563rem;color:var(--text3);">Order: ' + primary.order_days + '</span>' : '') +
+        (primary.cutoff ? '<span style="font-size:0.563rem;color:var(--yellow-bright);">&#x23F0; ' + primary.cutoff + '</span>' : '')
+      : '';
+
+    var contactRows = contacts.map(function(v) {
+      var emailLink = v.email && v.email !== 'nan' && v.email !== '—'
+        ? '<a href="mailto:' + v.email + '" style="color:var(--accent-bright);font-size:0.688rem;font-family:\'JetBrains Mono\',monospace;text-decoration:none;">' + v.email + '</a>'
+        : '<span style="font-size:0.688rem;color:var(--text3);">No email</span>';
+      var phoneLink = v.phone && v.phone !== 'nan'
+        ? ' &middot; <a href="tel:' + v.phone.replace(/[^0-9]/g,'') + '" style="color:var(--text2);font-size:0.688rem;">' + v.phone + '</a>'
+        : '';
+      return '<div style="padding:8px 0;border-top:1px solid var(--surface3);">' +
+        '<div style="font-size:0.813rem;font-weight:600;color:var(--text);">' + v.contact + '</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:3px;">' +
+          emailLink + phoneLink +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    return '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:8px;">' +
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">' +
+        '<div style="font-size:0.938rem;font-weight:700;color:var(--text);">' + coName + '</div>' +
+        (primary.vendor_id ? '<div style="font-size:0.563rem;color:var(--text3);font-family:\'JetBrains Mono\',monospace;">' + primary.vendor_id + '</div>' : '') +
+      '</div>' +
+      (schedInfo ? '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px;">' + schedInfo + '</div>' : '') +
+      contactRows +
+    '</div>';
+  }).join('');
+
+  el.innerHTML = '';
+  el.appendChild(packBtn);
+  el.appendChild(searchEl);
+  el.insertAdjacentHTML('beforeend', cardsHTML || '<div class="empty-state"><div class="empty-text">No contacts found.</div></div>');
+}
+
+// ─────────────────────────────────────────────
+// WEEKLY SUMMARY
+// ─────────────────────────────────────────────
+var WEEKLY_SCHEDULE = [{"num": 1, "vendor": "Vine Street Imports", "day": "MON", "contact": "David Costanzo", "note": ""}, {"num": 2, "vendor": "RNDC", "day": "MON", "contact": "Brad DuPlessis", "note": "Order by 9AM"}, {"num": 3, "vendor": "Muller Inc — Beer", "day": "TUE", "contact": "Joe Venuto", "note": "Order by 2PM"}, {"num": 4, "vendor": "Ace Endico", "day": "TUE", "contact": "A. Galvan", "note": ""}, {"num": 5, "vendor": "Beta Imports", "day": "TUE", "contact": "Confirm PO Only", "note": ""}, {"num": 6, "vendor": "SGWS", "day": "TUE", "contact": "Mark Kauterman", "note": "Order by 2PM"}, {"num": 7, "vendor": "Regal Wine", "day": "WED", "contact": "Scott McBride", "note": ""}, {"num": 8, "vendor": "Baldor", "day": "WED", "contact": "National Accts", "note": "Order varies"}, {"num": 9, "vendor": "F Magnotta", "day": "THU", "contact": "David Hall", "note": "Order by 2:30PM"}, {"num": 10, "vendor": "Palateur / Classica", "day": "THU", "contact": "Mark Monaco", "note": "Order by 12PM"}, {"num": 11, "vendor": "Cloche Wine Co", "day": "THU", "contact": "Michael Madrigale", "note": "Order by 12PM"}, {"num": 12, "vendor": "Breakthru", "day": "THU", "contact": "Tim Madden", "note": "Order by 12PM"}, {"num": 13, "vendor": "RNDC (Wine)", "day": "FRI", "contact": "Brad DuPlessis", "note": ""}, {"num": 14, "vendor": "The Wine Merchant", "day": "FRI", "contact": "Jeff", "note": "Order by 11:59PM"}, {"num": 15, "vendor": "Breakthru (Alt)", "day": "FRI", "contact": "Tim Madden", "note": ""}, {"num": 16, "vendor": "VOS Selections", "day": "TUE", "contact": "", "note": "Order by 12PM"}];
+var weeklySummaryData = {};  // vendor -> {confirmed, received, po, issues, notes}
+
+
+</script>
+</body>
+</html>
