@@ -381,7 +381,8 @@ html, body {
   <button class="btn btn-clear" onclick="clearAll()">Clear</button>
   <button class="btn btn-notes" id="notesBtn" onclick="openNotes()">📝 Notes</button>
   <button class="btn btn-export" onclick="exportCSV()">Export CSV</button>
-    <button class="btn btn-export" id="supa-save-btn" onclick="saveCountToSupabase()" style="background:var(--accent,#B85C00);color:#fff;margin-left:6px;">Save to Trend</button>
+  <button class="btn btn-export" id="supa-save-btn" onclick="saveCountToSupabase()" style="background:var(--accent,#B85C00);color:#fff;margin-left:6px;">Save to Trend</button>
+  <button class="btn btn-summary" onclick="openLoadDateSheet()">📅 Load</button>
   <button class="btn btn-summary" onclick="showSummary()">Summary</button>
 </div>
 
@@ -428,6 +429,33 @@ html, body {
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Hidden CSV file input for import -->
+<input type="file" id="csvImportInput" accept=".csv" style="display:none;" onchange="handleCSVImport(this)">
+
+<!-- Load Date / Import Sheet -->
+<div class="notes-sheet" id="loadDateSheet" onclick="closeLoadDateSheet(event)">
+  <div class="notes-panel" onclick="event.stopPropagation()">
+    <h3>📅 Load Count</h3>
+    <div class="notes-sub">Load a past session for editing, or import from CSV.</div>
+
+    <div style="margin-top:16px;">
+      <label style="font-size:0.75rem;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Load by date</label>
+      <input type="date" id="loadDateInput" style="width:100%;padding:10px;background:var(--surface2);border:1.5px solid var(--surface3);border-radius:8px;color:var(--text);font-size:1rem;font-family:'DM Sans',sans-serif;">
+      <button onclick="loadDateSession()" style="width:100%;margin-top:8px;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:0.938rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Load This Date</button>
+    </div>
+
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--surface3);">
+      <label style="font-size:0.75rem;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Import from CSV</label>
+      <div style="font-size:0.688rem;color:var(--text3);margin-bottom:8px;">Pick a pipa-count CSV export. Counts & flags load into the current session.</div>
+      <button onclick="document.getElementById('csvImportInput').click()" style="width:100%;padding:12px;background:var(--surface2);border:1.5px solid var(--surface3);border-radius:8px;color:var(--text);font-size:0.938rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">📂 Choose CSV File</button>
+    </div>
+
+    <div id="loadDateStatus" style="margin-top:12px;font-size:0.813rem;color:var(--accent);text-align:center;min-height:20px;"></div>
+
+    <button onclick="closeLoadDateSheet()" style="width:100%;margin-top:16px;padding:12px;background:var(--surface2);border:1.5px solid var(--surface3);border-radius:8px;color:var(--text2);font-size:0.938rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Close</button>
+  </div>
+</div>
 
 <script>
 // SUPABASE
@@ -1390,6 +1418,145 @@ function clearAll() {
   renderTabs();
   renderSections();
   toast('Counts cleared');
+}
+
+// ── LOAD DATE / CSV IMPORT ──────────────────────────────────────────────
+
+function openLoadDateSheet() {
+  // Default the date picker to today
+  document.getElementById('loadDateInput').value = TODAY;
+  document.getElementById('loadDateStatus').textContent = '';
+  document.getElementById('loadDateSheet').classList.add('open');
+}
+
+function closeLoadDateSheet(e) {
+  if (e && e.target !== document.getElementById('loadDateSheet')) return;
+  document.getElementById('loadDateSheet').classList.remove('open');
+}
+
+function loadDateSession() {
+  var date = document.getElementById('loadDateInput').value;
+  if (!date) { toast('Pick a date first'); return; }
+
+  var statusEl = document.getElementById('loadDateStatus');
+  statusEl.textContent = 'Loading…';
+
+  supa.from('count_sessions').select('*').eq('snap_date', date).limit(1)
+    .then(function(r) {
+      if (r.error) { statusEl.textContent = 'Error: ' + r.error.message; return; }
+      if (!r.data || !r.data.length) {
+        statusEl.textContent = 'No session found for ' + date;
+        return;
+      }
+      var row = r.data[0];
+      counts = row.counts || {};
+      flags  = row.flags  || {};
+      shiftNotes = row.notes || '';
+      // Write to cache
+      localStorage.setItem(LS_COUNTS, JSON.stringify(counts));
+      localStorage.setItem(LS_FLAGS,  JSON.stringify(flags));
+      localStorage.setItem(LS_NOTES,  shiftNotes);
+      var ta = document.getElementById('shiftNotesTA');
+      if (ta) ta.value = shiftNotes;
+      renderTabs();
+      renderSections();
+      statusEl.textContent = '✓ Loaded ' + date;
+      toast('Loaded count: ' + date);
+    });
+}
+
+function handleCSVImport(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var statusEl = document.getElementById('loadDateStatus');
+  statusEl.textContent = 'Parsing…';
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var lines = e.target.result.split('\n');
+      var header = lines[0].split(',').map(function(h) { return h.trim(); });
+      var dateIdx   = header.indexOf('Date');
+      var sheetIdx  = header.indexOf('Sheet');
+      var rowIdx    = header.indexOf('Row');
+      var fieldIdx  = header.indexOf('Field');
+      var countIdx  = header.indexOf('Count');
+      var flagIdx   = header.indexOf('Flag');
+      var noteIdx   = header.indexOf('Note');
+
+      if (sheetIdx < 0 || rowIdx < 0 || fieldIdx < 0 || countIdx < 0) {
+        statusEl.textContent = '✗ Not a valid pipa-count CSV';
+        return;
+      }
+
+      var newCounts = {};
+      var newFlags  = {};
+
+      for (var i = 1; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (!line) continue;
+        // Parse CSV line respecting quoted fields
+        var cols = parseCSVLine(line);
+        var sheet = (cols[sheetIdx] || '').trim();
+        var r     = (cols[rowIdx]   || '').trim();
+        var field = (cols[fieldIdx] || '').trim();
+        var count = (cols[countIdx] || '').trim();
+        var flag  = (cols[flagIdx]  || '').trim();
+        var note  = noteIdx >= 0 ? (cols[noteIdx] || '').trim() : '';
+
+        if (!sheet || !r || !field) continue;
+
+        var key = sheet + '|' + r + '|' + field;
+        if (count !== '') {
+          var num = parseFloat(count);
+          if (!isNaN(num)) newCounts[key] = num;
+        }
+        if (flag) {
+          newFlags[sheet + '|' + r] = { type: flag, note: note };
+        }
+      }
+
+      var countN = Object.keys(newCounts).length;
+      var flagN  = Object.keys(newFlags).length;
+      if (countN === 0) { statusEl.textContent = '✗ No counts found in file'; return; }
+
+      counts = newCounts;
+      flags  = newFlags;
+      localStorage.setItem(LS_COUNTS, JSON.stringify(counts));
+      localStorage.setItem(LS_FLAGS,  JSON.stringify(flags));
+      save(); // also queues Supabase upsert for today
+
+      renderTabs();
+      renderSections();
+      statusEl.textContent = '✓ Imported ' + countN + ' counts, ' + flagN + ' flags';
+      toast('CSV imported — ' + countN + ' items');
+    } catch(err) {
+      statusEl.textContent = '✗ Parse error: ' + err.message;
+    }
+    // Reset input so same file can be re-selected
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// Simple CSV line parser that handles quoted fields
+function parseCSVLine(line) {
+  var result = [];
+  var cur = '';
+  var inQuotes = false;
+  for (var i = 0; i < line.length; i++) {
+    var ch = line[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      result.push(cur);
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
 }
 
 function toast(msg) {
