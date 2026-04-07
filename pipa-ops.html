@@ -2933,11 +2933,11 @@ function renderInventoryTrend() {
             '<div style="flex:1;min-width:0;">' +
               '<div style="font-size:0.813rem;font-weight:500;color:var(--text);' +
                 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (row.item_name || row.d365) + '</div>' +
-              '<div style="font-size:0.563rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:1px;">' +
+              '<div style="font-size:0.563rem;color:var(--text3);font-family:monospace;margin-top:1px;">' +
                 (row.vendor || '') + ' · ' + dateStr +
               '</div>' +
             '</div>' +
-            '<div style="font-family:'JetBrains Mono',monospace;font-size:0.875rem;font-weight:700;' +
+            '<div style="font-family:monospace;font-size:0.875rem;font-weight:700;' +
               'color:var(--green-bright);margin-left:12px;flex-shrink:0;">+' + row.qty_received + '</div>' +
           '</div>';
         }).join('');
