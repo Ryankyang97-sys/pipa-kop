@@ -1261,27 +1261,141 @@ function _saveReceiptItems(confirmed, cb) {
 
 // INVOICES
 // ═══════════════════════════════════════════════
+
+// ── MANAGE RECEIPTS ─────────────────────────────
+// Shows all confirmed delivery_items for an invoice
+// with the ability to delete individual rows
+
+function manageReceipts(invId, vendor) {
+  var content = document.getElementById('addSheetContent');
+  content.innerHTML =
+    '<div class="sheet-handle"></div>' +
+    '<div class="sheet-title">Receipts — ' + vendor + '</div>' +
+    '<div style="font-size:0.75rem;color:var(--text3);margin-bottom:12px;">Loading...</div>';
+  document.getElementById('addSheet').classList.add('open');
+
+  supa.from('delivery_items')
+    .select('*')
+    .eq('invoice_id', invId)
+    .order('received_date', {ascending: false})
+    .then(function(result) {
+      var rows = result.data || [];
+
+      if (!rows.length) {
+        content.innerHTML =
+          '<div class="sheet-handle"></div>' +
+          '<div class="sheet-title">Receipts — ' + vendor + '</div>' +
+          '<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:0.875rem;">No receipt entries found.</div>' +
+          '<button class="btn-secondary" style="width:100%;margin-top:8px;" onclick="closeSheet(\'addSheet\')">Close</button>';
+        return;
+      }
+
+      // Group by received_date + confirmed status
+      var grouped = {};
+      rows.forEach(function(row) {
+        var key = (row.received_date || 'unknown') + '_' + (row.confirmed ? 'confirmed' : 'draft');
+        if (!grouped[key]) grouped[key] = { date: row.received_date, confirmed: row.confirmed, items: [] };
+        grouped[key].items.push(row);
+      });
+
+      var groupHTML = Object.keys(grouped).sort().reverse().map(function(key) {
+        var group = grouped[key];
+        var dateStr = group.date
+          ? new Date(group.date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'})
+          : 'Unknown date';
+        var statusPill = group.confirmed
+          ? '<span style="font-size:0.563rem;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--green-dim);color:var(--green-bright);">CONFIRMED</span>'
+          : '<span style="font-size:0.563rem;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--yellow-dim);color:var(--yellow-bright);">DRAFT</span>';
+
+        var itemRows = group.items.map(function(row) {
+          return '<div style="display:flex;align-items:center;justify-content:space-between;' +
+            'padding:8px 0;border-bottom:1px solid var(--surface3);">' +
+            '<div style="flex:1;min-width:0;">' +
+              '<div style="font-size:0.844rem;font-weight:500;color:var(--text);' +
+                'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (row.item_name || row.d365) + '</div>' +
+              '<div style="font-size:0.563rem;color:var(--text3);font-family:\'JetBrains Mono\',monospace;margin-top:2px;">' +
+                row.d365 +
+              '</div>' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:10px;">' +
+              '<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.938rem;font-weight:700;color:var(--green-bright);">+' + row.qty_received + '</div>' +
+              '<button onclick="deleteReceiptRow(' + row.id + ', \'' + invId + '\', \'' + vendor + '\', ' + row.qty_received + ', \'' + row.d365 + '\')" ' +
+                'style="background:var(--red-dim);color:var(--red-bright);border:none;border-radius:6px;' +
+                'padding:4px 8px;font-size:0.688rem;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">' +
+                '✕ Remove' +
+              '</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+
+        return '<div style="background:var(--surface);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;">' +
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
+            '<div style="font-size:0.813rem;font-weight:700;color:var(--text);">' + dateStr + '</div>' +
+            statusPill +
+          '</div>' +
+          itemRows +
+        '</div>';
+      }).join('');
+
+      content.innerHTML =
+        '<div class="sheet-handle"></div>' +
+        '<div class="sheet-title">Receipts — ' + vendor + '</div>' +
+        '<div style="font-size:0.75rem;color:var(--text3);margin-bottom:12px;">' +
+          rows.length + ' entr' + (rows.length === 1 ? 'y' : 'ies') + ' · Tap Remove to delete a row and reverse its effect on counts.' +
+        '</div>' +
+        groupHTML +
+        '<button class="btn-secondary" style="width:100%;margin-top:8px;" onclick="closeSheet(\'addSheet\')">Close</button>';
+    });
+}
+
+function deleteReceiptRow(rowId, invId, vendor, qty, d365) {
+  if (!confirm('Remove this receipt entry? This will subtract ' + qty + ' from today\'s order count for this item.')) return;
+
+  supa.from('delivery_items').delete().eq('id', rowId)
+    .then(function(r) {
+      if (r && r.error) { toast('Error: ' + r.error.message); return; }
+
+      // Subtract the received qty from order_counts
+      var currentCount = opCounts[d365] || 0;
+      var newCount = Math.max(0, currentCount - qty);
+      opCounts[d365] = newCount;
+
+      supa.from('order_counts')
+        .upsert({
+          count_date: TODAY,
+          d365:       d365,
+          count:      newCount,
+          order_qty:  null
+        }, { onConflict: 'count_date,d365' });
+
+      // Also update invoice lineItems received_qty if present
+      var inv = invoices.find(function(i) { return i.id === invId; });
+      if (inv && inv.lineItems) {
+        var li = inv.lineItems.find(function(l) { return l.d365 === d365; });
+        if (li) { li.received_qty = null; }
+        save('invoices', invoices);
+      }
+
+      toast('Receipt entry removed');
+      // Refresh the manage sheet
+      manageReceipts(invId, vendor);
+    });
+}
 function renderInvoices() {
   const el = document.getElementById('view-invoices');
   if (invoices.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🧾</div><div class="empty-text">No invoices logged yet.<br>Tap + to log one, or use "Create Invoice" on the Orders tab.</div></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🧾</div><div class="empty-text">No invoices logged yet.<br>Tap + after each delivery.</div></div>`;
     return;
   }
 
   // Sort newest first
   const sorted = [...invoices].sort((a,b) => new Date(b.date) - new Date(a.date));
-
-  // An invoice is "complete" if status is received/verified, OR all 4 checks are done
-  const isComplete = inv =>
-    inv.status === 'received' || inv.status === 'verified' ||
-    (inv.checks.received && inv.checks.d365 && inv.checks.sentIC && inv.checks.pricingOK);
-
-  const pending = sorted.filter(i => !isComplete(i));
-  const clear   = sorted.filter(i => isComplete(i));
+  const pending = sorted.filter(i => !i.checks.received || !i.checks.d365 || !i.checks.sentIC || !i.checks.pricingOK);
+  const clear = sorted.filter(i => i.checks.received && i.checks.d365 && i.checks.sentIC && i.checks.pricingOK);
 
   let html = '';
   if (pending.length) {
-    html += `<div class="section-label">Open (${pending.length})</div>`;
+    html += `<div class="section-label">Needs Attention (${pending.length})</div>`;
     html += pending.map(renderInvoiceCard).join('');
   }
   if (clear.length) {
@@ -1366,6 +1480,7 @@ function renderInvoiceCard(inv) {
       ${inv.notes ? `<div style="font-size:12px;color:var(--text2);margin-top:8px;padding-top:8px;border-top:1px solid var(--surface3);">${inv.notes}</div>` : ''}
       <div class="card-actions">
         <button class="btn-sm btn-primary" onclick="openReceiptSheet('${inv.id}', '${inv.vendor}', '${inv.date}')">Log Items</button>
+        <button class="btn-sm accent" onclick="manageReceipts('${inv.id}', '${inv.vendor}')">Receipts</button>
         <button class="btn-sm" onclick="deleteEntry('invoices', '${inv.id}')">Delete</button>
       </div>
     </div>`;
@@ -2151,6 +2266,11 @@ function deleteEntry(store, id) {
   if (!confirm('Delete this entry?')) return;
   const entry = arr[idx];
   if (store === 'activations') deleteActivationFromSupabase(entry);
+  // When deleting an invoice, also delete all associated delivery_items from Supabase
+  if (store === 'invoices') {
+    supa.from('delivery_items').delete().eq('invoice_id', id)
+      .then(function(r) { if (r && r.error) console.warn('delivery_items delete:', r.error.message); });
+  }
   arr.splice(idx, 1);
   save(store, arr);
   closeSheet('addSheet');
@@ -2679,16 +2799,6 @@ function renderInventoryTrend() {
         item.weeksToStockout = item.avgDepletion > 0 ? (lastCount / item.avgDepletion).toFixed(1) : null;
       });
 
-      // Attach delivery data to items BEFORE rendering rows
-      Object.keys(deliveryByD365).forEach(function(d365) {
-        if (!items[d365]) {
-          var di = deliveryByD365[d365];
-          items[d365] = { d365: d365, name: di.name, category: '', vendor: di.vendor, par: null, snaps: [] };
-        }
-        items[d365].totalReceived = deliveryByD365[d365].total;
-        items[d365].lastDelivery  = deliveryByD365[d365].lastDate;
-      });
-
       // Filter
       var cats = ['all'].concat([...new Set(Object.values(items).map(function(i){return i.category;}))].filter(Boolean).sort());
       var filtered = Object.values(items).filter(function(item) {
@@ -2696,6 +2806,7 @@ function renderInventoryTrend() {
         var searchOK = !trendSearch || item.name.toLowerCase().includes(trendSearch.toLowerCase());
         return catOK && searchOK;
       }).sort(function(a,b) {
+        // Sort: items with depletion data first, then by name
         var aWks = parseFloat(a.weeksToStockout);
         var bWks = parseFloat(b.weeksToStockout);
         if (!isNaN(aWks) && !isNaN(bWks)) return aWks - bWks;
@@ -2727,7 +2838,6 @@ function renderInventoryTrend() {
       // Summary stats
       var lowStock = filtered.filter(function(i){ return i.weeksToStockout !== null && parseFloat(i.weeksToStockout) < 2; }).length;
       var snapDates = [...new Set(data.map(function(r){return r.snap_date;}))].sort();
-      var totalDeliveries = deliveries.length;
 
       var summaryHTML =
         '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">' +
@@ -2736,42 +2846,6 @@ function renderInventoryTrend() {
           trendStat('&#x26A0;', lowStock, 'Low Stock') +
         '</div>';
 
-      // ── RECENT INTAKES ──────────────────────────────────────────────
-      // Sort deliveries by date descending, show last 10
-      var recentDeliveries = deliveries
-        .slice()
-        .sort(function(a,b) { return (b.received_date||'').localeCompare(a.received_date||''); })
-        .slice(0, 10);
-
-      var recentHTML = '';
-      if (recentDeliveries.length) {
-        var intakeRows = recentDeliveries.map(function(row) {
-          var dateStr = row.received_date
-            ? new Date(row.received_date + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'})
-            : '—';
-          return '<div style="display:flex;align-items:center;justify-content:space-between;' +
-            'padding:7px 0;border-bottom:1px solid var(--surface3);">' +
-            '<div style="flex:1;min-width:0;">' +
-              '<div style="font-size:0.813rem;font-weight:500;color:var(--text);' +
-                'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (row.item_name || row.d365) + '</div>' +
-              '<div style="font-size:0.563rem;color:var(--text3);font-family:\'JetBrains Mono\',monospace;margin-top:1px;">' +
-                (row.vendor || '') + ' · ' + dateStr +
-              '</div>' +
-            '</div>' +
-            '<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.875rem;font-weight:700;' +
-              'color:var(--green-bright);margin-left:12px;flex-shrink:0;">+' + row.qty_received + '</div>' +
-          '</div>';
-        }).join('');
-
-        recentHTML =
-          '<div style="background:var(--surface);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;">' +
-            '<div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;' +
-              'color:var(--green-bright);margin-bottom:8px;">📥 Recent Intakes (' + totalDeliveries + ' total)</div>' +
-            intakeRows +
-          '</div>';
-      }
-
-      // ── ITEM ROWS ────────────────────────────────────────────────────
       var rowsHTML = filtered.map(function(item) {
         var catStyle = (CAT_COLORS && CAT_COLORS[item.category]) || {bg:'var(--surface3)',color:'var(--text2)'};
         var wks = parseFloat(item.weeksToStockout);
@@ -2779,20 +2853,19 @@ function renderInventoryTrend() {
         var wksLabel = item.weeksToStockout != null ? item.weeksToStockout + 'w' : '—';
         var deplLabel = item.avgDepletion != null ? item.avgDepletion.toFixed(1) + '/wk' : '—';
         var snapsLabel = item.snaps.length + ' snap' + (item.snaps.length !== 1 ? 's' : '');
+        var rcvdLabel = rcvd != null ? rcvd + ' rcvd' + (lastDlv ? ' · ' + lastDlv : '') : null;
+        var lastSnap = item.snaps[item.snaps.length - 1];
+        var lastDate = lastSnap ? lastSnap.date : '—';
 
-        // These are now correctly defined AFTER delivery attachment
-        var rcvd    = item.totalReceived != null ? item.totalReceived : null;
-        var lastDlv = item.lastDelivery || null;
-        var rcvdLabel = rcvd != null
-          ? '+' + rcvd + ' rcvd' + (lastDlv ? ' · ' + new Date(lastDlv + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '')
-          : null;
+        var rcvd     = item.totalReceived  != null ? item.totalReceived  : null;
+        var lastDlv  = item.lastDelivery   || null;
 
         return '<div class="trend-row">' +
           '<div class="op-item-info">' +
             '<div class="op-item-name">' + item.name + '</div>' +
             '<div class="op-item-meta">' +
               '<span class="op-cat-badge" style="background:' + catStyle.bg + ';color:' + catStyle.color + ';">' + item.category + '</span>' +
-              '<span>' + (item.vendor || '') + '</span>' +
+              '<span>' + item.vendor + '</span>' +
               '<span>' + snapsLabel + '</span>' +
             '</div>' +
           '</div>' +
@@ -2809,8 +2882,16 @@ function renderInventoryTrend() {
       el.appendChild(searchEl);
       el.appendChild(catBtns);
       el.insertAdjacentHTML('beforeend', summaryHTML);
-      el.insertAdjacentHTML('beforeend', recentHTML);
       el.insertAdjacentHTML('beforeend', rowsHTML || '<div class="empty-state"><div class="empty-text">No items match.</div></div>');
+    // Attach delivery data to items
+      Object.keys(deliveryByD365).forEach(function(d365) {
+        if (!items[d365]) {
+          var di = deliveryByD365[d365];
+          items[d365] = { d365: d365, name: di.name, category: '', vendor: di.vendor, par: null, snaps: [] };
+        }
+        items[d365].totalReceived  = deliveryByD365[d365].total;
+        items[d365].lastDelivery   = deliveryByD365[d365].lastDate;
+      });
     });
 }
 
@@ -3354,60 +3435,41 @@ function openOrderItemSheet(vendorName, existingItem) {
     return '<option value="' + cat + '"' + (existingItem && existingItem.cat === cat ? ' selected' : '') + '>' + cat + '</option>';
   }).join('');
 
-  var isEdit  = !!existingItem;
-  var content = document.getElementById('addSheetContent');
+  var isEdit = !!existingItem;
+  var sheet  = document.getElementById('addSheet');
 
-  content.innerHTML =
+  sheet.innerHTML =
     '<div class="sheet-handle"></div>' +
     '<div class="sheet-title">' + (isEdit ? 'Edit Item' : 'Add Item to Order Guide') + '</div>' +
-
-    '<div class="form-group">' +
-      '<label class="form-label">Vendor</label>' +
-      '<select class="form-select" id="oi-vendor">' + vendorOpts + '</select>' +
+    '<div class="field-group">' +
+      '<label class="field-label">Vendor</label>' +
+      '<select class="field-input" id="oi-vendor">' + vendorOpts + '</select>' +
     '</div>' +
-
-    '<div class="form-group">' +
-      '<label class="form-label">D365 #</label>' +
-      '<input class="form-input" id="oi-d365" type="text" inputmode="numeric" placeholder="e.g. 1136347"' +
-        ' value="' + (existingItem ? existingItem.d365 : '') + '">' +
+    '<div class="field-group">' +
+      '<label class="field-label">D365 #</label>' +
+      '<input class="field-input" id="oi-d365" type="text" placeholder="e.g. 1136347" value="' + (existingItem ? existingItem.d365 : '') + '">' +
     '</div>' +
-
-    '<div class="form-group">' +
-      '<label class="form-label">Item Name</label>' +
-      '<input class="form-input" id="oi-name" type="text" placeholder="e.g. EPL Limonata"' +
-        ' value="' + (existingItem ? existingItem.name.replace(/"/g,'&quot;') : '') + '">' +
+    '<div class="field-group">' +
+      '<label class="field-label">Item Name</label>' +
+      '<input class="field-input" id="oi-name" type="text" placeholder="e.g. Prosecco" value="' + (existingItem ? existingItem.name : '') + '">' +
     '</div>' +
-
-    '<div class="form-row">' +
-      '<div class="form-group">' +
-        '<label class="form-label">Category</label>' +
-        '<select class="form-select" id="oi-cat">' + catOpts + '</select>' +
-      '</div>' +
-      '<div class="form-group">' +
-        '<label class="form-label">Par</label>' +
-        '<input class="form-input" id="oi-par" type="number" inputmode="numeric" placeholder="e.g. 12"' +
-          ' value="' + (existingItem && existingItem.par != null ? existingItem.par : '') + '">' +
-      '</div>' +
+    '<div class="field-group">' +
+      '<label class="field-label">Category</label>' +
+      '<select class="field-input" id="oi-cat">' + catOpts + '</select>' +
     '</div>' +
-
-    '<div class="form-group">' +
-      '<label class="form-label">Notes (optional)</label>' +
-      '<input class="form-input" id="oi-note" type="text" placeholder="e.g. Off Menu, OOS"' +
-        ' value="' + (existingItem ? (existingItem.note || '').replace(/"/g,'&quot;') : '') + '">' +
+    '<div class="field-group">' +
+      '<label class="field-label">Par</label>' +
+      '<input class="field-input" id="oi-par" type="number" placeholder="e.g. 12" value="' + (existingItem && existingItem.par != null ? existingItem.par : '') + '">' +
     '</div>' +
-
-    '<div class="sheet-actions">' +
-      '<button class="btn-primary" onclick="saveOrderItem(' +
-        (isEdit ? '\'' + existingItem.d365 + '\',\'' + existingItem.vendor + '\'' : 'null,null') +
-        ')">Save Item</button>' +
+    '<div class="field-group">' +
+      '<label class="field-label">Notes (optional)</label>' +
+      '<input class="field-input" id="oi-note" type="text" placeholder="e.g. Off Menu, OOS — evaluate replacement" value="' + (existingItem ? (existingItem.note || '') : '') + '">' +
     '</div>' +
-    (isEdit
-      ? '<button class="btn-secondary" style="margin-top:8px;color:var(--red-bright);" ' +
-          'onclick="removeOrderItem(\'' + existingItem.d365 + '\',\'' + existingItem.vendor + '\')">Remove from Order Guide</button>'
-      : '') +
-    '<button class="btn-secondary" style="margin-top:8px;" onclick="closeSheet(\'addSheet\')">Cancel</button>';
+    '<button class="btn-action btn-primary" onclick="saveOrderItem(' + (isEdit ? '\'' + existingItem.d365 + '\',\'' + existingItem.vendor + '\'' : 'null,null') + ')" style="margin-top:8px;">Save Item</button>' +
+    (isEdit ? '<button class="btn-action" onclick="removeOrderItem(\'' + existingItem.d365 + '\',\'' + existingItem.vendor + '\')" style="margin-top:8px;color:var(--red-bright);background:var(--surface2);">Remove from Order Guide</button>' : '') +
+    '<button class="btn-action" onclick="closeSheet(\'addSheet\')" style="margin-top:8px;">Cancel</button>';
 
-  document.getElementById('addSheet').classList.add('open');
+  sheet.classList.add('open');
 }
 
 function saveOrderItem(existingD365, existingVendor) {
