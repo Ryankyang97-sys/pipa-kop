@@ -645,21 +645,39 @@ const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 const TODAY = new Date().toISOString().slice(0,10);
 
 // Supabase-ready data models — swap localStorage for API calls here
+// ── DATA LAYER ──────────────────────────────────────────────────────────
+// Supabase is source of truth. localStorage is a render cache only.
 const DB = {
   get: (k) => { try { return JSON.parse(localStorage.getItem('pipa-ops-' + k) || 'null'); } catch(e) { return null; } },
   set: (k, v) => { try { localStorage.setItem('pipa-ops-' + k, JSON.stringify(v)); } catch(e) {} },
 };
 
-// Data stores
 let activations = DB.get('activations') || getDefaultActivations();
+let invoices    = DB.get('invoices')    || [];
+let waste       = DB.get('waste')       || [];
+let events      = DB.get('events')      || [];
+let recipes     = DB.get('recipes')     || getDefaultRecipes();
 
-// Load activations from Supabase on startup
-function loadActivations() {
-  supa.from('activations_log').select('*').order('created_at', {ascending: true})
-    .then(function(result) {
-      if (result.error || !result.data || !result.data.length) return;
-      // Merge Supabase data over localStorage
-      activations = result.data.map(function(row) {
+function save(key, data) { DB.set(key, data); }
+
+// Kept for backward compat
+function loadActivations() {}
+
+// ── STARTUP LOAD ────────────────────────────────────────────────────────
+function loadAllData() {
+  Promise.all([
+    supa.from('activations_log').select('*').order('created_at', {ascending: true}),
+    supa.from('invoices').select('*').order('created_at', {ascending: false}),
+    supa.from('waste_log').select('*').order('created_at', {ascending: false}).limit(200),
+    supa.from('events_log').select('*').order('event_date', {ascending: false}),
+  ]).then(function(results) {
+    var actResult   = results[0];
+    var invResult   = results[1];
+    var wasteResult = results[2];
+    var evResult    = results[3];
+
+    if (!actResult.error && actResult.data && actResult.data.length) {
+      activations = actResult.data.map(function(row) {
         return {
           id: String(row.id), priority: row.priority, name: row.name,
           d365: row.d365, vendor: row.vendor, category: row.category,
@@ -670,16 +688,67 @@ function loadActivations() {
         };
       });
       DB.set('activations', activations);
-      if (currentView === 'activations') renderActivations();
-    });
-}
-loadActivations();
-let invoices    = DB.get('invoices')    || [];
-let waste       = DB.get('waste')       || [];
-let events      = DB.get('events')      || [];
-let recipes     = DB.get('recipes')     || getDefaultRecipes();
+    }
 
-function save(key, data) { DB.set(key, data); }
+    if (!invResult.error && invResult.data) {
+      invoices = invResult.data.map(function(row) {
+        return {
+          id:          row.id,
+          date:        row.order_date,
+          vendor:      row.vendor,
+          po:          row.po_number   || '',
+          invoiceNum:  row.invoice_num || '',
+          amount:      row.amount      || '',
+          status:      row.status      || 'draft',
+          discrepancy: row.discrepancy || false,
+          lineItems:   row.line_items  || [],
+          checks:      row.checks      || {received:false,d365:false,sentIC:false,pricingOK:false},
+          notes:       row.notes       || '',
+        };
+      });
+      DB.set('invoices', invoices);
+    }
+
+    if (!wasteResult.error && wasteResult.data) {
+      waste = wasteResult.data.map(function(row) {
+        return {
+          id:       row.id,
+          date:     row.shift_date,
+          item:     row.item,
+          qty:      row.qty        || '',
+          unit:     row.unit       || '',
+          category: row.category   || '',
+          reason:   row.reason     || '',
+          value:    row.est_value  || '',
+          initials: row.initials   || '',
+          notes:    row.notes      || '',
+          approved: row.approved   || false,
+        };
+      });
+      DB.set('waste', waste);
+    }
+
+    if (!evResult.error && evResult.data) {
+      events = evResult.data.map(function(row) {
+        return {
+          id:       row.id,
+          name:     row.name,
+          date:     row.event_date,
+          covers:   row.covers    || '',
+          bevNeeds: row.bev_needs || '',
+          notes:    row.notes     || '',
+          flags:    row.flags     || {},
+        };
+      });
+      DB.set('events', events);
+    }
+
+    render(currentView);
+  }).catch(function(e) {
+    console.warn('loadAllData error:', e);
+    render(currentView);
+  });
+}
 
 let currentView = 'activations';
 let specFilter = 'All';
@@ -1223,6 +1292,7 @@ function _saveReceiptItems(confirmed, cb) {
           if (hasDiscrepancy) inv.discrepancy = true;
           inv.status = 'received';
           save('invoices', invoices);
+          saveInvoiceToSupabase(inv);
         }
 
         // 2. Update order_counts — add received qty to current on-hand count
@@ -1497,6 +1567,7 @@ function toggleInvCheck(invId, checkKey) {
   if (!inv) return;
   inv.checks[checkKey] = !inv.checks[checkKey];
   save('invoices', invoices);
+  saveInvoiceToSupabase(inv);
   renderInvoices();
 }
 
@@ -1505,6 +1576,7 @@ function toggleInvDiscrepancy(invId) {
   if (!inv) return;
   inv.discrepancy = !inv.discrepancy;
   save('invoices', invoices);
+  saveInvoiceToSupabase(inv);
   renderInvoices();
 }
 
@@ -1563,7 +1635,13 @@ function renderWaste() {
 
 function approveWaste(id) {
   const w = waste.find(x => x.id === id);
-  if (w) { w.approved = true; save('waste', waste); renderWaste(); toast('Entry approved'); }
+  if (!w) return;
+  w.approved = true;
+  save('waste', waste);
+  supa.from('waste_log').update({approved: true}).eq('id', id)
+    .then(function(r) { if (r.error) console.warn('waste approve:', r.error.message); });
+  renderWaste();
+  toast('Entry approved');
 }
 
 // ═══════════════════════════════════════════════
@@ -1628,6 +1706,8 @@ function toggleEventFlag(evId, flagKey) {
   if (!ev) return;
   ev.flags[flagKey] = !ev.flags[flagKey];
   save('events', events);
+  supa.from('events_log').update({flags: ev.flags}).eq('id', evId)
+    .then(function(r) { if (r.error) console.warn('event flag update:', r.error.message); });
   renderEvents();
 }
 
@@ -1909,28 +1989,58 @@ function openInvoiceSheet() {
 
 function saveInvoice() {
   const vendor = document.getElementById('inv-vendor').value;
-  invoices.push({
-    id: 'inv-' + Date.now(),
-    date:       document.getElementById('inv-date').value,
+  const inv = {
+    id:          'inv-' + Date.now(),
+    date:        document.getElementById('inv-date').value,
     vendor,
-    po:         document.getElementById('inv-po').value.trim(),
-    invoiceNum: document.getElementById('inv-num').value.trim(),
-    amount:     document.getElementById('inv-amount').value.trim(),
-    notes:      document.getElementById('inv-notes').value.trim(),
-    checks:     { received:false, d365:false, sentIC:false, pricingOK:false },
+    po:          document.getElementById('inv-po').value.trim(),
+    invoiceNum:  document.getElementById('inv-num').value.trim(),
+    amount:      document.getElementById('inv-amount').value.trim(),
+    notes:       document.getElementById('inv-notes').value.trim(),
+    checks:      { received:false, d365:false, sentIC:false, pricingOK:false },
     discrepancy: false,
-    lineItems:  [],   // populated when created via "Create Invoice" from Orders tab
-    status:     'draft',
-  });
+    lineItems:   [],
+    status:      'draft',
+  };
+  invoices.unshift(inv);
   save('invoices', invoices);
+  // Write to Supabase
+  supa.from('invoices').insert({
+    id:          inv.id,
+    vendor:      inv.vendor,
+    order_date:  inv.date,
+    po_number:   inv.po,
+    invoice_num: inv.invoiceNum,
+    amount:      inv.amount,
+    notes:       inv.notes,
+    checks:      inv.checks,
+    line_items:  inv.lineItems,
+    status:      inv.status,
+    discrepancy: inv.discrepancy,
+  }).then(function(r) { if (r.error) console.warn('invoice insert:', r.error.message); });
   closeSheet('addSheet');
   renderInvoices();
   toast('Invoice logged');
 }
 
-// ─────────────────────────────────────────────
-// CREATE INVOICE FROM ORDERS TAB
-// ─────────────────────────────────────────────
+// Helper — upsert an invoice object to Supabase
+function saveInvoiceToSupabase(inv) {
+  supa.from('invoices').upsert({
+    id:          inv.id,
+    vendor:      inv.vendor,
+    order_date:  inv.date,
+    po_number:   inv.po          || '',
+    invoice_num: inv.invoiceNum  || '',
+    amount:      inv.amount      || '',
+    notes:       inv.notes       || '',
+    checks:      inv.checks      || {},
+    line_items:  inv.lineItems   || [],
+    status:      inv.status      || 'draft',
+    discrepancy: inv.discrepancy || false,
+    updated_at:  new Date().toISOString(),
+  }, { onConflict: 'id' })
+  .then(function(r) { if (r.error) console.warn('invoice upsert:', r.error.message); });
+}
 function createInvoiceFromOrder(vendorName) {
   var v = ORDER_VENDORS[vendorName];
   if (!v) return;
@@ -2025,6 +2135,7 @@ function confirmInvoiceBuild(vendorName) {
   };
   invoices.unshift(inv);
   save('invoices', invoices);
+  saveInvoiceToSupabase(inv);
   closeSheet('addSheet');
   switchView('invoices');
   toast('Invoice created \u2014 ' + lineItems.length + ' items from ' + vendorName);
@@ -2089,7 +2200,7 @@ function openWasteSheet() {
 function saveWaste() {
   const item = document.getElementById('w-item').value.trim();
   if (!item) { toast('Item name required', true); return; }
-  waste.push({
+  const entry = {
     id:       'w-' + Date.now(),
     date:     TODAY,
     item,
@@ -2101,8 +2212,23 @@ function saveWaste() {
     initials: document.getElementById('w-initials').value.trim().toUpperCase(),
     notes:    document.getElementById('w-notes').value.trim(),
     approved: false,
-  });
+  };
+  waste.unshift(entry);
   save('waste', waste);
+  // Write to Supabase
+  supa.from('waste_log').insert({
+    id:         entry.id,
+    shift_date: entry.date,
+    item:       entry.item,
+    qty:        entry.qty,
+    unit:       entry.unit,
+    category:   entry.category,
+    reason:     entry.reason,
+    est_value:  entry.value  || null,
+    initials:   entry.initials || null,
+    notes:      entry.notes  || null,
+    approved:   false,
+  }).then(function(r) { if (r.error) console.warn('waste insert:', r.error.message); });
   closeSheet('addSheet');
   renderWaste();
   toast('Waste entry logged');
@@ -2160,7 +2286,7 @@ function openEventSheet() {
 function saveEvent() {
   const name = document.getElementById('ev-name').value.trim();
   if (!name) { toast('Event name required', true); return; }
-  events.push({
+  const entry = {
     id:       'ev-' + Date.now(),
     name,
     date:     document.getElementById('ev-date').value,
@@ -2175,8 +2301,19 @@ function saveEvent() {
       productPulled: false,
       orderPlaced:   false,
     },
-  });
+  };
+  events.unshift(entry);
   save('events', events);
+  // Write to Supabase
+  supa.from('events_log').insert({
+    id:         entry.id,
+    name:       entry.name,
+    event_date: entry.date,
+    covers:     entry.covers   || null,
+    bev_needs:  entry.bevNeeds || null,
+    notes:      entry.notes    || null,
+    flags:      entry.flags,
+  }).then(function(r) { if (r.error) console.warn('event insert:', r.error.message); });
   closeSheet('addSheet');
   renderEvents();
   toast('Event added');
@@ -2323,12 +2460,26 @@ function deleteEntry(store, id) {
   if (idx < 0) return;
   if (!confirm('Delete this entry?')) return;
   const entry = arr[idx];
-  if (store === 'activations') deleteActivationFromSupabase(entry);
-  // When deleting an invoice, also delete all associated delivery_items from Supabase
+
+  // Supabase deletes
+  const tableMap = {
+    activations: null, // handled separately below
+    invoices:    'invoices',
+    waste:       'waste_log',
+    events:      'events_log',
+  };
+  if (store === 'activations') {
+    deleteActivationFromSupabase(entry);
+  } else if (tableMap[store]) {
+    supa.from(tableMap[store]).delete().eq('id', id)
+      .then(function(r) { if (r && r.error) console.warn(store + ' delete:', r.error.message); });
+  }
+  // Cascade: invoice delete also removes delivery_items
   if (store === 'invoices') {
     supa.from('delivery_items').delete().eq('invoice_id', id)
-      .then(function(r) { if (r && r.error) console.warn('delivery_items delete:', r.error.message); });
+      .then(function(r) { if (r && r.error) console.warn('delivery_items cascade delete:', r.error.message); });
   }
+
   arr.splice(idx, 1);
   save(store, arr);
   closeSheet('addSheet');
@@ -2368,7 +2519,9 @@ document.getElementById('headerDate').textContent = new Date().toLocaleDateStrin
   weekday:'short', month:'short', day:'numeric'
 });
 
+// Render immediately from cache, then load real data from Supabase
 renderActivations();
+loadAllData();
 
 // ─────────────────────────────────────────────
 // UPDATES COMPOSER

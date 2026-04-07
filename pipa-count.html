@@ -915,22 +915,64 @@ let flags = {};    // "sheet|row" -> {type: '86'|'low'|'reorder', note: string}
 let shiftNotes = '';
 let activeFlagItem = null; // {item, flagKey}
 const TODAY = new Date().toISOString().slice(0,10);
-const STORAGE_KEY = 'pipa-count-' + TODAY;
-const FLAGS_KEY   = 'pipa-flags-' + TODAY;
-const NOTES_KEY   = 'pipa-notes-' + TODAY;
+// ── STORAGE: Supabase count_sessions + localStorage cache ──
+const LS_COUNTS = 'pipa-count-' + TODAY;
+const LS_FLAGS  = 'pipa-flags-' + TODAY;
+const LS_NOTES  = 'pipa-notes-' + TODAY;
 
-try { const s = localStorage.getItem(STORAGE_KEY); if (s) counts = JSON.parse(s); } catch(e){}
-try { const s = localStorage.getItem(FLAGS_KEY);   if (s) flags  = JSON.parse(s); } catch(e){}
-try { const s = localStorage.getItem(NOTES_KEY);   if (s) shiftNotes = s; } catch(e){}
+try { const s = localStorage.getItem(LS_COUNTS); if (s) counts = JSON.parse(s); } catch(e){}
+try { const s = localStorage.getItem(LS_FLAGS);  if (s) flags  = JSON.parse(s); } catch(e){}
+try { const s = localStorage.getItem(LS_NOTES);  if (s) shiftNotes = s; } catch(e){}
 
+function loadCountSession() {
+  supa.from('count_sessions').select('*').eq('snap_date', TODAY).limit(1)
+    .then(function(r) {
+      if (r.error || !r.data || !r.data.length) return;
+      var row = r.data[0];
+      if (row.counts && Object.keys(row.counts).length) {
+        counts = row.counts;
+        localStorage.setItem(LS_COUNTS, JSON.stringify(counts));
+      }
+      if (row.flags && Object.keys(row.flags).length) {
+        flags = row.flags;
+        localStorage.setItem(LS_FLAGS, JSON.stringify(flags));
+      }
+      if (row.notes) {
+        shiftNotes = row.notes;
+        localStorage.setItem(LS_NOTES, shiftNotes);
+      }
+      renderStop(currentStop);
+      var ta = document.getElementById('shiftNotesTA');
+      if (ta) ta.value = shiftNotes;
+    });
+}
+loadCountSession();
+
+var _saveTimer = null;
+function _flushToSupabase() {
+  supa.from('count_sessions').upsert({
+    snap_date:  TODAY,
+    counts:     counts,
+    flags:      flags,
+    notes:      shiftNotes,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'snap_date' })
+  .then(function(r) { if (r.error) console.warn('count_sessions:', r.error.message); });
+}
 function save() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(counts)); } catch(e){}
+  try { localStorage.setItem(LS_COUNTS, JSON.stringify(counts)); } catch(e){}
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(_flushToSupabase, 800);
 }
 function saveFlags() {
-  try { localStorage.setItem(FLAGS_KEY, JSON.stringify(flags)); } catch(e){}
+  try { localStorage.setItem(LS_FLAGS, JSON.stringify(flags)); } catch(e){}
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(_flushToSupabase, 800);
 }
 function saveNotesStorage() {
-  try { localStorage.setItem(NOTES_KEY, shiftNotes); } catch(e){}
+  try { localStorage.setItem(LS_NOTES, shiftNotes); } catch(e){}
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(_flushToSupabase, 800);
 }
 
 function countKey(item, fieldKey) { return `${item.sheet}|${item.row}|${fieldKey}`; }
