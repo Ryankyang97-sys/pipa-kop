@@ -2846,6 +2846,53 @@ function renderInventoryTrend() {
           trendStat('&#x26A0;', lowStock, 'Low Stock') +
         '</div>';
 
+      // Attach delivery data to items BEFORE rendering so rcvd shows correctly
+      Object.keys(deliveryByD365).forEach(function(d365) {
+        if (!items[d365]) {
+          var di = deliveryByD365[d365];
+          items[d365] = { d365: d365, name: di.name, category: '', vendor: di.vendor, par: null, snaps: [] };
+        }
+        items[d365].totalReceived = deliveryByD365[d365].total;
+        items[d365].lastDelivery  = deliveryByD365[d365].lastDate;
+      });
+
+      var totalDeliveries = deliveries.length;
+
+      // ── RECENT INTAKES ───────────────────────────────────────────────
+      var recentDeliveries = deliveries
+        .slice()
+        .sort(function(a,b){ return (b.received_date||'').localeCompare(a.received_date||''); })
+        .slice(0, 10);
+
+      var recentHTML = '';
+      if (recentDeliveries.length) {
+        var intakeRows = recentDeliveries.map(function(row) {
+          var dateStr = row.received_date
+            ? new Date(row.received_date + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'})
+            : '—';
+          return '<div style="display:flex;align-items:center;justify-content:space-between;' +
+            'padding:7px 0;border-bottom:1px solid var(--surface3);">' +
+            '<div style="flex:1;min-width:0;">' +
+              '<div style="font-size:0.813rem;font-weight:500;color:var(--text);' +
+                'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (row.item_name || row.d365) + '</div>' +
+              '<div style="font-size:0.563rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:1px;">' +
+                (row.vendor || '') + ' · ' + dateStr +
+              '</div>' +
+            '</div>' +
+            '<div style="font-family:'JetBrains Mono',monospace;font-size:0.875rem;font-weight:700;' +
+              'color:var(--green-bright);margin-left:12px;flex-shrink:0;">+' + row.qty_received + '</div>' +
+          '</div>';
+        }).join('');
+
+        recentHTML =
+          '<div style="background:var(--surface);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;">' +
+            '<div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;' +
+              'color:var(--green-bright);margin-bottom:8px;">📥 Recent Intakes (' + totalDeliveries + ' total)</div>' +
+            intakeRows +
+          '</div>';
+      }
+
+      // ── ITEM ROWS ────────────────────────────────────────────────────
       var rowsHTML = filtered.map(function(item) {
         var catStyle = (CAT_COLORS && CAT_COLORS[item.category]) || {bg:'var(--surface3)',color:'var(--text2)'};
         var wks = parseFloat(item.weeksToStockout);
@@ -2853,19 +2900,20 @@ function renderInventoryTrend() {
         var wksLabel = item.weeksToStockout != null ? item.weeksToStockout + 'w' : '—';
         var deplLabel = item.avgDepletion != null ? item.avgDepletion.toFixed(1) + '/wk' : '—';
         var snapsLabel = item.snaps.length + ' snap' + (item.snaps.length !== 1 ? 's' : '');
-        var rcvdLabel = rcvd != null ? rcvd + ' rcvd' + (lastDlv ? ' · ' + lastDlv : '') : null;
-        var lastSnap = item.snaps[item.snaps.length - 1];
-        var lastDate = lastSnap ? lastSnap.date : '—';
 
-        var rcvd     = item.totalReceived  != null ? item.totalReceived  : null;
-        var lastDlv  = item.lastDelivery   || null;
+        // Declare rcvd/lastDlv AFTER delivery attachment so they have values
+        var rcvd    = item.totalReceived != null ? item.totalReceived : null;
+        var lastDlv = item.lastDelivery || null;
+        var rcvdLabel = rcvd != null
+          ? '+' + rcvd + ' rcvd' + (lastDlv ? ' · ' + new Date(lastDlv + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '')
+          : null;
 
         return '<div class="trend-row">' +
           '<div class="op-item-info">' +
             '<div class="op-item-name">' + item.name + '</div>' +
             '<div class="op-item-meta">' +
               '<span class="op-cat-badge" style="background:' + catStyle.bg + ';color:' + catStyle.color + ';">' + item.category + '</span>' +
-              '<span>' + item.vendor + '</span>' +
+              '<span>' + (item.vendor || '') + '</span>' +
               '<span>' + snapsLabel + '</span>' +
             '</div>' +
           '</div>' +
@@ -2882,16 +2930,8 @@ function renderInventoryTrend() {
       el.appendChild(searchEl);
       el.appendChild(catBtns);
       el.insertAdjacentHTML('beforeend', summaryHTML);
+      el.insertAdjacentHTML('beforeend', recentHTML);
       el.insertAdjacentHTML('beforeend', rowsHTML || '<div class="empty-state"><div class="empty-text">No items match.</div></div>');
-    // Attach delivery data to items
-      Object.keys(deliveryByD365).forEach(function(d365) {
-        if (!items[d365]) {
-          var di = deliveryByD365[d365];
-          items[d365] = { d365: d365, name: di.name, category: '', vendor: di.vendor, par: null, snaps: [] };
-        }
-        items[d365].totalReceived  = deliveryByD365[d365].total;
-        items[d365].lastDelivery   = deliveryByD365[d365].lastDate;
-      });
     });
 }
 
