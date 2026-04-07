@@ -1556,6 +1556,7 @@ function renderInvoiceCard(inv) {
       ${inv.notes ? `<div style="font-size:12px;color:var(--text2);margin-top:8px;padding-top:8px;border-top:1px solid var(--surface3);">${inv.notes}</div>` : ''}
       <div class="card-actions">
         <button class="btn-sm btn-primary" onclick="openReceiptSheet('${inv.id}', '${inv.vendor}', '${inv.date}')">Log Items</button>
+        <button class="btn-sm" onclick="openInvoiceEditSheet('${inv.id}')">Edit</button>
         <button class="btn-sm accent" onclick="manageReceipts('${inv.id}', '${inv.vendor}')">Receipts</button>
         <button class="btn-sm" onclick="deleteEntry('invoices', '${inv.id}')">Delete</button>
       </div>
@@ -1578,6 +1579,57 @@ function toggleInvDiscrepancy(invId) {
   save('invoices', invoices);
   saveInvoiceToSupabase(inv);
   renderInvoices();
+}
+
+function openInvoiceEditSheet(invId) {
+  const inv = invoices.find(i => i.id === invId);
+  if (!inv) return;
+  const el = document.getElementById('addSheetContent');
+  el.innerHTML =
+    '<div class="sheet-handle"></div>' +
+    '<div class="sheet-title">Edit Invoice</div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label class="form-label">Date</label>' +
+        '<input class="form-input" id="ie-date" type="date" value="' + (inv.date || TODAY) + '"></div>' +
+      '<div class="form-group"><label class="form-label">Amount ($)</label>' +
+        '<input class="form-input" id="ie-amount" type="text" inputmode="decimal" placeholder="0.00" value="' + (inv.amount || '') + '"></div>' +
+    '</div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label class="form-label">PO #</label>' +
+        '<input class="form-input" id="ie-po" type="text" inputmode="numeric" placeholder="5038" value="' + (inv.po || '') + '"></div>' +
+      '<div class="form-group"><label class="form-label">Invoice #</label>' +
+        '<input class="form-input" id="ie-num" type="text" placeholder="CHECK LOOP" value="' + (inv.invoiceNum || '') + '"></div>' +
+    '</div>' +
+    '<div class="form-group"><label class="form-label">Notes</label>' +
+      '<textarea class="form-textarea" id="ie-notes" rows="2" placeholder="Comments, issues...">' + (inv.notes || '') + '</textarea></div>' +
+    '<div class="form-group"><label class="form-label">Status</label>' +
+      '<select class="form-select" id="ie-status">' +
+        '<option value="draft"'    + (inv.status === 'draft'    ? ' selected' : '') + '>Draft</option>' +
+        '<option value="ordered"'  + (inv.status === 'ordered'  ? ' selected' : '') + '>Ordered</option>' +
+        '<option value="received"' + (inv.status === 'received' ? ' selected' : '') + '>Received</option>' +
+        '<option value="verified"' + (inv.status === 'verified' ? ' selected' : '') + '>Verified</option>' +
+      '</select></div>' +
+    '<div class="sheet-actions">' +
+      '<button class="btn-primary" onclick="saveInvoiceEdit(\'' + invId + '\')">' +
+        'Save Changes</button></div>' +
+    '<button class="btn-secondary" style="margin-top:8px;" onclick="closeSheet(\'addSheet\')">Cancel</button>';
+  document.getElementById('addSheet').classList.add('open');
+}
+
+function saveInvoiceEdit(invId) {
+  const inv = invoices.find(i => i.id === invId);
+  if (!inv) return;
+  inv.date       = document.getElementById('ie-date').value;
+  inv.amount     = document.getElementById('ie-amount').value.trim();
+  inv.po         = document.getElementById('ie-po').value.trim();
+  inv.invoiceNum = document.getElementById('ie-num').value.trim();
+  inv.notes      = document.getElementById('ie-notes').value.trim();
+  inv.status     = document.getElementById('ie-status').value;
+  save('invoices', invoices);
+  saveInvoiceToSupabase(inv);
+  closeSheet('addSheet');
+  renderInvoices();
+  toast('Invoice updated');
 }
 
 // ═══════════════════════════════════════════════
@@ -3119,21 +3171,26 @@ function renderInventoryTrend() {
           ? '+' + rcvd + ' rcvd' + (lastDlv ? ' · ' + new Date(lastDlv + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '')
           : null;
 
-        return '<div class="trend-row">' +
-          '<div class="op-item-info">' +
-            '<div class="op-item-name">' + item.name + '</div>' +
-            '<div class="op-item-meta">' +
-              '<span class="op-cat-badge" style="background:' + catStyle.bg + ';color:' + catStyle.color + ';">' + item.category + '</span>' +
-              '<span>' + (item.vendor || '') + '</span>' +
-              '<span>' + snapsLabel + '</span>' +
+        var sparkSVG = buildSparkline(item.snaps, item.totalReceived, wksColor);
+
+        return '<div class="trend-row" style="flex-direction:column;align-items:stretch;gap:0;">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
+            '<div class="op-item-info" style="flex:1;min-width:0;">' +
+              '<div class="op-item-name">' + item.name + '</div>' +
+              '<div class="op-item-meta">' +
+                '<span class="op-cat-badge" style="background:' + catStyle.bg + ';color:' + catStyle.color + ';">' + item.category + '</span>' +
+                '<span>' + (item.vendor || '') + '</span>' +
+                '<span>' + snapsLabel + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;">' +
+              '<div style="font-size:0.938rem;font-weight:700;color:' + wksColor + ';">' + wksLabel + '</div>' +
+              '<div style="font-size:0.563rem;color:var(--text3);">' + deplLabel + '</div>' +
+              '<div style="font-size:0.563rem;color:var(--text3);">on hand: ' + (item.lastCount != null ? item.lastCount : '—') + '</div>' +
+              (rcvdLabel ? '<div style="font-size:0.563rem;color:var(--green-bright);">' + rcvdLabel + '</div>' : '') +
             '</div>' +
           '</div>' +
-          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;">' +
-            '<div style="font-size:0.938rem;font-weight:700;color:' + wksColor + ';">' + wksLabel + '</div>' +
-            '<div style="font-size:0.563rem;color:var(--text3);">' + deplLabel + '</div>' +
-            '<div style="font-size:0.563rem;color:var(--text3);">on hand: ' + (item.lastCount != null ? item.lastCount : '—') + '</div>' +
-            (rcvdLabel ? '<div style="font-size:0.563rem;color:var(--green-bright);">' + rcvdLabel + '</div>' : '') +
-          '</div>' +
+          (sparkSVG ? '<div style="margin-top:8px;">' + sparkSVG + '</div>' : '') +
         '</div>';
       }).join('');
 
@@ -3144,6 +3201,47 @@ function renderInventoryTrend() {
       el.insertAdjacentHTML('beforeend', recentHTML);
       el.insertAdjacentHTML('beforeend', rowsHTML || '<div class="empty-state"><div class="empty-text">No items match.</div></div>');
     });
+}
+
+// Build an inline SVG sparkline from snap data
+// Shows count over time as a line, with green dots where deliveries occurred
+function buildSparkline(snaps, totalReceived, lineColor) {
+  if (!snaps || snaps.length < 2) return '';
+
+  var W = 200, H = 36, PAD = 4;
+  var counts = snaps.map(function(s) { return s.count != null ? s.count : 0; });
+  var minV = Math.min.apply(null, counts);
+  var maxV = Math.max.apply(null, counts);
+  var range = maxV - minV || 1;
+  var n = counts.length;
+
+  // Scale x/y
+  function sx(i) { return PAD + (i / (n - 1)) * (W - PAD * 2); }
+  function sy(v) { return PAD + (1 - (v - minV) / range) * (H - PAD * 2); }
+
+  // Build polyline points
+  var pts = counts.map(function(v, i) { return sx(i) + ',' + sy(v); }).join(' ');
+
+  // Area fill path (closed under line)
+  var areaD = 'M' + sx(0) + ',' + sy(counts[0]);
+  for (var i = 1; i < n; i++) areaD += ' L' + sx(i) + ',' + sy(counts[i]);
+  areaD += ' L' + sx(n-1) + ',' + (H - PAD) + ' L' + sx(0) + ',' + (H - PAD) + ' Z';
+
+  // Last point dot
+  var lx = sx(n-1), ly = sy(counts[n-1]);
+
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg"' +
+    ' style="width:100%;height:36px;display:block;overflow:visible;">' +
+    '<defs>' +
+      '<linearGradient id="sg' + n + '" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0%" stop-color="' + lineColor + '" stop-opacity="0.25"/>' +
+        '<stop offset="100%" stop-color="' + lineColor + '" stop-opacity="0.02"/>' +
+      '</linearGradient>' +
+    '</defs>' +
+    '<path d="' + areaD + '" fill="url(#sg' + n + ')" stroke="none"/>' +
+    '<polyline points="' + pts + '" fill="none" stroke="' + lineColor + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+    '<circle cx="' + lx + '" cy="' + ly + '" r="3" fill="' + lineColor + '"/>' +
+  '</svg>';
 }
 
 function trendStat(icon, val, label) {
