@@ -1281,7 +1281,9 @@ function renderWasteSummary() {
     html += '<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--surface2);">';
     html += '<div style="flex:1;min-width:0;">';
     html += '<div class="ops-row-name">' + item.name + '</div>';
-    html += '<div style="font-size:0.625rem;color:var(--text3);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;">' + dayBreakdown + '</div>';
+    html += '<div style="display:flex;gap:6px;align-items:center;margin-top:2px;flex-wrap:wrap;">';
+    html += '<span style="font-family:JetBrains Mono,monospace;font-size:0.625rem;color:var(--accent);background:var(--accent-dim);padding:2px 6px;border-radius:4px;">' + item.d365 + '</span> ' + dayBreakdown;
+    html += '</div>';
     html += '</div>';
     html += '<div style="font-family:JetBrains Mono,monospace;font-size:0.875rem;font-weight:700;color:var(--accent);min-width:28px;text-align:right;">' + total + '</div>';
     html += '</div>';
@@ -2191,6 +2193,59 @@ function submitPastryManual() {
 }
 
 // Override renderPastry to merge local + DB entries
+
+// ── PASTRY ITEMS — D365 reference list ──────────────────────────────────────
+// Source: reference card (Image 1) + Thursday 02/12/26 order sheet (Image 2)
+// Used to show D365# in Pastry tab for MStore/D365 entry reference.
+// ── PASTRY ITEMS — complete D365 reference ───────────────────────────────────
+// Source: reference card (Img1 = 678xxx/691xxx IDs) + 02/12/26 order sheet (Img2)
+// d365 = zero-padded 8-digit as used in D365/MStore for entry.
+// null = no confirmed D365 on file — use D365 Lookup tab to find.
+const PASTRY_ITEMS = [
+  // ── DOLCI / PASTRY ──────────────────────────────────────────────────────
+  { group:'DOLCI',    name:'Tiramisu di Eataly',              d365:'00694904', unit:'Tray (15ea)', wk_par:'6 trays',  wknd_par:'8 trays'   },
+  { group:'DOLCI',    name:'Cocoa Powder',                    d365:'00691795', unit:'Quart',       wk_par:'1 quart',  wknd_par:'2 quart'   },
+  { group:'DOLCI',    name:'Nonna Cream / Mascarpone Cream',  d365:'00691796', unit:'Quart',       wk_par:'3 quarts', wknd_par:'5 quarts'  },
+  { group:'DOLCI',    name:'Mini Tiramisu (lunch only)',       d365:null,       unit:'Tray (15ea)', wk_par:'1 tray',   wknd_par:null,       notes:'Order Sun–Wed only' },
+  { group:'DOLCI',    name:'Budino',                          d365:'00678765', unit:'Tray (15ea)', wk_par:'2 trays',  wknd_par:'3 trays'   },
+  { group:'DOLCI',    name:'Panna Cotta ai Frutti di Bosco',  d365:'00678766', unit:'Tray (15ea)', wk_par:'1 tray',   wknd_par:'2 trays'   },
+  { group:'DOLCI',    name:'Pistachio Gelato Base',           d365:'00691801', unit:'Quart',       wk_par:'8 quarts', wknd_par:'10 quarts' },
+  { group:'DOLCI',    name:'Almond Cookies',                  d365:'00684660', unit:'Quart',       wk_par:'1 quart',  wknd_par:'2 quarts'  },
+  { group:'DOLCI',    name:'Powdered Sugar',                  d365:'00691799', unit:'Quart',       wk_par:'1 quart',  wknd_par:'1 quart'   },
+  // ── CONNOLO ─────────────────────────────────────────────────────────────
+  { group:'CONNOLO',  name:'Ricotta',                         d365:null,       unit:null,          wk_par:null,       wknd_par:null        },
+  { group:'CONNOLO',  name:'Chocolate Chips',                 d365:'00691805', unit:'Quart',       wk_par:null,       wknd_par:null        },
+  { group:'CONNOLO',  name:'Chopped Pistachio',               d365:'00691803', unit:'Quart',       wk_par:null,       wknd_par:null        },
+  { group:'CONNOLO',  name:'Powdered Sugar (Connolo)',        d365:'00691799', unit:'Quart',       wk_par:null,       wknd_par:null        },
+  // ── GELATO ──────────────────────────────────────────────────────────────
+  { group:'GELATO',   name:'Pistachio Base',                  d365:'00691801', unit:'Quart',       wk_par:null,       wknd_par:null        },
+  { group:'GELATO',   name:'Salted Caramel Sauce',            d365:'00691798', unit:'Quart',       wk_par:null,       wknd_par:null        },
+  { group:'GELATO',   name:'Chopped Hazelnut',                d365:null,       unit:'Quart',       wk_par:null,       wknd_par:null        },
+  { group:'GELATO',   name:'Chocolate Sauce',                 d365:'00684662', unit:'Quart',       wk_par:null,       wknd_par:null        },
+  { group:'GELATO',   name:'Fior di Latte',                   d365:null,       unit:null,          wk_par:null,       wknd_par:null        },
+  { group:'GELATO',   name:'Hazelnut',                        d365:'00694906', unit:'Quart',       wk_par:null,       wknd_par:null        },
+  { group:'GELATO',   name:'Strawberry Sorbet',               d365:null,       unit:null,          wk_par:null,       wknd_par:null        },
+  { group:'GELATO',   name:'Chocolate Gelato',                d365:null,       unit:null,          wk_par:null,       wknd_par:null        },
+  // ── TOPPINGS (Cannoli and Gelato — from 02/12/26 order sheet) ───────────
+  { group:'TOPPINGS', name:'Chopped Hazelnut (Topping)',      d365:null,       unit:'Quart',       wk_par:'1 quart',  wknd_par:'2 quarts'  },
+  { group:'TOPPINGS', name:'Choco Sauce',                     d365:'00684662', unit:'Quart',       wk_par:'1 quart',  wknd_par:'2 quarts'  },
+  { group:'TOPPINGS', name:'Powdered Sugar (Topping)',        d365:'00691799', unit:'Quart',       wk_par:'1 quart',  wknd_par:'2 quarts'  },
+  { group:'TOPPINGS', name:'Chopped Pistachio (Topping)',     d365:'00691803', unit:'Quart',       wk_par:'1 quart',  wknd_par:'2 quarts'  },
+  { group:'TOPPINGS', name:'Caramel Sauce',                   d365:'00691798', unit:'Quart',       wk_par:'1 quart',  wknd_par:'2 quarts'  },
+  { group:'TOPPINGS', name:'Carmalized Apples',               d365:'00694906', unit:'Quart',       wk_par:'1 quart',  wknd_par:'2 quarts'  },
+  { group:'TOPPINGS', name:'Chocolate Chips (Topping)',       d365:'00691805', unit:'Quart',       wk_par:'1 quart',  wknd_par:'2 quarts'  },
+];
+
+// Look up pastry item by name for D365 reference display
+function getPastryD365(itemName) {
+  if (!itemName) return null;
+  var lower = itemName.toLowerCase().trim();
+  var match = PASTRY_ITEMS.find(function(p) {
+    return p.name.toLowerCase() === lower || lower.indexOf(p.name.toLowerCase()) >= 0 || p.name.toLowerCase().indexOf(lower) >= 0;
+  });
+  return match ? match.d365 : null;
+}
+
 var _origRenderPastry = renderPastry;
 function renderPastry() {
   var iso = dateKey(pastryDateOffset);
@@ -2239,9 +2294,13 @@ function renderPastry() {
         var onH = r.on_hand!=null ? r.on_hand : '&#x2014;';
         var ord = r.order_qty!=null ? r.order_qty : '&#x2014;';
         var isLocal = !!localRows.find(function(l){ return l.item_name===r.item_name; });
+        var pd365 = r.d365_id || getPastryD365(r.item_name);
         s += '<div class="pastry-row'+(r.is_topping?' topping-row':'')+ '" onclick="editPastryRow(\''+r.item_name.replace(/'/g,"&#39;")+'\','+JSON.stringify(r).replace(/</g,'&lt;')+')" style="cursor:pointer;">';
         s += '<div><div class="ops-row-name">'+r.item_name+(isLocal?' <span style="font-size:0.5rem;color:var(--accent);">&#x25CF;</span>':'')+'</div>';
-        if (r.week_par) s += '<div class="ops-row-id">wk: '+r.week_par+(r.weekend_par?' / wknd: '+r.weekend_par:'')+'</div>';
+        s += '<div style="display:flex;gap:6px;align-items:center;margin-top:2px;flex-wrap:wrap;">';
+        if (pd365) s += '<span style="font-family:JetBrains Mono,monospace;font-size:0.625rem;color:var(--accent);background:var(--accent-dim);padding:2px 6px;border-radius:4px;letter-spacing:0.04em;">'+pd365+'</span>';
+        if (r.week_par) s += '<span class="ops-row-id" style="font-size:0.563rem;">wk: '+r.week_par+(r.weekend_par?' / wknd: '+r.weekend_par:'')+'</span>';
+        s += '</div>';
         if (r.notes) s += '<div style="font-size:0.563rem;color:#E07070;margin-top:2px;">'+r.notes+'</div>';
         s += '</div>';
         s += '<div class="pastry-val">'+onH+'</div>';
