@@ -299,6 +299,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     <button class="btn btn-secondary" style="margin-top:14px;" onclick="openTransferManual()">+ Add Custom Item</button>
     <button class="btn btn-secondary" style="margin-top:6px;" onclick="clearTransfer()">Clear This Day</button>
     <button class="btn btn-primary" style="margin-top:6px;" onclick="shareTransfer()">&#128228; Share Entered Items</button>
+    <button class="btn btn-primary" style="margin-top:6px;background:#1A6B35;" onclick="exportAdacoTransfer()">&#11123; Export to Adaco</button>
     <button class="btn btn-secondary" style="margin-top:6px;border-color:var(--accent-border);color:var(--accent);" id="transferSaveBtn" onclick="saveTransferToSupabase()">&#9729; Save to Supabase</button>
   </div>
 
@@ -339,6 +340,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     <button class="btn btn-secondary" style="margin-top:14px;" onclick="openWasteManual()">+ Add Custom Item</button>
     <button class="btn btn-secondary" style="margin-top:6px;" onclick="clearWasteWeek()">Clear Week</button>
     <button class="btn btn-primary" style="margin-top:6px;" onclick="shareWaste()">&#128228; Share Non-Zero</button>
+    <button class="btn btn-primary" style="margin-top:6px;background:#1A6B35;" onclick="exportAdacoWaste()">&#11123; Export to Adaco</button>
     <button class="btn btn-secondary" style="margin-top:6px;border-color:var(--accent-border);color:var(--accent);" id="wasteSaveBtn" onclick="saveWasteToSupabase()">&#9729; Save to Supabase</button>
   </div>
 
@@ -360,6 +362,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     </div>
     <div id="pastryContent"><div class="empty-state"><div class="empty-icon">&#x1F950;</div><div class="empty-msg">Loading&#x2026;</div></div></div>
     <button class="btn btn-secondary" style="margin-top:14px;" onclick="openPastryManual()">+ Add / Edit Entry</button>
+    <button class="btn btn-primary" style="margin-top:6px;background:#1A6B35;" onclick="exportAdacoPastry()">&#11123; Export to Adaco</button>
     <button class="btn btn-secondary" style="margin-top:6px;border-color:var(--accent-border);color:var(--accent);" id="pastrySaveBtn" onclick="savePastryToSupabase()">&#9729; Save to Supabase</button>
   </div>
 
@@ -2367,6 +2370,286 @@ async function savePastryToSupabase() {
   }
 }
 
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MINIMAL XLSX WRITER — no CDN, no libraries
+// Generates a binary .xlsx file matching the Adaco import template exactly.
+// Format: Sheet "Foglio1", 3 columns: PRODUCT CODE (@text), QUANTITY, BATCH/LOTTO
+// ═══════════════════════════════════════════════════════════════════════════
+(function(){
+
+// ── Low-level helpers ─────────────────────────────────────────────────────
+function uint32LE(n){ return [n&0xff,(n>>8)&0xff,(n>>16)&0xff,(n>>24)&0xff]; }
+function uint16LE(n){ return [n&0xff,(n>>8)&0xff]; }
+
+function crc32(buf){
+  var crc=0xFFFFFFFF;
+  var t=new Uint32Array(256);
+  for(var i=0;i<256;i++){var c=i;for(var j=0;j<8;j++)c=c&1?(0xEDB88320^(c>>>1)):(c>>>1);t[i]=c;}
+  for(var i=0;i<buf.length;i++)crc=t[(crc^buf[i])&0xff]^(crc>>>8);
+  return (crc^0xFFFFFFFF)>>>0;
+}
+
+function deflateRaw(data){
+  // Store method (no compression) — simplest valid deflate
+  var out=[];
+  var i=0;
+  while(i<data.length){
+    var blockLen=Math.min(65535,data.length-i);
+    var last=i+blockLen>=data.length?1:0;
+    out.push(last);
+    out=out.concat(uint16LE(blockLen));
+    out=out.concat(uint16LE(~blockLen&0xffff));
+    for(var j=0;j<blockLen;j++)out.push(data[i+j]);
+    i+=blockLen;
+  }
+  return out;
+}
+
+function zlibWrap(data){
+  var raw=deflateRaw(data);
+  var adler=1,s1=1,s2=0;
+  for(var i=0;i<data.length;i++){s1=(s1+data[i])%65521;s2=(s2+s1)%65521;}
+  adler=(s2<<16)|s1;
+  return [0x78,0x9C].concat(raw).concat([(adler>>>24)&0xff,(adler>>>16)&0xff,(adler>>>8)&0xff,adler&0xff]);
+}
+
+function str2bytes(s){
+  var a=[];for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);if(c<128)a.push(c);else if(c<2048)a.push(0xC0|(c>>6),0x80|(c&0x3F));else a.push(0xE0|(c>>12),0x80|((c>>6)&0x3F),0x80|(c&0x3F));}return a;
+}
+
+function zipEntry(name,data,isFirst){
+  var nameBytes=str2bytes(name);
+  var compressed=zlibWrap(data);
+  var crc=crc32(data);
+  var local=[0x50,0x4B,0x03,0x04,0x14,0x00,0x00,0x00,0x08,0x00,0x00,0x00,0x00,0x00]
+    .concat(uint32LE(crc))
+    .concat(uint32LE(compressed.length))
+    .concat(uint32LE(data.length))
+    .concat(uint16LE(nameBytes.length))
+    .concat([0x00,0x00])
+    .concat(nameBytes)
+    .concat(compressed);
+  return {name:nameBytes,data:compressed,crc:crc,rawLen:data.length,local:local};
+}
+
+function buildZip(files){
+  var out=[];
+  var centralDir=[];
+  var offset=0;
+  files.forEach(function(f){
+    var e=zipEntry(f.name,f.data);
+    centralDir.push({name:e.name,crc:e.crc,compLen:e.data.length,rawLen:e.rawLen,offset:offset});
+    out=out.concat(e.local);
+    offset+=e.local.length;
+  });
+  var cdStart=offset;
+  centralDir.forEach(function(cd){
+    var cde=[0x50,0x4B,0x01,0x02,0x14,0x00,0x14,0x00,0x00,0x00,0x08,0x00,0x00,0x00,0x00,0x00]
+      .concat(uint32LE(cd.crc))
+      .concat(uint32LE(cd.compLen))
+      .concat(uint32LE(cd.rawLen))
+      .concat(uint16LE(cd.name.length))
+      .concat([0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00])
+      .concat(uint32LE(cd.offset))
+      .concat(cd.name);
+    out=out.concat(cde);
+  });
+  var cdLen=out.length-cdStart;
+  var eocd=[0x50,0x4B,0x05,0x06,0x00,0x00,0x00,0x00]
+    .concat(uint16LE(centralDir.length))
+    .concat(uint16LE(centralDir.length))
+    .concat(uint32LE(cdLen))
+    .concat(uint32LE(cdStart))
+    .concat([0x00,0x00]);
+  return new Uint8Array(out.concat(eocd));
+}
+
+// ── XML builders ─────────────────────────────────────────────────────────
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function buildXlsx(rows){
+  // rows = [{code: '00694904', qty: 3, batch: null}, ...]
+  // Shared strings: collect all text values
+  var strs=[]; var strMap={};
+  function si(v){ var s=String(v); if(strs.indexOf(s)<0){strMap[s]=strs.length;strs.push(s);}return strMap[s]; }
+
+  // Header row first
+  si('PRODUCT CODE'); si('QUANTITY'); si('BATCH/LOTTO optional');
+  // Data rows — codes are text
+  rows.forEach(function(r){ si(r.code); });
+
+  // Sheet XML
+  var sheetRows='';
+  // Header row
+  sheetRows+='<row r="1"><c r="A1" t="s" s="1"><v>'+si('PRODUCT CODE')+'</v></c><c r="B1" t="s"><v>'+si('QUANTITY')+'</v></c><c r="C1" t="s"><v>'+si('BATCH/LOTTO optional')+'</v></c></row>';
+  rows.forEach(function(r,i){
+    var row=i+2;
+    var qtyCell=r.qty!==null&&r.qty!==undefined
+      ? '<c r="B'+row+'"><v>'+r.qty+'</v></c>'
+      : '<c r="B'+row+'"/>';
+    var batchCell=r.batch!=null
+      ? '<c r="C'+row+'" t="s"><v>'+si(String(r.batch))+'</v></c>'
+      : '';
+    sheetRows+='<row r="'+row+'"><c r="A'+row+'" t="s" s="1"><v>'+si(r.code)+'</v></c>'+qtyCell+batchCell+'</row>';
+  });
+
+  var sheetXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    +'<sheetData>'+sheetRows+'</sheetData>'
+    +'<pageSetup orientation="portrait"/>'
+    +'</worksheet>';
+
+  // Shared strings XML
+  var sst='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="'+strs.length+'" uniqueCount="'+strs.length+'">'
+    +strs.map(function(s){return '<si><t xml:space="preserve">'+esc(s)+'</t></si>';}).join('')
+    +'</sst>';
+
+  // Styles — define one text format (s="1") for Product Code column so it stays text
+  var stylesXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    +'<numFmts count="1"><numFmt numFmtId="49" formatCode="@"/></numFmts>'
+    +'<fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts>'
+    +'<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>'
+    +'<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
+    +'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+    +'<cellXfs count="2">'
+    +'<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+    +'<xf numFmtId="49" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+    +'</cellXfs>'
+    +'</styleSheet>';
+
+  var wbXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+    +'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+    +'<sheets><sheet name="Foglio1" sheetId="1" r:id="rId1"/></sheets>'
+    +'</workbook>';
+
+  var wbRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+    +'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>'
+    +'<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+    +'</Relationships>';
+
+  var rootRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+    +'</Relationships>';
+
+  var ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    +'<Default Extension="xml" ContentType="application/xml"/>'
+    +'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+    +'<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+    +'<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>'
+    +'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+    +'</Types>';
+
+  return buildZip([
+    {name:'[Content_Types].xml',             data:str2bytes(ct)},
+    {name:'_rels/.rels',                      data:str2bytes(rootRels)},
+    {name:'xl/workbook.xml',                  data:str2bytes(wbXml)},
+    {name:'xl/_rels/workbook.xml.rels',       data:str2bytes(wbRels)},
+    {name:'xl/worksheets/sheet1.xml',         data:str2bytes(sheetXml)},
+    {name:'xl/sharedStrings.xml',             data:str2bytes(sst)},
+    {name:'xl/styles.xml',                    data:str2bytes(stylesXml)},
+  ]);
+}
+
+function downloadXlsx(rows, filename){
+  if(!rows.length){ showToast('No data to export'); return; }
+  var bytes=buildXlsx(rows);
+  var blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download=filename; a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  showToast('Downloaded ' + filename);
+}
+
+// ── Tab-specific export functions ─────────────────────────────────────────
+
+window.exportAdacoTransfer = function() {
+  var allItems = TRANSFER_ITEMS.concat(transferCustomItems.map(function(c){
+    return { d365:c.key, name:c.name, par:c.par||0 };
+  }));
+  var rows = allItems
+    .filter(function(item){
+      var d = transferData[item.d365] || {};
+      return d.total !== undefined || d.floor !== undefined || d.walkin !== undefined;
+    })
+    .map(function(item){
+      var d = transferData[item.d365] || {};
+      var total = d.total !== undefined ? d.total : ((d.floor||0)+(d.walkin||0));
+      // Pad D365 to 8 digits
+      var code = item.d365.replace(/^0+/,'');
+      code = code.padStart(8,'0');
+      return { code:code, qty:total, batch:null };
+    });
+  var iso = dateKey(transferDateOffset);
+  downloadXlsx(rows, 'adaco_transfer_' + iso + '.xlsx');
+};
+
+window.exportAdacoWaste = function() {
+  var items = getActiveItems();
+  var data  = getActiveData();
+  var rows = items
+    .filter(function(item){
+      var d = data[item.d365] || {};
+      return DAYS.some(function(day){ return parseFloat(d[day]) > 0; });
+    })
+    .map(function(item){
+      var d = data[item.d365] || {};
+      var total = DAYS.reduce(function(s,day){ return s+(parseFloat(d[day])||0); },0);
+      var code = String(item.d365).replace(/^0+/,'').padStart(8,'0');
+      return { code:code, qty:total, batch:null };
+    });
+  var weekStart = getWeekKey(wasteWeekOffset);
+  var label = wasteMode === 'pronto' ? 'pronto' : 'cxra';
+  downloadXlsx(rows, 'adaco_waste_' + label + '_' + weekStart + '.xlsx');
+};
+
+window.exportAdacoPastry = function() {
+  var iso = dateKey(pastryDateOffset);
+  // Pull from Supabase then merge local, same as renderPastry
+  sbFetch('ks_pastry_orders?shift_date=eq.'+iso+'&order=is_topping,item_name').then(function(dbRows){
+    var localRows = DB.get('pastry_local_'+iso) || [];
+    var merged = dbRows.slice();
+    localRows.forEach(function(lr){
+      var ex = merged.find(function(r){ return r.item_name===lr.item_name; });
+      if(ex) Object.assign(ex,lr); else merged.push(lr);
+    });
+    var rows = merged
+      .filter(function(r){ return r.order_qty != null && parseFloat(r.order_qty) > 0; })
+      .map(function(r){
+        var d365 = r.d365_id || getPastryD365(r.item_name);
+        if(!d365){ showToast('No D365# for: ' + r.item_name + ' — skipped'); return null; }
+        var code = String(d365).replace(/^0+/,'').padStart(8,'0');
+        return { code:code, qty:parseFloat(r.order_qty), batch:null };
+      })
+      .filter(Boolean);
+    downloadXlsx(rows, 'adaco_pastry_' + iso + '.xlsx');
+  }).catch(function(){
+    // Fall back to local only
+    var localRows = DB.get('pastry_local_'+iso) || [];
+    var rows = localRows
+      .filter(function(r){ return r.order_qty != null && parseFloat(r.order_qty) > 0; })
+      .map(function(r){
+        var d365 = r.d365_id || getPastryD365(r.item_name);
+        if(!d365) return null;
+        var code = String(d365).replace(/^0+/,'').padStart(8,'0');
+        return { code:code, qty:parseFloat(r.order_qty), batch:null };
+      })
+      .filter(Boolean);
+    downloadXlsx(rows, 'adaco_pastry_' + iso + '.xlsx');
+  });
+};
+
+})(); // IIFE end
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MODAL HELPERS
