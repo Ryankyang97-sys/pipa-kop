@@ -116,6 +116,16 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .email-box{background:var(--bg);border-radius:10px;padding:14px;border:1px solid var(--surface3);font-size:0.688rem;line-height:1.7;color:var(--text2);font-family:'JetBrains Mono',monospace;white-space:pre-wrap;word-break:break-word;margin-bottom:12px;max-height:320px;overflow-y:auto;}
 .search-results-modal{border-radius:10px;border:1px solid var(--surface2);margin-top:8px;overflow:hidden;}
 
+/* ── FILTER CHIPS ── */
+.filter-row{display:flex;gap:6px;margin:10px 0 4px;align-items:center;flex-wrap:nowrap;}
+.filter-label{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);white-space:nowrap;flex-shrink:0;}
+.filter-chips{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
+.filter-chips::-webkit-scrollbar{display:none;}
+.chip{flex-shrink:0;padding:5px 10px;border-radius:20px;font-size:0.688rem;font-weight:600;cursor:pointer;border:1px solid var(--surface3);background:var(--surface2);color:var(--text2);white-space:nowrap;transition:all 0.12s;}
+.chip:active{opacity:0.7;}
+.chip.active{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent);}
+.filter-section{margin-bottom:8px;}
+
 /* ── MISC ── */
 .empty-state{text-align:center;padding:40px 20px;color:var(--text3);}
 .empty-icon{font-size:2rem;margin-bottom:10px;}
@@ -125,6 +135,50 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 @keyframes spin{to{transform:rotate(360deg);}}
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 24px);left:50%;transform:translateX(-50%);background:var(--surface3);color:var(--text);padding:10px 18px;border-radius:10px;font-size:0.813rem;font-weight:600;z-index:200;pointer-events:none;transition:opacity 0.3s;}
 .toast.hidden{opacity:0;}
+
+/* ── RESULT EXPAND + ADD TO ACTIVATION ── */
+.result-item.expanded{background:var(--surface2);cursor:default;}
+.result-actions{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--surface3);}
+.result-item.expanded .result-actions{display:block;}
+.act-select{width:100%;background:var(--bg);border:1px solid var(--surface3);border-radius:8px;padding:9px 12px;color:var(--text);font-size:0.813rem;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:8px;}
+.act-select:focus{border-color:var(--accent);}
+.add-act-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:0.75rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;}
+.add-act-btn:active{opacity:0.8;}
+
+/* ── ADACO COPY BUTTON ── */
+.adaco-row{display:flex;align-items:center;gap:0;padding:12px 14px;border-bottom:1px solid var(--surface2);background:var(--surface);}
+.adaco-row:last-child{border-bottom:none;}
+.adaco-body{flex:1;min-width:0;}
+.copy-btn{flex-shrink:0;padding:7px 12px;border-radius:8px;border:1px solid var(--surface3);background:var(--surface2);color:var(--text2);font-size:0.688rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:all 0.12s;margin-left:10px;}
+.copy-btn:active{opacity:0.7;}
+.copy-btn.copied{background:var(--green-dim);border-color:var(--green-border);color:#4CAF82;}
+
+/* ── PASTRY TRANSFER ── */
+.pt-section-header{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:var(--text3);padding:10px 0 6px;margin-top:16px;border-bottom:1px solid var(--surface2);}
+.pt-section-header:first-of-type{margin-top:0;}
+.pt-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--surface2);}
+.pt-row:last-child{border-bottom:none;}
+.pt-name{flex:1;font-size:0.813rem;font-weight:600;line-height:1.3;}
+.pt-unit{font-size:0.625rem;color:var(--text3);font-weight:600;text-transform:uppercase;margin-top:2px;}
+.pt-adaco{font-family:'JetBrains Mono',monospace;font-size:0.625rem;color:var(--accent);flex-shrink:0;}
+.pt-qty-wrap{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.pt-qty-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--surface3);background:var(--surface2);color:var(--text);font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pt-qty-btn:active{opacity:0.7;}
+.pt-qty{width:36px;text-align:center;background:transparent;border:none;color:var(--text);font-size:0.938rem;font-weight:700;font-family:'JetBrains Mono',monospace;outline:none;}
+.pt-summary{background:var(--surface);border-radius:14px;border:1px solid var(--surface3);margin-top:16px;overflow:hidden;}
+.pt-summary-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--surface3);}
+.pt-summary-title{font-size:0.875rem;font-weight:700;}
+.pt-summary-count{font-size:0.688rem;color:var(--text3);}
+.pt-entry-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--surface2);}
+.pt-entry-row:last-child{border-bottom:none;}
+.pt-entry-row.done{opacity:0.4;}
+.pt-entry-num{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--accent);min-width:70px;}
+.pt-entry-info{flex:1;min-width:0;}
+.pt-entry-name{font-size:0.813rem;font-weight:600;}
+.pt-entry-qty{font-size:0.688rem;color:var(--text2);margin-top:2px;}
+.pt-entry-copy{flex-shrink:0;}
+.pt-done-btn{flex-shrink:0;width:28px;height:28px;border-radius:8px;border:1px solid var(--surface3);background:var(--surface2);color:var(--text3);font-size:0.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.pt-done-btn.checked{background:var(--green-dim);border-color:var(--green-border);color:#4CAF82;}
 </style>
 </head>
 <body>
@@ -139,6 +193,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     <div class="tab active" onclick="switchTab('lookup',this)">D365 Lookup</div>
     <div class="tab" onclick="switchTab('adaco',this)">Adaco / MStore</div>
     <div class="tab" onclick="switchTab('activations',this)">Activations</div>
+    <div class="tab" onclick="switchTab('pastry',this)">Pastry Transfer</div>
   </div>
 
   <!-- ── TAB: D365 LOOKUP ── -->
@@ -150,7 +205,38 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
         placeholder="Adaco ID, D365 #, or name…"
         autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div>
-    <div class="search-hint">e.g. "2065342" · "00699091" · "asparagus"</div>
+
+    <!-- Department filter -->
+    <div class="filter-section">
+      <div class="filter-row">
+        <span class="filter-label">Dept</span>
+        <div class="filter-chips" id="deptChips">
+          <div class="chip" data-filter="dept" data-val="RS" onclick="toggleFilter('dept','RS',this)">Restaurant</div>
+          <div class="chip" data-filter="dept" data-val="P1" onclick="toggleFilter('dept','P1',this)">Pronto</div>
+          <div class="chip" data-filter="dept" data-val="BA" onclick="toggleFilter('dept','BA',this)">Bakery</div>
+          <div class="chip" data-filter="dept" data-val="PA" onclick="toggleFilter('dept','PA',this)">Pastry</div>
+          <div class="chip" data-filter="dept" data-val="CK" onclick="toggleFilter('dept','CK',this)">Kitchen</div>
+          <div class="chip" data-filter="dept" data-val="FA" onclick="toggleFilter('dept','FA',this)">Fresh Pasta</div>
+          <div class="chip" data-filter="dept" data-val="OF" onclick="toggleFilter('dept','OF',this)">Produce</div>
+          <div class="chip" data-filter="dept" data-val="FG" onclick="toggleFilter('dept','FG',this)">Cheese</div>
+          <div class="chip" data-filter="dept" data-val="VI" onclick="toggleFilter('dept','VI',this)">Wine/Bev</div>
+          <div class="chip" data-filter="dept" data-val="U2" onclick="toggleFilter('dept','U2',this)">Spirits</div>
+          <div class="chip" data-filter="dept" data-val="GH" onclick="toggleFilter('dept','GH',this)">Beverages</div>
+          <div class="chip" data-filter="dept" data-val="MP" onclick="toggleFilter('dept','MP',this)">Pantry</div>
+          <div class="chip" data-filter="dept" data-val="GF" onclick="toggleFilter('dept','GF',this)">Eggs/Dairy</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Brand filter — populated dynamically after first search -->
+    <div class="filter-section" id="brandFilterSection" style="display:none;">
+      <div class="filter-row">
+        <span class="filter-label">Brand</span>
+        <div class="filter-chips" id="brandChips"></div>
+      </div>
+    </div>
+
+    <div class="search-hint" style="margin-top:0;">e.g. "2065342" · "00699091" · "asparagus"</div>
     <div id="lookupResults"></div>
   </div>
 
@@ -179,6 +265,38 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
   </div>
 
 </div>
+
+  <!-- ── TAB: PASTRY TRANSFER ── -->
+  <div class="panel" id="panel-pastry">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <div class="section-label" style="margin:0;">PiPa ← Pastry Daily Order</div>
+      <button class="btn btn-secondary btn-sm" onclick="ptClearAll()">Clear</button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div id="pt-datestamp" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--text2);"></div>
+    </div>
+    <div class="search-hint" style="margin-bottom:16px;margin-top:0;">Enter order qty, then use the MStore checklist below.</div>
+
+    <!-- DOLCI / PASTRY section -->
+    <div class="pt-section-header">Dolci &amp; Pastry</div>
+    <div id="pt-items-dolci"></div>
+
+    <!-- TOPPINGS section -->
+    <div class="pt-section-header">Toppings for Cannoli &amp; Gelato</div>
+    <div id="pt-items-toppings"></div>
+
+    <!-- MStore Entry Checklist -->
+    <div class="pt-summary" id="pt-summary" style="display:none;">
+      <div class="pt-summary-header">
+        <span class="pt-summary-title">&#128203; MStore Entry</span>
+        <span class="pt-summary-count" id="pt-summary-count"></span>
+      </div>
+      <div id="pt-entry-list"></div>
+    </div>
+
+  </div>
+
 
 <!-- ── MODAL: NEW ACTIVATION ── -->
 <div class="modal-overlay hidden" id="newActModal">
@@ -342,53 +460,172 @@ function switchTab(tab, el) {
 const MF = {
   CK:'Kitchen Prep', P1:'Pronto', RS:'Restaurant', BA:'Bakery',
   PA:'Pastry', FA:'Fresh Pasta', OF:'Produce', FG:'Cheese/Dairy',
-  GF:'Eggs/Dairy', MP:'Pantry/Oil'
+  GF:'Eggs/Dairy', MP:'Pantry/Oil', VI:'Wine/Bev', U2:'Spirits',
+  GH:'Beverages', GS:'Grocery', GD:'Grocery Dry', SM:'Ready Meals',
+  MC:'Butcher', GE:'Gelato', LV:'Lavazza', P3:'Panini', TF:'Truffle'
 };
+
+// ── FILTER STATE ──────────────────────────────────────────────────────────────
+const filters = { dept: null, brand: null };
+
+function toggleFilter(type, val, el) {
+  // Deselect if already active
+  if (filters[type] === val) {
+    filters[type] = null;
+    el.classList.remove('active');
+  } else {
+    // Deselect previous chip of same type
+    document.querySelectorAll('.chip[data-filter="' + type + '"]').forEach(function(c) {
+      c.classList.remove('active');
+    });
+    filters[type] = val;
+    el.classList.add('active');
+  }
+  // Re-run search with new filter
+  var q = document.getElementById('lookupSearch').value.trim();
+  if (q.length >= 2 || filters.dept || filters.brand) runLookupSearch(q);
+}
+
+// After a search, extract unique brands from results and render brand chips
+function renderBrandChips(rows) {
+  var brands = [];
+  var seen = {};
+  rows.forEach(function(r) {
+    if (r.vendor_brand && r.vendor_brand !== 'EATALY' && !seen[r.vendor_brand]) {
+      seen[r.vendor_brand] = true;
+      brands.push(r.vendor_brand);
+    }
+  });
+  var section = document.getElementById('brandFilterSection');
+  var chips = document.getElementById('brandChips');
+  if (!brands.length) { section.style.display = 'none'; return; }
+  brands.sort();
+  chips.innerHTML = brands.map(function(b) {
+    var isActive = filters.brand === b;
+    return '<div class="chip' + (isActive ? ' active' : '') + '" data-filter="brand" data-val="' + b + '" onclick="toggleFilter(\'brand\',\'' + b.replace(/'/g,"\\'") + '\',this)">' + b + '</div>';
+  }).join('');
+  section.style.display = '';
+}
 
 // ── D365 LOOKUP ──────────────────────────────────────────────────────────────
 function buildLookupQuery(q) {
-  // Numeric-looking input: search by d365_id OR adaco_id
-  const stripped = stripZeros(q);
-  if (/^\d+$/.test(stripped)) {
-    return 'ks_products?or=(d365_id.eq.' + encodeURIComponent(q)
+  var base = 'ks_products?';
+  var params = [];
+
+  // Text vs numeric query
+  var stripped = q ? stripZeros(q) : '';
+  if (q && /^\d+$/.test(stripped)) {
+    params.push('or=(d365_id.eq.' + encodeURIComponent(q)
       + ',d365_id.eq.' + encodeURIComponent(stripped)
       + ',adaco_id.eq.' + encodeURIComponent(q)
-      + ',adaco_id.eq.' + encodeURIComponent(stripped)
-      + ')&limit=20&select=d365_id,adaco_id,name,macrofamily,vendor_brand';
+      + ',adaco_id.eq.' + encodeURIComponent(stripped) + ')');
+  } else if (q) {
+    params.push('name=ilike.*' + encodeURIComponent(q) + '*');
+    params.push('order=name.asc');
+  } else {
+    // No text query — filter-only mode, sort by name
+    params.push('order=name.asc');
   }
-  // Text: ilike on name
-  return 'ks_products?name=ilike.*' + encodeURIComponent(q) + '*&limit=20&select=d365_id,adaco_id,name,macrofamily,vendor_brand&order=name.asc';
+
+  // Department filter
+  if (filters.dept) {
+    params.push('macrofamily=eq.' + encodeURIComponent(filters.dept));
+  }
+  // Brand filter
+  if (filters.brand) {
+    params.push('vendor_brand=eq.' + encodeURIComponent(filters.brand));
+  }
+
+  params.push('limit=40');
+  params.push('select=d365_id,adaco_id,name,macrofamily,vendor_brand');
+
+  return base + params.join('&');
 }
 
 function renderLookupRow(r, clickFn) {
-  const safeName = r.name.replace(/'/g, "\\'");
-  const safeD365 = r.d365_id.replace(/'/g, "\\'");
-  const safeAdaco = r.adaco_id.replace(/'/g, "\\'");
-  const safeMf = (r.macrofamily || '').replace(/'/g, "\\'");
-  const mfLabel = MF[r.macrofamily] || r.macrofamily || '—';
-  const onclick = clickFn
-    ? 'onclick="' + clickFn + '(\'' + safeD365 + '\',\'' + safeAdaco + '\',\'' + safeName + '\',\'' + safeMf + '\')"'
-    : '';
-  const brand = r.vendor_brand && r.vendor_brand !== 'EATALY' ? '<span class="result-adaco">' + r.vendor_brand + '</span>' : '';
-  return '<div class="result-item" ' + onclick + '>'
+  var mfLabel = MF[r.macrofamily] || r.macrofamily || '\u2014';
+  var brand = (r.vendor_brand && r.vendor_brand !== 'EATALY') ? r.vendor_brand : '';
+
+  function esc(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+  // Modal search (Add Item modal) \u2014 simple clickable row
+  if (clickFn) {
+    return '<div class="result-item" onclick="' + clickFn + '(\'' + esc(r.d365_id) + '\',\'' + esc(r.adaco_id) + '\',\'' + esc(r.name) + '\',\'' + esc(r.macrofamily||'') + '\')">'
+      + '<div class="result-name">' + r.name + '</div>'
+      + '<div class="result-meta">'
+      + '<span class="result-id">D365: ' + r.d365_id + '</span>'
+      + '<span class="result-adaco">Adaco: ' + r.adaco_id + '</span>'
+      + '<span class="result-mf">' + mfLabel + '</span>'
+      + (brand ? '<span class="result-adaco">' + brand + '</span>' : '')
+      + '</div></div>';
+  }
+
+  // Main lookup tab \u2014 expandable card with Add to Activation
+  var uid = 'res-' + r.d365_id.replace(/[^a-z0-9]/gi, '');
+  var actOptions = activations.length
+    ? activations.map(function(a, ai) {
+        return '<option value="' + ai + '">' + a.name + '</option>';
+      }).join('')
+    : '<option value="" disabled>No activations yet</option>';
+
+  return '<div class="result-item" id="' + uid + '" onclick="expandResult(this)">'
     + '<div class="result-name">' + r.name + '</div>'
     + '<div class="result-meta">'
     + '<span class="result-id">D365: ' + r.d365_id + '</span>'
     + '<span class="result-adaco">Adaco: ' + r.adaco_id + '</span>'
     + '<span class="result-mf">' + mfLabel + '</span>'
-    + brand
-    + '</div></div>';
+    + (brand ? '<span class="result-adaco">' + brand + '</span>' : '')
+    + '</div>'
+    + '<div class="result-actions" onclick="event.stopPropagation()">'
+    + '<select class="act-select" id="sel-' + uid + '">'
+    + actOptions
+    + '</select>'
+    + '<button class="add-act-btn" onclick="addToActFromLookup(\'' + esc(r.d365_id) + '\',\'' + esc(r.adaco_id) + '\',\'' + esc(r.name) + '\',\'' + esc(r.macrofamily||'') + '\',\'sel-' + uid + '\')">'
+    + '+ Add to Activation'
+    + '</button>'
+    + '</div>'
+    + '</div>';
+}
+
+
+function expandResult(el) {
+  // Collapse any other expanded row first
+  document.querySelectorAll('.result-item.expanded').forEach(function(other) {
+    if (other !== el) other.classList.remove('expanded');
+  });
+  el.classList.toggle('expanded');
+}
+
+async function addToActFromLookup(d365, adaco, name, mf, selId) {
+  var sel = document.getElementById(selId);
+  var ai = parseInt(sel.value);
+  if (isNaN(ai) || !activations[ai]) { showToast('Pick an activation first'); return; }
+  if (!activations[ai].items) activations[ai].items = [];
+  // Prevent duplicate
+  var exists = activations[ai].items.some(function(i) { return i.d365_id === d365; });
+  if (exists) { showToast('Already in that activation'); return; }
+  activations[ai].items.push({ d365_id: d365, adaco_id: adaco, name: name, macrofamily: mf, status: 'pending' });
+  await patchItems(ai);
+  showToast('Added to ' + activations[ai].name);
 }
 
 async function runLookupSearch(q) {
   const el = document.getElementById('lookupResults');
-  q = q.trim();
-  if (q.length < 2) { el.innerHTML = ''; return; }
+  q = (q || '').trim();
+  // Need at least a 2-char query OR an active filter to search
+  if (q.length < 2 && !filters.dept && !filters.brand) {
+    el.innerHTML = '';
+    document.getElementById('brandFilterSection').style.display = 'none';
+    return;
+  }
   el.innerHTML = '<div class="loading-row"><span class="spin">&#9696;</span> Searching…</div>';
   try {
     const rows = await sbFetch(buildLookupQuery(q));
+    // Render brand chips from full result set
+    renderBrandChips(rows);
+    // If brand filter is active, client-side filter the display (brand already filtered server-side)
     if (!rows.length) {
-      el.innerHTML = '<div class="no-results">No products found for "' + q + '"</div>';
+      el.innerHTML = '<div class="no-results">No products found' + (q ? ' for "' + q + '"' : '') + '</div>';
       return;
     }
     el.innerHTML = '<div class="results">' + rows.map(function(r) { return renderLookupRow(r, null); }).join('') + '</div>';
@@ -425,12 +662,15 @@ async function runAdacoSearch(q) {
     }
     el.innerHTML = '<div class="results">'
       + rows.map(function(r) {
-          return '<div class="adaco-item">'
+          return '<div class="adaco-row">'
+            + '<div class="adaco-body">'
             + '<div class="adaco-name">' + r.description + '</div>'
             + '<div class="adaco-meta">'
             + '<span class="adaco-num">#' + r.product_number + '</span>'
             + (r.category ? '<span class="adaco-cat">' + r.category + '</span>' : '')
-            + '</div></div>';
+            + '</div></div>'
+            + '<button class="copy-btn" onclick="copyAdacoNum(this,\'' + r.product_number + '\')">Copy #</button>'
+            + '</div>';
         }).join('')
       + '</div>';
   } catch(e) {
@@ -442,22 +682,41 @@ document.getElementById('adacoSearch').addEventListener('input', debounce(functi
   runAdacoSearch(e.target.value);
 }, 300));
 
+function copyAdacoNum(btn, num) {
+  navigator.clipboard.writeText(num).then(function() {
+    var orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = orig;
+      btn.classList.remove('copied');
+    }, 1800);
+  });
+}
+
 // ── ACTIVATIONS — STATE ───────────────────────────────────────────────────────
 let activations = [];
 let currentActId = null;  // Supabase row id (bigint)
 let currentItemIdx = null;
 
-async function loadActivations() {
-  const el = document.getElementById('activationsList');
-  el.innerHTML = '<div class="loading-row"><span class="spin">&#9696;</span> Loading…</div>';
+async function loadActivations(renderList) {
+  if (renderList !== false) {
+    const el = document.getElementById('activationsList');
+    el.innerHTML = '<div class="loading-row"><span class="spin">&#9696;</span> Loading…</div>';
+  }
   try {
     const rows = await sbFetch('ks_activations?select=id,name,launch_date,department,items&order=created_at.desc');
     activations = rows;
-    renderActivations();
+    if (renderList !== false) renderActivations();
   } catch(e) {
-    el.innerHTML = '<div class="no-results">Could not load activations — check connection</div>';
+    if (renderList !== false) {
+      document.getElementById('activationsList').innerHTML = '<div class="no-results">Could not load activations — check connection</div>';
+    }
   }
 }
+
+// Pre-load activations silently on page load so the dropdown is ready in D365 Lookup
+loadActivations(false);
 
 // ── ACTIVATIONS — RENDER ──────────────────────────────────────────────────────
 function daysUntil(dateStr) {
@@ -724,6 +983,176 @@ document.querySelectorAll('.modal-overlay').forEach(function(o) {
     if (e.target === o) o.classList.add('hidden');
   });
 });
+
+
+// ── PASTRY TRANSFER ─────────────────────────────────────────────────────────
+// Item list from reference sheet (Image 1). adaco = Adaco product number.
+// Items without confirmed adaco numbers are marked null.
+const PT_ITEMS = {
+  dolci: [
+    { name: 'Tiramisu di Eataly',          unit: 'Tray (15ea)', adaco: '694904' },
+    { name: 'Cocoa Powder',                unit: 'Quart',       adaco: '691795' },
+    { name: 'Nonna Cream / Mascarpone',    unit: 'Quart',       adaco: '691796' },
+    { name: 'Mini Tiramisu (lunch only)',   unit: 'Tray (15ea)', adaco: '2064828', note: 'Sun–Wed only' },
+    { name: 'Budino',                      unit: 'Tray (15ea)', adaco: '678765' },
+    { name: 'Panna Cotta ai Frutti Bosco', unit: 'Tray (15ea)', adaco: '678766' },
+    { name: 'Pistachio Gelato Base',       unit: 'Quart',       adaco: '691801' },
+    { name: 'Almond Struesel / Cookies',   unit: 'Quart',       adaco: '684660' },
+    { name: 'Powdered Sugar',              unit: 'Quart',       adaco: '691799' },
+  ],
+  toppings: [
+    { name: 'Chopped Hazelnut',   unit: 'Quart', adaco: '103912' },
+    { name: 'Chocolate Sauce',    unit: 'Quart', adaco: '684662' },
+    { name: 'Powdered Sugar',     unit: 'Quart', adaco: '691799' },
+    { name: 'Chopped Pistachio',  unit: 'Quart', adaco: '691803' },
+    { name: 'Caramel Sauce',      unit: 'Quart', adaco: '691798' },
+    { name: 'Caramelized Apples', unit: 'Quart', adaco: '694906' },
+    { name: 'Chocolate Chips',    unit: 'Quart', adaco: '691805' },
+  ]
+};
+
+// qty state: key = section-index, value = qty string
+const ptQty = {};
+
+function ptKey(section, i) { return section + '-' + i; }
+
+function ptRenderSection(sectionId, items, section) {
+  var el = document.getElementById(sectionId);
+  var html = '';
+  items.forEach(function(item, i) {
+    var k = ptKey(section, i);
+    var qty = ptQty[k] || '0';
+    var adacoStr = item.adaco ? item.adaco : '—';
+    var noteHtml = item.note ? ' <span style="font-size:0.563rem;color:var(--text3);font-weight:600;">' + item.note + '</span>' : '';
+    html += '<div class="pt-row">';
+    html +=   '<div style="flex:1;min-width:0;">';
+    html +=     '<div class="pt-name">' + item.name + noteHtml + '</div>';
+    html +=     '<div style="display:flex;gap:8px;align-items:center;margin-top:3px;">';
+    html +=       '<span class="pt-unit">' + item.unit + '</span>';
+    html +=       '<span class="pt-adaco">#' + adacoStr + '</span>';
+    html +=     '</div>';
+    html +=   '</div>';
+    html +=   '<div class="pt-qty-wrap">';
+    html +=     '<button class="pt-qty-btn" onclick="ptAdj(\'' + section + '\',' + i + ',-1)">&#8722;</button>';
+    html +=     '<input class="pt-qty" type="number" min="0" max="99" value="' + qty + '" '
+              +   'onchange="ptSet(\'' + section + '\',' + i + ',this.value)" '
+              +   'oninput="ptSet(\'' + section + '\',' + i + ',this.value)">';
+    html +=     '<button class="pt-qty-btn" onclick="ptAdj(\'' + section + '\',' + i + ',1)">&#43;</button>';
+    html +=   '</div>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function ptRender() {
+  // Set today's date stamp
+  var ds = document.getElementById('pt-datestamp');
+  if (ds) {
+    ds.textContent = new Date().toLocaleDateString('en-US', {weekday:'short', month:'numeric', day:'numeric', year:'2-digit'});
+  }
+  ptRenderSection('pt-items-dolci',    PT_ITEMS.dolci,    'dolci');
+  ptRenderSection('pt-items-toppings', PT_ITEMS.toppings, 'toppings');
+  ptUpdateSummary();
+}
+
+function ptAdj(section, i, delta) {
+  var k = ptKey(section, i);
+  var cur = parseFloat(ptQty[k]) || 0;
+  var next = Math.max(0, cur + delta);
+  ptQty[k] = String(next);
+  ptRender();
+}
+
+function ptSet(section, i, val) {
+  var k = ptKey(section, i);
+  var n = parseFloat(val);
+  ptQty[k] = (isNaN(n) || n < 0) ? '0' : String(n);
+  ptUpdateSummary();
+}
+
+function ptClearAll() {
+  Object.keys(ptQty).forEach(function(k) { ptQty[k] = '0'; });
+  ptRender();
+}
+
+// Build the ordered MStore entry list from all items with qty > 0
+function ptGetEntries() {
+  var entries = [];
+  ['dolci','toppings'].forEach(function(section) {
+    var items = PT_ITEMS[section];
+    items.forEach(function(item, i) {
+      var k = ptKey(section, i);
+      var qty = parseFloat(ptQty[k]) || 0;
+      if (qty > 0) {
+        entries.push({ name: item.name, unit: item.unit, adaco: item.adaco, qty: qty, key: k });
+      }
+    });
+  });
+  return entries;
+}
+
+// Track which entries have been marked done in MStore
+var ptDone = {};
+
+function ptUpdateSummary() {
+  var entries = ptGetEntries();
+  var summaryEl = document.getElementById('pt-summary');
+  var listEl    = document.getElementById('pt-entry-list');
+  var countEl   = document.getElementById('pt-summary-count');
+
+  if (!entries.length) {
+    summaryEl.style.display = 'none';
+    return;
+  }
+  summaryEl.style.display = '';
+
+  var remaining = entries.filter(function(e) { return !ptDone[e.key]; }).length;
+  countEl.textContent = remaining + ' of ' + entries.length + ' remaining';
+
+  var html = '';
+  entries.forEach(function(e) {
+    var done = !!ptDone[e.key];
+    var adacoDisplay = e.adaco ? e.adaco : 'NO # — look up';
+    html += '<div class="pt-entry-row' + (done ? ' done' : '') + '">';
+    html +=   '<div class="pt-entry-num">' + adacoDisplay + '</div>';
+    html +=   '<div class="pt-entry-info">';
+    html +=     '<div class="pt-entry-name">' + e.name + '</div>';
+    html +=     '<div class="pt-entry-qty">Qty: ' + e.qty + ' ' + e.unit + '</div>';
+    html +=   '</div>';
+    if (e.adaco) {
+      html += '<button class="copy-btn' + (done ? ' copied' : '') + '" style="margin-right:6px;" '
+            +   'onclick="ptCopyNum(this,\'' + e.adaco + '\')">' + (done ? '\u2713' : 'Copy #') + '</button>';
+    }
+    html +=   '<button class="pt-done-btn' + (done ? ' checked' : '') + '" onclick="ptToggleDone(\'' + e.key + '\')">'
+            +   (done ? '&#10003;' : '&#9711;') + '</button>';
+    html += '</div>';
+  });
+  listEl.innerHTML = html;
+}
+
+function ptCopyNum(btn, num) {
+  navigator.clipboard.writeText(num).then(function() {
+    var orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = orig;
+      btn.classList.remove('copied');
+    }, 1800);
+  });
+}
+
+function ptToggleDone(key) {
+  ptDone[key] = !ptDone[key];
+  ptUpdateSummary();
+}
+
+// Initialise on tab switch
+const _origSwitchTab = switchTab;
+function switchTab(tab, el) {
+  _origSwitchTab(tab, el);
+  if (tab === 'pastry') ptRender();
+}
 
 </script>
 </body>
