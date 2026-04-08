@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="KS Tool">
 <title>KS — Kitchen Specialist</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -173,6 +174,17 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .toast{position:fixed;bottom:calc(var(--safe-bottom) + 20px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--green-border);color:#4CAF82;font-size:0.75rem;font-weight:600;padding:10px 18px;border-radius:20px;z-index:200;opacity:0;transition:opacity 0.2s;pointer-events:none;}
 .toast.show{opacity:1;}
 .row-group-divider{height:6px;background:var(--surface2);}
+.backlog-badge{display:inline-flex;align-items:center;gap:4px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:3px 8px;border-radius:10px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
+.readonly-overlay{pointer-events:none;opacity:0.6;}
+.pastry-section{background:var(--surface);border-radius:14px;overflow:hidden;border:1px solid var(--surface3);margin-bottom:14px;}
+.pastry-row{display:grid;grid-template-columns:1fr 60px 60px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--surface2);gap:8px;}
+.pastry-row:last-child{border-bottom:none;}
+.pastry-row.topping-row{background:var(--yellow-dim);}
+.pastry-val{font-family:'JetBrains Mono',monospace;font-size:0.813rem;font-weight:700;text-align:center;}
+.pastry-val.ordered{color:var(--accent);}
+.pastry-val.zero{color:var(--text3);}
+.pastry-col-hdr{font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);text-align:center;}
+
 </style>
 </head>
 <body>
@@ -190,6 +202,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
       <div class="tab" onclick="switchTab('activations',this)">Activations</div>
       <div class="tab" onclick="switchTab('transfer',this)">Transfer</div>
       <div class="tab" onclick="switchTab('waste',this)">Waste</div>
+      <div class="tab" onclick="switchTab('pastry',this)">Pastry</div>
       <div class="tab" onclick="switchTab('procurement',this)">Procurement</div>
     </div>
   </div>
@@ -255,6 +268,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     <div id="transferList"></div>
     <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearTransfer()">Clear This Day</button>
     <button class="btn btn-primary" style="margin-top:6px;" onclick="shareTransfer()">&#128228; Share Entered Items</button>
+    <button class="btn btn-secondary" style="margin-top:6px;border-color:var(--accent-border);color:var(--accent);" id="transferSaveBtn" onclick="saveTransferToSupabase()">&#9729; Save to Supabase</button>
   </div>
 
   <!-- WASTE (Pronto + CxRA toggle) -->
@@ -293,7 +307,28 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 
     <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearWasteWeek()">Clear Week</button>
     <button class="btn btn-primary" style="margin-top:6px;" onclick="shareWaste()">&#128228; Share Non-Zero</button>
+    <button class="btn btn-secondary" style="margin-top:6px;border-color:var(--accent-border);color:var(--accent);" id="wasteSaveBtn" onclick="saveWasteToSupabase()">&#9729; Save to Supabase</button>
   </div>
+
+  <!-- PASTRY PREP ORDERS -->
+  <div class="panel" id="panel-pastry">
+    <div class="ops-header">
+      <div>
+        <div class="section-label" style="margin:0 0 4px;">Pastry Prep Orders</div>
+        <div class="waste-nav">
+          <button class="waste-nav-btn" onclick="changePastryDay(-1)">&#8249;</button>
+          <div style="font-size:0.688rem;color:var(--text2);font-weight:600;" id="pastryDateLabel"></div>
+          <button class="waste-nav-btn" onclick="changePastryDay(1)">&#8250;</button>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="ops-date" id="pastryDateSub" style="font-size:0.625rem;"></div>
+        <div style="font-size:0.5rem;color:var(--text3);margin-top:3px;" id="pastrySourceLabel"></div>
+      </div>
+    </div>
+    <div id="pastryContent"><div class="empty-state"><div class="empty-icon">🥐</div><div class="empty-msg">Loading…</div></div></div>
+  </div>
+
   <!-- PROCUREMENT -->
   <div class="panel" id="panel-procurement">
     <div class="ops-header">
@@ -315,6 +350,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     <div style="margin-top:18px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Full Checklist</div>
     <div id="procList"></div>
     <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearProc()">Clear This Week</button>
+    <button class="btn btn-secondary" style="margin-top:6px;border-color:var(--accent-border);color:var(--accent);" id="procSaveBtn" onclick="saveProcToSupabase()">&#9729; Save to Supabase</button>
   </div>
 
 </div><!-- .page -->
@@ -398,47 +434,46 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
-// CONFIG
+// CONFIG — matches pipa-ops / pipa-count / pipa-bar pattern
+// localStorage = fast working store   |   Supabase = sync/persist layer
 // ═══════════════════════════════════════════════════════════════════════════
 const SB_URL = 'https://fhbusipvtxjnwidlgpaa.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
+const supa = supabase.createClient(SB_URL, SB_KEY);
+const TODAY = new Date().toISOString().slice(0, 10);
+
+// DB helper — mirrors pipa-ops DB.get / DB.set
+const DB = {
+  get: function(k) { try { return JSON.parse(localStorage.getItem('pipa-ks-' + k) || 'null'); } catch(e) { return null; } },
+  set: function(k, v) { try { localStorage.setItem('pipa-ks-' + k, JSON.stringify(v)); } catch(e) {} },
+};
 
 const MF_LABELS = {"CK":"Kitchen Prep","P1":"Pronto","RS":"Restaurant","BA":"Bakery","PA":"Pastry","FA":"Fresh Pasta","OF":"Produce","FG":"Cheese/Dairy","GF":"Eggs/Dairy","MP":"Pantry/Oil"};
 
+// ── Thin wrappers kept for callers that use sbFetch/sbPost/sbPatch/sbDelete ─
+// (used by D365 search, MStore search, Activations CRUD, Pastry/history reads)
 async function sbFetch(path) {
+  const res = await supa.from(path.split('?')[0]).select('*');
+  // Fast-path: for simple queries use raw fetch (preserves filter/order params)
   const r = await fetch(SB_URL + '/rest/v1/' + path, {
     headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
   });
   if (!r.ok) throw new Error('Supabase error ' + r.status);
   return r.json();
 }
-
 async function sbPost(table, body) {
-  const r = await fetch(SB_URL + '/rest/v1/' + table, {
-    method: 'POST',
-    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-    body: JSON.stringify(body)
-  });
-  if (!r.ok) throw new Error('Supabase error ' + r.status);
-  return r.json();
+  const result = await supa.from(table).insert(body).select();
+  if (result.error) throw new Error(result.error.message);
+  return result.data;
 }
-
 async function sbPatch(table, id, body) {
-  const r = await fetch(SB_URL + '/rest/v1/' + table + '?id=eq.' + id, {
-    method: 'PATCH',
-    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-    body: JSON.stringify(body)
-  });
-  if (!r.ok) throw new Error('Supabase error ' + r.status);
-  return r.json();
+  const result = await supa.from(table).update(body).eq('id', id).select();
+  if (result.error) throw new Error(result.error.message);
+  return result.data;
 }
-
 async function sbDelete(table, id) {
-  const r = await fetch(SB_URL + '/rest/v1/' + table + '?id=eq.' + id, {
-    method: 'DELETE',
-    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
-  });
-  if (!r.ok) throw new Error('Supabase error ' + r.status);
+  const result = await supa.from(table).delete().eq('id', id);
+  if (result.error) throw new Error(result.error.message);
 }
 
 function debounce(fn, ms) {
@@ -462,6 +497,7 @@ function switchTab(id, el) {
   el.classList.add('active');
   document.getElementById('panel-' + id).classList.add('active');
   if (id === 'transfer') renderTransfer();
+  if (id === 'pastry') renderPastry();
   if (id === 'waste') renderWaste();
   if (id === 'procurement') renderProc();
 }
@@ -843,11 +879,12 @@ function transferStorageKey() {
 }
 
 function loadTransferData() {
-  try { transferData = JSON.parse(localStorage.getItem(transferStorageKey()) || '{}'); } catch(e) { transferData = {}; }
+  transferData = DB.get('transfer_' + dateKey(transferDateOffset)) || {};
 }
 
 function saveTransferData() {
-  try { localStorage.setItem(transferStorageKey(), JSON.stringify(transferData)); } catch(e) {}
+  if (transferData._backlog) return;
+  DB.set('transfer_' + dateKey(transferDateOffset), transferData);
 }
 
 function changeTransferDay(dir) {
@@ -1038,7 +1075,7 @@ let wasteMode = 'pronto'; // 'pronto' | 'cxra'
 
 // Storage key includes mode so the two logs never collide
 function wasteStorageKey() {
-  return 'pipa_ks_waste_' + wasteMode + '_' + getWeekKey(wasteWeekOffset);
+  return 'waste_' + wasteMode + '_' + getWeekKey(wasteWeekOffset);
 }
 
 function getActiveItems() {
@@ -1046,12 +1083,11 @@ function getActiveItems() {
 }
 
 function getActiveData() {
-  const key = wasteStorageKey();
-  try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch(e) { return {}; }
+  return DB.get(wasteStorageKey()) || {};
 }
 
 function saveActiveData(data) {
-  try { localStorage.setItem(wasteStorageKey(), JSON.stringify(data)); } catch(e) {}
+  DB.set(wasteStorageKey(), data);
 }
 
 function getWeekKey(offset) {
@@ -1263,15 +1299,15 @@ function procWeekKey(offset) {
 }
 
 function procStorageKey() {
-  return 'pipa_ks_proc_' + procWeekKey(procWeekOffset);
+  return 'proc_' + procWeekKey(procWeekOffset);
 }
 
 function loadProcData() {
-  try { procData = JSON.parse(localStorage.getItem(procStorageKey()) || '{}'); } catch(e) { procData = {}; }
+  procData = DB.get('proc_' + procWeekKey(procWeekOffset)) || {};
 }
 
 function saveProcData() {
-  try { localStorage.setItem(procStorageKey(), JSON.stringify(procData)); } catch(e) {}
+  DB.set('proc_' + procWeekKey(procWeekOffset), procData);
 }
 
 function changeProcWeek(dir) {
@@ -1368,6 +1404,301 @@ function clearProc() {
   renderProc();
 }
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PASTRY PREP ORDERS — reads from ks_pastry_orders via Supabase
+// ═══════════════════════════════════════════════════════════════════════════
+let pastryDateOffset = 0;
+
+function changePastryDay(dir) {
+  pastryDateOffset += dir;
+  renderPastry();
+}
+
+function renderPastry() {
+  const d = new Date();
+  d.setDate(d.getDate() + pastryDateOffset);
+  const iso = dateKey(pastryDateOffset);
+  const label = pastryDateOffset === 0 ? 'Today' : (pastryDateOffset === -1 ? 'Yesterday' : d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}));
+  document.getElementById('pastryDateLabel').textContent = label;
+  document.getElementById('pastryDateSub').textContent = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('pastrySourceLabel').textContent = '';
+  const el = document.getElementById('pastryContent');
+  el.innerHTML = '<div class="empty-state" style="padding:20px 0;"><div class="empty-msg">Loading…</div></div>';
+  sbFetch('ks_pastry_orders?shift_date=eq.' + iso + '&order=is_topping,item_name').then(function(rows) {
+    if (!rows.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">No pastry order logged for this date.</div></div>';
+      document.getElementById('pastrySourceLabel').textContent = 'no entry';
+      return;
+    }
+    document.getElementById('pastrySourceLabel').innerHTML = '<span class="backlog-badge">📋 Backlog</span>';
+    var mainItems  = rows.filter(function(r){ return !r.is_topping; });
+    var toppings   = rows.filter(function(r){ return r.is_topping; });
+    var html = '';
+    // Column headers
+    html += '<div style="display:flex;padding:0 14px 6px;gap:8px;border-bottom:1px solid var(--surface3);margin-bottom:4px;">';
+    html += '<div style="flex:1;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">Item</div>';
+    html += '<div class="pastry-col-hdr" style="width:60px;">On Hand</div>';
+    html += '<div class="pastry-col-hdr" style="width:60px;">Ordered</div></div>';
+    function renderSection(title, items) {
+      if (!items.length) return '';
+      var s = '<div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin:12px 0 6px;">' + title + '</div>';
+      s += '<div class="pastry-section">';
+      items.forEach(function(r) {
+        var onH  = r.on_hand  !== null && r.on_hand  !== undefined ? r.on_hand  : '—';
+        var ord  = r.order_qty !== null && r.order_qty !== undefined ? r.order_qty : '—';
+        var ordClass = (parseFloat(ord) > 0) ? 'ordered' : 'zero';
+        s += '<div class="pastry-row' + (r.is_topping ? ' topping-row' : '') + '">';
+        s += '<div><div class="ops-row-name">' + r.item_name + '</div>';
+        if (r.week_par) s += '<div class="ops-row-id">wk: ' + r.week_par + (r.weekend_par ? ' / wknd: ' + r.weekend_par : '') + '</div>';
+        if (r.notes) s += '<div style="font-size:0.563rem;color:#E07070;margin-top:2px;">' + r.notes + '</div>';
+        s += '</div>';
+        s += '<div class="pastry-val">' + onH + '</div>';
+        s += '<div class="pastry-val ' + ordClass + '">' + ord + '</div>';
+        s += '</div>';
+      });
+      s += '</div>';
+      return s;
+    }
+    html += renderSection('Dolci / Pastry', mainItems);
+    html += renderSection('Toppings — Cannoli & Gelato', toppings);
+    el.innerHTML = html;
+  }).catch(function() {
+    el.innerHTML = '<div class="empty-state"><div class="empty-msg">Could not load pastry orders.</div></div>';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HISTORY FALLBACK — Transfer & Waste pull from Supabase when localStorage empty
+// ═══════════════════════════════════════════════════════════════════════════
+
+// After loadTransferData, if data is empty and date is in the past, try Supabase
+async function maybeLoadTransferFromDb() {
+  if (transferDateOffset >= 0) return; // today or future — don't override
+  const hasLocal = Object.keys(transferData).length > 0;
+  if (hasLocal) return;
+  const iso = dateKey(transferDateOffset);
+  try {
+    const rows = await sbFetch('ks_pronto_counts?shift_date=eq.' + iso + '&order=item_name');
+    if (!rows.length) return;
+    // Map d365_id → {floor, walkin} so existing renderTransfer works
+    rows.forEach(function(r) {
+      if (!transferData[r.d365_id]) transferData[r.d365_id] = {};
+      if (r.floor_count !== null) transferData[r.d365_id].floor  = r.floor_count;
+      if (r.walkin_count !== null) transferData[r.d365_id].walkin = r.walkin_count;
+    });
+    // Mark as backlog so we don't overwrite
+    transferData._backlog = true;
+    showBacklogBadge('transferDateSub');
+  } catch(e) { /* silently fail */ }
+}
+
+function showBacklogBadge(targetId) {
+  var el = document.getElementById(targetId);
+  if (!el) return;
+  if (el.querySelector('.backlog-badge')) return; // already shown
+  var badge = document.createElement('span');
+  badge.className = 'backlog-badge';
+  badge.style.marginLeft = '6px';
+  badge.textContent = '📋 Backlog';
+  el.appendChild(badge);
+}
+
+// Patch changeTransferDay to trigger DB fallback
+var _origChangeTransferDay = changeTransferDay;
+function changeTransferDay(dir) {
+  transferDateOffset += dir;
+  loadTransferData();
+  maybeLoadTransferFromDb().then(function() { renderTransfer(); });
+}
+
+// Patch saveTransferData to not save backlog data back to localStorage
+var _origSaveTransferData = saveTransferData;
+function saveTransferData() {
+  if (transferData._backlog) return; // read-only backlog — don't overwrite
+  _origSaveTransferData();
+}
+
+// Waste: when navigating to a past week with no local data, pull from ks_waste_log
+async function maybeLoadWasteFromDb() {
+  if (wasteWeekOffset >= 0) return;
+  const key = wasteStorageKey();
+  const existing = (() => { try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch(e) { return {}; } })();
+  if (Object.keys(existing).length > 0) return;
+  const weekStart = getWeekKey(wasteWeekOffset);
+  try {
+    const rows = await sbFetch('ks_waste_log?week_start=eq.' + weekStart + '&log_type=eq.' + wasteMode + '&order=item_name');
+    if (!rows.length) return;
+    var data = {};
+    rows.forEach(function(r) {
+      var key = r.d365_id;
+      data[key] = {};
+      ['mon','tue','wed','thu','fri','sat','sun'].forEach(function(day) {
+        if (r[day] !== null && r[day] !== undefined) {
+          data[key][day.charAt(0).toUpperCase() + day.slice(1)] = r[day];
+        }
+      });
+    });
+    data._backlog = true;
+    // Inject into the active storage slot temporarily (don't persist)
+    localStorage.setItem(key + '_backlog_temp', JSON.stringify(data));
+    // Override getActiveData for this render
+    window._wasteBacklogData = data;
+    showBacklogBadge('wasteWeekRange');
+  } catch(e) { /* silently fail */ }
+}
+
+// Patch changeWasteWeek
+var _origChangeWasteWeek = changeWasteWeek;
+function changeWasteWeek(dir) {
+  wasteWeekOffset += dir;
+  window._wasteBacklogData = null;
+  maybeLoadWasteFromDb().then(function() { renderWaste(); });
+}
+
+// Patch setWasteMode to also clear backlog cache
+var _origSetWasteMode = setWasteMode;
+function setWasteMode(mode) {
+  window._wasteBacklogData = null;
+  wasteMode = mode;
+  document.getElementById('wasteToggleProto').classList.toggle('active', mode === 'pronto');
+  document.getElementById('wasteToggleCxra').classList.toggle('active', mode === 'cxra');
+  if (wasteWeekOffset < 0) {
+    maybeLoadWasteFromDb().then(function() { renderWaste(); });
+  } else {
+    renderWaste();
+  }
+}
+
+// Patch getActiveData to return backlog data when available
+var _origGetActiveData = getActiveData;
+function getActiveData() {
+  if (window._wasteBacklogData) return window._wasteBacklogData;
+  return _origGetActiveData();
+}
+
+// Patch saveActiveData to not overwrite backlog
+var _origSaveActiveData = saveActiveData;
+function saveActiveData(data) {
+  if (window._wasteBacklogData) return; // read-only
+  _origSaveActiveData(data);
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SUPABASE SAVE FUNCTIONS
+// Matches pipa-count pattern: localStorage = working store,
+// explicit "Save to Supabase" button upserts to DB on demand.
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function saveTransferToSupabase() {
+  const btn = document.getElementById('transferSaveBtn');
+  const iso = dateKey(transferDateOffset);
+  const entered = TRANSFER_ITEMS.filter(function(item) {
+    const d = transferData[item.d365] || {};
+    return d.floor !== undefined || d.walkin !== undefined;
+  });
+  if (!entered.length) { showToast('No counts to save'); return; }
+  if (btn) btn.textContent = 'Saving…';
+  const rows = entered.map(function(item) {
+    const d = transferData[item.d365] || {};
+    const floor  = d.floor  !== undefined ? d.floor  : null;
+    const walkin = d.walkin !== undefined ? d.walkin : null;
+    const need   = (floor !== null || walkin !== null)
+      ? item.par - ((floor || 0) + (walkin || 0)) : null;
+    return {
+      shift_date:    iso,
+      d365_id:       item.d365,
+      item_name:     item.name,
+      par:           item.par,
+      floor_count:   floor,
+      walkin_count:  walkin,
+      need:          need,
+      complete:      need !== null && need <= 0,
+      date_estimated: false,
+    };
+  });
+  var result = await supa.from('ks_pronto_counts')
+    .upsert(rows, { onConflict: 'shift_date,d365_id' });
+  if (btn) btn.textContent = '☁️ Save to Supabase';
+  if (result.error) {
+    showToast('Error: ' + result.error.message);
+  } else {
+    showToast('Saved ' + rows.length + ' items ✓');
+  }
+}
+
+async function saveWasteToSupabase() {
+  const btn = document.getElementById('wasteSaveBtn');
+  const data = getActiveData();
+  const items = getActiveItems();
+  const weekStart = getWeekKey(wasteWeekOffset);
+  const nonZero = items.filter(function(item) {
+    const d = data[item.d365] || {};
+    return DAYS.some(function(day) { return parseFloat(d[day]) > 0; });
+  });
+  if (!nonZero.length) { showToast('No waste entries to save'); return; }
+  if (btn) btn.textContent = 'Saving…';
+  const rows = nonZero.map(function(item) {
+    const d = data[item.d365] || {};
+    return {
+      week_start: weekStart,
+      log_type:   wasteMode,
+      d365_id:    item.d365,
+      item_name:  item.name,
+      mon: parseFloat(d['Mon']) || null,
+      tue: parseFloat(d['Tue']) || null,
+      wed: parseFloat(d['Wed']) || null,
+      thu: parseFloat(d['Thu']) || null,
+      fri: parseFloat(d['Fri']) || null,
+      sat: parseFloat(d['Sat']) || null,
+      sun: parseFloat(d['Sun']) || null,
+    };
+  });
+  var result = await supa.from('ks_waste_log')
+    .upsert(rows, { onConflict: 'week_start,log_type,d365_id' });
+  if (btn) btn.textContent = '☁️ Save to Supabase';
+  if (result.error) {
+    showToast('Error: ' + result.error.message);
+  } else {
+    showToast('Saved ' + rows.length + ' ' + wasteMode + ' items ✓');
+  }
+}
+
+async function saveProcToSupabase() {
+  const btn = document.getElementById('procSaveBtn');
+  const weekStart = procWeekKey(procWeekOffset);
+  const checked = [];
+  PROC_ITEMS.forEach(function(item) {
+    const key = item.d365.replace(/[^a-zA-Z0-9]/g, '_');
+    const d = procData[key] || {};
+    PROC_DAYS.forEach(function(day) {
+      if (d[day]) checked.push({ week_start: weekStart, d365_id: item.d365, item_name: item.name, order_day: day });
+    });
+  });
+  if (!checked.length) { showToast('No orders to save'); return; }
+  if (btn) btn.textContent = 'Saving…';
+  // Procurement doesn't have its own table yet — save as waste_notes entries
+  // using a dedicated log_type so they're queryable
+  var result = await supa.from('ks_waste_notes')
+    .upsert(checked.map(function(r) {
+      return {
+        shift_date: weekStart,
+        item_name:  r.item_name + ' (' + r.order_day + ')',
+        qty:        1,
+        log_type:   'procurement',
+        notes:      'EDT order — week of ' + weekStart + ', ordered ' + r.order_day,
+      };
+    }), { onConflict: 'shift_date,item_name,log_type' });
+  if (btn) btn.textContent = '☁️ Save to Supabase';
+  if (result.error) {
+    showToast('Error: ' + result.error.message);
+  } else {
+    showToast('Saved ' + checked.length + ' orders ✓');
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // MODAL HELPERS
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1382,6 +1713,7 @@ document.querySelectorAll('.modal-overlay').forEach(function(o) {
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════
 loadActivations();
+window._wasteBacklogData = null;
 </script>
 </body>
 </html>
