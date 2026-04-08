@@ -121,6 +121,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 
 /* Procurement checkboxes */
 .proc-row{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--surface2);gap:10px;}
+.proc-row.proc-row-done .proc-name{color:var(--text3);text-decoration:line-through;}
 .proc-row:last-child{border-bottom:none;}
 .proc-check{display:flex;gap:8px;flex-shrink:0;}
 .day-check{display:flex;flex-direction:column;align-items:center;gap:3px;}
@@ -188,6 +189,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
       <div class="tab" onclick="switchTab('transfer',this)">Transfer</div>
       <div class="tab" onclick="switchTab('waste',this)">Waste</div>
       <div class="tab" onclick="switchTab('procurement',this)">Procurement</div>
+      <div class="tab" onclick="switchTab('cxra',this)">CxRA</div>
     </div>
   </div>
 
@@ -222,20 +224,25 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     <div id="activationsList"></div>
   </div>
 
-  <!-- ══ TRANSFER ══════════════════════════════════════════════════════════ -->
+  <!-- TRANSFER -->
   <div class="panel" id="panel-transfer">
     <div class="ops-header">
       <div>
-        <div class="section-label" style="margin:0 0 2px;">Pronto Count Sheet</div>
-        <div style="font-size:0.625rem;color:var(--text3);">Floor / Walk-in → Need</div>
+        <div class="section-label" style="margin:0 0 4px;">Pronto Count Sheet</div>
+        <div class="waste-nav">
+          <button class="waste-nav-btn" onclick="changeTransferDay(-1)">&#8249;</button>
+          <div style="font-size:0.688rem;color:var(--text2);font-weight:600;" id="transferDateLabel"></div>
+          <button class="waste-nav-btn" onclick="changeTransferDay(1)">&#8250;</button>
+        </div>
       </div>
-      <div>
-        <div class="ops-date" id="transferDate"></div>
-        <div style="font-size:0.5rem;color:var(--text3);text-align:right;margin-top:3px;">auto-saves</div>
+      <div style="text-align:right;">
+        <div class="ops-date" id="transferDateSub" style="font-size:0.625rem;"></div>
+        <div style="font-size:0.5rem;color:var(--text3);margin-top:3px;">saves per day</div>
       </div>
     </div>
-
-    <!-- Column headers -->
+    <div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Summary</div>
+    <div id="transferSummary"></div>
+    <div style="margin-top:18px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Full Sheet</div>
     <div style="display:flex;align-items:center;padding:0 14px 6px;gap:10px;border-bottom:1px solid var(--surface3);margin-bottom:4px;">
       <div style="flex:1;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">Item</div>
       <div style="display:flex;gap:6px;flex-shrink:0;">
@@ -244,11 +251,9 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
       </div>
       <div style="font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);width:38px;text-align:center;">Need</div>
     </div>
-
     <div id="transferList"></div>
-
-    <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearTransfer()">Clear All Counts</button>
-    <button class="btn btn-primary" style="margin-top:6px;" onclick="shareTransfer()">&#128228; Share / Export</button>
+    <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearTransfer()">Clear This Day</button>
+    <button class="btn btn-primary" style="margin-top:6px;" onclick="shareTransfer()">&#128228; Share Entered Items</button>
   </div>
 
   <!-- ══ WASTE ═════════════════════════════════════════════════════════════ -->
@@ -277,24 +282,62 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 
     <div id="wasteList"></div>
 
+    <div style="margin-top:18px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Week Summary — Non-Zero</div>
+    <div id="wasteSummary"></div>
     <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearWasteWeek()">Clear Week</button>
-    <button class="btn btn-primary" style="margin-top:6px;" onclick="shareWaste()">&#128228; Share / Export</button>
+    <button class="btn btn-primary" style="margin-top:6px;" onclick="shareWaste()">&#128228; Share Non-Zero</button>
   </div>
 
   <!-- ══ PROCUREMENT ════════════════════════════════════════════════════════ -->
   <div class="panel" id="panel-procurement">
     <div class="ops-header">
       <div>
-        <div class="section-label" style="margin:0 0 2px;">EDT Ordering</div>
-        <div style="font-size:0.625rem;color:var(--text3);">Mon / Wed / Fri</div>
+        <div class="section-label" style="margin:0 0 4px;">EDT Ordering</div>
+        <div class="waste-nav">
+          <button class="waste-nav-btn" onclick="changeProcWeek(-1)">&#8249;</button>
+          <div style="font-size:0.688rem;color:var(--text2);font-weight:600;" id="procWeekLabel"></div>
+          <button class="waste-nav-btn" onclick="changeProcWeek(1)">&#8250;</button>
+        </div>
       </div>
       <div style="text-align:right;">
         <div class="ops-date" id="procDate"></div>
-        <div style="font-size:0.5rem;color:var(--text3);margin-top:3px;">auto-saves</div>
+        <div style="font-size:0.5rem;color:var(--text3);margin-top:3px;">saves per week</div>
       </div>
     </div>
+    <div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Ordered This Week</div>
+    <div id="procSummary"></div>
+    <div style="margin-top:18px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Full Checklist</div>
     <div id="procList"></div>
-    <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearProc()">Clear All</button>
+    <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearProc()">Clear This Week</button>
+  </div>
+
+  <!-- CxRA WASTE -->
+  <div class="panel" id="panel-cxra">
+    <div class="ops-header">
+      <div>
+        <div class="section-label" style="margin:0 0 4px;">CxRA Waste Log</div>
+        <div class="waste-nav">
+          <button class="waste-nav-btn" onclick="changeCxraWeek(-1)">&#8249;</button>
+          <div style="font-size:0.688rem;color:var(--text2);font-weight:600;" id="cxraWeekLabel"></div>
+          <button class="waste-nav-btn" onclick="changeCxraWeek(1)">&#8250;</button>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="ops-date" id="cxraWeekRange"></div>
+        <div style="font-size:0.5rem;color:var(--text3);margin-top:3px;">saves per week</div>
+      </div>
+    </div>
+    <div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Week Summary — Non-Zero</div>
+    <div id="cxraSummary"></div>
+    <div style="margin-top:18px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Full Sheet</div>
+    <div style="display:flex;align-items:center;padding:0 14px 4px;gap:8px;justify-content:flex-end;border-bottom:1px solid var(--surface3);margin-bottom:4px;">
+      <div style="flex:1;"></div>
+      <div style="display:flex;gap:4px;" id="cxraDayHeaders"></div>
+      <div style="min-width:26px;text-align:right;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">Tot</div>
+    </div>
+    <div id="cxraList"></div>
+    <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearCxraWeek()">Clear Week</button>
+    <button class="btn btn-primary" style="margin-top:6px;" onclick="shareCxra()">&#128228; Share Non-Zero</button>
   </div>
 
 </div><!-- .page -->
@@ -444,6 +487,7 @@ function switchTab(id, el) {
   if (id === 'transfer') renderTransfer();
   if (id === 'waste') renderWaste();
   if (id === 'procurement') renderProc();
+  if (id === 'cxra') renderCxra();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -808,25 +852,44 @@ const TRANSFER_ITEMS = [
   { group: 'IN HOUSE', name: 'Grilled Chicken 2',   d365: '2052353',  par: 5  },
 ];
 
-// Transfer state: keyed by item d365 -> {floor, walkin}
+// ── TRANSFER STATE ──────────────────────────────────────────────────────────
 let transferData = {};
-const TRANSFER_KEY = 'pipa_ks_transfer_' + todayKey();
+let transferDateOffset = 0; // 0 = today, -1 = yesterday, etc.
 
-function todayKey() {
-  const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+function dateKey(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() + (offset || 0));
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function transferStorageKey() {
+  return 'pipa_ks_transfer_' + dateKey(transferDateOffset);
 }
 
 function loadTransferData() {
-  try { transferData = JSON.parse(localStorage.getItem(TRANSFER_KEY) || '{}'); } catch(e) { transferData = {}; }
+  try { transferData = JSON.parse(localStorage.getItem(transferStorageKey()) || '{}'); } catch(e) { transferData = {}; }
 }
 
 function saveTransferData() {
-  try { localStorage.setItem(TRANSFER_KEY, JSON.stringify(transferData)); } catch(e) {}
+  try { localStorage.setItem(transferStorageKey(), JSON.stringify(transferData)); } catch(e) {}
+}
+
+function changeTransferDay(dir) {
+  transferDateOffset += dir;
+  renderTransfer();
 }
 
 function renderTransfer() {
-  document.getElementById('transferDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
   loadTransferData();
+
+  // Header date label + nav
+  const d = new Date();
+  d.setDate(d.getDate() + transferDateOffset);
+  const dateLabel = transferDateOffset === 0 ? 'Today' : (transferDateOffset === -1 ? 'Yesterday' : d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}));
+  document.getElementById('transferDateLabel').textContent = dateLabel;
+  document.getElementById('transferDateSub').textContent = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+
+  // Build full list HTML
   const groups = [];
   const seen = {};
   TRANSFER_ITEMS.forEach(function(item) {
@@ -837,11 +900,11 @@ function renderTransfer() {
     const items = TRANSFER_ITEMS.filter(function(i) { return i.group === g; });
     html += '<div class="section-group">';
     html += '<div class="group-header"><span class="group-title">' + g + '</span><span class="group-count">' + items.length + ' items</span></div>';
-    items.forEach(function(item, idx) {
+    items.forEach(function(item) {
       const key = item.d365;
-      const d = transferData[key] || {};
-      const floor = d.floor !== undefined ? d.floor : '';
-      const walkin = d.walkin !== undefined ? d.walkin : '';
+      const dat = transferData[key] || {};
+      const floor = dat.floor !== undefined ? dat.floor : '';
+      const walkin = dat.walkin !== undefined ? dat.walkin : '';
       const need = calcNeed(floor, walkin, item.par);
       const needClass = need === '' ? 'need-zero' : (need > 0 ? 'need-pos' : 'need-over');
       const needText = need === '' ? '—' : (need > 0 ? '+' + need : need);
@@ -858,6 +921,54 @@ function renderTransfer() {
     html += '</div>';
   });
   document.getElementById('transferList').innerHTML = html;
+  renderTransferSummary();
+}
+
+function renderTransferSummary() {
+  // Only items that have at least one value entered
+  const entered = TRANSFER_ITEMS.filter(function(item) {
+    const d = transferData[item.d365] || {};
+    return d.floor !== undefined || d.walkin !== undefined;
+  });
+  const summaryEl = document.getElementById('transferSummary');
+  if (!entered.length) {
+    summaryEl.innerHTML = '<div style="font-size:0.75rem;color:var(--text3);padding:12px 0 4px;">No counts entered yet.</div>';
+    return;
+  }
+  // Group by need: needs transfer first, then OK, then over par
+  const needsTransfer = entered.filter(function(i) { const d = transferData[i.d365] || {}; return calcNeed(d.floor, d.walkin, i.par) > 0; });
+  const atOrOver    = entered.filter(function(i) { const d = transferData[i.d365] || {}; return calcNeed(d.floor, d.walkin, i.par) <= 0; });
+
+  let html = '';
+  if (needsTransfer.length) {
+    html += '<div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin:10px 0 6px;">Needs Transfer (' + needsTransfer.length + ')</div>';
+    html += '<div class="section-group">';
+    needsTransfer.forEach(function(item) {
+      const d = transferData[item.d365] || {};
+      const need = calcNeed(d.floor, d.walkin, item.par);
+      html += '<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--surface2);">';
+      html += '<div style="flex:1;min-width:0;"><div class="ops-row-name">' + item.name + '</div>';
+      html += '<div class="ops-row-id">Floor: ' + (d.floor !== undefined ? d.floor : '—') + ' &nbsp; W-in: ' + (d.walkin !== undefined ? d.walkin : '—') + ' &nbsp; par: ' + item.par + '</div></div>';
+      html += '<div class="need-badge need-pos">+' + need + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  if (atOrOver.length) {
+    html += '<div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#4CAF82;margin:10px 0 6px;">At / Over Par (' + atOrOver.length + ')</div>';
+    html += '<div class="section-group">';
+    atOrOver.forEach(function(item) {
+      const d = transferData[item.d365] || {};
+      const need = calcNeed(d.floor, d.walkin, item.par);
+      html += '<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--surface2);">';
+      html += '<div style="flex:1;min-width:0;"><div class="ops-row-name">' + item.name + '</div>';
+      html += '<div class="ops-row-id">Floor: ' + (d.floor !== undefined ? d.floor : '—') + ' &nbsp; W-in: ' + (d.walkin !== undefined ? d.walkin : '—') + ' &nbsp; par: ' + item.par + '</div></div>';
+      html += '<div class="need-badge need-over">' + need + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  summaryEl.innerHTML = html;
 }
 
 function calcNeed(floor, walkin, par) {
@@ -870,31 +981,43 @@ function calcNeed(floor, walkin, par) {
 
 function updateTransfer(key, field, val) {
   if (!transferData[key]) transferData[key] = {};
-  transferData[key][field] = val === '' ? undefined : parseFloat(val);
+  if (val === '') {
+    delete transferData[key][field];
+  } else {
+    transferData[key][field] = parseFloat(val);
+  }
   saveTransferData();
-  // Re-render just the need badge for this item without full re-render
   renderTransfer();
 }
 
 function clearTransfer() {
-  if (!confirm('Clear all counts for today?')) return;
+  const label = transferDateOffset === 0 ? 'today' : document.getElementById('transferDateSub').textContent;
+  if (!confirm('Clear all counts for ' + label + '?')) return;
   transferData = {};
   saveTransferData();
   renderTransfer();
 }
 
 function shareTransfer() {
-  let lines = ['PRONTO COUNT — ' + new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})];
-  lines.push('');
+  const d = new Date();
+  d.setDate(d.getDate() + transferDateOffset);
+  const dateStr = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  // Only export items with values entered
+  const entered = TRANSFER_ITEMS.filter(function(item) {
+    const dat = transferData[item.d365] || {};
+    return dat.floor !== undefined || dat.walkin !== undefined;
+  });
+  if (!entered.length) { showToast('No counts to export'); return; }
+  let lines = ['PRONTO COUNT — ' + dateStr, ''];
   let currentGroup = '';
-  TRANSFER_ITEMS.forEach(function(item) {
+  entered.forEach(function(item) {
     if (item.group !== currentGroup) { currentGroup = item.group; lines.push('── ' + item.group + ' ──'); }
-    const d = transferData[item.d365] || {};
-    const floor = d.floor !== undefined ? d.floor : '—';
-    const walkin = d.walkin !== undefined ? d.walkin : '—';
-    const need = calcNeed(d.floor, d.walkin, item.par);
-    const needStr = need === '' ? '—' : (need > 0 ? 'NEED +' + need : need <= 0 ? 'OK' : '—');
-    lines.push(item.name + ' | Floor: ' + floor + ' | W-in: ' + walkin + ' | ' + needStr);
+    const dat = transferData[item.d365] || {};
+    const floor = dat.floor !== undefined ? dat.floor : '—';
+    const walkin = dat.walkin !== undefined ? dat.walkin : '—';
+    const need = calcNeed(dat.floor, dat.walkin, item.par);
+    const needStr = need === '' ? '' : (need > 0 ? ' → NEED +' + need : ' ✓ OK');
+    lines.push(item.name + '  Floor: ' + floor + '  W-in: ' + walkin + needStr);
   });
   const text = lines.join('\n');
   if (navigator.share) {
@@ -909,6 +1032,35 @@ function shareTransfer() {
 // ═══════════════════════════════════════════════════════════════════════════
 // Same items as transfer (they track waste for the same product list)
 const WASTE_ITEMS = TRANSFER_ITEMS; // reuse
+
+// CxRA waste items (675xxx IDs from master file)
+const CXRA_ITEMS = [
+  // GRAB & GO – Breakfast
+  { group: 'BREAKFAST',    name: 'Hummus w/ Vegetable',      d365: '675421' },
+  { group: 'BREAKFAST',    name: 'Yogurt & Berries',         d365: '675423' },
+  { group: 'BREAKFAST',    name: 'Chia Seed Pudding',        d365: '675424' },
+  { group: 'BREAKFAST',    name: 'Overnight Oats',           d365: '675422' },
+  // FRESH FRUIT
+  { group: 'FRESH FRUIT',  name: 'Cantaloupe',               d365: '675425' },
+  { group: 'FRESH FRUIT',  name: 'Pineapple',                d365: '675426' },
+  { group: 'FRESH FRUIT',  name: 'Strawberries',             d365: '675427' },
+  { group: 'FRESH FRUIT',  name: 'Mixed Berries',            d365: '675458' },
+  // TRAMEZZINI
+  { group: 'TRAMEZZINI',   name: 'Egg Salad',                d365: '675416' },
+  { group: 'TRAMEZZINI',   name: 'Tuna Salad',               d365: '675420' },
+  { group: 'TRAMEZZINI',   name: 'Caprese',                  d365: '675419' },
+  { group: 'TRAMEZZINI',   name: 'Turkey',                   d365: '675418' },
+  { group: 'TRAMEZZINI',   name: 'Prosciutto',               d365: '675417' },
+  // SALADS
+  { group: 'SALADS',       name: 'Quinoa Salad',             d365: '675415' },
+  { group: 'SALADS',       name: 'Marinated Chickpea',       d365: '675408' },
+  { group: 'SALADS',       name: 'Antipasto Salad',          d365: '675413' },
+  { group: 'SALADS',       name: 'Brussel Kale Salad',       d365: '675410' },
+  { group: 'SALADS',       name: 'Chicken Cesar Salad',      d365: '675411' },
+  { group: 'SALADS',       name: 'Black Rice Salad',         d365: '675414' },
+  { group: 'SALADS',       name: 'Marinated Shrimp Salad',   d365: '675412' },
+  { group: 'SALADS',       name: 'Marinated Vegetable',      d365: '675409' },
+];
 
 const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 let wasteWeekOffset = 0; // 0 = current week
@@ -947,6 +1099,36 @@ function saveWasteData() {
 function changeWasteWeek(dir) {
   wasteWeekOffset += dir;
   renderWaste();
+}
+
+function renderWasteSummary() {
+  const el = document.getElementById('wasteSummary');
+  const nonZero = WASTE_ITEMS.filter(function(item) {
+    const d = wasteData[item.d365] || {};
+    return DAYS.some(function(day) { return parseFloat(d[day]) > 0; });
+  });
+  if (!nonZero.length) {
+    el.innerHTML = '<div style="font-size:0.75rem;color:var(--text3);padding:8px 0 4px;">No waste entries this week.</div>';
+    return;
+  }
+  let html = '<div class="section-group">';
+  nonZero.forEach(function(item) {
+    const d = wasteData[item.d365] || {};
+    const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
+    const dayBreakdown = DAYS.map(function(day) {
+      const v = parseFloat(d[day]) || 0;
+      return v > 0 ? '<span style="font-family:JetBrains Mono,monospace;font-size:0.625rem;">' + day.charAt(0) + ':' + v + '</span>' : '';
+    }).filter(Boolean).join(' ');
+    html += '<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--surface2);">';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div class="ops-row-name">' + item.name + '</div>';
+    html += '<div style="font-size:0.625rem;color:var(--text3);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;">' + dayBreakdown + '</div>';
+    html += '</div>';
+    html += '<div style="font-family:JetBrains Mono,monospace;font-size:0.875rem;font-weight:700;color:var(--accent);min-width:28px;text-align:right;">' + total + '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
 }
 
 function renderWaste() {
@@ -1007,6 +1189,7 @@ function updateWaste(key, day, val, input) {
   const row = input.closest('.waste-row');
   row.querySelector('.waste-total').textContent = total > 0 ? total : '—';
   saveWasteData();
+  renderWasteSummary();
 }
 
 function clearWasteWeek() {
@@ -1034,6 +1217,159 @@ function shareWaste() {
   const text = lines.join('\n');
   if (navigator.share) {
     navigator.share({ text: text, title: 'Pronto Waste' }).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text).then(function() { showToast('Copied to clipboard'); });
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CxRA WASTE
+// ═══════════════════════════════════════════════════════════════════════════
+let cxraWeekOffset = 0;
+let cxraData = {};
+
+function cxraWeekKey(offset) {
+  const d = new Date();
+  const day = d.getDay();
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1) + ((offset || 0) * 7));
+  return monday.getFullYear() + '-' + String(monday.getMonth()+1).padStart(2,'0') + '-' + String(monday.getDate()).padStart(2,'0');
+}
+
+function loadCxraData() {
+  const key = 'pipa_ks_cxra_' + cxraWeekKey(cxraWeekOffset);
+  try { cxraData = JSON.parse(localStorage.getItem(key) || '{}'); } catch(e) { cxraData = {}; }
+}
+
+function saveCxraData() {
+  const key = 'pipa_ks_cxra_' + cxraWeekKey(cxraWeekOffset);
+  try { localStorage.setItem(key, JSON.stringify(cxraData)); } catch(e) {}
+}
+
+function changeCxraWeek(dir) {
+  cxraWeekOffset += dir;
+  renderCxra();
+}
+
+function renderCxra() {
+  loadCxraData();
+  const dates = getWeekDates(cxraWeekOffset);
+  const startStr = dates[0].toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const endStr   = dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('cxraWeekRange').textContent = startStr + '\u2013' + endStr;
+  document.getElementById('cxraWeekLabel').textContent = cxraWeekOffset === 0 ? 'This Week' : (cxraWeekOffset === -1 ? 'Last Week' : (cxraWeekOffset < 0 ? Math.abs(cxraWeekOffset) + ' weeks ago' : cxraWeekOffset + ' weeks ahead'));
+
+  let dayH = '';
+  DAYS.forEach(function(d) {
+    dayH += '<div style="width:32px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">' + d + '</div>';
+  });
+  document.getElementById('cxraDayHeaders').innerHTML = dayH;
+
+  const groups = [];
+  const seen = {};
+  CXRA_ITEMS.forEach(function(item) {
+    if (!seen[item.group]) { seen[item.group] = true; groups.push(item.group); }
+  });
+
+  let html = '';
+  groups.forEach(function(g) {
+    const items = CXRA_ITEMS.filter(function(i) { return i.group === g; });
+    html += '<div class="section-group">';
+    html += '<div class="group-header"><span class="group-title">' + g + '</span></div>';
+    items.forEach(function(item) {
+      const key = item.d365;
+      const d = cxraData[key] || {};
+      const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
+      html += '<div class="waste-row">';
+      html += '<div class="ops-row-info"><div class="ops-row-name">' + item.name + '</div><div class="ops-row-id">' + item.d365 + '</div></div>';
+      html += '<div class="waste-days">';
+      DAYS.forEach(function(day) {
+        const v = d[day] !== undefined ? d[day] : '';
+        const hasVal = v !== '' && parseFloat(v) > 0;
+        html += '<input class="waste-day-input' + (hasVal ? ' has-value' : '') + '" type="number" min="0" inputmode="numeric" placeholder="0" value="' + v + '" onchange="updateCxra(\'' + key + '\',\'' + day + '\',this.value,this)">';
+      });
+      html += '</div>';
+      html += '<div class="waste-total">' + (total > 0 ? total : '\u2014') + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('cxraList').innerHTML = html;
+  renderCxraSummary();
+}
+
+function renderCxraSummary() {
+  const el = document.getElementById('cxraSummary');
+  const nonZero = CXRA_ITEMS.filter(function(item) {
+    const d = cxraData[item.d365] || {};
+    return DAYS.some(function(day) { return parseFloat(d[day]) > 0; });
+  });
+  if (!nonZero.length) {
+    el.innerHTML = '<div style="font-size:0.75rem;color:var(--text3);padding:8px 0 4px;">No CxRA waste entries this week.</div>';
+    return;
+  }
+  let html = '<div class="section-group">';
+  nonZero.forEach(function(item) {
+    const d = cxraData[item.d365] || {};
+    const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
+    const dayBreakdown = DAYS.map(function(day) {
+      const v = parseFloat(d[day]) || 0;
+      return v > 0 ? '<span style="font-family:JetBrains Mono,monospace;font-size:0.625rem;">' + day.charAt(0) + ':' + v + '</span>' : '';
+    }).filter(Boolean).join(' ');
+    html += '<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--surface2);">';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div class="ops-row-name">' + item.name + '</div>';
+    html += '<div style="font-size:0.625rem;color:var(--text3);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;">' + dayBreakdown + '</div>';
+    html += '</div>';
+    html += '<div style="font-family:JetBrains Mono,monospace;font-size:0.875rem;font-weight:700;color:var(--accent);min-width:28px;text-align:right;">' + total + '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function updateCxra(key, day, val, input) {
+  if (!cxraData[key]) cxraData[key] = {};
+  cxraData[key][day] = val === '' ? undefined : parseFloat(val);
+  const hasVal = val !== '' && parseFloat(val) > 0;
+  input.classList.toggle('has-value', hasVal);
+  const d = cxraData[key];
+  const total = DAYS.reduce(function(s, dy) { return s + (parseFloat(d[dy]) || 0); }, 0);
+  const row = input.closest('.waste-row');
+  row.querySelector('.waste-total').textContent = total > 0 ? total : '\u2014';
+  saveCxraData();
+  renderCxraSummary();
+}
+
+function clearCxraWeek() {
+  if (!confirm('Clear all CxRA waste entries for this week?')) return;
+  cxraData = {};
+  saveCxraData();
+  renderCxra();
+}
+
+function shareCxra() {
+  const dates = getWeekDates(cxraWeekOffset);
+  const startStr = dates[0].toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const endStr   = dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const nonZero = CXRA_ITEMS.filter(function(item) {
+    const d = cxraData[item.d365] || {};
+    return DAYS.some(function(day) { return parseFloat(d[day]) > 0; });
+  });
+  if (!nonZero.length) { showToast('No entries to export'); return; }
+  let lines = ['CxRA WASTE LOG \u2014 ' + startStr + '\u2013' + endStr, ''];
+  let currentGroup = '';
+  nonZero.forEach(function(item) {
+    if (item.group !== currentGroup) { currentGroup = item.group; lines.push('\u2500\u2500 ' + item.group + ' \u2500\u2500'); }
+    const d = cxraData[item.d365] || {};
+    const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
+    const dayStr = DAYS.map(function(day) { const v = parseFloat(d[day]) || 0; return v > 0 ? day + ':' + v : ''; }).filter(Boolean).join('  ');
+    lines.push(item.name + '  |  ' + dayStr + '  |  Total: ' + total);
+  });
+  const text = lines.join('\n');
+  if (navigator.share) {
+    navigator.share({ text: text, title: 'CxRA Waste' }).catch(function(){});
   } else {
     navigator.clipboard.writeText(text).then(function() { showToast('Copied to clipboard'); });
   }
@@ -1077,19 +1413,44 @@ const PROC_ITEMS = [
 
 const PROC_DAYS = ['Mon', 'Wed', 'Fri'];
 let procData = {};
-const PROC_KEY = 'pipa_ks_proc_' + (function() { const d = new Date(); return d.getFullYear() + '-W' + String(Math.ceil((d.getDate() - d.getDay() + 10) / 7)).padStart(2,'0'); })();
+let procWeekOffset = 0;
+
+function procWeekKey(offset) {
+  const d = new Date();
+  const day = d.getDay();
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1) + ((offset || 0) * 7));
+  return monday.getFullYear() + '-' + String(monday.getMonth()+1).padStart(2,'0') + '-' + String(monday.getDate()).padStart(2,'0');
+}
+
+function procStorageKey() {
+  return 'pipa_ks_proc_' + procWeekKey(procWeekOffset);
+}
 
 function loadProcData() {
-  try { procData = JSON.parse(localStorage.getItem(PROC_KEY) || '{}'); } catch(e) { procData = {}; }
+  try { procData = JSON.parse(localStorage.getItem(procStorageKey()) || '{}'); } catch(e) { procData = {}; }
 }
 
 function saveProcData() {
-  try { localStorage.setItem(PROC_KEY, JSON.stringify(procData)); } catch(e) {}
+  try { localStorage.setItem(procStorageKey(), JSON.stringify(procData)); } catch(e) {}
+}
+
+function changeProcWeek(dir) {
+  procWeekOffset += dir;
+  renderProc();
 }
 
 function renderProc() {
   loadProcData();
-  document.getElementById('procDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+
+  // Week label
+  const monday = new Date(procWeekKey(procWeekOffset) + 'T00:00:00');
+  const friday = new Date(monday); friday.setDate(monday.getDate() + 4);
+  const weekLabel = procWeekOffset === 0 ? 'This Week' : (procWeekOffset === -1 ? 'Last Week' : (procWeekOffset < 0 ? Math.abs(procWeekOffset) + ' weeks ago' : procWeekOffset + ' weeks ahead'));
+  const rangeLabel = monday.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + '–' + friday.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  document.getElementById('procWeekLabel').textContent = weekLabel;
+  document.getElementById('procDate').textContent = rangeLabel;
+
   const groups = [];
   const seen = {};
   PROC_ITEMS.forEach(function(item) { if (!seen[item.group]) { seen[item.group] = true; groups.push(item.group); } });
@@ -1102,7 +1463,8 @@ function renderProc() {
     items.forEach(function(item) {
       const key = item.d365.replace(/[^a-zA-Z0-9]/g, '_');
       const d = procData[key] || {};
-      html += '<div class="proc-row">';
+      const anyChecked = PROC_DAYS.some(function(day) { return !!d[day]; });
+      html += '<div class="proc-row' + (anyChecked ? ' proc-row-done' : '') + '">';
       html += '<div class="proc-info"><div class="proc-name">' + item.name + '</div><div class="proc-id">' + item.d365 + '</div></div>';
       html += '<div class="proc-check">';
       PROC_DAYS.forEach(function(day) {
@@ -1118,6 +1480,36 @@ function renderProc() {
     html += '</div>';
   });
   document.getElementById('procList').innerHTML = html;
+  renderProcSummary();
+}
+
+function renderProcSummary() {
+  const summaryEl = document.getElementById('procSummary');
+  const checked = {};
+  PROC_DAYS.forEach(function(day) { checked[day] = []; });
+  PROC_ITEMS.forEach(function(item) {
+    const key = item.d365.replace(/[^a-zA-Z0-9]/g, '_');
+    const d = procData[key] || {};
+    PROC_DAYS.forEach(function(day) {
+      if (d[day]) checked[day].push(item.name);
+    });
+  });
+  const anyChecked = PROC_DAYS.some(function(day) { return checked[day].length > 0; });
+  if (!anyChecked) {
+    summaryEl.innerHTML = '<div style="font-size:0.75rem;color:var(--text3);padding:12px 0 4px;">No orders placed yet this week.</div>';
+    return;
+  }
+  let html = '';
+  PROC_DAYS.forEach(function(day) {
+    if (!checked[day].length) return;
+    html += '<div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);margin:10px 0 6px;">' + day + ' (' + checked[day].length + ' ordered)</div>';
+    html += '<div class="section-group">';
+    checked[day].forEach(function(name) {
+      html += '<div style="padding:8px 14px;border-bottom:1px solid var(--surface2);font-size:0.813rem;font-weight:600;display:flex;align-items:center;gap:8px;"><span style="color:#4CAF82;font-size:0.75rem;">✓</span>' + name + '</div>';
+    });
+    html += '</div>';
+  });
+  summaryEl.innerHTML = html;
 }
 
 function toggleProc(key, day, el) {
@@ -1127,6 +1519,7 @@ function toggleProc(key, day, el) {
   el.classList.toggle('checked', !wasChecked);
   el.textContent = !wasChecked ? '✓' : '';
   saveProcData();
+  renderProcSummary();
 }
 
 function clearProc() {
