@@ -454,6 +454,7 @@ function switchTab(tab, el) {
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
   document.getElementById('panel-' + tab).classList.add('active');
   if (tab === 'activations') loadActivations();
+  if (tab === 'pastry') ptRender();
 }
 
 // ── MACROFAMILY LABELS ────────────────────────────────────────────────────────
@@ -1145,13 +1146,6 @@ function ptCopyNum(btn, num) {
 function ptToggleDone(key) {
   ptDone[key] = !ptDone[key];
   ptUpdateSummary();
-}
-
-// Initialise on tab switch
-const _origSwitchTab = switchTab;
-function switchTab(tab, el) {
-  _origSwitchTab(tab, el);
-  if (tab === 'pastry') ptRender();
 }
 
 </script>
