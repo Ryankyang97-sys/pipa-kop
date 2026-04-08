@@ -209,6 +209,12 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .pending-badge{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;font-size:0.563rem;font-weight:700;margin-left:4px;vertical-align:middle;}
 #tab-pending{position:relative;}
 
+
+/* &#x2014; MANUAL ENTRY &#x2014; */
+.manual-row{display:flex;gap:8px;margin-bottom:10px;align-items:flex-end;}
+.manual-field{display:flex;flex-direction:column;gap:4px;flex:1;}
+.manual-field.narrow{flex:0 0 72px;}
+.manual-field-label{font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);}
 </style>
 </head>
 <body>
@@ -279,19 +285,19 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
         <div style="font-size:0.5rem;color:var(--text3);margin-top:3px;">saves per day</div>
       </div>
     </div>
-    <div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Summary</div>
-    <div id="transferSummary"></div>
-    <div style="margin-top:18px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Full Sheet</div>
-    <div style="display:flex;align-items:center;padding:0 14px 6px;gap:10px;border-bottom:1px solid var(--surface3);margin-bottom:4px;">
+    <div style="display:flex;align-items:center;padding:0 14px 4px;gap:8px;border-bottom:1px solid var(--surface3);margin-bottom:4px;">
       <div style="flex:1;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">Item</div>
       <div style="display:flex;gap:6px;flex-shrink:0;">
-        <div class="count-col"><div style="font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);width:50px;text-align:center;">Floor</div></div>
-        <div class="count-col"><div style="font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);width:50px;text-align:center;">Walk-in</div></div>
+        <div style="width:50px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">Floor</div>
+        <div style="width:50px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">W-in</div>
       </div>
-      <div style="font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);width:38px;text-align:center;">Need</div>
+      <div style="width:38px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">Need</div>
     </div>
     <div id="transferList"></div>
-    <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearTransfer()">Clear This Day</button>
+    <div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin:16px 0 6px;">Summary &#x2014; Entered Items</div>
+    <div id="transferSummary"></div>
+    <button class="btn btn-secondary" style="margin-top:14px;" onclick="openTransferManual()">+ Add Custom Item</button>
+    <button class="btn btn-secondary" style="margin-top:6px;" onclick="clearTransfer()">Clear This Day</button>
     <button class="btn btn-primary" style="margin-top:6px;" onclick="shareTransfer()">&#128228; Share Entered Items</button>
     <button class="btn btn-secondary" style="margin-top:6px;border-color:var(--accent-border);color:var(--accent);" id="transferSaveBtn" onclick="saveTransferToSupabase()">&#9729; Save to Supabase</button>
   </div>
@@ -330,7 +336,8 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     </div>
     <div id="wasteList"></div>
 
-    <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearWasteWeek()">Clear Week</button>
+    <button class="btn btn-secondary" style="margin-top:14px;" onclick="openWasteManual()">+ Add Custom Item</button>
+    <button class="btn btn-secondary" style="margin-top:6px;" onclick="clearWasteWeek()">Clear Week</button>
     <button class="btn btn-primary" style="margin-top:6px;" onclick="shareWaste()">&#128228; Share Non-Zero</button>
     <button class="btn btn-secondary" style="margin-top:6px;border-color:var(--accent-border);color:var(--accent);" id="wasteSaveBtn" onclick="saveWasteToSupabase()">&#9729; Save to Supabase</button>
   </div>
@@ -351,7 +358,9 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
         <div style="font-size:0.5rem;color:var(--text3);margin-top:3px;" id="pastrySourceLabel"></div>
       </div>
     </div>
-    <div id="pastryContent"><div class="empty-state"><div class="empty-icon">🥐</div><div class="empty-msg">Loading…</div></div></div>
+    <div id="pastryContent"><div class="empty-state"><div class="empty-icon">&#x1F950;</div><div class="empty-msg">Loading&#x2026;</div></div></div>
+    <button class="btn btn-secondary" style="margin-top:14px;" onclick="openPastryManual()">+ Add / Edit Entry</button>
+    <button class="btn btn-secondary" style="margin-top:6px;border-color:var(--accent-border);color:var(--accent);" id="pastrySaveBtn" onclick="savePastryToSupabase()">&#9729; Save to Supabase</button>
   </div>
 
 
@@ -1667,7 +1676,7 @@ async function saveTransferToSupabase() {
     };
   });
   var result = await supa.from('ks_pronto_counts')
-    .upsert(rows, { onConflict: 'shift_date,d365_id' });
+    .upsert(rows, { onConflict: 'ks_pronto_counts_date_d365' });
   if (btn) btn.textContent = '☁️ Save to Supabase';
   if (result.error) {
     showToast('Error: ' + result.error.message);
@@ -1979,6 +1988,290 @@ async function loadPendingFromSupabase() {
 }
 
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MANUAL ENTRY FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── TRANSFER — custom items ──────────────────────────────────────────────────
+var transferCustomItems = [];
+
+function openTransferManual() {
+  ['tm-name','tm-d365','tm-par','tm-floor','tm-walkin'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('transferManualModal').classList.remove('hidden');
+}
+
+function submitTransferManual() {
+  var name  = document.getElementById('tm-name').value.trim();
+  if (!name) { showToast('Item name required'); return; }
+  var d365  = document.getElementById('tm-d365').value.trim() || ('custom-' + Date.now());
+  var par   = parseFloat(document.getElementById('tm-par').value) || 0;
+  var floor = document.getElementById('tm-floor').value;
+  var walkin= document.getElementById('tm-walkin').value;
+  if (!transferCustomItems.find(function(i){ return i.key===d365; }))
+    transferCustomItems.push({ key:d365, name:name, d365:d365, par:par });
+  if (!transferData[d365]) transferData[d365] = {};
+  if (floor  !== '') transferData[d365].floor  = parseFloat(floor);
+  if (walkin !== '') transferData[d365].walkin = parseFloat(walkin);
+  saveTransferData();
+  closeModal('transferManualModal');
+  renderTransfer();
+  showToast(name + ' added');
+}
+
+// Override renderTransfer to include custom items and use waste-row card style
+var _origRenderTransfer = renderTransfer;
+function renderTransfer() {
+  loadTransferData();
+  var d = new Date();
+  d.setDate(d.getDate() + transferDateOffset);
+  document.getElementById('transferDateLabel').textContent =
+    transferDateOffset===0 ? 'Today' : transferDateOffset===-1 ? 'Yesterday' :
+    d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  document.getElementById('transferDateSub').textContent =
+    d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+
+  var allItems = TRANSFER_ITEMS.concat(transferCustomItems.map(function(c){
+    return { group:'CUSTOM', name:c.name, d365:c.key, par:c.par||0 };
+  }));
+  var groups = [], seen = {};
+  allItems.forEach(function(i){ if(!seen[i.group]){seen[i.group]=true;groups.push(i.group);} });
+
+  var html = '';
+  groups.forEach(function(g) {
+    var items = allItems.filter(function(i){ return i.group===g; });
+    html += '<div class="section-group">';
+    html += '<div class="group-header"><span class="group-title">'+g+'</span><span class="group-count">'+items.length+' items</span></div>';
+    items.forEach(function(item) {
+      var key = item.d365;
+      var dat = transferData[key] || {};
+      var floor  = dat.floor  !== undefined ? dat.floor  : '';
+      var walkin = dat.walkin !== undefined ? dat.walkin : '';
+      var need = calcNeed(floor, walkin, item.par);
+      var nc = need==='' ? 'need-zero' : need>0 ? 'need-pos' : 'need-over';
+      var nt = need==='' ? '&#x2014;' : need>0 ? '+'+need : need;
+      html += '<div class="waste-row" style="padding:10px 14px;">';
+      html += '<div class="ops-row-info"><div class="ops-row-name">'+item.name+'</div>';
+      html += '<div class="ops-row-id">'+(key.startsWith('custom-')?'custom':key)+' &nbsp;&#xB7;&nbsp; <span class="ops-row-par">par '+item.par+'</span></div></div>';
+      html += '<div style="display:flex;gap:6px;flex-shrink:0;">';
+      html += '<div class="count-col"><input class="count-input" type="number" min="0" inputmode="numeric" placeholder="&#x2014;" value="'+floor+'" onchange="updateTransfer(\''+key+'\',\'floor\',this.value)"><div class="count-label">Floor</div></div>';
+      html += '<div class="count-col"><input class="count-input" type="number" min="0" inputmode="numeric" placeholder="&#x2014;" value="'+walkin+'" onchange="updateTransfer(\''+key+'\',\'walkin\',this.value)"><div class="count-label">W-in</div></div>';
+      html += '</div>';
+      html += '<div class="need-badge '+nc+'">'+nt+'</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('transferList').innerHTML = html;
+  renderTransferSummary();
+}
+
+// ── WASTE — custom items ─────────────────────────────────────────────────────
+var wasteCustomItems = { pronto: [], cxra: [] };
+
+function openWasteManual() {
+  ['wm-name','wm-d365'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('wasteManualSub').textContent =
+    (wasteMode==='pronto' ? 'Pronto' : 'CxRA') + ' &#x2014; adding to current week';
+  // Build day inputs dynamically (avoids duplicate id issues)
+  var grid = document.getElementById('wmDayGrid');
+  grid.innerHTML = '';
+  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(function(day) {
+    var col = document.createElement('div');
+    col.style.cssText = 'display:flex;flex-direction:column;gap:3px;align-items:center;';
+    col.innerHTML = '<span style="font-size:0.5rem;text-transform:uppercase;color:var(--text3);">'+day+'</span>'+
+      '<input id="wm-'+day+'" class="form-input" type="number" min="0" inputmode="numeric" placeholder="0" style="padding:8px 4px;text-align:center;">';
+    grid.appendChild(col);
+  });
+  document.getElementById('wasteManualModal').classList.remove('hidden');
+}
+
+function submitWasteManual() {
+  var name  = document.getElementById('wm-name').value.trim();
+  if (!name) { showToast('Item name required'); return; }
+  var d365  = document.getElementById('wm-d365').value.trim() || ('custom-'+Date.now());
+  var list  = wasteCustomItems[wasteMode];
+  if (!list.find(function(i){ return i.key===d365; }))
+    list.push({ key:d365, name:name, group:'CUSTOM', d365:d365 });
+  var data = getActiveData();
+  if (!data[d365]) data[d365] = {};
+  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(function(day) {
+    var el = document.getElementById('wm-'+day);
+    if (el && el.value!=='' && parseFloat(el.value)>0) data[d365][day] = parseFloat(el.value);
+  });
+  saveActiveData(data);
+  closeModal('wasteManualModal');
+  renderWaste();
+  showToast(name + ' added');
+}
+
+// Patch getActiveItems to include custom items
+var _origGetActiveItems = getActiveItems;
+function getActiveItems() {
+  var std = _origGetActiveItems();
+  var custom = (wasteCustomItems[wasteMode]||[]).map(function(c){
+    return { group:'CUSTOM', name:c.name, d365:c.key };
+  });
+  return std.concat(custom);
+}
+
+// ── PASTRY — local entries + save ────────────────────────────────────────────
+var pastryLocalEntries = {};
+
+function openPastryManual() {
+  var iso = dateKey(pastryDateOffset);
+  document.getElementById('pastryManualSub').textContent =
+    document.getElementById('pastryDateSub').textContent;
+  ['pm-name','pm-unit','pm-onhand','pm-ordered','pm-wkpar','pm-wkndpar','pm-notes'].forEach(function(id){
+    document.getElementById(id).value='';
+  });
+  document.getElementById('pm-topping').checked = false;
+  document.getElementById('pastryManualModal').classList.remove('hidden');
+}
+
+function submitPastryManual() {
+  var name = document.getElementById('pm-name').value.trim();
+  if (!name) { showToast('Item name required'); return; }
+  var iso = dateKey(pastryDateOffset);
+  var entry = {
+    item_name:   name,
+    unit:        document.getElementById('pm-unit').value.trim()||null,
+    on_hand:     document.getElementById('pm-onhand').value!=='' ? parseFloat(document.getElementById('pm-onhand').value) : null,
+    order_qty:   document.getElementById('pm-ordered').value!=='' ? parseFloat(document.getElementById('pm-ordered').value) : null,
+    week_par:    document.getElementById('pm-wkpar').value.trim()||null,
+    weekend_par: document.getElementById('pm-wkndpar').value.trim()||null,
+    is_topping:  document.getElementById('pm-topping').checked,
+    notes:       document.getElementById('pm-notes').value.trim()||null,
+  };
+  if (!pastryLocalEntries[iso]) pastryLocalEntries[iso] = [];
+  var idx = pastryLocalEntries[iso].findIndex(function(e){ return e.item_name===name; });
+  if (idx>=0) pastryLocalEntries[iso][idx] = entry;
+  else pastryLocalEntries[iso].push(entry);
+  DB.set('pastry_local_'+iso, pastryLocalEntries[iso]);
+  closeModal('pastryManualModal');
+  renderPastry();
+  showToast(name + ' saved locally');
+}
+
+// Override renderPastry to merge local + DB entries
+var _origRenderPastry = renderPastry;
+function renderPastry() {
+  var iso = dateKey(pastryDateOffset);
+  var localRows = DB.get('pastry_local_'+iso) || [];
+  pastryLocalEntries[iso] = localRows;
+  var d = new Date();
+  d.setDate(d.getDate() + pastryDateOffset);
+  document.getElementById('pastryDateLabel').textContent =
+    pastryDateOffset===0 ? 'Today' : pastryDateOffset===-1 ? 'Yesterday' :
+    d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  document.getElementById('pastryDateSub').textContent =
+    d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('pastrySourceLabel').textContent = '';
+  var el = document.getElementById('pastryContent');
+  el.innerHTML = '<div class="empty-state" style="padding:20px 0;"><div class="empty-msg">Loading&#x2026;</div></div>';
+
+  sbFetch('ks_pastry_orders?shift_date=eq.'+iso+'&order=is_topping,item_name').then(function(dbRows) {
+    var merged = dbRows.slice();
+    localRows.forEach(function(lr) {
+      var ex = merged.find(function(r){ return r.item_name===lr.item_name; });
+      if (ex) Object.assign(ex, lr);
+      else merged.push(lr);
+    });
+    if (!merged.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F950;</div><div class="empty-msg">No pastry order for this date.<br><span style="font-size:0.75rem;color:var(--text3);">Use + Add / Edit Entry to log one.</span></div></div>';
+      return;
+    }
+    var srcLabel = dbRows.length && localRows.length ? '&#x1F4CB; DB + local' :
+                   localRows.length ? 'local only' : '&#x1F4CB; Backlog';
+    document.getElementById('pastrySourceLabel').innerHTML =
+      '<span class="backlog-badge">'+srcLabel+'</span>';
+
+    var mainItems = merged.filter(function(r){ return !r.is_topping; });
+    var toppings  = merged.filter(function(r){ return r.is_topping; });
+
+    var html = '<div style="display:flex;padding:0 14px 6px;gap:8px;border-bottom:1px solid var(--surface3);margin-bottom:4px;">';
+    html += '<div style="flex:1;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">Item</div>';
+    html += '<div class="pastry-col-hdr" style="width:60px;">On Hand</div>';
+    html += '<div class="pastry-col-hdr" style="width:60px;">Ordered</div></div>';
+
+    function buildSection(title, items) {
+      if (!items.length) return '';
+      var s = '<div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin:12px 0 6px;">'+title+'</div>';
+      s += '<div class="pastry-section">';
+      items.forEach(function(r) {
+        var onH = r.on_hand!=null ? r.on_hand : '&#x2014;';
+        var ord = r.order_qty!=null ? r.order_qty : '&#x2014;';
+        var isLocal = !!localRows.find(function(l){ return l.item_name===r.item_name; });
+        s += '<div class="pastry-row'+(r.is_topping?' topping-row':'')+ '" onclick="editPastryRow(\''+r.item_name.replace(/'/g,"&#39;")+'\','+JSON.stringify(r).replace(/</g,'&lt;')+')" style="cursor:pointer;">';
+        s += '<div><div class="ops-row-name">'+r.item_name+(isLocal?' <span style="font-size:0.5rem;color:var(--accent);">&#x25CF;</span>':'')+'</div>';
+        if (r.week_par) s += '<div class="ops-row-id">wk: '+r.week_par+(r.weekend_par?' / wknd: '+r.weekend_par:'')+'</div>';
+        if (r.notes) s += '<div style="font-size:0.563rem;color:#E07070;margin-top:2px;">'+r.notes+'</div>';
+        s += '</div>';
+        s += '<div class="pastry-val">'+onH+'</div>';
+        s += '<div class="pastry-val '+(parseFloat(ord)>0?'ordered':'zero')+'">'+ord+'</div>';
+        s += '</div>';
+      });
+      s += '</div>';
+      return s;
+    }
+    html += buildSection('Dolci / Pastry', mainItems);
+    html += buildSection('Toppings &#x2014; Cannoli &amp; Gelato', toppings);
+    el.innerHTML = html;
+  }).catch(function() {
+    if (localRows.length) {
+      document.getElementById('pastrySourceLabel').innerHTML = '<span class="backlog-badge">local only</span>';
+      el.innerHTML = '<div style="font-size:0.75rem;color:#E07070;padding:8px 0 12px;">&#x26A0; DB unavailable &#x2014; showing local entries only</div>';
+    } else {
+      el.innerHTML = '<div class="empty-state"><div class="empty-msg">Could not load. Use + Add / Edit Entry to enter manually.</div></div>';
+    }
+  });
+}
+
+function editPastryRow(name, rowData) {
+  // Pre-fill the manual modal with existing values for editing
+  document.getElementById('pm-name').value = name;
+  document.getElementById('pm-unit').value = rowData.unit||'';
+  document.getElementById('pm-onhand').value = rowData.on_hand!=null ? rowData.on_hand : '';
+  document.getElementById('pm-ordered').value = rowData.order_qty!=null ? rowData.order_qty : '';
+  document.getElementById('pm-wkpar').value = rowData.week_par||'';
+  document.getElementById('pm-wkndpar').value = rowData.weekend_par||'';
+  document.getElementById('pm-notes').value = rowData.notes||'';
+  document.getElementById('pm-topping').checked = !!rowData.is_topping;
+  document.getElementById('pastryManualSub').textContent = 'Editing: ' + name;
+  document.getElementById('pastryManualModal').classList.remove('hidden');
+}
+
+async function savePastryToSupabase() {
+  var btn = document.getElementById('pastrySaveBtn');
+  var iso = dateKey(pastryDateOffset);
+  var localRows = DB.get('pastry_local_'+iso) || [];
+  if (!localRows.length) { showToast('No local entries to save'); return; }
+  if (btn) btn.textContent = 'Saving\u2026';
+  var rows = localRows.map(function(r) {
+    return {
+      shift_date: iso, item_name: r.item_name,
+      unit: r.unit||null, week_par: r.week_par||null, weekend_par: r.weekend_par||null,
+      is_topping: !!r.is_topping,
+      on_hand: r.on_hand!=null ? r.on_hand : null,
+      order_qty: r.order_qty!=null ? r.order_qty : null,
+      notes: r.notes||null,
+    };
+  });
+  var result = await supa.from('ks_pastry_orders').insert(rows);
+  if (btn) btn.textContent = '\u2601\uFE0F Save to Supabase';
+  if (result.error) {
+    showToast('Error: ' + result.error.message);
+  } else {
+    DB.set('pastry_local_'+iso, []);
+    pastryLocalEntries[iso] = [];
+    showToast('Saved ' + rows.length + ' items \u2713');
+    addPendingEntry('pastry', 'Pastry Order \u2014 ' + iso, iso, rows.length, null);
+    updatePendingBadge();
+    renderPastry();
+  }
+}
+
+
 // ═══════════════════════════════════════════════════════════════════════════
 // MODAL HELPERS
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1997,5 +2290,107 @@ window._wasteBacklogData = null;
 loadPendingFromSupabase();
 updatePendingBadge();
 </script>
+
+<!-- TRANSFER MANUAL ENTRY MODAL -->
+<div class="modal-overlay hidden" id="transferManualModal">
+  <div class="modal">
+    <span class="modal-close" onclick="closeModal('transferManualModal')">&#10005;</span>
+    <div class="modal-title">Add Custom Item</div>
+    <div class="modal-sub">For items not on the standard count sheet</div>
+    <div class="form-group">
+      <label class="form-label">Item Name</label>
+      <input class="form-input" id="tm-name" placeholder="e.g. Lasagna Bianca S">
+    </div>
+    <div class="form-group">
+      <label class="form-label">D365 # (optional)</label>
+      <input class="form-input" id="tm-d365" placeholder="e.g. 2049237" inputmode="numeric">
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
+        <span class="form-label">Par</span>
+        <input class="form-input" id="tm-par" type="number" min="0" inputmode="numeric" placeholder="0">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
+        <span class="form-label">Floor</span>
+        <input class="form-input" id="tm-floor" type="number" min="0" inputmode="numeric" placeholder="&#x2014;">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
+        <span class="form-label">Walk-in</span>
+        <input class="form-input" id="tm-walkin" type="number" min="0" inputmode="numeric" placeholder="&#x2014;">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="submitTransferManual()">Add to Sheet</button>
+    <button class="btn btn-secondary" style="margin-top:6px;" onclick="closeModal('transferManualModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- WASTE MANUAL ENTRY MODAL -->
+<div class="modal-overlay hidden" id="wasteManualModal">
+  <div class="modal">
+    <span class="modal-close" onclick="closeModal('wasteManualModal')">&#10005;</span>
+    <div class="modal-title">Add Custom Waste Item</div>
+    <div class="modal-sub" id="wasteManualSub">Adding to current week</div>
+    <div class="form-group">
+      <label class="form-label">Item Name</label>
+      <input class="form-input" id="wm-name" placeholder="e.g. Herb Butter Special">
+    </div>
+    <div class="form-group">
+      <label class="form-label">D365 # (optional)</label>
+      <input class="form-input" id="wm-d365" placeholder="e.g. 00699091" inputmode="numeric">
+    </div>
+    <div class="form-label" style="margin-bottom:8px;">Quantities by Day</div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px;" id="wmDayGrid"></div>
+    <button class="btn btn-primary" onclick="submitWasteManual()">Add to Sheet</button>
+    <button class="btn btn-secondary" style="margin-top:6px;" onclick="closeModal('wasteManualModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- PASTRY MANUAL ENTRY MODAL -->
+<div class="modal-overlay hidden" id="pastryManualModal">
+  <div class="modal">
+    <span class="modal-close" onclick="closeModal('pastryManualModal')">&#10005;</span>
+    <div class="modal-title">Add / Edit Pastry Entry</div>
+    <div class="modal-sub" id="pastryManualSub"></div>
+    <div class="form-group">
+      <label class="form-label">Item Name</label>
+      <input class="form-input" id="pm-name" placeholder="e.g. Tiramisu di Eataly">
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
+        <span class="form-label">Unit</span>
+        <input class="form-input" id="pm-unit" placeholder="Quart / Tray">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:0 0 72px;">
+        <span class="form-label">On Hand</span>
+        <input class="form-input" id="pm-onhand" type="number" inputmode="numeric" placeholder="&#x2014;">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:0 0 72px;">
+        <span class="form-label">Ordered</span>
+        <input class="form-input" id="pm-ordered" type="number" inputmode="numeric" placeholder="&#x2014;">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
+        <span class="form-label">Week Par</span>
+        <input class="form-input" id="pm-wkpar" placeholder="e.g. 6 trays">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
+        <span class="form-label">Weekend Par</span>
+        <input class="form-input" id="pm-wkndpar" placeholder="e.g. 8 trays">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-input" id="pm-notes" placeholder="e.g. No longer selling">
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:0.813rem;color:var(--text2);cursor:pointer;">
+      <input type="checkbox" id="pm-topping" style="width:16px;height:16px;accent-color:var(--accent);">
+      Topping item (Cannoli &amp; Gelato section)
+    </label>
+    <button class="btn btn-primary" onclick="submitPastryManual()">Save Entry</button>
+    <button class="btn btn-secondary" style="margin-top:6px;" onclick="closeModal('pastryManualModal')">Cancel</button>
+  </div>
+</div>
+
 </body>
 </html>
