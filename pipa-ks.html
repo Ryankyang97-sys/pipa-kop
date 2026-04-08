@@ -354,10 +354,10 @@ function buildLookupQuery(q) {
       + ',d365_id.eq.' + encodeURIComponent(stripped)
       + ',adaco_id.eq.' + encodeURIComponent(q)
       + ',adaco_id.eq.' + encodeURIComponent(stripped)
-      + ')&limit=20&select=d365_id,adaco_id,name,macrofamily';
+      + ')&limit=20&select=d365_id,adaco_id,name,macrofamily,vendor_brand';
   }
   // Text: ilike on name
-  return 'ks_products?name=ilike.*' + encodeURIComponent(q) + '*&limit=20&select=d365_id,adaco_id,name,macrofamily&order=name.asc';
+  return 'ks_products?name=ilike.*' + encodeURIComponent(q) + '*&limit=20&select=d365_id,adaco_id,name,macrofamily,vendor_brand&order=name.asc';
 }
 
 function renderLookupRow(r, clickFn) {
@@ -369,12 +369,14 @@ function renderLookupRow(r, clickFn) {
   const onclick = clickFn
     ? 'onclick="' + clickFn + '(\'' + safeD365 + '\',\'' + safeAdaco + '\',\'' + safeName + '\',\'' + safeMf + '\')"'
     : '';
+  const brand = r.vendor_brand && r.vendor_brand !== 'EATALY' ? '<span class="result-adaco">' + r.vendor_brand + '</span>' : '';
   return '<div class="result-item" ' + onclick + '>'
     + '<div class="result-name">' + r.name + '</div>'
     + '<div class="result-meta">'
     + '<span class="result-id">D365: ' + r.d365_id + '</span>'
     + '<span class="result-adaco">Adaco: ' + r.adaco_id + '</span>'
     + '<span class="result-mf">' + mfLabel + '</span>'
+    + brand
     + '</div></div>';
 }
 
