@@ -185,6 +185,30 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .pastry-val.zero{color:var(--text3);}
 .pastry-col-hdr{font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);text-align:center;}
 
+
+/* ── PENDING TAB ── */
+.pending-card{background:var(--surface);border-radius:14px;border:1px solid var(--surface3);margin-bottom:10px;overflow:hidden;transition:opacity 0.2s;}
+.pending-card.done-card{opacity:0.55;}
+.pending-card-header{display:flex;align-items:center;padding:12px 14px;gap:10px;}
+.pending-check{width:28px;height:28px;border-radius:8px;border:2px solid var(--surface3);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;transition:all 0.15s;}
+.pending-check.checked{background:var(--green-dim);border-color:var(--green-border);}
+.pending-meta{flex:1;min-width:0;}
+.pending-type{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:2px;}
+.pending-type.type-transfer{color:#5BA4CF;}
+.pending-type.type-waste{color:#E8A838;}
+.pending-type.type-pastry{color:#C77DDA;}
+.pending-type.type-procurement{color:#56B87C;}
+.pending-type.type-manual{color:var(--text3);}
+.pending-title{font-size:0.875rem;font-weight:600;line-height:1.3;margin-bottom:2px;}
+.pending-date{font-family:'JetBrains Mono',monospace;font-size:0.625rem;color:var(--text3);}
+.pending-done-at{font-size:0.563rem;color:#4CAF82;margin-top:2px;}
+.pending-items-count{font-family:'JetBrains Mono',monospace;font-size:0.688rem;font-weight:700;padding:4px 8px;border-radius:6px;background:var(--surface2);color:var(--text2);flex-shrink:0;}
+.pending-delete{color:var(--text3);font-size:0.875rem;cursor:pointer;padding:4px 8px;flex-shrink:0;}
+.pending-filter-btn{padding:6px 12px;border-radius:20px;border:1.5px solid var(--surface3);background:var(--surface2);color:var(--text3);font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;}
+.pending-filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.pending-badge{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;font-size:0.563rem;font-weight:700;margin-left:4px;vertical-align:middle;}
+#tab-pending{position:relative;}
+
 </style>
 </head>
 <body>
@@ -203,6 +227,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
       <div class="tab" onclick="switchTab('transfer',this)">Transfer</div>
       <div class="tab" onclick="switchTab('waste',this)">Waste</div>
       <div class="tab" onclick="switchTab('pastry',this)">Pastry</div>
+      <div class="tab" onclick="switchTab('pending',this)" id="tab-pending">Pending</div>
       <div class="tab" onclick="switchTab('procurement',this)">Procurement</div>
     </div>
   </div>
@@ -327,6 +352,27 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
       </div>
     </div>
     <div id="pastryContent"><div class="empty-state"><div class="empty-icon">🥐</div><div class="empty-msg">Loading…</div></div></div>
+  </div>
+
+
+  <!-- PENDING ENTRIES — accountability tracker -->
+  <div class="panel" id="panel-pending">
+    <div class="ops-header" style="margin-bottom:14px;">
+      <div>
+        <div class="section-label" style="margin:0 0 2px;">Pending Entry Log</div>
+        <div style="font-size:0.625rem;color:var(--text3);">Track what still needs to be entered in MStore / D365</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="addManualPending()" style="flex-shrink:0;">+ Add</button>
+    </div>
+
+    <!-- Filter pills -->
+    <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;" id="pendingFilters">
+      <button class="pending-filter-btn active" onclick="setPendingFilter('all',this)">All</button>
+      <button class="pending-filter-btn" onclick="setPendingFilter('pending',this)">⏳ Pending</button>
+      <button class="pending-filter-btn" onclick="setPendingFilter('done',this)">✅ Done</button>
+    </div>
+
+    <div id="pendingList"></div>
   </div>
 
   <!-- PROCUREMENT -->
@@ -498,6 +544,7 @@ function switchTab(id, el) {
   document.getElementById('panel-' + id).classList.add('active');
   if (id === 'transfer') renderTransfer();
   if (id === 'pastry') renderPastry();
+  if (id === 'pending') renderPending();
   if (id === 'waste') renderWaste();
   if (id === 'procurement') renderProc();
 }
@@ -1626,6 +1673,8 @@ async function saveTransferToSupabase() {
     showToast('Error: ' + result.error.message);
   } else {
     showToast('Saved ' + rows.length + ' items ✓');
+    addPendingEntry('transfer', 'Pronto Count — ' + iso, iso, rows.length, null);
+    updatePendingBadge();
   }
 }
 
@@ -1662,7 +1711,11 @@ async function saveWasteToSupabase() {
   if (result.error) {
     showToast('Error: ' + result.error.message);
   } else {
+    var _wTypeKey = wasteMode === 'pronto' ? 'waste_pronto' : 'waste_cxra';
+    var _wLabel = (wasteMode === 'pronto' ? 'Pronto' : 'CxRA') + ' Waste — week of ' + weekStart;
     showToast('Saved ' + rows.length + ' ' + wasteMode + ' items ✓');
+    addPendingEntry(_wTypeKey, _wLabel, weekStart, rows.length, null);
+    updatePendingBadge();
   }
 }
 
@@ -1696,8 +1749,235 @@ async function saveProcToSupabase() {
     showToast('Error: ' + result.error.message);
   } else {
     showToast('Saved ' + checked.length + ' orders ✓');
+    addPendingEntry('procurement', 'EDT Orders — week of ' + weekStart, weekStart, checked.length, null);
+    updatePendingBadge();
   }
 }
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PENDING ENTRY LOG
+// Accountability tracker — auto-creates a pending item whenever data is
+// saved to Supabase, lets you check it off once entered in MStore/D365.
+// Schema: { id, type, title, ref_date, item_count, status, created_at,
+//           done_at, notes }
+// Storage: DB.get/set('pending') mirrored to ks_pending_log in Supabase.
+// ═══════════════════════════════════════════════════════════════════════════
+
+let pendingLog = DB.get('pending') || [];
+let pendingFilter = 'all';
+
+function savePendingLocal() { DB.set('pending', pendingLog); }
+
+// Called by save functions after a successful Supabase upsert
+function addPendingEntry(type, title, refDate, itemCount, notes) {
+  var existing = pendingLog.find(function(e) {
+    return e.type === type && e.ref_date === refDate && e.status === 'pending';
+  });
+  if (existing) {
+    // Update count if re-saved
+    existing.item_count = itemCount;
+    existing.notes = notes || existing.notes;
+    existing.created_at = new Date().toISOString();
+  } else {
+    pendingLog.unshift({
+      id:         'pnd-' + Date.now(),
+      type:       type,        // 'transfer' | 'waste_pronto' | 'waste_cxra' | 'pastry' | 'procurement' | 'manual'
+      title:      title,
+      ref_date:   refDate,
+      item_count: itemCount,
+      status:     'pending',   // 'pending' | 'done'
+      created_at: new Date().toISOString(),
+      done_at:    null,
+      notes:      notes || null,
+    });
+  }
+  savePendingLocal();
+  syncPendingToSupabase();
+  updatePendingBadge();
+}
+
+function togglePendingEntry(id) {
+  var entry = pendingLog.find(function(e) { return e.id === id; });
+  if (!entry) return;
+  if (entry.status === 'pending') {
+    entry.status = 'done';
+    entry.done_at = new Date().toISOString();
+    showToast('Marked as entered ✓');
+  } else {
+    entry.status = 'pending';
+    entry.done_at = null;
+    showToast('Moved back to pending');
+  }
+  savePendingLocal();
+  syncPendingToSupabase();
+  updatePendingBadge();
+  renderPending();
+}
+
+function deletePendingEntry(id) {
+  if (!confirm('Remove this entry from the log?')) return;
+  pendingLog = pendingLog.filter(function(e) { return e.id !== id; });
+  savePendingLocal();
+  syncPendingToSupabase();
+  updatePendingBadge();
+  renderPending();
+}
+
+function addManualPending() {
+  var title = prompt('What needs to be entered? (e.g. "Waste log 4/8 — Pronto")');
+  if (!title || !title.trim()) return;
+  addPendingEntry('manual', title.trim(), TODAY, null, 'Manual entry');
+  renderPending();
+}
+
+function setPendingFilter(filter, el) {
+  pendingFilter = filter;
+  document.querySelectorAll('.pending-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  el.classList.add('active');
+  renderPending();
+}
+
+function renderPending() {
+  var el = document.getElementById('pendingList');
+  var list = pendingLog.slice(); // copy
+
+  if (pendingFilter === 'pending') list = list.filter(function(e) { return e.status === 'pending'; });
+  if (pendingFilter === 'done')    list = list.filter(function(e) { return e.status === 'done'; });
+
+  // Sort: pending first, then done; within each group newest first
+  list.sort(function(a, b) {
+    if (a.status !== b.status) return a.status === 'pending' ? -1 : 1;
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">' +
+      (pendingFilter === 'done' ? '✅' : '📋') + '</div><div class="empty-msg">' +
+      (pendingFilter === 'done' ? 'Nothing marked as done yet.' :
+       pendingFilter === 'pending' ? 'No pending entries — all caught up!' :
+       'No entries yet.<br>Entries are added automatically when you save data to Supabase.') +
+      '</div></div>';
+    return;
+  }
+
+  var TYPE_LABELS = {
+    transfer:        '🔄 Transfer Count',
+    waste_pronto:    '🍝 Pronto Waste',
+    waste_cxra:      '☕ CxRA Waste',
+    pastry:          '🥐 Pastry Order',
+    procurement:     '📦 EDT Ordering',
+    manual:          '✏️ Manual',
+  };
+  var TYPE_CLASSES = {
+    transfer: 'type-transfer', waste_pronto: 'type-waste', waste_cxra: 'type-waste',
+    pastry: 'type-pastry', procurement: 'type-procurement', manual: 'type-manual',
+  };
+
+  var html = '';
+  // Section headers when showing all
+  var shownPendingHeader = false, shownDoneHeader = false;
+
+  list.forEach(function(entry) {
+    if (pendingFilter === 'all') {
+      if (entry.status === 'pending' && !shownPendingHeader) {
+        html += '<div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent);margin-bottom:8px;">⏳ Needs Entry</div>';
+        shownPendingHeader = true;
+      }
+      if (entry.status === 'done' && !shownDoneHeader) {
+        html += '<div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin:16px 0 8px;">✅ Entered</div>';
+        shownDoneHeader = true;
+      }
+    }
+
+    var typeLabel = TYPE_LABELS[entry.type] || entry.type;
+    var typeClass = TYPE_CLASSES[entry.type] || 'type-manual';
+    var isDone = entry.status === 'done';
+
+    // Date display
+    var refD = entry.ref_date ? new Date(entry.ref_date + 'T12:00:00') : null;
+    var dateStr = refD ? refD.toLocaleDateString('en-US', {weekday:'short',month:'short',day:'numeric',year:'numeric'}) : '';
+    var doneStr = entry.done_at ? 'Entered ' + new Date(entry.done_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' at ' + new Date(entry.done_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : '';
+    var countBadge = entry.item_count ? '<span class="pending-items-count">' + entry.item_count + ' item' + (entry.item_count !== 1 ? 's' : '') + '</span>' : '';
+
+    html += '<div class="pending-card' + (isDone ? ' done-card' : '') + '" data-id="' + entry.id + '">';
+    html += '<div class="pending-card-header">';
+    html += '<div class="pending-check' + (isDone ? ' checked' : '') + '" onclick="togglePendingEntry(\'' + entry.id + '\')">' + (isDone ? '✓' : '') + '</div>';
+    html += '<div class="pending-meta">';
+    html += '<div class="pending-type ' + typeClass + '">' + typeLabel + '</div>';
+    html += '<div class="pending-title">' + entry.title + '</div>';
+    if (dateStr) html += '<div class="pending-date">' + dateStr + '</div>';
+    if (isDone && doneStr) html += '<div class="pending-done-at">' + doneStr + '</div>';
+    if (entry.notes && entry.type === 'manual') html += '<div style="font-size:0.625rem;color:var(--text3);margin-top:2px;">' + entry.notes + '</div>';
+    html += '</div>';
+    if (countBadge) html += countBadge;
+    html += '<span class="pending-delete" onclick="deletePendingEntry(\'' + entry.id + '\')">✕</span>';
+    html += '</div>';
+    html += '</div>';
+  });
+
+  el.innerHTML = html;
+}
+
+function updatePendingBadge() {
+  var pending = pendingLog.filter(function(e) { return e.status === 'pending'; }).length;
+  var tab = document.getElementById('tab-pending');
+  if (!tab) return;
+  var existing = tab.querySelector('.pending-badge');
+  if (existing) existing.remove();
+  if (pending > 0) {
+    var badge = document.createElement('span');
+    badge.className = 'pending-badge';
+    badge.textContent = pending;
+    tab.appendChild(badge);
+  }
+}
+
+async function syncPendingToSupabase() {
+  // Fire-and-forget — mirrors pipa-ops pattern of writing localStorage + Supabase in parallel
+  try {
+    await supa.from('ks_pending_log').upsert(
+      pendingLog.map(function(e) { return {
+        entry_id:   e.id,
+        type:       e.type,
+        title:      e.title,
+        ref_date:   e.ref_date || null,
+        item_count: e.item_count || null,
+        status:     e.status,
+        created_at: e.created_at,
+        done_at:    e.done_at || null,
+        notes:      e.notes || null,
+      }; }),
+      { onConflict: 'entry_id' }
+    );
+  } catch(e) { /* non-blocking */ }
+}
+
+async function loadPendingFromSupabase() {
+  try {
+    var result = await supa.from('ks_pending_log')
+      .select('*').order('created_at', { ascending: false });
+    if (result.error || !result.data || !result.data.length) return;
+    var remote = result.data.map(function(r) { return {
+      id:         r.entry_id,
+      type:       r.type,
+      title:      r.title,
+      ref_date:   r.ref_date,
+      item_count: r.item_count,
+      status:     r.status,
+      created_at: r.created_at,
+      done_at:    r.done_at,
+      notes:      r.notes,
+    }; });
+    // Merge: remote is authoritative for status/done_at; local wins for brand-new unsync'd items
+    var remoteIds = remote.map(function(r) { return r.id; });
+    var localOnly = pendingLog.filter(function(e) { return remoteIds.indexOf(e.id) === -1; });
+    pendingLog = remote.concat(localOnly);
+    savePendingLocal();
+    updatePendingBadge();
+  } catch(e) { /* silently fail */ }
+}
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MODAL HELPERS
@@ -1714,6 +1994,8 @@ document.querySelectorAll('.modal-overlay').forEach(function(o) {
 // ═══════════════════════════════════════════════════════════════════════════
 loadActivations();
 window._wasteBacklogData = null;
+loadPendingFromSupabase();
+updatePendingBadge();
 </script>
 </body>
 </html>
