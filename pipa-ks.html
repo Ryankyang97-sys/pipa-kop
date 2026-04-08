@@ -15,110 +15,116 @@
   --text:#F0EDE8;--text2:#8A8680;--text3:#5A5650;
   --accent:#B85C00;--accent-dim:rgba(184,92,0,0.15);--accent-border:rgba(184,92,0,0.3);
   --green:#2D7A4F;--green-dim:rgba(45,122,79,0.12);--green-border:rgba(45,122,79,0.3);
-  --red-dim:rgba(139,32,32,0.2);--red-border:rgba(200,80,80,0.4);
+  --red:#8B2020;--red-dim:rgba(139,32,32,0.2);--red-border:rgba(200,80,80,0.4);
   --yellow-dim:rgba(200,180,40,0.15);--yellow-border:rgba(200,180,40,0.35);
   --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
 }
 html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100%;-webkit-text-size-adjust:none;}
 .page{padding:calc(var(--safe-top) + 40px) 18px calc(var(--safe-bottom) + 60px);max-width:480px;margin:0 auto;}
 .nav-back{display:flex;align-items:center;gap:8px;margin-bottom:24px;text-decoration:none;color:var(--text3);font-size:0.75rem;font-weight:600;}
-.wordmark-main{font-size:1.5rem;font-weight:700;letter-spacing:-0.02em;}
+.wordmark-main{font-size:1.5rem;font-weight:700;letter-spacing:-0.02em;color:var(--text);}
 .wordmark-main span{color:var(--accent);}
 .wordmark-sub{font-size:0.688rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-top:4px;}
-.tabs{display:flex;gap:0;margin:20px 0 0;border-bottom:1px solid var(--surface2);overflow-x:auto;}
-.tab{padding:8px 12px 10px;font-size:0.688rem;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:0;margin:20px 0 0;border-bottom:1px solid var(--surface2);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tab{flex-shrink:0;padding:8px 14px 10px;font-size:0.688rem;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap;}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .panel{display:none;padding-top:20px;}
 .panel.active{display:block;}
+
+/* ── SECTION LABELS ── */
 .section-label{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:var(--text3);margin-bottom:10px;margin-top:24px;}
 .section-label:first-of-type{margin-top:0;}
-.search-wrap{position:relative;margin-bottom:4px;}
-.search-input{width:100%;background:var(--surface);border:1px solid var(--surface3);border-radius:12px;padding:13px 16px 13px 44px;color:var(--text);font-size:0.938rem;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;}
-.search-input:focus{border-color:var(--accent);}
-.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:1rem;}
-.search-hint{font-size:0.688rem;color:var(--text3);padding-left:4px;margin-bottom:12px;margin-top:4px;}
-.results{max-height:380px;overflow-y:auto;border-radius:12px;border:1px solid var(--surface2);}
-.result-item{padding:12px 14px;border-bottom:1px solid var(--surface2);cursor:pointer;transition:background 0.1s;}
-.result-item:last-child{border-bottom:none;}
-.result-item:active,.result-item.tappable:active{background:var(--surface2);}
-.result-name{font-size:0.813rem;font-weight:600;margin-bottom:4px;line-height:1.4;}
-.result-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.mono{font-family:'JetBrains Mono',monospace;font-size:0.688rem;}
-.clr-accent{color:var(--accent);}
-.clr-dim{color:var(--text3);}
-.tag{font-size:0.563rem;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);}
-.no-results{padding:20px;text-align:center;color:var(--text3);font-size:0.813rem;}
-.loading{padding:16px;text-align:center;color:var(--text3);font-size:0.813rem;}
 
-/* ACTIVATION CARDS */
+/* ── SEARCH ── */
+.search-wrap{position:relative;margin-bottom:4px;}
+.search-input{width:100%;background:var(--surface);border:1px solid var(--surface3);border-radius:12px;padding:13px 16px 13px 44px;color:var(--text);font-size:0.938rem;font-family:'DM Sans',sans-serif;outline:none;}
+.search-input:focus{border-color:var(--accent);}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text3);}
+.search-hint{font-size:0.688rem;color:var(--text3);padding-left:4px;margin-bottom:12px;margin-top:4px;}
+.results{border-radius:12px;border:1px solid var(--surface2);overflow:hidden;}
+.result-item{padding:12px 14px;border-bottom:1px solid var(--surface2);cursor:pointer;background:var(--surface);}
+.result-item:last-child{border-bottom:none;}
+.result-item:active{background:var(--surface2);}
+.result-name{font-size:0.813rem;font-weight:600;margin-bottom:4px;line-height:1.4;}
+.result-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.result-id{font-family:'JetBrains Mono',monospace;font-size:0.688rem;color:var(--accent);}
+.result-adaco{font-family:'JetBrains Mono',monospace;font-size:0.688rem;color:var(--text3);}
+.result-mf{font-size:0.563rem;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);}
+.no-results{padding:20px;text-align:center;color:var(--text3);font-size:0.813rem;background:var(--surface);border-radius:12px;border:1px solid var(--surface2);}
+.loading-row{padding:16px 14px;text-align:center;color:var(--text3);font-size:0.813rem;background:var(--surface);border-radius:12px;border:1px solid var(--surface2);}
+
+/* ── ADACO RESULTS ── */
+.adaco-item{padding:12px 14px;border-bottom:1px solid var(--surface2);background:var(--surface);}
+.adaco-item:last-child{border-bottom:none;}
+.adaco-name{font-size:0.813rem;font-weight:600;margin-bottom:4px;}
+.adaco-meta{display:flex;gap:10px;align-items:center;}
+.adaco-num{font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--accent);}
+.adaco-cat{font-size:0.563rem;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);}
+
+/* ── ACTIVATIONS ── */
 .activation-card{background:var(--surface);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--surface3);}
-.act-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
-.act-name{font-size:0.938rem;font-weight:700;line-height:1.3;}
-.act-delete{color:var(--text3);font-size:1rem;cursor:pointer;padding:2px 6px;flex-shrink:0;}
-.countdown{font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:700;padding:4px 10px;border-radius:6px;display:inline-block;}
-.cd-ok{background:var(--green-dim);color:#4CAF82;border:1px solid var(--green-border);}
-.cd-warn{background:var(--yellow-dim);color:#C8B428;border:1px solid var(--yellow-border);}
-.cd-danger{background:var(--red-dim);color:#E07070;border:1px solid var(--red-border);}
-.cd-past{background:var(--surface2);color:var(--text3);border:1px solid var(--surface3);}
-.act-meta{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
-.dept-tag{font-size:0.625rem;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;}
+.activation-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.activation-name{font-size:0.938rem;font-weight:700;}
+.activation-delete{color:var(--text3);font-size:1.1rem;cursor:pointer;padding:2px 6px;}
+.countdown{font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:700;padding:4px 10px;border-radius:6px;}
+.countdown.ok{background:var(--green-dim);color:#4CAF82;border:1px solid var(--green-border);}
+.countdown.warn{background:var(--yellow-dim);color:#C8B428;border:1px solid var(--yellow-border);}
+.countdown.danger{background:var(--red-dim);color:#E07070;border:1px solid var(--red-border);}
+.countdown.past{background:var(--surface2);color:var(--text3);}
 .item-count{font-size:0.688rem;color:var(--text2);margin-bottom:10px;}
 .legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
 .legend-item{display:flex;align-items:center;gap:4px;font-size:0.625rem;color:var(--text3);font-weight:600;text-transform:uppercase;}
-.legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
-
-/* CHECKLIST */
+.legend-dot{width:8px;height:8px;border-radius:2px;}
 .checklist-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--surface2);}
 .checklist-item:last-child{border-bottom:none;}
 .status-btn{flex-shrink:0;width:28px;height:28px;border-radius:8px;border:none;cursor:pointer;font-size:0.875rem;display:flex;align-items:center;justify-content:center;}
-.s-ok{background:var(--green-dim);border:1px solid var(--green-border);}
-.s-price{background:var(--yellow-dim);border:1px solid var(--yellow-border);}
-.s-release{background:var(--red-dim);border:1px solid var(--red-border);}
-.s-pending{background:var(--surface2);border:1px solid var(--surface3);}
+.status-ok{background:var(--green-dim);border:1px solid var(--green-border);}
+.status-price{background:var(--yellow-dim);border:1px solid var(--yellow-border);}
+.status-release{background:var(--red-dim);border:1px solid var(--red-border);}
+.status-pending{background:var(--surface2);border:1px solid var(--surface3);}
 .item-info{flex:1;min-width:0;}
-.item-name{font-size:0.813rem;font-weight:600;line-height:1.4;margin-bottom:2px;}
+.item-name{font-size:0.813rem;font-weight:600;line-height:1.4;margin-bottom:3px;}
 .item-ids{font-family:'JetBrains Mono',monospace;font-size:0.625rem;color:var(--text3);}
-.item-status{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:3px;}
-.sl-ok{color:#4CAF82;}.sl-price{color:#C8B428;}.sl-release{color:#E07070;}.sl-pending{color:var(--text3);}
+.item-status-label{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:3px;}
 .item-remove{color:var(--text3);font-size:0.875rem;cursor:pointer;padding:4px;flex-shrink:0;}
+.label-ok{color:#4CAF82;}.label-price{color:#C8B428;}.label-release{color:#E07070;}.label-pending{color:var(--text3);}
+.dept-tag{font-size:0.625rem;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;}
 
-/* BUTTONS */
-.btn{width:100%;padding:13px;border-radius:12px;border:none;font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity 0.15s;}
+/* ── BUTTONS ── */
+.btn{width:100%;padding:14px;border-radius:12px;border:none;font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity 0.15s;}
 .btn:active{opacity:0.8;}
 .btn-primary{background:var(--accent);color:#fff;}
 .btn-secondary{background:var(--surface2);color:var(--text2);border:1px solid var(--surface3);}
 .btn-danger{background:var(--red-dim);color:#E07070;border:1px solid var(--red-border);}
-.btn-green{background:var(--green-dim);color:#4CAF82;border:1px solid var(--green-border);}
-.btn-sm{width:auto;padding:7px 13px;font-size:0.75rem;margin-top:0;}
+.btn-sm{width:auto;padding:8px 14px;font-size:0.75rem;margin-top:0;}
 
-/* FORMS */
+/* ── FORMS ── */
 .form-group{margin-bottom:14px;}
 .form-label{font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px;display:block;}
-.form-input{width:100%;background:var(--surface);border:1px solid var(--surface3);border-radius:10px;padding:11px 14px;color:var(--text);font-size:0.875rem;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;}
+.form-input{width:100%;background:var(--surface);border:1px solid var(--surface3);border-radius:10px;padding:11px 14px;color:var(--text);font-size:0.875rem;font-family:'DM Sans',sans-serif;outline:none;}
 .form-input:focus{border-color:var(--accent);}
-.row{display:flex;gap:8px;}
-.row .form-input{flex:1;}
 
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
 .modal-overlay.hidden{display:none;}
-.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 18px calc(var(--safe-bottom) + 20px);width:100%;max-width:480px;max-height:88vh;overflow-y:auto;}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px calc(var(--safe-bottom) + 24px);width:100%;max-width:480px;max-height:88vh;overflow-y:auto;}
 .modal-title{font-size:1rem;font-weight:700;margin-bottom:4px;}
-.modal-sub{font-size:0.75rem;color:var(--text3);margin-bottom:18px;}
-.modal-close{float:right;font-size:1.2rem;cursor:pointer;color:var(--text3);margin-top:-2px;}
-.modal-search-results{max-height:220px;overflow-y:auto;border-radius:10px;border:1px solid var(--surface2);margin-top:8px;margin-bottom:4px;}
-.divider{height:1px;background:var(--surface2);margin:16px 0;}
+.modal-sub{font-size:0.75rem;color:var(--text3);margin-bottom:20px;}
+.modal-close{float:right;font-size:1.25rem;cursor:pointer;color:var(--text3);}
+.email-box{background:var(--bg);border-radius:10px;padding:14px;border:1px solid var(--surface3);font-size:0.688rem;line-height:1.7;color:var(--text2);font-family:'JetBrains Mono',monospace;white-space:pre-wrap;word-break:break-word;margin-bottom:12px;max-height:320px;overflow-y:auto;}
+.search-results-modal{border-radius:10px;border:1px solid var(--surface2);margin-top:8px;overflow:hidden;}
 
-/* EMAIL */
-.email-box{background:var(--bg);border-radius:10px;padding:14px;border:1px solid var(--surface3);font-size:0.688rem;line-height:1.8;color:var(--text2);font-family:'JetBrains Mono',monospace;white-space:pre-wrap;word-break:break-word;margin-bottom:12px;max-height:300px;overflow-y:auto;}
-
-/* EMPTY */
+/* ── MISC ── */
 .empty-state{text-align:center;padding:40px 20px;color:var(--text3);}
 .empty-icon{font-size:2rem;margin-bottom:10px;}
-.empty-msg{font-size:0.813rem;line-height:1.7;}
-
-/* ERROR BANNER */
-.error-banner{background:var(--red-dim);border:1px solid var(--red-border);border-radius:10px;padding:12px 14px;font-size:0.75rem;color:#E07070;margin-bottom:12px;display:none;}
+.empty-msg{font-size:0.813rem;line-height:1.6;}
+.divider{height:1px;background:var(--surface2);margin:16px 0;}
+.spin{display:inline-block;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.toast{position:fixed;bottom:calc(var(--safe-bottom) + 24px);left:50%;transform:translateX(-50%);background:var(--surface3);color:var(--text);padding:10px 18px;border-radius:10px;font-size:0.813rem;font-weight:600;z-index:200;pointer-events:none;transition:opacity 0.3s;}
+.toast.hidden{opacity:0;}
 </style>
 </head>
 <body>
@@ -129,53 +135,57 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
   <div class="wordmark-main">KS <span>Tool</span></div>
   <div class="wordmark-sub">Kitchen Specialist &middot; Eataly KOP</div>
 
-  <div id="errorBanner" class="error-banner"></div>
-
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('d365',this)">D365 Lookup</div>
+    <div class="tab active" onclick="switchTab('lookup',this)">D365 Lookup</div>
     <div class="tab" onclick="switchTab('adaco',this)">Adaco / MStore</div>
     <div class="tab" onclick="switchTab('activations',this)">Activations</div>
   </div>
 
-  <!-- D365 PANEL -->
-  <div class="panel active" id="panel-d365">
-    <div class="section-label">D365 Released Products</div>
+  <!-- ── TAB: D365 LOOKUP ── -->
+  <div class="panel active" id="panel-lookup">
+    <div class="section-label">Search Released Products</div>
     <div class="search-wrap">
       <span class="search-icon">&#128269;</span>
-      <input class="search-input" id="d365Search" type="search" placeholder="Adaco ID, D365 #, or product name..." oninput="debounce(searchD365, 300)(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+      <input class="search-input" id="lookupSearch" type="search"
+        placeholder="Adaco ID, D365 #, or name…"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div>
-    <div class="search-hint">e.g. "2065342" &nbsp;·&nbsp; "00699091" &nbsp;·&nbsp; "asparagus"</div>
-    <div class="results" id="d365Results" style="display:none;"></div>
+    <div class="search-hint">e.g. "2065342" · "00699091" · "asparagus"</div>
+    <div id="lookupResults"></div>
   </div>
 
-  <!-- ADACO PANEL -->
+  <!-- ── TAB: ADACO / MSTORE ── -->
   <div class="panel" id="panel-adaco">
-    <div class="section-label">Adaco Ingredients &mdash; MStore Lookup</div>
+    <div class="section-label">Search Adaco Ingredients</div>
     <div class="search-wrap">
       <span class="search-icon">&#128269;</span>
-      <input class="search-input" id="adacoSearch" type="search" placeholder="Ingredient name or product #..." oninput="debounce(searchAdaco, 300)(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+      <input class="search-input" id="adacoSearch" type="search"
+        placeholder="Ingredient name or product number…"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div>
-    <div class="search-hint">Search raw ingredients by name to find Adaco product # for MStore entry</div>
-    <div class="results" id="adacoResults" style="display:none;"></div>
+    <div class="search-hint">e.g. "chicken breast" · "asparagus" · "2065342"</div>
+    <div id="adacoResults"></div>
   </div>
 
-  <!-- ACTIVATIONS PANEL -->
+  <!-- ── TAB: ACTIVATIONS ── -->
   <div class="panel" id="panel-activations">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
       <div class="section-label" style="margin:0;">Active Launches</div>
       <button class="btn btn-primary btn-sm" onclick="showNewActivation()">+ New</button>
     </div>
-    <div id="activationsList"></div>
+    <div id="activationsList">
+      <div class="loading-row">&#8987; Loading…</div>
+    </div>
   </div>
 
 </div>
 
-<!-- NEW ACTIVATION MODAL -->
-<div class="modal-overlay hidden" id="modalNewAct">
+<!-- ── MODAL: NEW ACTIVATION ── -->
+<div class="modal-overlay hidden" id="newActModal">
   <div class="modal">
-    <span class="modal-close" onclick="closeModal('modalNewAct')">&#10005;</span>
+    <span class="modal-close" onclick="closeModal('newActModal')">&#10005;</span>
     <div class="modal-title">New Activation</div>
-    <div class="modal-sub">Track a new product launch</div>
+    <div class="modal-sub">Track a new launch</div>
     <div class="form-group">
       <label class="form-label">Activation Name</label>
       <input class="form-input" id="actName" placeholder="e.g. Spring Greens — Pronto">
@@ -186,358 +196,391 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     </div>
     <div class="form-group">
       <label class="form-label">Department / Concept</label>
-      <input class="form-input" id="actDept" placeholder="e.g. Pronto, PiPa, Pastry...">
+      <input class="form-input" id="actDept" placeholder="e.g. Pronto, PiPa, Pastry…">
     </div>
     <button class="btn btn-primary" onclick="createActivation()">Create</button>
-    <button class="btn btn-secondary" style="margin-top:6px;" onclick="closeModal('modalNewAct')">Cancel</button>
+    <button class="btn btn-secondary" onclick="closeModal('newActModal')" style="margin-top:6px;">Cancel</button>
   </div>
 </div>
 
-<!-- ADD ITEM MODAL -->
-<div class="modal-overlay hidden" id="modalAddItem">
+<!-- ── MODAL: ADD ITEM ── -->
+<div class="modal-overlay hidden" id="addItemModal">
   <div class="modal">
-    <span class="modal-close" onclick="closeModal('modalAddItem')">&#10005;</span>
+    <span class="modal-close" onclick="closeModal('addItemModal')">&#10005;</span>
     <div class="modal-title">Add Item</div>
     <div class="modal-sub" id="addItemActName"></div>
     <div class="search-wrap">
       <span class="search-icon">&#128269;</span>
-      <input class="search-input" id="addItemSearch" type="search" placeholder="Search D365 product..." oninput="debounce(searchAddItem, 300)(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+      <input class="search-input" id="addItemSearch" type="search"
+        placeholder="Adaco ID, D365 #, or name…"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div>
-    <div class="modal-search-results" id="addItemResults"></div>
+    <div class="search-results-modal" id="addItemResults"></div>
     <div class="divider"></div>
     <div class="form-label">Or add manually (not in D365 yet)</div>
     <div class="form-group" style="margin-top:8px;">
       <input class="form-input" id="manualName" placeholder="Product name">
     </div>
-    <div class="row" style="margin-bottom:14px;">
-      <input class="form-input" id="manualAdaco" placeholder="Adaco ID">
-      <input class="form-input" id="manualD365" placeholder="D365 #">
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <input class="form-input" id="manualAdaco" placeholder="Adaco ID" style="flex:1;">
+      <input class="form-input" id="manualD365" placeholder="D365 #" style="flex:1;">
     </div>
     <button class="btn btn-primary" onclick="addManualItem()">Add Manual Item</button>
   </div>
 </div>
 
-<!-- STATUS MODAL -->
-<div class="modal-overlay hidden" id="modalStatus">
+<!-- ── MODAL: STATUS PICKER ── -->
+<div class="modal-overlay hidden" id="statusModal">
   <div class="modal">
-    <span class="modal-close" onclick="closeModal('modalStatus')">&#10005;</span>
-    <div class="modal-title" id="statusItemName" style="font-size:0.875rem;margin-bottom:4px;"></div>
+    <span class="modal-close" onclick="closeModal('statusModal')">&#10005;</span>
+    <div class="modal-title" id="statusModalName" style="margin-bottom:4px;font-size:0.875rem;line-height:1.4;"></div>
     <div class="modal-sub">Set verification status</div>
     <div style="display:flex;flex-direction:column;gap:8px;">
-      <button class="btn btn-green" onclick="setStatus('ok')">&#9989;&nbsp; Verified — Works in PO</button>
-      <button class="btn btn-secondary" style="border-color:var(--yellow-border);color:#C8B428;" onclick="setStatus('price')">&#9888;&#65039;&nbsp; Price Error — Needs fix</button>
-      <button class="btn btn-secondary" style="border-color:var(--red-border);color:#E07070;" onclick="setStatus('release')">&#128683;&nbsp; Not Released to EKP — Escalate</button>
-      <button class="btn btn-secondary" onclick="setStatus('pending')">&#8987;&nbsp; Pending Verification</button>
+      <button class="btn btn-secondary" style="border-color:var(--green-border);color:#4CAF82;" onclick="setStatus('ok')">&#9989; Verified — Works in PO</button>
+      <button class="btn btn-secondary" style="border-color:var(--yellow-border);color:#C8B428;" onclick="setStatus('price')">&#9888;&#65039; Price Error — Needs fix</button>
+      <button class="btn btn-secondary" style="border-color:var(--red-border);color:#E07070;" onclick="setStatus('release')">&#128683; Not Released to EKP</button>
+      <button class="btn btn-secondary" onclick="setStatus('pending')">&#8987; Pending Verification</button>
     </div>
   </div>
 </div>
 
-<!-- EMAIL MODAL -->
-<div class="modal-overlay hidden" id="modalEmail">
+<!-- ── MODAL: EMAIL ── -->
+<div class="modal-overlay hidden" id="emailModal">
   <div class="modal">
-    <span class="modal-close" onclick="closeModal('modalEmail')">&#10005;</span>
+    <span class="modal-close" onclick="closeModal('emailModal')">&#10005;</span>
     <div class="modal-title">Escalation Email — Paul</div>
-    <div class="modal-sub">Copy and send to Paul Challapa</div>
+    <div class="modal-sub">Copy and paste into your email client</div>
     <div class="email-box" id="emailContent"></div>
     <button class="btn btn-primary" onclick="copyEmail()">Copy to Clipboard</button>
-    <button class="btn btn-secondary" style="margin-top:6px;" onclick="closeModal('modalEmail')">Close</button>
+    <button class="btn btn-secondary" style="margin-top:6px;" onclick="closeModal('emailModal')">Close</button>
   </div>
 </div>
 
+<!-- ── TOAST ── -->
+<div class="toast hidden" id="toast"></div>
+
 <script>
+'use strict';
+
+// ── SUPABASE ──────────────────────────────────────────────────────────────────
 const SB_URL = 'https://fhbusipvtxjnwidlgpaa.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
 
-const MF = {
-  CK:'Kitchen Prep',P1:'Pronto',RS:'Restaurant',BA:'Bakery',
-  PA:'Pastry',FA:'Fresh Pasta',OF:'Produce',FG:'Cheese/Dairy',
-  GF:'Eggs/Dairy',MP:'Pantry/Oil'
+const HEADERS = {
+  'apikey': SB_KEY,
+  'Authorization': 'Bearer ' + SB_KEY,
+  'Content-Type': 'application/json'
 };
 
-// ── SUPABASE ────────────────────────────────────────────────────────────
 async function sbFetch(path) {
-  const r = await fetch(SB_URL + '/rest/v1/' + path, {
-    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
-  });
-  if (!r.ok) throw new Error('Supabase error ' + r.status);
+  const r = await fetch(SB_URL + '/rest/v1/' + path, { headers: HEADERS });
+  if (!r.ok) throw new Error('Supabase ' + r.status);
   return r.json();
 }
 
 async function sbPost(table, body) {
   const r = await fetch(SB_URL + '/rest/v1/' + table, {
     method: 'POST',
-    headers: {
-      'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
-      'Content-Type': 'application/json', 'Prefer': 'return=representation'
-    },
+    headers: { ...HEADERS, 'Prefer': 'return=representation' },
     body: JSON.stringify(body)
   });
-  if (!r.ok) throw new Error('Insert error ' + r.status);
+  if (!r.ok) throw new Error('Supabase ' + r.status);
   return r.json();
 }
 
 async function sbPatch(table, id, body) {
   const r = await fetch(SB_URL + '/rest/v1/' + table + '?id=eq.' + id, {
     method: 'PATCH',
-    headers: {
-      'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
-      'Content-Type': 'application/json', 'Prefer': 'return=representation'
-    },
+    headers: { ...HEADERS, 'Prefer': 'return=representation' },
     body: JSON.stringify(body)
   });
-  if (!r.ok) throw new Error('Update error ' + r.status);
+  if (!r.ok) throw new Error('Supabase ' + r.status);
   return r.json();
 }
 
 async function sbDelete(table, id) {
   const r = await fetch(SB_URL + '/rest/v1/' + table + '?id=eq.' + id, {
     method: 'DELETE',
-    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    headers: HEADERS
   });
-  if (!r.ok) throw new Error('Delete error ' + r.status);
+  if (!r.ok) throw new Error('Supabase ' + r.status);
 }
 
-function showError(msg) {
-  const b = document.getElementById('errorBanner');
-  b.textContent = msg;
-  b.style.display = 'block';
-  setTimeout(() => b.style.display = 'none', 5000);
-}
-
-// ── DEBOUNCE ────────────────────────────────────────────────────────────
+// ── UTILS ─────────────────────────────────────────────────────────────────────
 function debounce(fn, ms) {
   let t;
-  return function(...args) {
+  return function() {
+    const args = arguments;
     clearTimeout(t);
-    t = setTimeout(() => fn(...args), ms);
+    t = setTimeout(function() { fn.apply(null, args); }, ms);
   };
 }
 
-// ── TABS ────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(el._t);
+  el._t = setTimeout(function() { el.classList.add('hidden'); }, 2200);
+}
+
+// Strip leading zeros for numeric ID queries
+function stripZeros(s) {
+  return s.replace(/^0+/, '') || '0';
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
 function switchTab(tab, el) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
   el.classList.add('active');
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
   document.getElementById('panel-' + tab).classList.add('active');
   if (tab === 'activations') loadActivations();
 }
 
-// ── D365 SEARCH ─────────────────────────────────────────────────────────
-async function searchD365(q) {
-  const box = document.getElementById('d365Results');
+// ── MACROFAMILY LABELS ────────────────────────────────────────────────────────
+const MF = {
+  CK:'Kitchen Prep', P1:'Pronto', RS:'Restaurant', BA:'Bakery',
+  PA:'Pastry', FA:'Fresh Pasta', OF:'Produce', FG:'Cheese/Dairy',
+  GF:'Eggs/Dairy', MP:'Pantry/Oil'
+};
+
+// ── D365 LOOKUP ──────────────────────────────────────────────────────────────
+function buildLookupQuery(q) {
+  // Numeric-looking input: search by d365_id OR adaco_id
+  const stripped = stripZeros(q);
+  if (/^\d+$/.test(stripped)) {
+    return 'ks_products?or=(d365_id.eq.' + encodeURIComponent(q)
+      + ',d365_id.eq.' + encodeURIComponent(stripped)
+      + ',adaco_id.eq.' + encodeURIComponent(q)
+      + ',adaco_id.eq.' + encodeURIComponent(stripped)
+      + ')&limit=20&select=d365_id,adaco_id,name,macrofamily';
+  }
+  // Text: ilike on name
+  return 'ks_products?name=ilike.*' + encodeURIComponent(q) + '*&limit=20&select=d365_id,adaco_id,name,macrofamily&order=name.asc';
+}
+
+function renderLookupRow(r, clickFn) {
+  const safeName = r.name.replace(/'/g, "\\'");
+  const safeD365 = r.d365_id.replace(/'/g, "\\'");
+  const safeAdaco = r.adaco_id.replace(/'/g, "\\'");
+  const safeMf = (r.macrofamily || '').replace(/'/g, "\\'");
+  const mfLabel = MF[r.macrofamily] || r.macrofamily || '—';
+  const onclick = clickFn
+    ? 'onclick="' + clickFn + '(\'' + safeD365 + '\',\'' + safeAdaco + '\',\'' + safeName + '\',\'' + safeMf + '\')"'
+    : '';
+  return '<div class="result-item" ' + onclick + '>'
+    + '<div class="result-name">' + r.name + '</div>'
+    + '<div class="result-meta">'
+    + '<span class="result-id">D365: ' + r.d365_id + '</span>'
+    + '<span class="result-adaco">Adaco: ' + r.adaco_id + '</span>'
+    + '<span class="result-mf">' + mfLabel + '</span>'
+    + '</div></div>';
+}
+
+async function runLookupSearch(q) {
+  const el = document.getElementById('lookupResults');
   q = q.trim();
-  if (q.length < 2) { box.style.display = 'none'; return; }
-  box.style.display = 'block';
-  box.innerHTML = '<div class="loading">Searching...</div>';
+  if (q.length < 2) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="loading-row"><span class="spin">&#9696;</span> Searching…</div>';
   try {
-    const qClean = q.replace(/^0+/, '');
-    // Search by name (ilike), d365_id, or adaco_id
-    const enc = encodeURIComponent('%' + q + '%');
-    const encClean = encodeURIComponent('%' + qClean + '%');
-    const data = await sbFetch(
-      'ks_products?or=(name.ilike.' + enc + ',d365_id.ilike.' + encClean + ',adaco_id.ilike.' + encClean + ')&limit=30&order=name.asc'
-    );
-    if (!data.length) { box.innerHTML = '<div class="no-results">No items found in D365</div>'; return; }
-    box.innerHTML = data.map(r =>
-      '<div class="result-item">' +
-        '<div class="result-name">' + esc(r.name) + '</div>' +
-        '<div class="result-meta">' +
-          '<span class="mono clr-accent">D365: ' + esc(r.d365_id) + '</span>' +
-          '<span class="mono clr-dim">Adaco: ' + esc(r.adaco_id) + '</span>' +
-          '<span class="tag">' + esc(MF[r.macrofamily] || r.macrofamily || '') + '</span>' +
-        '</div>' +
-      '</div>'
-    ).join('');
+    const rows = await sbFetch(buildLookupQuery(q));
+    if (!rows.length) {
+      el.innerHTML = '<div class="no-results">No products found for "' + q + '"</div>';
+      return;
+    }
+    el.innerHTML = '<div class="results">' + rows.map(function(r) { return renderLookupRow(r, null); }).join('') + '</div>';
   } catch(e) {
-    box.innerHTML = '<div class="no-results">Error loading — check connection</div>';
-    showError('D365 search failed: ' + e.message);
+    el.innerHTML = '<div class="no-results">Search error — check connection</div>';
   }
 }
 
-// ── ADACO SEARCH ────────────────────────────────────────────────────────
-async function searchAdaco(q) {
-  const box = document.getElementById('adacoResults');
+document.getElementById('lookupSearch').addEventListener('input', debounce(function(e) {
+  runLookupSearch(e.target.value);
+}, 300));
+
+// ── ADACO / MSTORE SEARCH ─────────────────────────────────────────────────────
+async function runAdacoSearch(q) {
+  const el = document.getElementById('adacoResults');
   q = q.trim();
-  if (q.length < 2) { box.style.display = 'none'; return; }
-  box.style.display = 'block';
-  box.innerHTML = '<div class="loading">Searching...</div>';
+  if (q.length < 2) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="loading-row"><span class="spin">&#9696;</span> Searching…</div>';
   try {
-    const enc = encodeURIComponent('%' + q + '%');
-    const data = await sbFetch(
-      'ks_adaco_ingredients?or=(description.ilike.' + enc + ',product_number.ilike.' + enc + ')&limit=30&order=description.asc'
-    );
-    if (!data.length) { box.innerHTML = '<div class="no-results">No ingredients found</div>'; return; }
-    box.innerHTML = data.map(r =>
-      '<div class="result-item">' +
-        '<div class="result-name">' + esc(r.description) + '</div>' +
-        '<div class="result-meta">' +
-          '<span class="mono clr-accent"># ' + esc(r.product_number) + '</span>' +
-          '<span class="tag">' + esc(r.category || '') + '</span>' +
-        '</div>' +
-      '</div>'
-    ).join('');
+    let path;
+    const stripped = stripZeros(q);
+    if (/^\d+$/.test(stripped)) {
+      path = 'ks_adaco_ingredients?or=(product_number.eq.' + encodeURIComponent(q)
+        + ',product_number.eq.' + encodeURIComponent(stripped)
+        + ')&limit=20&select=product_number,description,category';
+    } else {
+      path = 'ks_adaco_ingredients?description=ilike.*' + encodeURIComponent(q)
+        + '*&limit=20&select=product_number,description,category&order=description.asc';
+    }
+    const rows = await sbFetch(path);
+    if (!rows.length) {
+      el.innerHTML = '<div class="no-results">No ingredients found for "' + q + '"</div>';
+      return;
+    }
+    el.innerHTML = '<div class="results">'
+      + rows.map(function(r) {
+          return '<div class="adaco-item">'
+            + '<div class="adaco-name">' + r.description + '</div>'
+            + '<div class="adaco-meta">'
+            + '<span class="adaco-num">#' + r.product_number + '</span>'
+            + (r.category ? '<span class="adaco-cat">' + r.category + '</span>' : '')
+            + '</div></div>';
+        }).join('')
+      + '</div>';
   } catch(e) {
-    box.innerHTML = '<div class="no-results">Error loading — check connection</div>';
-    showError('Adaco search failed: ' + e.message);
+    el.innerHTML = '<div class="no-results">Search error — check connection</div>';
   }
 }
 
-// ── ADD ITEM SEARCH ──────────────────────────────────────────────────────
-async function searchAddItem(q) {
-  const box = document.getElementById('addItemResults');
-  q = q.trim();
-  if (q.length < 2) { box.innerHTML = ''; return; }
-  box.innerHTML = '<div class="loading">Searching...</div>';
-  try {
-    const enc = encodeURIComponent('%' + q + '%');
-    const qClean = q.replace(/^0+/, '');
-    const encClean = encodeURIComponent('%' + qClean + '%');
-    const data = await sbFetch(
-      'ks_products?or=(name.ilike.' + enc + ',d365_id.ilike.' + encClean + ',adaco_id.ilike.' + encClean + ')&limit=20&order=name.asc'
-    );
-    if (!data.length) { box.innerHTML = '<div class="no-results">No items found</div>'; return; }
-    box.innerHTML = data.map(r =>
-      '<div class="result-item tappable" onclick=\'addItemFromSearch(' + JSON.stringify(r) + ')\'>' +
-        '<div class="result-name">' + esc(r.name) + '</div>' +
-        '<div class="result-meta">' +
-          '<span class="mono clr-accent">D365: ' + esc(r.d365_id) + '</span>' +
-          '<span class="mono clr-dim">Adaco: ' + esc(r.adaco_id) + '</span>' +
-          '<span class="tag">' + esc(MF[r.macrofamily] || r.macrofamily || '') + '</span>' +
-        '</div>' +
-      '</div>'
-    ).join('');
-  } catch(e) {
-    box.innerHTML = '<div class="no-results">Search error</div>';
-  }
-}
+document.getElementById('adacoSearch').addEventListener('input', debounce(function(e) {
+  runAdacoSearch(e.target.value);
+}, 300));
 
-// ── ACTIVATIONS ──────────────────────────────────────────────────────────
+// ── ACTIVATIONS — STATE ───────────────────────────────────────────────────────
 let activations = [];
-let currentActId = null;
+let currentActId = null;  // Supabase row id (bigint)
 let currentItemIdx = null;
 
 async function loadActivations() {
   const el = document.getElementById('activationsList');
-  el.innerHTML = '<div class="loading">Loading...</div>';
+  el.innerHTML = '<div class="loading-row"><span class="spin">&#9696;</span> Loading…</div>';
   try {
-    activations = await sbFetch('ks_activations?order=created_at.desc');
+    const rows = await sbFetch('ks_activations?select=id,name,launch_date,department,items&order=created_at.desc');
+    activations = rows;
     renderActivations();
   } catch(e) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-msg">Could not load activations.<br>' + e.message + '</div></div>';
-    showError('Load failed: ' + e.message);
+    el.innerHTML = '<div class="no-results">Could not load activations — check connection</div>';
   }
 }
 
-function daysUntil(d) {
-  if (!d) return null;
-  const launch = new Date(d + 'T12:00:00');
-  const today = new Date(); today.setHours(0,0,0,0);
+// ── ACTIVATIONS — RENDER ──────────────────────────────────────────────────────
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const launch = new Date(dateStr + 'T12:00:00');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   return Math.round((launch - today) / 86400000);
 }
 
-function cdHtml(d) {
-  const n = daysUntil(d);
-  if (n === null) return '';
-  if (n < 0) return '<span class="countdown cd-past">Launched ' + Math.abs(n) + 'd ago</span>';
-  if (n === 0) return '<span class="countdown cd-danger">LAUNCH TODAY</span>';
-  if (n <= 4) return '<span class="countdown cd-danger">' + n + 'd to launch</span>';
-  if (n <= 11) return '<span class="countdown cd-warn">' + n + 'd to launch</span>';
-  return '<span class="countdown cd-ok">' + n + 'd to launch</span>';
+function countdownHtml(dateStr) {
+  const d = daysUntil(dateStr);
+  if (d === null) return '';
+  if (d < 0)  return '<span class="countdown past">Launched ' + Math.abs(d) + 'd ago</span>';
+  if (d === 0) return '<span class="countdown danger">LAUNCH TODAY</span>';
+  if (d <= 4)  return '<span class="countdown danger">' + d + 'd to launch</span>';
+  if (d <= 11) return '<span class="countdown warn">' + d + 'd to launch</span>';
+  return '<span class="countdown ok">' + d + 'd to launch</span>';
 }
 
-function sIcon(s){return {ok:'✅',price:'⚠️',release:'🚫',pending:'⏳'}[s]||'⏳';}
-function sLabel(s){return {ok:'Verified',price:'Price Error',release:'Not Released',pending:'Pending'}[s]||'Pending';}
-function sCls(s){return {ok:'sl-ok',price:'sl-price',release:'sl-release',pending:'sl-pending'}[s]||'sl-pending';}
-function sBtnCls(s){return {ok:'s-ok',price:'s-price',release:'s-release',pending:'s-pending'}[s]||'s-pending';}
+function statusIcon(s)      { return {ok:'✅', price:'⚠️', release:'🚫', pending:'⏳'}[s] || '⏳'; }
+function statusLabel(s)     { return {ok:'Verified', price:'Price Error', release:'Not Released', pending:'Pending'}[s] || 'Pending'; }
+function statusClass(s)     { return {ok:'label-ok', price:'label-price', release:'label-release', pending:'label-pending'}[s] || 'label-pending'; }
+function statusBtnClass(s)  { return {ok:'status-ok', price:'status-price', release:'status-release', pending:'status-pending'}[s] || 'status-pending'; }
 
 function renderActivations() {
   const el = document.getElementById('activationsList');
   if (!activations.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">No activations yet.<br>Tap <strong>+ New</strong> to start tracking a launch.</div></div>';
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>'
+      + '<div class="empty-msg">No activations yet.<br>Tap <strong>+ New</strong> to start tracking a launch.</div></div>';
     return;
   }
   let html = '';
-  activations.forEach(function(act, ai) {
+  for (let ai = 0; ai < activations.length; ai++) {
+    const act = activations[ai];
     const items = act.items || [];
-    const escalate = items.filter(i => i.status === 'price' || i.status === 'release');
+    const escalate = items.filter(function(i) { return i.status === 'price' || i.status === 'release'; });
+
     let itemsHtml = '';
     if (items.length) {
-      items.forEach(function(item, ii) {
-        itemsHtml +=
-          '<div class="checklist-item">' +
-            '<button class="status-btn ' + sBtnCls(item.status) + '" onclick="openStatusPicker(' + ai + ',' + ii + ')">' + sIcon(item.status) + '</button>' +
-            '<div class="item-info">' +
-              '<div class="item-name">' + esc(item.name) + '</div>' +
-              '<div class="item-ids">D365: ' + esc(item.d365_id||'—') + ' &nbsp;|&nbsp; Adaco: ' + esc(item.adaco_id||'—') + '</div>' +
-              '<div class="item-status ' + sCls(item.status) + '">' + sLabel(item.status) + '</div>' +
-            '</div>' +
-            '<span class="item-remove" onclick="removeItem(' + ai + ',' + ii + ')">&#10005;</span>' +
-          '</div>';
-      });
+      for (let ii = 0; ii < items.length; ii++) {
+        const item = items[ii];
+        itemsHtml += '<div class="checklist-item">';
+        itemsHtml += '<button class="status-btn ' + statusBtnClass(item.status) + '" onclick="openStatusPicker(' + ai + ',' + ii + ')">' + statusIcon(item.status) + '</button>';
+        itemsHtml += '<div class="item-info"><div class="item-name">' + item.name + '</div>';
+        itemsHtml += '<div class="item-ids">D365: ' + (item.d365_id || '—') + ' &nbsp;|&nbsp; Adaco: ' + (item.adaco_id || '—') + '</div>';
+        itemsHtml += '<div class="item-status-label ' + statusClass(item.status) + '">' + statusLabel(item.status) + '</div></div>';
+        itemsHtml += '<span class="item-remove" onclick="removeItem(' + ai + ',' + ii + ')">✕</span></div>';
+      }
     } else {
-      itemsHtml = '<div style="font-size:0.75rem;color:var(--text3);padding:10px 0;">No items added yet.</div>';
+      itemsHtml = '<div style="font-size:0.75rem;color:var(--text3);padding:12px 0;">No items added yet.</div>';
     }
-    html +=
-      '<div class="activation-card">' +
-        '<div class="act-header">' +
-          '<div class="act-name">' + esc(act.name) + '</div>' +
-          '<span class="act-delete" onclick="deleteActivation(' + ai + ')">&#128465;</span>' +
-        '</div>' +
-        '<div class="act-meta">' + cdHtml(act.launch_date) + (act.department ? '<span class="dept-tag">' + esc(act.department) + '</span>' : '') + '</div>' +
-        '<div class="item-count">' + items.length + ' item' + (items.length!==1?'s':'') + ' &nbsp;&middot;&nbsp; ' + escalate.length + ' need' + (escalate.length!==1?'':'s') + ' escalation</div>' +
-        '<div class="legend">' +
-          '<div class="legend-item"><div class="legend-dot" style="background:#2D7A4F;"></div>Verified</div>' +
-          '<div class="legend-item"><div class="legend-dot" style="background:#7A6A20;"></div>Price Error</div>' +
-          '<div class="legend-item"><div class="legend-dot" style="background:#8B2020;"></div>Not Released</div>' +
-          '<div class="legend-item"><div class="legend-dot" style="background:#3A3A3A;"></div>Pending</div>' +
-        '</div>' +
-        itemsHtml +
-        '<button class="btn btn-secondary" style="margin-top:12px;" onclick="openAddItem(' + ai + ')">+ Add Item</button>' +
-        (escalate.length ? '<button class="btn btn-danger" style="margin-top:6px;" onclick="generateEmail(' + ai + ')">&#128231; Generate Paul Email</button>' : '') +
-      '</div>';
-  });
+
+    html += '<div class="activation-card">';
+    html += '<div class="activation-header"><div class="activation-name">' + act.name + '</div>';
+    html += '<span class="activation-delete" onclick="deleteActivation(' + ai + ')">🗑</span></div>';
+    html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">' + countdownHtml(act.launch_date);
+    if (act.department) html += ' <span class="dept-tag">' + act.department + '</span>';
+    html += '</div>';
+    html += '<div class="item-count">' + items.length + ' item' + (items.length !== 1 ? 's' : '')
+      + ' &nbsp;&middot;&nbsp; ' + escalate.length + ' need' + (escalate.length !== 1 ? '' : 's') + ' escalation</div>';
+    html += '<div class="legend">';
+    html += '<div class="legend-item"><div class="legend-dot" style="background:#2D7A4F;"></div>Verified</div>';
+    html += '<div class="legend-item"><div class="legend-dot" style="background:#7A6A20;"></div>Price Error</div>';
+    html += '<div class="legend-item"><div class="legend-dot" style="background:#8B2020;"></div>Not Released</div>';
+    html += '<div class="legend-item"><div class="legend-dot" style="background:#3A3A3A;"></div>Pending</div>';
+    html += '</div>';
+    html += itemsHtml;
+    html += '<button class="btn btn-secondary" style="margin-top:12px;" onclick="openAddItem(' + ai + ')">+ Add Item</button>';
+    if (escalate.length) {
+      html += '<button class="btn btn-danger" style="margin-top:6px;" onclick="generateEmail(' + ai + ')">&#128231; Generate Paul Email</button>';
+    }
+    html += '</div>';
+  }
   el.innerHTML = html;
 }
 
-// ── ACTIVATION CRUD ──────────────────────────────────────────────────────
+// ── ACTIVATIONS — CRUD ────────────────────────────────────────────────────────
 function showNewActivation() {
   document.getElementById('actName').value = '';
   document.getElementById('actDate').value = '';
   document.getElementById('actDept').value = '';
-  document.getElementById('modalNewAct').classList.remove('hidden');
+  document.getElementById('newActModal').classList.remove('hidden');
 }
 
 async function createActivation() {
   const name = document.getElementById('actName').value.trim();
   const date = document.getElementById('actDate').value || null;
-  const dept = document.getElementById('actDept').value.trim();
-  if (!name) { alert('Please enter an activation name.'); return; }
+  const dept = document.getElementById('actDept').value.trim() || null;
+  if (!name) { showToast('Please enter an activation name.'); return; }
   try {
-    const rows = await sbPost('ks_activations', { name, launch_date: date, department: dept, items: [] });
+    const rows = await sbPost('ks_activations', { name: name, launch_date: date, department: dept, items: [] });
     activations.unshift(rows[0]);
-    closeModal('modalNewAct');
+    closeModal('newActModal');
     renderActivations();
-  } catch(e) { showError('Could not create: ' + e.message); }
+    showToast('Activation created');
+  } catch(e) {
+    showToast('Error creating activation');
+  }
 }
 
 async function deleteActivation(ai) {
-  if (!confirm('Delete "' + activations[ai].name + '"?')) return;
+  const act = activations[ai];
+  if (!confirm('Delete "' + act.name + '"?')) return;
   try {
-    await sbDelete('ks_activations', activations[ai].id);
+    await sbDelete('ks_activations', act.id);
     activations.splice(ai, 1);
     renderActivations();
-  } catch(e) { showError('Delete failed: ' + e.message); }
+    showToast('Deleted');
+  } catch(e) {
+    showToast('Error deleting');
+  }
 }
 
-async function saveItems(ai) {
+async function patchItems(ai) {
   const act = activations[ai];
   try {
-    await sbPatch('ks_activations', act.id, { items: act.items, updated_at: new Date().toISOString() });
-    renderActivations();
-  } catch(e) { showError('Save failed: ' + e.message); }
+    const rows = await sbPatch('ks_activations', act.id, { items: act.items });
+    activations[ai] = rows[0];
+  } catch(e) {
+    showToast('Save error — retry');
+  }
 }
 
-// ── ITEM CRUD ────────────────────────────────────────────────────────────
+// ── ADD ITEM MODAL ────────────────────────────────────────────────────────────
 function openAddItem(ai) {
   currentActId = ai;
   document.getElementById('addItemActName').textContent = activations[ai].name;
@@ -546,100 +589,140 @@ function openAddItem(ai) {
   document.getElementById('manualName').value = '';
   document.getElementById('manualAdaco').value = '';
   document.getElementById('manualD365').value = '';
-  document.getElementById('modalAddItem').classList.remove('hidden');
+  document.getElementById('addItemModal').classList.remove('hidden');
 }
 
-function addItemFromSearch(r) {
-  activations[currentActId].items.push({ d365_id: r.d365_id, adaco_id: r.adaco_id, name: r.name, macrofamily: r.macrofamily, status: 'pending' });
-  saveItems(currentActId);
-  closeModal('modalAddItem');
+async function runAddSearch(q) {
+  const el = document.getElementById('addItemResults');
+  q = q.trim();
+  if (q.length < 2) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="loading-row"><span class="spin">&#9696;</span> Searching…</div>';
+  try {
+    const rows = await sbFetch(buildLookupQuery(q));
+    if (!rows.length) {
+      el.innerHTML = '<div class="no-results">No products found</div>';
+      return;
+    }
+    el.innerHTML = rows.map(function(r) { return renderLookupRow(r, 'addItemFromSearch'); }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="no-results">Search error</div>';
+  }
 }
 
-function addManualItem() {
+document.getElementById('addItemSearch').addEventListener('input', debounce(function(e) {
+  runAddSearch(e.target.value);
+}, 300));
+
+async function addItemFromSearch(d365, adaco, name, mf) {
+  const ai = currentActId;
+  if (!activations[ai].items) activations[ai].items = [];
+  activations[ai].items.push({ d365_id: d365, adaco_id: adaco, name: name, macrofamily: mf, status: 'pending' });
+  closeModal('addItemModal');
+  await patchItems(ai);
+  renderActivations();
+  showToast('Item added');
+}
+
+async function addManualItem() {
   const name = document.getElementById('manualName').value.trim();
   const adaco = document.getElementById('manualAdaco').value.trim();
   const d365 = document.getElementById('manualD365').value.trim();
-  if (!name) { alert('Please enter a product name.'); return; }
-  activations[currentActId].items.push({ d365_id: d365||'—', adaco_id: adaco||'—', name, macrofamily: '', status: 'pending' });
-  saveItems(currentActId);
-  closeModal('modalAddItem');
+  if (!name) { showToast('Please enter a product name.'); return; }
+  const ai = currentActId;
+  if (!activations[ai].items) activations[ai].items = [];
+  activations[ai].items.push({ d365_id: d365 || '—', adaco_id: adaco || '—', name: name, macrofamily: '', status: 'pending' });
+  closeModal('addItemModal');
+  await patchItems(ai);
+  renderActivations();
+  showToast('Item added');
 }
 
-function removeItem(ai, ii) {
+async function removeItem(ai, ii) {
   activations[ai].items.splice(ii, 1);
-  saveItems(ai);
+  await patchItems(ai);
+  renderActivations();
 }
 
-// ── STATUS ────────────────────────────────────────────────────────────────
+// ── STATUS PICKER ─────────────────────────────────────────────────────────────
 function openStatusPicker(ai, ii) {
-  currentActId = ai; currentItemIdx = ii;
-  document.getElementById('statusItemName').textContent = activations[ai].items[ii].name;
-  document.getElementById('modalStatus').classList.remove('hidden');
+  currentActId = ai;
+  currentItemIdx = ii;
+  document.getElementById('statusModalName').textContent = activations[ai].items[ii].name;
+  document.getElementById('statusModal').classList.remove('hidden');
 }
 
-function setStatus(s) {
-  activations[currentActId].items[currentItemIdx].status = s;
-  saveItems(currentActId);
-  closeModal('modalStatus');
+async function setStatus(s) {
+  const ai = currentActId;
+  const ii = currentItemIdx;
+  activations[ai].items[ii].status = s;
+  closeModal('statusModal');
+  await patchItems(ai);
+  renderActivations();
 }
 
-// ── EMAIL ─────────────────────────────────────────────────────────────────
+// ── EMAIL GENERATOR ───────────────────────────────────────────────────────────
 function generateEmail(ai) {
   const act = activations[ai];
   const days = daysUntil(act.launch_date);
-  const escalate = (act.items||[]).filter(i => i.status==='price'||i.status==='release');
+  const escalate = (act.items || []).filter(function(i) { return i.status === 'price' || i.status === 'release'; });
   const dateStr = act.launch_date
-    ? new Date(act.launch_date+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})
+    ? new Date(act.launch_date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'long',month:'long',day:'numeric',year:'numeric'})
     : 'TBD';
-  const daysLine = days!==null
-    ? (days>=0 ? ' We are '+days+' day'+(days!==1?'s':'')+' out from launch.' : ' The launch date has passed.')
-    : '';
-  const urgency = days!==null && days>=0 && days<=11
-    ? '⚠️ NOTE: Launch is in '+days+' day'+(days!==1?'s':'')+' — this is within the 11-day lead time window.\n\n'
-    : '';
-  let lines = '';
-  escalate.forEach(function(item, i) {
-    if (i>0) lines+='\n\n';
-    const issue = item.status==='price'
+
+  let itemLines = '';
+  for (let i = 0; i < escalate.length; i++) {
+    const item = escalate[i];
+    const issue = item.status === 'price'
       ? 'PRICE ERROR — item exists in D365 but has no price assigned, blocking PO entry'
       : 'NOT RELEASED — item not released to EKP or department, blocking ordering';
-    lines += '  • '+item.name+'\n    Adaco: '+item.adaco_id+' | D365: '+item.d365_id+'\n    Issue: '+issue;
-  });
-  const email =
-    'Hi Paul,\n\n' +
-    'I\'m reaching out regarding the '+act.name+' activation (Launch: '+dateStr+').'+daysLine+'\n\n' +
-    urgency +
-    'The following item'+(escalate.length!==1?'s have':' has')+' not been verified in D365 for our location (EKP) and '+(escalate.length!==1?'require':'requires')+' your attention before we can order:\n\n' +
-    lines +
-    '\n\nCould you please look into releasing these items to our site/department and/or resolving the pricing so we can place our first order in time for the launch?\n\n' +
-    'Happy to provide any additional details.\n\n' +
-    'Thank you,\nRyan Yang\nKitchen Specialist — Eataly King of Prussia';
+    if (i > 0) itemLines += '\n\n';
+    itemLines += '  \u2022 ' + item.name + '\n    Adaco: ' + (item.adaco_id || '—') + ' | D365: ' + (item.d365_id || '—') + '\n    Issue: ' + issue;
+  }
+
+  let urgency = '';
+  if (days !== null && days >= 0 && days <= 11) {
+    urgency = '\u26a0\ufe0f NOTE: Launch is in ' + days + ' day' + (days !== 1 ? 's' : '') + ' — within or at the 11-day lead time window.\n\n';
+  }
+
+  const daysLine = days !== null
+    ? ' We are ' + (days >= 0
+        ? days + ' day' + (days !== 1 ? 's' : '') + ' out from launch'
+        : Math.abs(days) + ' day' + (Math.abs(days) !== 1 ? 's' : '') + ' past launch date')
+      + '.'
+    : '';
+
+  const email = 'Hi Paul,\n\nI\u2019m reaching out regarding the ' + act.name
+    + ' activation (Launch: ' + dateStr + ').' + daysLine + '\n\n'
+    + urgency
+    + 'The following item' + (escalate.length !== 1 ? 's have' : ' has')
+    + ' not been verified in D365 for our location (EKP) and '
+    + (escalate.length !== 1 ? 'require' : 'requires') + ' your attention before we can order:\n\n'
+    + itemLines
+    + '\n\nCould you please look into releasing these items to our site/department and/or resolving the pricing so we can place our first order in time for the launch?'
+    + '\n\nHappy to provide any additional details needed.\n\nThank you,\nRyan Yang\nKitchen Specialist \u2014 Eataly King of Prussia';
+
   document.getElementById('emailContent').textContent = email;
-  document.getElementById('modalEmail').classList.remove('hidden');
+  document.getElementById('emailModal').classList.remove('hidden');
 }
 
 function copyEmail() {
   const text = document.getElementById('emailContent').textContent;
   navigator.clipboard.writeText(text).then(function() {
-    const btn = event.target;
-    const orig = btn.textContent;
-    btn.textContent = 'Copied!';
-    setTimeout(function(){ btn.textContent = orig; }, 2000);
+    showToast('Copied to clipboard');
   });
 }
 
-// ── UTILS ─────────────────────────────────────────────────────────────────
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
+// ── MODAL HELPERS ─────────────────────────────────────────────────────────────
 function closeModal(id) {
   document.getElementById(id).classList.add('hidden');
 }
 
 document.querySelectorAll('.modal-overlay').forEach(function(o) {
-  o.addEventListener('click', function(e) { if(e.target===o) o.classList.add('hidden'); });
+  o.addEventListener('click', function(e) {
+    if (e.target === o) o.classList.add('hidden');
+  });
 });
+
 </script>
 </body>
 </html>
