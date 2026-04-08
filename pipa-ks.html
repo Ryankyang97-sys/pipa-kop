@@ -27,13 +27,13 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .wordmark-sub{font-size:0.688rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-top:4px;}
 
 /* ── TABS ── */
-.tabs{display:flex;gap:0;margin:20px 0 0;border-bottom:1px solid var(--surface2);overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.tab{flex-shrink:0;padding:8px 14px 10px;font-size:0.688rem;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap;}
+.tabs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:20px -18px 0;padding:0 18px;}
+.tabs-wrap::-webkit-scrollbar{display:none;}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--surface2);width:max-content;min-width:100%;}
+.tab{padding:8px 12px 10px;font-size:0.688rem;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .panel{display:none;padding-top:20px;}
 .panel.active{display:block;}
-
-/* ── SECTION LABELS ── */
 .section-label{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:var(--text3);margin-bottom:10px;margin-top:24px;}
 .section-label:first-of-type{margin-top:0;}
 
@@ -41,10 +41,10 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .search-wrap{position:relative;margin-bottom:4px;}
 .search-input{width:100%;background:var(--surface);border:1px solid var(--surface3);border-radius:12px;padding:13px 16px 13px 44px;color:var(--text);font-size:0.938rem;font-family:'DM Sans',sans-serif;outline:none;}
 .search-input:focus{border-color:var(--accent);}
-.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text3);}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;}
 .search-hint{font-size:0.688rem;color:var(--text3);padding-left:4px;margin-bottom:12px;margin-top:4px;}
-.results{border-radius:12px;border:1px solid var(--surface2);overflow:hidden;}
-.result-item{padding:12px 14px;border-bottom:1px solid var(--surface2);cursor:pointer;background:var(--surface);}
+.results{max-height:340px;overflow-y:auto;border-radius:12px;border:1px solid var(--surface2);}
+.result-item{padding:12px 14px;border-bottom:1px solid var(--surface2);cursor:pointer;}
 .result-item:last-child{border-bottom:none;}
 .result-item:active{background:var(--surface2);}
 .result-name{font-size:0.813rem;font-weight:600;margin-bottom:4px;line-height:1.4;}
@@ -52,16 +52,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .result-id{font-family:'JetBrains Mono',monospace;font-size:0.688rem;color:var(--accent);}
 .result-adaco{font-family:'JetBrains Mono',monospace;font-size:0.688rem;color:var(--text3);}
 .result-mf{font-size:0.563rem;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);}
-.no-results{padding:20px;text-align:center;color:var(--text3);font-size:0.813rem;background:var(--surface);border-radius:12px;border:1px solid var(--surface2);}
-.loading-row{padding:16px 14px;text-align:center;color:var(--text3);font-size:0.813rem;background:var(--surface);border-radius:12px;border:1px solid var(--surface2);}
-
-/* ── ADACO RESULTS ── */
-.adaco-item{padding:12px 14px;border-bottom:1px solid var(--surface2);background:var(--surface);}
-.adaco-item:last-child{border-bottom:none;}
-.adaco-name{font-size:0.813rem;font-weight:600;margin-bottom:4px;}
-.adaco-meta{display:flex;gap:10px;align-items:center;}
-.adaco-num{font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--accent);}
-.adaco-cat{font-size:0.563rem;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);}
+.no-results{padding:20px;text-align:center;color:var(--text3);font-size:0.813rem;}
 
 /* ── ACTIVATIONS ── */
 .activation-card{background:var(--surface);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--surface3);}
@@ -90,107 +81,95 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .item-status-label{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:3px;}
 .item-remove{color:var(--text3);font-size:0.875rem;cursor:pointer;padding:4px;flex-shrink:0;}
 .label-ok{color:#4CAF82;}.label-price{color:#C8B428;}.label-release{color:#E07070;}.label-pending{color:var(--text3);}
-.dept-tag{font-size:0.625rem;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;}
 
-/* ── BUTTONS ── */
-.btn{width:100%;padding:14px;border-radius:12px;border:none;font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity 0.15s;}
-.btn:active{opacity:0.8;}
+/* ── TRANSFER / WASTE / PROCUREMENT ── */
+.ops-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.ops-date{font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--text2);background:var(--surface2);padding:5px 10px;border-radius:8px;border:1px solid var(--surface3);}
+.section-group{background:var(--surface);border-radius:14px;overflow:hidden;border:1px solid var(--surface3);margin-bottom:14px;}
+.group-header{padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--surface3);display:flex;align-items:center;justify-content:space-between;}
+.group-title{font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);}
+.group-count{font-family:'JetBrains Mono',monospace;font-size:0.625rem;color:var(--text3);}
+.ops-row{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--surface2);gap:10px;}
+.ops-row:last-child{border-bottom:none;}
+.ops-row-info{flex:1;min-width:0;}
+.ops-row-name{font-size:0.813rem;font-weight:600;line-height:1.3;margin-bottom:2px;}
+.ops-row-id{font-family:'JetBrains Mono',monospace;font-size:0.563rem;color:var(--text3);}
+.ops-row-par{font-family:'JetBrains Mono',monospace;font-size:0.625rem;color:var(--accent);font-weight:600;}
+
+/* Transfer count inputs */
+.count-inputs{display:flex;gap:6px;flex-shrink:0;}
+.count-input{width:50px;background:var(--surface2);border:1px solid var(--surface3);border-radius:8px;padding:6px 8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.875rem;text-align:center;outline:none;}
+.count-input:focus{border-color:var(--accent);}
+.count-label{font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);text-align:center;margin-top:2px;}
+.count-col{display:flex;flex-direction:column;align-items:center;}
+.need-badge{font-family:'JetBrains Mono',monospace;font-size:0.688rem;font-weight:700;padding:3px 7px;border-radius:6px;min-width:32px;text-align:center;}
+.need-pos{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
+.need-zero{background:var(--surface2);color:var(--text3);border:1px solid var(--surface3);}
+.need-over{background:var(--green-dim);color:#4CAF82;border:1px solid var(--green-border);}
+
+/* Waste inputs */
+.waste-row{display:grid;grid-template-columns:1fr auto;align-items:center;padding:10px 14px;border-bottom:1px solid var(--surface2);gap:8px;}
+.waste-row:last-child{border-bottom:none;}
+.waste-days{display:flex;gap:4px;flex-shrink:0;}
+.waste-day-input{width:32px;background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;padding:5px 4px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.75rem;text-align:center;outline:none;}
+.waste-day-input:focus{border-color:var(--accent);}
+.waste-day-input.has-value{border-color:var(--accent-border);background:var(--accent-dim);}
+.waste-total{font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:700;min-width:24px;text-align:right;color:var(--text2);}
+.day-labels{display:flex;gap:4px;justify-content:flex-end;padding:6px 14px 0;margin-bottom:-2px;}
+.day-label{width:32px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);}
+.day-label-total{min-width:24px;text-align:right;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);}
+
+/* Procurement checkboxes */
+.proc-row{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--surface2);gap:10px;}
+.proc-row:last-child{border-bottom:none;}
+.proc-check{display:flex;gap:8px;flex-shrink:0;}
+.day-check{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.day-check-label{font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);}
+.day-checkbox{width:24px;height:24px;border-radius:6px;border:1.5px solid var(--surface3);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.75rem;transition:background 0.15s,border-color 0.15s;}
+.day-checkbox.checked{background:var(--green-dim);border-color:var(--green-border);color:#4CAF82;}
+.proc-info{flex:1;min-width:0;}
+.proc-name{font-size:0.813rem;font-weight:600;line-height:1.3;margin-bottom:2px;}
+.proc-id{font-family:'JetBrains Mono',monospace;font-size:0.563rem;color:var(--text3);}
+
+/* Adaco MStore */
+.adaco-result-item{padding:12px 14px;border-bottom:1px solid var(--surface2);}
+.adaco-result-item:last-child{border-bottom:none;}
+.adaco-number{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--accent);margin-bottom:4px;letter-spacing:0.04em;}
+.adaco-desc{font-size:0.813rem;font-weight:600;line-height:1.4;margin-bottom:3px;}
+.adaco-cat{font-size:0.563rem;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);}
+.copy-btn{margin-left:auto;background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text3);font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:4px 8px;cursor:pointer;flex-shrink:0;}
+.copy-btn:active{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent);}
+
+/* Shared UI */
+.btn{width:100%;padding:14px;border-radius:12px;border:none;font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;margin-top:8px;}
 .btn-primary{background:var(--accent);color:#fff;}
 .btn-secondary{background:var(--surface2);color:var(--text2);border:1px solid var(--surface3);}
 .btn-danger{background:var(--red-dim);color:#E07070;border:1px solid var(--red-border);}
 .btn-sm{width:auto;padding:8px 14px;font-size:0.75rem;margin-top:0;}
-
-/* ── FORMS ── */
+.btn-xs{width:auto;padding:5px 10px;font-size:0.688rem;margin-top:0;}
 .form-group{margin-bottom:14px;}
 .form-label{font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px;display:block;}
 .form-input{width:100%;background:var(--surface);border:1px solid var(--surface3);border-radius:10px;padding:11px 14px;color:var(--text);font-size:0.875rem;font-family:'DM Sans',sans-serif;outline:none;}
 .form-input:focus{border-color:var(--accent);}
-
-/* ── MODALS ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
 .modal-overlay.hidden{display:none;}
-.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px calc(var(--safe-bottom) + 24px);width:100%;max-width:480px;max-height:88vh;overflow-y:auto;}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px calc(var(--safe-bottom) + 24px);width:100%;max-width:480px;max-height:85vh;overflow-y:auto;}
 .modal-title{font-size:1rem;font-weight:700;margin-bottom:4px;}
 .modal-sub{font-size:0.75rem;color:var(--text3);margin-bottom:20px;}
 .modal-close{float:right;font-size:1.25rem;cursor:pointer;color:var(--text3);}
 .email-box{background:var(--bg);border-radius:10px;padding:14px;border:1px solid var(--surface3);font-size:0.688rem;line-height:1.7;color:var(--text2);font-family:'JetBrains Mono',monospace;white-space:pre-wrap;word-break:break-word;margin-bottom:12px;max-height:320px;overflow-y:auto;}
-.search-results-modal{border-radius:10px;border:1px solid var(--surface2);margin-top:8px;overflow:hidden;}
-
-/* ── FILTER CHIPS ── */
-.filter-row{display:flex;gap:6px;margin:10px 0 4px;align-items:center;flex-wrap:nowrap;}
-.filter-label{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);white-space:nowrap;flex-shrink:0;}
-.filter-chips{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
-.filter-chips::-webkit-scrollbar{display:none;}
-.chip{flex-shrink:0;padding:5px 10px;border-radius:20px;font-size:0.688rem;font-weight:600;cursor:pointer;border:1px solid var(--surface3);background:var(--surface2);color:var(--text2);white-space:nowrap;transition:all 0.12s;}
-.chip:active{opacity:0.7;}
-.chip.active{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent);}
-.filter-section{margin-bottom:8px;}
-
-/* ── MISC ── */
+.search-results-modal{max-height:240px;overflow-y:auto;border-radius:10px;border:1px solid var(--surface2);margin-top:8px;}
 .empty-state{text-align:center;padding:40px 20px;color:var(--text3);}
 .empty-icon{font-size:2rem;margin-bottom:10px;}
 .empty-msg{font-size:0.813rem;line-height:1.6;}
 .divider{height:1px;background:var(--surface2);margin:16px 0;}
-.spin{display:inline-block;animation:spin 0.8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.toast{position:fixed;bottom:calc(var(--safe-bottom) + 24px);left:50%;transform:translateX(-50%);background:var(--surface3);color:var(--text);padding:10px 18px;border-radius:10px;font-size:0.813rem;font-weight:600;z-index:200;pointer-events:none;transition:opacity 0.3s;}
-.toast.hidden{opacity:0;}
-
-/* ── RESULT EXPAND + ADD TO ACTIVATION ── */
-.result-item.expanded{background:var(--surface2);cursor:default;}
-.result-actions{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--surface3);}
-.result-item.expanded .result-actions{display:block;}
-.act-select{width:100%;background:var(--bg);border:1px solid var(--surface3);border-radius:8px;padding:9px 12px;color:var(--text);font-size:0.813rem;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:8px;}
-.act-select:focus{border-color:var(--accent);}
-.add-act-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:0.75rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;}
-.add-act-btn:active{opacity:0.8;}
-
-/* ── ADACO COPY BUTTON ── */
-.adaco-row{display:flex;align-items:center;gap:0;padding:12px 14px;border-bottom:1px solid var(--surface2);background:var(--surface);}
-.adaco-row:last-child{border-bottom:none;}
-.adaco-body{flex:1;min-width:0;}
-.copy-btn{flex-shrink:0;padding:7px 12px;border-radius:8px;border:1px solid var(--surface3);background:var(--surface2);color:var(--text2);font-size:0.688rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:all 0.12s;margin-left:10px;}
-.copy-btn:active{opacity:0.7;}
-.copy-btn.copied{background:var(--green-dim);border-color:var(--green-border);color:#4CAF82;}
-
-/* ── PASTRY TRANSFER ── */
-.pt-section-header{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:var(--text3);padding:10px 0 6px;margin-top:16px;border-bottom:1px solid var(--surface2);}
-.pt-section-header:first-of-type{margin-top:0;}
-.pt-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--surface2);}
-.pt-row:last-child{border-bottom:none;}
-.pt-name{flex:1;font-size:0.813rem;font-weight:600;line-height:1.3;}
-.pt-unit{font-size:0.625rem;color:var(--text3);font-weight:600;text-transform:uppercase;margin-top:2px;}
-.pt-adaco{font-family:'JetBrains Mono',monospace;font-size:0.625rem;color:var(--accent);flex-shrink:0;}
-.pt-qty-wrap{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.pt-qty-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--surface3);background:var(--surface2);color:var(--text);font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.pt-qty-btn:active{opacity:0.7;}
-.pt-qty{width:36px;text-align:center;background:transparent;border:none;color:var(--text);font-size:0.938rem;font-weight:700;font-family:'JetBrains Mono',monospace;outline:none;}
-.pt-summary{background:var(--surface);border-radius:14px;border:1px solid var(--surface3);margin-top:16px;overflow:hidden;}
-.pt-summary-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--surface3);}
-.pt-summary-title{font-size:0.875rem;font-weight:700;}
-.pt-summary-count{font-size:0.688rem;color:var(--text3);}
-.pt-entry-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--surface2);}
-.pt-entry-row:last-child{border-bottom:none;}
-.pt-entry-row.done{opacity:0.4;}
-.pt-entry-num{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--accent);min-width:70px;}
-.pt-entry-info{flex:1;min-width:0;}
-.pt-entry-name{font-size:0.813rem;font-weight:600;}
-.pt-entry-qty{font-size:0.688rem;color:var(--text2);margin-top:2px;}
-.pt-entry-copy{flex-shrink:0;}
-.pt-done-btn{flex-shrink:0;width:28px;height:28px;border-radius:8px;border:1px solid var(--surface3);background:var(--surface2);color:var(--text3);font-size:0.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.pt-done-btn.checked{background:var(--green-dim);border-color:var(--green-border);color:#4CAF82;}
-
-/* ── PASTRY TRANSFER LOG ── */
-.pt-log{background:var(--surface);border-radius:14px;border:1px solid var(--surface3);margin-top:16px;overflow:hidden;}
-.pt-log-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--surface3);}
-.pt-log-title{font-size:0.875rem;font-weight:700;}
-.pt-log-entry{padding:12px 16px;border-bottom:1px solid var(--surface2);}
-.pt-log-entry:last-child{border-bottom:none;}
-.pt-log-date{font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;}
-.pt-log-items{font-size:0.75rem;color:var(--text2);line-height:1.7;}
-.pt-log-item{display:flex;gap:8px;}
-.pt-log-qty{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text);min-width:24px;}
-.pt-log-del{color:var(--text3);font-size:0.75rem;cursor:pointer;padding:2px 6px;float:right;}
+.dept-tag{font-size:0.625rem;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;}
+.waste-week-label{font-size:0.625rem;color:var(--text3);margin-bottom:4px;}
+.waste-nav{display:flex;align-items:center;gap:10px;}
+.waste-nav-btn{background:var(--surface2);border:1px solid var(--surface3);border-radius:8px;color:var(--text2);font-size:0.875rem;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.toast{position:fixed;bottom:calc(var(--safe-bottom) + 20px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--green-border);color:#4CAF82;font-size:0.75rem;font-weight:600;padding:10px 18px;border-radius:20px;z-index:200;opacity:0;transition:opacity 0.2s;pointer-events:none;}
+.toast.show{opacity:1;}
+.row-group-divider{height:6px;background:var(--surface2);}
 </style>
 </head>
 <body>
@@ -201,136 +180,129 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
   <div class="wordmark-main">KS <span>Tool</span></div>
   <div class="wordmark-sub">Kitchen Specialist &middot; Eataly KOP</div>
 
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('lookup',this)">D365 Lookup</div>
-    <div class="tab" onclick="switchTab('adaco',this)">Adaco / MStore</div>
-    <div class="tab" onclick="switchTab('activations',this)">Activations</div>
-    <div class="tab" onclick="switchTab('pastry',this)">Pastry Transfer</div>
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('lookup',this)">D365</div>
+      <div class="tab" onclick="switchTab('mstore',this)">MStore</div>
+      <div class="tab" onclick="switchTab('activations',this)">Activations</div>
+      <div class="tab" onclick="switchTab('transfer',this)">Transfer</div>
+      <div class="tab" onclick="switchTab('waste',this)">Waste</div>
+      <div class="tab" onclick="switchTab('procurement',this)">Procurement</div>
+    </div>
   </div>
 
-  <!-- ── TAB: D365 LOOKUP ── -->
+  <!-- ══ D365 LOOKUP ══════════════════════════════════════════════════════ -->
   <div class="panel active" id="panel-lookup">
     <div class="section-label">Search Released Products</div>
     <div class="search-wrap">
       <span class="search-icon">&#128269;</span>
-      <input class="search-input" id="lookupSearch" type="search"
-        placeholder="Adaco ID, D365 #, or name…"
-        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <input class="search-input" id="lookupSearch" type="search" placeholder="Adaco ID, D365 #, or product name..." oninput="debouncedLookup(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
-
-    <!-- Department filter -->
-    <div class="filter-section">
-      <div class="filter-row">
-        <span class="filter-label">Dept</span>
-        <div class="filter-chips" id="deptChips">
-          <div class="chip" data-filter="dept" data-val="RS" onclick="toggleFilter('dept','RS',this)">Restaurant</div>
-          <div class="chip" data-filter="dept" data-val="P1" onclick="toggleFilter('dept','P1',this)">Pronto</div>
-          <div class="chip" data-filter="dept" data-val="BA" onclick="toggleFilter('dept','BA',this)">Bakery</div>
-          <div class="chip" data-filter="dept" data-val="PA" onclick="toggleFilter('dept','PA',this)">Pastry</div>
-          <div class="chip" data-filter="dept" data-val="CK" onclick="toggleFilter('dept','CK',this)">Kitchen</div>
-          <div class="chip" data-filter="dept" data-val="FA" onclick="toggleFilter('dept','FA',this)">Fresh Pasta</div>
-          <div class="chip" data-filter="dept" data-val="OF" onclick="toggleFilter('dept','OF',this)">Produce</div>
-          <div class="chip" data-filter="dept" data-val="FG" onclick="toggleFilter('dept','FG',this)">Cheese</div>
-          <div class="chip" data-filter="dept" data-val="VI" onclick="toggleFilter('dept','VI',this)">Wine/Bev</div>
-          <div class="chip" data-filter="dept" data-val="U2" onclick="toggleFilter('dept','U2',this)">Spirits</div>
-          <div class="chip" data-filter="dept" data-val="GH" onclick="toggleFilter('dept','GH',this)">Beverages</div>
-          <div class="chip" data-filter="dept" data-val="MP" onclick="toggleFilter('dept','MP',this)">Pantry</div>
-          <div class="chip" data-filter="dept" data-val="GF" onclick="toggleFilter('dept','GF',this)">Eggs/Dairy</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Brand filter — populated dynamically after first search -->
-    <div class="filter-section" id="brandFilterSection" style="display:none;">
-      <div class="filter-row">
-        <span class="filter-label">Brand</span>
-        <div class="filter-chips" id="brandChips"></div>
-      </div>
-    </div>
-
-    <div class="search-hint" style="margin-top:0;">e.g. "2065342" · "00699091" · "asparagus"</div>
-    <div id="lookupResults"></div>
+    <div class="search-hint">e.g. "2065342", "00699091", or "asparagus"</div>
+    <div class="results" id="lookupResults" style="display:none;"></div>
   </div>
 
-  <!-- ── TAB: ADACO / MSTORE ── -->
-  <div class="panel" id="panel-adaco">
-    <div class="section-label">Search Adaco Ingredients</div>
+  <!-- ══ ADACO / MSTORE ═══════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-mstore">
+    <div class="section-label">MStore / Waste Lookup</div>
     <div class="search-wrap">
       <span class="search-icon">&#128269;</span>
-      <input class="search-input" id="adacoSearch" type="search"
-        placeholder="Ingredient name or product number…"
-        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <input class="search-input" id="mstoreSearch" type="search" placeholder="Search ingredient by name or number..." oninput="debouncedMstore(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
-    <div class="search-hint">e.g. "chicken breast" · "asparagus" · "2065342"</div>
-    <div id="adacoResults"></div>
+    <div class="search-hint">Cook writes "chicken breast" → find Adaco product #</div>
+    <div class="results" id="mstoreResults" style="display:none;"></div>
   </div>
 
-  <!-- ── TAB: ACTIVATIONS ── -->
+  <!-- ══ ACTIVATIONS ══════════════════════════════════════════════════════ -->
   <div class="panel" id="panel-activations">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
       <div class="section-label" style="margin:0;">Active Launches</div>
       <button class="btn btn-primary btn-sm" onclick="showNewActivation()">+ New</button>
     </div>
-    <div id="activationsList">
-      <div class="loading-row">&#8987; Loading…</div>
-    </div>
+    <div id="activationsList"></div>
   </div>
 
-</div>
-
-  <!-- ── TAB: PASTRY TRANSFER ── -->
-  <div class="panel" id="panel-pastry">
-
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-      <div class="section-label" style="margin:0;">PiPa ← Pastry Daily Order</div>
-      <button class="btn btn-secondary btn-sm" onclick="ptClearAll()">Clear</button>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <div id="pt-datestamp" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--text2);"></div>
-    </div>
-    <div class="search-hint" style="margin-bottom:16px;margin-top:0;">Enter order qty, then use the MStore checklist below.</div>
-
-    <!-- DOLCI / PASTRY section -->
-    <div class="pt-section-header">Dolci &amp; Pastry</div>
-    <div id="pt-items-dolci"></div>
-
-    <!-- TOPPINGS section -->
-    <div class="pt-section-header">Toppings for Cannoli &amp; Gelato</div>
-    <div id="pt-items-toppings"></div>
-
-    <!-- MStore Entry Checklist -->
-    <div class="pt-summary" id="pt-summary" style="display:none;">
-      <div class="pt-summary-header">
-        <span class="pt-summary-title">&#128203; MStore Entry</span>
-        <span class="pt-summary-count" id="pt-summary-count"></span>
+  <!-- ══ TRANSFER ══════════════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-transfer">
+    <div class="ops-header">
+      <div>
+        <div class="section-label" style="margin:0 0 2px;">Pronto Count Sheet</div>
+        <div style="font-size:0.625rem;color:var(--text3);">Floor / Walk-in → Need</div>
       </div>
-      <div id="pt-entry-list"></div>
+      <div>
+        <div class="ops-date" id="transferDate"></div>
+        <div style="font-size:0.5rem;color:var(--text3);text-align:right;margin-top:3px;">auto-saves</div>
+      </div>
     </div>
 
-    <!-- Save Entry -->
-    <div id="pt-save-wrap" style="display:none;margin-top:12px;">
-      <div style="display:flex;gap:8px;align-items:center;">
-        <div style="flex:1;">
-          <label class="form-label" style="margin-bottom:4px;">Transfer Date</label>
-          <input class="form-input" type="date" id="pt-save-date" style="padding:9px 12px;font-size:0.813rem;">
+    <!-- Column headers -->
+    <div style="display:flex;align-items:center;padding:0 14px 6px;gap:10px;border-bottom:1px solid var(--surface3);margin-bottom:4px;">
+      <div style="flex:1;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">Item</div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <div class="count-col"><div style="font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);width:50px;text-align:center;">Floor</div></div>
+        <div class="count-col"><div style="font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);width:50px;text-align:center;">Walk-in</div></div>
+      </div>
+      <div style="font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);width:38px;text-align:center;">Need</div>
+    </div>
+
+    <div id="transferList"></div>
+
+    <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearTransfer()">Clear All Counts</button>
+    <button class="btn btn-primary" style="margin-top:6px;" onclick="shareTransfer()">&#128228; Share / Export</button>
+  </div>
+
+  <!-- ══ WASTE ═════════════════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-waste">
+    <div class="ops-header">
+      <div>
+        <div class="section-label" style="margin:0 0 2px;">Pronto Waste Log</div>
+        <div class="waste-nav">
+          <button class="waste-nav-btn" onclick="changeWasteWeek(-1)">&#8249;</button>
+          <div style="font-size:0.625rem;color:var(--text2);" id="wasteWeekLabel"></div>
+          <button class="waste-nav-btn" onclick="changeWasteWeek(1)">&#8250;</button>
         </div>
-        <button class="btn btn-primary btn-sm" style="margin-top:18px;height:38px;" onclick="ptSaveEntry()">&#128190; Save Entry</button>
+      </div>
+      <div style="text-align:right;">
+        <div class="ops-date" id="wasteWeekRange"></div>
+        <div style="font-size:0.5rem;color:var(--text3);margin-top:3px;">auto-saves</div>
       </div>
     </div>
 
-    <!-- Transfer Log -->
-    <div class="pt-log" id="pt-log" style="display:none;">
-      <div class="pt-log-header">
-        <span class="pt-log-title">&#128196; Transfer Log</span>
-        <span id="pt-log-count" style="font-size:0.688rem;color:var(--text3);"></span>
-      </div>
-      <div id="pt-log-entries"></div>
+    <!-- Day column headers -->
+    <div style="display:flex;align-items:center;padding:0 14px 4px;gap:8px;justify-content:flex-end;border-bottom:1px solid var(--surface3);margin-bottom:4px;">
+      <div style="flex:1;"></div>
+      <div style="display:flex;gap:4px;" id="wasteDayHeaders"></div>
+      <div style="min-width:26px;text-align:right;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">Tot</div>
     </div>
 
+    <div id="wasteList"></div>
+
+    <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearWasteWeek()">Clear Week</button>
+    <button class="btn btn-primary" style="margin-top:6px;" onclick="shareWaste()">&#128228; Share / Export</button>
   </div>
 
+  <!-- ══ PROCUREMENT ════════════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-procurement">
+    <div class="ops-header">
+      <div>
+        <div class="section-label" style="margin:0 0 2px;">EDT Ordering</div>
+        <div style="font-size:0.625rem;color:var(--text3);">Mon / Wed / Fri</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="ops-date" id="procDate"></div>
+        <div style="font-size:0.5rem;color:var(--text3);margin-top:3px;">auto-saves</div>
+      </div>
+    </div>
+    <div id="procList"></div>
+    <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearProc()">Clear All</button>
+  </div>
 
-<!-- ── MODAL: NEW ACTIVATION ── -->
+</div><!-- .page -->
+
+<!-- ═══ TOAST ═══════════════════════════════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══ NEW ACTIVATION MODAL ════════════════════════════════════════════════ -->
 <div class="modal-overlay hidden" id="newActModal">
   <div class="modal">
     <span class="modal-close" onclick="closeModal('newActModal')">&#10005;</span>
@@ -346,14 +318,14 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     </div>
     <div class="form-group">
       <label class="form-label">Department / Concept</label>
-      <input class="form-input" id="actDept" placeholder="e.g. Pronto, PiPa, Pastry…">
+      <input class="form-input" id="actDept" placeholder="e.g. Pronto, PiPa, Pastry...">
     </div>
     <button class="btn btn-primary" onclick="createActivation()">Create</button>
     <button class="btn btn-secondary" onclick="closeModal('newActModal')" style="margin-top:6px;">Cancel</button>
   </div>
 </div>
 
-<!-- ── MODAL: ADD ITEM ── -->
+<!-- ═══ ADD ITEM MODAL ═══════════════════════════════════════════════════════ -->
 <div class="modal-overlay hidden" id="addItemModal">
   <div class="modal">
     <span class="modal-close" onclick="closeModal('addItemModal')">&#10005;</span>
@@ -361,9 +333,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     <div class="modal-sub" id="addItemActName"></div>
     <div class="search-wrap">
       <span class="search-icon">&#128269;</span>
-      <input class="search-input" id="addItemSearch" type="search"
-        placeholder="Adaco ID, D365 #, or name…"
-        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <input class="search-input" id="addItemSearch" type="search" placeholder="Search Adaco ID or product name..." oninput="debouncedAddSearch(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
     <div class="search-results-modal" id="addItemResults"></div>
     <div class="divider"></div>
@@ -379,22 +349,22 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
   </div>
 </div>
 
-<!-- ── MODAL: STATUS PICKER ── -->
+<!-- ═══ STATUS PICKER MODAL ══════════════════════════════════════════════════ -->
 <div class="modal-overlay hidden" id="statusModal">
   <div class="modal">
     <span class="modal-close" onclick="closeModal('statusModal')">&#10005;</span>
-    <div class="modal-title" id="statusModalName" style="margin-bottom:4px;font-size:0.875rem;line-height:1.4;"></div>
+    <div class="modal-title" id="statusModalName" style="margin-bottom:4px;font-size:0.875rem;"></div>
     <div class="modal-sub">Set verification status</div>
     <div style="display:flex;flex-direction:column;gap:8px;">
       <button class="btn btn-secondary" style="border-color:var(--green-border);color:#4CAF82;" onclick="setStatus('ok')">&#9989; Verified — Works in PO</button>
       <button class="btn btn-secondary" style="border-color:var(--yellow-border);color:#C8B428;" onclick="setStatus('price')">&#9888;&#65039; Price Error — Needs fix</button>
-      <button class="btn btn-secondary" style="border-color:var(--red-border);color:#E07070;" onclick="setStatus('release')">&#128683; Not Released to EKP</button>
+      <button class="btn btn-secondary" style="border-color:var(--red-border);color:#E07070;" onclick="setStatus('release')">&#128683; Not Released to EKP — Escalate</button>
       <button class="btn btn-secondary" onclick="setStatus('pending')">&#8987; Pending Verification</button>
     </div>
   </div>
 </div>
 
-<!-- ── MODAL: EMAIL ── -->
+<!-- ═══ EMAIL MODAL ═══════════════════════════════════════════════════════════ -->
 <div class="modal-overlay hidden" id="emailModal">
   <div class="modal">
     <span class="modal-close" onclick="closeModal('emailModal')">&#10005;</span>
@@ -406,380 +376,202 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
   </div>
 </div>
 
-<!-- ── TOAST ── -->
-<div class="toast hidden" id="toast"></div>
-
 <script>
-'use strict';
-
-// ── SUPABASE ──────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════════════════
 const SB_URL = 'https://fhbusipvtxjnwidlgpaa.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
 
-const HEADERS = {
-  'apikey': SB_KEY,
-  'Authorization': 'Bearer ' + SB_KEY,
-  'Content-Type': 'application/json'
-};
+const MF_LABELS = {"CK":"Kitchen Prep","P1":"Pronto","RS":"Restaurant","BA":"Bakery","PA":"Pastry","FA":"Fresh Pasta","OF":"Produce","FG":"Cheese/Dairy","GF":"Eggs/Dairy","MP":"Pantry/Oil"};
 
 async function sbFetch(path) {
-  const r = await fetch(SB_URL + '/rest/v1/' + path, { headers: HEADERS });
-  if (!r.ok) throw new Error('Supabase ' + r.status);
+  const r = await fetch(SB_URL + '/rest/v1/' + path, {
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+  });
+  if (!r.ok) throw new Error('Supabase error ' + r.status);
   return r.json();
 }
 
 async function sbPost(table, body) {
   const r = await fetch(SB_URL + '/rest/v1/' + table, {
     method: 'POST',
-    headers: { ...HEADERS, 'Prefer': 'return=representation' },
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
     body: JSON.stringify(body)
   });
-  if (!r.ok) throw new Error('Supabase ' + r.status);
+  if (!r.ok) throw new Error('Supabase error ' + r.status);
   return r.json();
 }
 
 async function sbPatch(table, id, body) {
   const r = await fetch(SB_URL + '/rest/v1/' + table + '?id=eq.' + id, {
     method: 'PATCH',
-    headers: { ...HEADERS, 'Prefer': 'return=representation' },
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
     body: JSON.stringify(body)
   });
-  if (!r.ok) throw new Error('Supabase ' + r.status);
+  if (!r.ok) throw new Error('Supabase error ' + r.status);
   return r.json();
 }
 
 async function sbDelete(table, id) {
   const r = await fetch(SB_URL + '/rest/v1/' + table + '?id=eq.' + id, {
     method: 'DELETE',
-    headers: HEADERS
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
   });
-  if (!r.ok) throw new Error('Supabase ' + r.status);
+  if (!r.ok) throw new Error('Supabase error ' + r.status);
 }
 
-// ── UTILS ─────────────────────────────────────────────────────────────────────
 function debounce(fn, ms) {
   let t;
-  return function() {
-    const args = arguments;
-    clearTimeout(t);
-    t = setTimeout(function() { fn.apply(null, args); }, ms);
-  };
+  return function() { const a = arguments; clearTimeout(t); t = setTimeout(function() { fn.apply(null,a); }, ms); };
 }
 
 function showToast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.classList.remove('hidden');
-  clearTimeout(el._t);
-  el._t = setTimeout(function() { el.classList.add('hidden'); }, 2200);
+  el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 2200);
 }
 
-// Strip leading zeros for numeric ID queries
-function stripZeros(s) {
-  return s.replace(/^0+/, '') || '0';
-}
-
-// ── TABS ──────────────────────────────────────────────────────────────────────
-function switchTab(tab, el) {
+// ═══════════════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════════════════
+function switchTab(id, el) {
   document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
-  el.classList.add('active');
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
-  document.getElementById('panel-' + tab).classList.add('active');
-  if (tab === 'activations') loadActivations();
-  if (tab === 'pastry') ptRender();
+  el.classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+  if (id === 'transfer') renderTransfer();
+  if (id === 'waste') renderWaste();
+  if (id === 'procurement') renderProc();
 }
 
-// ── MACROFAMILY LABELS ────────────────────────────────────────────────────────
-const MF = {
-  CK:'Kitchen Prep', P1:'Pronto', RS:'Restaurant', BA:'Bakery',
-  PA:'Pastry', FA:'Fresh Pasta', OF:'Produce', FG:'Cheese/Dairy',
-  GF:'Eggs/Dairy', MP:'Pantry/Oil', VI:'Wine/Bev', U2:'Spirits',
-  GH:'Beverages', GS:'Grocery', GD:'Grocery Dry', SM:'Ready Meals',
-  MC:'Butcher', GE:'Gelato', LV:'Lavazza', P3:'Panini', TF:'Truffle'
-};
+// ═══════════════════════════════════════════════════════════════════════════
+// D365 LOOKUP
+// ═══════════════════════════════════════════════════════════════════════════
+const debouncedLookup = debounce(runSearch, 300);
 
-// ── FILTER STATE ──────────────────────────────────────────────────────────────
-const filters = { dept: null, brand: null };
-
-function toggleFilter(type, val, el) {
-  // Deselect if already active
-  if (filters[type] === val) {
-    filters[type] = null;
-    el.classList.remove('active');
-  } else {
-    // Deselect previous chip of same type
-    document.querySelectorAll('.chip[data-filter="' + type + '"]').forEach(function(c) {
-      c.classList.remove('active');
-    });
-    filters[type] = val;
-    el.classList.add('active');
-  }
-  // Re-run search with new filter
-  var q = document.getElementById('lookupSearch').value.trim();
-  if (q.length >= 2 || filters.dept || filters.brand) runLookupSearch(q);
-}
-
-// After a search, extract unique brands from results and render brand chips
-function renderBrandChips(rows) {
-  var brands = [];
-  var seen = {};
-  rows.forEach(function(r) {
-    if (r.vendor_brand && r.vendor_brand !== 'EATALY' && !seen[r.vendor_brand]) {
-      seen[r.vendor_brand] = true;
-      brands.push(r.vendor_brand);
-    }
-  });
-  var section = document.getElementById('brandFilterSection');
-  var chips = document.getElementById('brandChips');
-  if (!brands.length) { section.style.display = 'none'; return; }
-  brands.sort();
-  chips.innerHTML = brands.map(function(b) {
-    var isActive = filters.brand === b;
-    return '<div class="chip' + (isActive ? ' active' : '') + '" data-filter="brand" data-val="' + b + '" onclick="toggleFilter(\'brand\',\'' + b.replace(/'/g,"\\'") + '\',this)">' + b + '</div>';
-  }).join('');
-  section.style.display = '';
-}
-
-// ── D365 LOOKUP ──────────────────────────────────────────────────────────────
-function buildLookupQuery(q) {
-  var base = 'ks_products?';
-  var params = [];
-
-  // Text vs numeric query
-  var stripped = q ? stripZeros(q) : '';
-  if (q && /^\d+$/.test(stripped)) {
-    params.push('or=(d365_id.eq.' + encodeURIComponent(q)
-      + ',d365_id.eq.' + encodeURIComponent(stripped)
-      + ',adaco_id.eq.' + encodeURIComponent(q)
-      + ',adaco_id.eq.' + encodeURIComponent(stripped) + ')');
-  } else if (q) {
-    params.push('name=ilike.*' + encodeURIComponent(q) + '*');
-    params.push('order=name.asc');
-  } else {
-    // No text query — filter-only mode, sort by name
-    params.push('order=name.asc');
-  }
-
-  // Department filter
-  if (filters.dept) {
-    params.push('macrofamily=eq.' + encodeURIComponent(filters.dept));
-  }
-  // Brand filter
-  if (filters.brand) {
-    params.push('vendor_brand=eq.' + encodeURIComponent(filters.brand));
-  }
-
-  params.push('limit=40');
-  params.push('select=d365_id,adaco_id,name,macrofamily,vendor_brand');
-
-  return base + params.join('&');
-}
-
-function renderLookupRow(r, clickFn) {
-  var mfLabel = MF[r.macrofamily] || r.macrofamily || '\u2014';
-  var brand = (r.vendor_brand && r.vendor_brand !== 'EATALY') ? r.vendor_brand : '';
-
-  function esc(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
-
-  // Modal search (Add Item modal) \u2014 simple clickable row
-  if (clickFn) {
-    return '<div class="result-item" onclick="' + clickFn + '(\'' + esc(r.d365_id) + '\',\'' + esc(r.adaco_id) + '\',\'' + esc(r.name) + '\',\'' + esc(r.macrofamily||'') + '\')">'
-      + '<div class="result-name">' + r.name + '</div>'
-      + '<div class="result-meta">'
-      + '<span class="result-id">D365: ' + r.d365_id + '</span>'
-      + '<span class="result-adaco">Adaco: ' + r.adaco_id + '</span>'
-      + '<span class="result-mf">' + mfLabel + '</span>'
-      + (brand ? '<span class="result-adaco">' + brand + '</span>' : '')
-      + '</div></div>';
-  }
-
-  // Main lookup tab \u2014 expandable card with Add to Activation
-  var uid = 'res-' + r.d365_id.replace(/[^a-z0-9]/gi, '');
-  var actOptions = activations.length
-    ? activations.map(function(a, ai) {
-        return '<option value="' + ai + '">' + a.name + '</option>';
-      }).join('')
-    : '<option value="" disabled>No activations yet</option>';
-
-  return '<div class="result-item" id="' + uid + '" onclick="expandResult(this)">'
-    + '<div class="result-name">' + r.name + '</div>'
-    + '<div class="result-meta">'
-    + '<span class="result-id">D365: ' + r.d365_id + '</span>'
-    + '<span class="result-adaco">Adaco: ' + r.adaco_id + '</span>'
-    + '<span class="result-mf">' + mfLabel + '</span>'
-    + (brand ? '<span class="result-adaco">' + brand + '</span>' : '')
-    + '</div>'
-    + '<div class="result-actions" onclick="event.stopPropagation()">'
-    + '<select class="act-select" id="sel-' + uid + '">'
-    + actOptions
-    + '</select>'
-    + '<button class="add-act-btn" onclick="addToActFromLookup(\'' + esc(r.d365_id) + '\',\'' + esc(r.adaco_id) + '\',\'' + esc(r.name) + '\',\'' + esc(r.macrofamily||'') + '\',\'sel-' + uid + '\')">'
-    + '+ Add to Activation'
-    + '</button>'
-    + '</div>'
-    + '</div>';
-}
-
-
-function expandResult(el) {
-  // Collapse any other expanded row first
-  document.querySelectorAll('.result-item.expanded').forEach(function(other) {
-    if (other !== el) other.classList.remove('expanded');
-  });
-  el.classList.toggle('expanded');
-}
-
-async function addToActFromLookup(d365, adaco, name, mf, selId) {
-  var sel = document.getElementById(selId);
-  var ai = parseInt(sel.value);
-  if (isNaN(ai) || !activations[ai]) { showToast('Pick an activation first'); return; }
-  if (!activations[ai].items) activations[ai].items = [];
-  // Prevent duplicate
-  var exists = activations[ai].items.some(function(i) { return i.d365_id === d365; });
-  if (exists) { showToast('Already in that activation'); return; }
-  activations[ai].items.push({ d365_id: d365, adaco_id: adaco, name: name, macrofamily: mf, status: 'pending' });
-  await patchItems(ai);
-  showToast('Added to ' + activations[ai].name);
-}
-
-async function runLookupSearch(q) {
+async function runSearch(val) {
   const el = document.getElementById('lookupResults');
-  q = (q || '').trim();
-  // Need at least a 2-char query OR an active filter to search
-  if (q.length < 2 && !filters.dept && !filters.brand) {
-    el.innerHTML = '';
-    document.getElementById('brandFilterSection').style.display = 'none';
-    return;
+  val = (val || '').trim();
+  if (val.length < 2) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = 'block';
+  el.innerHTML = '<div class="no-results">Searching…</div>';
+
+  const stripped = val.replace(/^0+/, '') || '0';
+  let query;
+  if (/^\d+$/.test(stripped)) {
+    query = 'ks_products?or=(d365_id.ilike.*' + val + '*,adaco_id.ilike.*stripped*,name.ilike.*' + encodeURIComponent(val) + '*)&order=name&limit=30'.replace('stripped', stripped);
+    query = 'ks_products?or=(d365_id.ilike.*' + encodeURIComponent(val) + '*,adaco_id.ilike.*' + encodeURIComponent(stripped) + '*,name.ilike.*' + encodeURIComponent(val) + '*)&order=name&limit=30';
+  } else {
+    query = 'ks_products?name=ilike.*' + encodeURIComponent(val) + '*&order=name&limit=30';
   }
-  el.innerHTML = '<div class="loading-row"><span class="spin">&#9696;</span> Searching…</div>';
+
   try {
-    const rows = await sbFetch(buildLookupQuery(q));
-    // Render brand chips from full result set
-    renderBrandChips(rows);
-    // If brand filter is active, client-side filter the display (brand already filtered server-side)
-    if (!rows.length) {
-      el.innerHTML = '<div class="no-results">No products found' + (q ? ' for "' + q + '"' : '') + '</div>';
-      return;
-    }
-    el.innerHTML = '<div class="results">' + rows.map(function(r) { return renderLookupRow(r, null); }).join('') + '</div>';
+    const rows = await sbFetch(query);
+    if (!rows.length) { el.innerHTML = '<div class="no-results">No results for "' + val + '"</div>'; return; }
+    el.innerHTML = rows.map(function(r) {
+      return '<div class="result-item" onclick="copyD365Id(\'' + r.d365_id + '\')"><div class="result-name">' + r.name + '</div><div class="result-meta"><span class="result-id">D365: ' + r.d365_id + '</span><span class="result-adaco">Adaco: ' + r.adaco_id + '</span><span class="result-mf">' + (MF_LABELS[r.macrofamily] || r.macrofamily) + '</span></div></div>';
+    }).join('');
   } catch(e) {
-    el.innerHTML = '<div class="no-results">Search error — check connection</div>';
+    el.innerHTML = '<div class="no-results">Error loading results</div>';
   }
 }
 
-document.getElementById('lookupSearch').addEventListener('input', debounce(function(e) {
-  runLookupSearch(e.target.value);
-}, 300));
+function copyD365Id(id) {
+  navigator.clipboard.writeText(id).catch(function(){});
+  showToast('Copied ' + id);
+}
 
-// ── ADACO / MSTORE SEARCH ─────────────────────────────────────────────────────
-async function runAdacoSearch(q) {
-  const el = document.getElementById('adacoResults');
-  q = q.trim();
-  if (q.length < 2) { el.innerHTML = ''; return; }
-  el.innerHTML = '<div class="loading-row"><span class="spin">&#9696;</span> Searching…</div>';
+// ═══════════════════════════════════════════════════════════════════════════
+// MSTORE / ADACO LOOKUP
+// ═══════════════════════════════════════════════════════════════════════════
+const debouncedMstore = debounce(runMstoreSearch, 300);
+
+async function runMstoreSearch(val) {
+  const el = document.getElementById('mstoreResults');
+  val = (val || '').trim();
+  if (val.length < 2) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = 'block';
+  el.innerHTML = '<div class="no-results">Searching…</div>';
+
+  const stripped = val.replace(/^0+/, '') || '0';
+  let query;
+  if (/^\d+$/.test(stripped)) {
+    query = 'ks_adaco_ingredients?product_number=ilike.*' + encodeURIComponent(stripped) + '*&order=description&limit=30';
+  } else {
+    query = 'ks_adaco_ingredients?description=ilike.*' + encodeURIComponent(val) + '*&order=description&limit=30';
+  }
+
   try {
-    let path;
-    const stripped = stripZeros(q);
-    if (/^\d+$/.test(stripped)) {
-      path = 'ks_adaco_ingredients?or=(product_number.eq.' + encodeURIComponent(q)
-        + ',product_number.eq.' + encodeURIComponent(stripped)
-        + ')&limit=20&select=product_number,description,category';
-    } else {
-      path = 'ks_adaco_ingredients?description=ilike.*' + encodeURIComponent(q)
-        + '*&limit=20&select=product_number,description,category&order=description.asc';
-    }
-    const rows = await sbFetch(path);
-    if (!rows.length) {
-      el.innerHTML = '<div class="no-results">No ingredients found for "' + q + '"</div>';
-      return;
-    }
-    el.innerHTML = '<div class="results">'
-      + rows.map(function(r) {
-          return '<div class="adaco-row">'
-            + '<div class="adaco-body">'
-            + '<div class="adaco-name">' + r.description + '</div>'
-            + '<div class="adaco-meta">'
-            + '<span class="adaco-num">#' + r.product_number + '</span>'
-            + (r.category ? '<span class="adaco-cat">' + r.category + '</span>' : '')
-            + '</div></div>'
-            + '<button class="copy-btn" onclick="copyAdacoNum(this,\'' + r.product_number + '\')">Copy #</button>'
-            + '</div>';
-        }).join('')
-      + '</div>';
+    const rows = await sbFetch(query);
+    if (!rows.length) { el.innerHTML = '<div class="no-results">No results for "' + val + '"</div>'; return; }
+    el.innerHTML = rows.map(function(r) {
+      return '<div class="adaco-result-item" style="display:flex;align-items:center;gap:8px;">' +
+        '<div style="flex:1;min-width:0;">' +
+        '<div class="adaco-number">' + r.product_number + '</div>' +
+        '<div class="adaco-desc">' + r.description + '</div>' +
+        '<span class="adaco-cat">' + (r.category || '') + '</span>' +
+        '</div>' +
+        '<button class="copy-btn" onclick="copyAdacoNum(\'' + r.product_number + '\',this)">Copy #</button>' +
+        '</div>';
+    }).join('');
   } catch(e) {
-    el.innerHTML = '<div class="no-results">Search error — check connection</div>';
+    el.innerHTML = '<div class="no-results">Error loading results</div>';
   }
 }
 
-document.getElementById('adacoSearch').addEventListener('input', debounce(function(e) {
-  runAdacoSearch(e.target.value);
-}, 300));
-
-function copyAdacoNum(btn, num) {
-  navigator.clipboard.writeText(num).then(function() {
-    var orig = btn.textContent;
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    setTimeout(function() {
-      btn.textContent = orig;
-      btn.classList.remove('copied');
-    }, 1800);
-  });
+function copyAdacoNum(num, btn) {
+  navigator.clipboard.writeText(num).catch(function(){});
+  const orig = btn.textContent;
+  btn.textContent = '✓';
+  setTimeout(function() { btn.textContent = orig; }, 1800);
+  showToast('Copied ' + num);
 }
 
-// ── ACTIVATIONS — STATE ───────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// ACTIVATIONS
+// ═══════════════════════════════════════════════════════════════════════════
 let activations = [];
-let currentActId = null;  // Supabase row id (bigint)
-let currentItemIdx = null;
+let currentActId = 0;
+let currentItemIdx = 0;
 
-async function loadActivations(renderList) {
-  if (renderList !== false) {
-    const el = document.getElementById('activationsList');
-    el.innerHTML = '<div class="loading-row"><span class="spin">&#9696;</span> Loading…</div>';
-  }
+async function loadActivations() {
   try {
-    const rows = await sbFetch('ks_activations?select=id,name,launch_date,department,items&order=created_at.desc');
+    const rows = await sbFetch('ks_activations?order=created_at.desc&select=*');
     activations = rows;
-    if (renderList !== false) renderActivations();
+    renderActivations();
   } catch(e) {
-    if (renderList !== false) {
-      document.getElementById('activationsList').innerHTML = '<div class="no-results">Could not load activations — check connection</div>';
-    }
+    document.getElementById('activationsList').innerHTML = '<div class="empty-state"><div class="empty-msg">Could not load activations.</div></div>';
   }
 }
 
-// Pre-load activations silently on page load so the dropdown is ready in D365 Lookup
-loadActivations(false);
-
-// ── ACTIVATIONS — RENDER ──────────────────────────────────────────────────────
 function daysUntil(dateStr) {
   if (!dateStr) return null;
   const launch = new Date(dateStr + 'T12:00:00');
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = new Date(); today.setHours(0,0,0,0);
   return Math.round((launch - today) / 86400000);
 }
 
 function countdownHtml(dateStr) {
   const d = daysUntil(dateStr);
   if (d === null) return '';
-  if (d < 0)  return '<span class="countdown past">Launched ' + Math.abs(d) + 'd ago</span>';
+  if (d < 0) return '<span class="countdown past">Launched ' + Math.abs(d) + 'd ago</span>';
   if (d === 0) return '<span class="countdown danger">LAUNCH TODAY</span>';
-  if (d <= 4)  return '<span class="countdown danger">' + d + 'd to launch</span>';
+  if (d <= 4) return '<span class="countdown danger">' + d + 'd to launch</span>';
   if (d <= 11) return '<span class="countdown warn">' + d + 'd to launch</span>';
   return '<span class="countdown ok">' + d + 'd to launch</span>';
 }
 
-function statusIcon(s)      { return {ok:'✅', price:'⚠️', release:'🚫', pending:'⏳'}[s] || '⏳'; }
-function statusLabel(s)     { return {ok:'Verified', price:'Price Error', release:'Not Released', pending:'Pending'}[s] || 'Pending'; }
-function statusClass(s)     { return {ok:'label-ok', price:'label-price', release:'label-release', pending:'label-pending'}[s] || 'label-pending'; }
-function statusBtnClass(s)  { return {ok:'status-ok', price:'status-price', release:'status-release', pending:'status-pending'}[s] || 'status-pending'; }
+function statusIcon(s) { return {ok:'✅',price:'⚠️',release:'🚫',pending:'⏳'}[s] || '⏳'; }
+function statusLabel(s) { return {ok:'Verified',price:'Price Error',release:'Not Released',pending:'Pending'}[s] || 'Pending'; }
+function statusClass(s) { return {ok:'label-ok',price:'label-price',release:'label-release',pending:'label-pending'}[s] || 'label-pending'; }
+function statusBtnClass(s) { return {ok:'status-ok',price:'status-price',release:'status-release',pending:'status-pending'}[s] || 'status-pending'; }
 
 function renderActivations() {
   const el = document.getElementById('activationsList');
   if (!activations.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>'
-      + '<div class="empty-msg">No activations yet.<br>Tap <strong>+ New</strong> to start tracking a launch.</div></div>';
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">No activations yet.<br>Tap <strong>+ New</strong> to start tracking a launch.</div></div>';
     return;
   }
   let html = '';
@@ -787,7 +579,6 @@ function renderActivations() {
     const act = activations[ai];
     const items = act.items || [];
     const escalate = items.filter(function(i) { return i.status === 'price' || i.status === 'release'; });
-
     let itemsHtml = '';
     if (items.length) {
       for (let ii = 0; ii < items.length; ii++) {
@@ -795,28 +586,21 @@ function renderActivations() {
         itemsHtml += '<div class="checklist-item">';
         itemsHtml += '<button class="status-btn ' + statusBtnClass(item.status) + '" onclick="openStatusPicker(' + ai + ',' + ii + ')">' + statusIcon(item.status) + '</button>';
         itemsHtml += '<div class="item-info"><div class="item-name">' + item.name + '</div>';
-        itemsHtml += '<div class="item-ids">D365: ' + (item.d365_id || '—') + ' &nbsp;|&nbsp; Adaco: ' + (item.adaco_id || '—') + '</div>';
+        itemsHtml += '<div class="item-ids">D365: ' + (item.d365_id || item.d365 || '—') + ' &nbsp;|&nbsp; Adaco: ' + (item.adaco_id || item.adaco || '—') + '</div>';
         itemsHtml += '<div class="item-status-label ' + statusClass(item.status) + '">' + statusLabel(item.status) + '</div></div>';
         itemsHtml += '<span class="item-remove" onclick="removeItem(' + ai + ',' + ii + ')">✕</span></div>';
       }
     } else {
       itemsHtml = '<div style="font-size:0.75rem;color:var(--text3);padding:12px 0;">No items added yet.</div>';
     }
-
     html += '<div class="activation-card">';
     html += '<div class="activation-header"><div class="activation-name">' + act.name + '</div>';
     html += '<span class="activation-delete" onclick="deleteActivation(' + ai + ')">🗑</span></div>';
-    html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">' + countdownHtml(act.launch_date);
-    if (act.department) html += ' <span class="dept-tag">' + act.department + '</span>';
+    html += '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">' + countdownHtml(act.launch_date || act.date);
+    if (act.department || act.dept) html += ' <span class="dept-tag">' + (act.department || act.dept) + '</span>';
     html += '</div>';
-    html += '<div class="item-count">' + items.length + ' item' + (items.length !== 1 ? 's' : '')
-      + ' &nbsp;&middot;&nbsp; ' + escalate.length + ' need' + (escalate.length !== 1 ? '' : 's') + ' escalation</div>';
-    html += '<div class="legend">';
-    html += '<div class="legend-item"><div class="legend-dot" style="background:#2D7A4F;"></div>Verified</div>';
-    html += '<div class="legend-item"><div class="legend-dot" style="background:#7A6A20;"></div>Price Error</div>';
-    html += '<div class="legend-item"><div class="legend-dot" style="background:#8B2020;"></div>Not Released</div>';
-    html += '<div class="legend-item"><div class="legend-dot" style="background:#3A3A3A;"></div>Pending</div>';
-    html += '</div>';
+    html += '<div class="item-count">' + items.length + ' item' + (items.length !== 1 ? 's' : '') + ' &nbsp;&middot;&nbsp; ' + escalate.length + ' need' + (escalate.length !== 1 ? '' : 's') + ' escalation</div>';
+    html += '<div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#2D7A4F;"></div>Verified</div><div class="legend-item"><div class="legend-dot" style="background:#7A6A20;"></div>Price Error</div><div class="legend-item"><div class="legend-dot" style="background:#8B2020;"></div>Not Released</div><div class="legend-item"><div class="legend-dot" style="background:#3A3A3A;"></div>Pending</div></div>';
     html += itemsHtml;
     html += '<button class="btn btn-secondary" style="margin-top:12px;" onclick="openAddItem(' + ai + ')">+ Add Item</button>';
     if (escalate.length) {
@@ -827,7 +611,6 @@ function renderActivations() {
   el.innerHTML = html;
 }
 
-// ── ACTIVATIONS — CRUD ────────────────────────────────────────────────────────
 function showNewActivation() {
   document.getElementById('actName').value = '';
   document.getElementById('actDate').value = '';
@@ -837,44 +620,26 @@ function showNewActivation() {
 
 async function createActivation() {
   const name = document.getElementById('actName').value.trim();
-  const date = document.getElementById('actDate').value || null;
-  const dept = document.getElementById('actDept').value.trim() || null;
-  if (!name) { showToast('Please enter an activation name.'); return; }
+  const date = document.getElementById('actDate').value;
+  const dept = document.getElementById('actDept').value.trim();
+  if (!name) { alert('Please enter an activation name.'); return; }
   try {
-    const rows = await sbPost('ks_activations', { name: name, launch_date: date, department: dept, items: [] });
+    const rows = await sbPost('ks_activations', { name: name, launch_date: date || null, department: dept, items: [] });
     activations.unshift(rows[0]);
     closeModal('newActModal');
     renderActivations();
-    showToast('Activation created');
-  } catch(e) {
-    showToast('Error creating activation');
-  }
+  } catch(e) { alert('Error saving activation'); }
 }
 
 async function deleteActivation(ai) {
-  const act = activations[ai];
-  if (!confirm('Delete "' + act.name + '"?')) return;
+  if (!confirm('Delete "' + activations[ai].name + '"?')) return;
   try {
-    await sbDelete('ks_activations', act.id);
+    await sbDelete('ks_activations', activations[ai].id);
     activations.splice(ai, 1);
     renderActivations();
-    showToast('Deleted');
-  } catch(e) {
-    showToast('Error deleting');
-  }
+  } catch(e) { alert('Error deleting'); }
 }
 
-async function patchItems(ai) {
-  const act = activations[ai];
-  try {
-    const rows = await sbPatch('ks_activations', act.id, { items: act.items });
-    activations[ai] = rows[0];
-  } catch(e) {
-    showToast('Save error — retry');
-  }
-}
-
-// ── ADD ITEM MODAL ────────────────────────────────────────────────────────────
 function openAddItem(ai) {
   currentActId = ai;
   document.getElementById('addItemActName').textContent = activations[ai].name;
@@ -886,58 +651,56 @@ function openAddItem(ai) {
   document.getElementById('addItemModal').classList.remove('hidden');
 }
 
-async function runAddSearch(q) {
+const debouncedAddSearch = debounce(runAddSearch, 300);
+
+async function runAddSearch(val) {
   const el = document.getElementById('addItemResults');
-  q = q.trim();
-  if (q.length < 2) { el.innerHTML = ''; return; }
-  el.innerHTML = '<div class="loading-row"><span class="spin">&#9696;</span> Searching…</div>';
-  try {
-    const rows = await sbFetch(buildLookupQuery(q));
-    if (!rows.length) {
-      el.innerHTML = '<div class="no-results">No products found</div>';
-      return;
-    }
-    el.innerHTML = rows.map(function(r) { return renderLookupRow(r, 'addItemFromSearch'); }).join('');
-  } catch(e) {
-    el.innerHTML = '<div class="no-results">Search error</div>';
+  val = (val || '').trim();
+  if (val.length < 2) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="no-results">Searching…</div>';
+  const stripped = val.replace(/^0+/, '') || '0';
+  let query;
+  if (/^\d+$/.test(stripped)) {
+    query = 'ks_products?or=(d365_id.ilike.*' + encodeURIComponent(val) + '*,adaco_id.ilike.*' + encodeURIComponent(stripped) + '*)&order=name&limit=20';
+  } else {
+    query = 'ks_products?name=ilike.*' + encodeURIComponent(val) + '*&order=name&limit=20';
   }
+  try {
+    const rows = await sbFetch(query);
+    if (!rows.length) { el.innerHTML = '<div class="no-results">No results</div>'; return; }
+    el.innerHTML = rows.map(function(r) {
+      const safeName = r.name.replace(/'/g,"'");
+      return '<div class="result-item" onclick="addItemFromSearch(\'' + r.d365_id + '\',\'' + r.adaco_id + '\',\'' + safeName + '\',\'' + r.macrofamily + '\')">' +
+        '<div class="result-name">' + r.name + '</div>' +
+        '<div class="result-meta"><span class="result-id">D365: ' + r.d365_id + '</span><span class="result-adaco">Adaco: ' + r.adaco_id + '</span><span class="result-mf">' + (MF_LABELS[r.macrofamily] || r.macrofamily) + '</span></div></div>';
+    }).join('');
+  } catch(e) { el.innerHTML = '<div class="no-results">Error</div>'; }
 }
 
-document.getElementById('addItemSearch').addEventListener('input', debounce(function(e) {
-  runAddSearch(e.target.value);
-}, 300));
-
 async function addItemFromSearch(d365, adaco, name, mf) {
-  const ai = currentActId;
-  if (!activations[ai].items) activations[ai].items = [];
-  activations[ai].items.push({ d365_id: d365, adaco_id: adaco, name: name, macrofamily: mf, status: 'pending' });
+  activations[currentActId].items.push({ d365_id: d365, adaco_id: adaco, name: name, macrofamily: mf, status: 'pending' });
+  await saveActivationItems(currentActId);
   closeModal('addItemModal');
-  await patchItems(ai);
   renderActivations();
-  showToast('Item added');
 }
 
 async function addManualItem() {
   const name = document.getElementById('manualName').value.trim();
   const adaco = document.getElementById('manualAdaco').value.trim();
   const d365 = document.getElementById('manualD365').value.trim();
-  if (!name) { showToast('Please enter a product name.'); return; }
-  const ai = currentActId;
-  if (!activations[ai].items) activations[ai].items = [];
-  activations[ai].items.push({ d365_id: d365 || '—', adaco_id: adaco || '—', name: name, macrofamily: '', status: 'pending' });
+  if (!name) { alert('Please enter a product name.'); return; }
+  activations[currentActId].items.push({ d365_id: d365 || '—', adaco_id: adaco || '—', name: name, macrofamily: '', status: 'pending' });
+  await saveActivationItems(currentActId);
   closeModal('addItemModal');
-  await patchItems(ai);
   renderActivations();
-  showToast('Item added');
 }
 
 async function removeItem(ai, ii) {
   activations[ai].items.splice(ii, 1);
-  await patchItems(ai);
+  await saveActivationItems(ai);
   renderActivations();
 }
 
-// ── STATUS PICKER ─────────────────────────────────────────────────────────────
 function openStatusPicker(ai, ii) {
   currentActId = ai;
   currentItemIdx = ii;
@@ -946,23 +709,23 @@ function openStatusPicker(ai, ii) {
 }
 
 async function setStatus(s) {
-  const ai = currentActId;
-  const ii = currentItemIdx;
-  activations[ai].items[ii].status = s;
+  activations[currentActId].items[currentItemIdx].status = s;
+  await saveActivationItems(currentActId);
   closeModal('statusModal');
-  await patchItems(ai);
   renderActivations();
 }
 
-// ── EMAIL GENERATOR ───────────────────────────────────────────────────────────
+async function saveActivationItems(ai) {
+  try {
+    await sbPatch('ks_activations', activations[ai].id, { items: activations[ai].items });
+  } catch(e) { console.error('Save failed', e); }
+}
+
 function generateEmail(ai) {
   const act = activations[ai];
-  const days = daysUntil(act.launch_date);
-  const escalate = (act.items || []).filter(function(i) { return i.status === 'price' || i.status === 'release'; });
-  const dateStr = act.launch_date
-    ? new Date(act.launch_date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'long',month:'long',day:'numeric',year:'numeric'})
-    : 'TBD';
-
+  const days = daysUntil(act.launch_date || act.date);
+  const escalate = act.items.filter(function(i) { return i.status === 'price' || i.status === 'release'; });
+  const dateStr = (act.launch_date || act.date) ? new Date((act.launch_date || act.date) + 'T12:00:00').toLocaleDateString('en-US', {weekday:'long',month:'long',day:'numeric',year:'numeric'}) : 'TBD';
   let itemLines = '';
   for (let i = 0; i < escalate.length; i++) {
     const item = escalate[i];
@@ -970,31 +733,14 @@ function generateEmail(ai) {
       ? 'PRICE ERROR — item exists in D365 but has no price assigned, blocking PO entry'
       : 'NOT RELEASED — item not released to EKP or department, blocking ordering';
     if (i > 0) itemLines += '\n\n';
-    itemLines += '  \u2022 ' + item.name + '\n    Adaco: ' + (item.adaco_id || '—') + ' | D365: ' + (item.d365_id || '—') + '\n    Issue: ' + issue;
+    itemLines += '  • ' + item.name + '\n    Adaco: ' + (item.adaco_id || item.adaco) + ' | D365: ' + (item.d365_id || item.d365) + '\n    Issue: ' + issue;
   }
-
   let urgency = '';
   if (days !== null && days >= 0 && days <= 11) {
-    urgency = '\u26a0\ufe0f NOTE: Launch is in ' + days + ' day' + (days !== 1 ? 's' : '') + ' — within or at the 11-day lead time window.\n\n';
+    urgency = '⚠️ NOTE: Launch is in ' + days + ' day' + (days !== 1 ? 's' : '') + ' — this is within or at the 11-day lead time window.\n\n';
   }
-
-  const daysLine = days !== null
-    ? ' We are ' + (days >= 0
-        ? days + ' day' + (days !== 1 ? 's' : '') + ' out from launch'
-        : Math.abs(days) + ' day' + (Math.abs(days) !== 1 ? 's' : '') + ' past launch date')
-      + '.'
-    : '';
-
-  const email = 'Hi Paul,\n\nI\u2019m reaching out regarding the ' + act.name
-    + ' activation (Launch: ' + dateStr + ').' + daysLine + '\n\n'
-    + urgency
-    + 'The following item' + (escalate.length !== 1 ? 's have' : ' has')
-    + ' not been verified in D365 for our location (EKP) and '
-    + (escalate.length !== 1 ? 'require' : 'requires') + ' your attention before we can order:\n\n'
-    + itemLines
-    + '\n\nCould you please look into releasing these items to our site/department and/or resolving the pricing so we can place our first order in time for the launch?'
-    + '\n\nHappy to provide any additional details needed.\n\nThank you,\nRyan Yang\nKitchen Specialist \u2014 Eataly King of Prussia';
-
+  const daysLine = days !== null ? ' We are ' + (days >= 0 ? days + ' day' + (days !== 1 ? 's' : '') + ' out from launch' : Math.abs(days) + ' day' + (Math.abs(days) !== 1 ? 's' : '') + ' past launch date') + '.' : '';
+  const email = 'Hi Paul,\n\nI\'m reaching out regarding the ' + act.name + ' activation (Launch: ' + dateStr + ').' + daysLine + '\n\n' + urgency + 'The following item' + (escalate.length !== 1 ? 's have' : ' has') + ' not been verified in D365 for our location (EKP) and ' + (escalate.length !== 1 ? 'require' : 'requires') + ' your attention before we can order:\n\n' + itemLines + '\n\nCould you please look into releasing these items to our site/department and/or resolving the pricing so we can place our first order in time for the launch?\n\nHappy to provide any additional details needed.\n\nThank you,\nRyan Yang\nKitchen Specialist — Eataly King of Prussia';
   document.getElementById('emailContent').textContent = email;
   document.getElementById('emailModal').classList.remove('hidden');
 }
@@ -1002,292 +748,408 @@ function generateEmail(ai) {
 function copyEmail() {
   const text = document.getElementById('emailContent').textContent;
   navigator.clipboard.writeText(text).then(function() {
-    showToast('Copied to clipboard');
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(function() { btn.textContent = orig; }, 2000);
   });
 }
 
-// ── MODAL HELPERS ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// TRANSFER SHEET DATA
+// ═══════════════════════════════════════════════════════════════════════════
+const TRANSFER_ITEMS = [
+  // PORTION
+  { group: 'PORTION', name: 'Meatballs L',       d365: '2050205',  par: 4  },
+  { group: 'PORTION', name: 'Meatballs S',        d365: '2046890',  par: 10 },
+  { group: 'PORTION', name: 'Eggplant Parm L',    d365: '2049276',  par: 4  },
+  { group: 'PORTION', name: 'Eggplant Parm S',    d365: '2049275',  par: 6  },
+  { group: 'PORTION', name: 'Lasagna L',           d365: '2047135',  par: 4  },
+  { group: 'PORTION', name: 'Lasagna S',           d365: '2049237',  par: 15 },
+  { group: 'PORTION', name: 'Lasagna Verdure L',   d365: '00673560', par: 4  },
+  { group: 'PORTION', name: 'Lasagna Verdure S',   d365: '00673557', par: 15 },
+  { group: 'PORTION', name: 'Gnocchi Sorrentina',  d365: '2039049',  par: 6  },
+  // PESTOS / SAUCES
+  { group: 'PESTOS / SAUCES', name: 'Basil Pesto',           d365: '00682876', par: 10 },
+  { group: 'PESTOS / SAUCES', name: 'Spinach Walnut Pesto',  d365: '00682879', par: 10 },
+  { group: 'PESTOS / SAUCES', name: 'Pea Fava Pesto',        d365: '00699093', par: 10 },
+  { group: 'PESTOS / SAUCES', name: 'Herb Butter',           d365: '00699091', par: 10 },
+  { group: 'PESTOS / SAUCES', name: 'Apricot Mostarda',      d365: '00682881', par: 10 },
+  { group: 'PESTOS / SAUCES', name: 'Fig Mostarda',          d365: '00682882', par: 10 },
+  { group: 'PESTOS / SAUCES', name: 'Pizza Sauce',           d365: '00682897', par: 4  },
+  { group: 'PESTOS / SAUCES', name: 'Walnut Sauce',          d365: '00699092', par: 10 },
+  { group: 'PESTOS / SAUCES', name: 'Cacio e Pepe',          d365: '00682894', par: 10 },
+  { group: 'PESTOS / SAUCES', name: 'Ragu Bolognese',        d365: '00682893', par: 6  },
+  { group: 'PESTOS / SAUCES', name: 'Basic Tomato',          d365: '00682890', par: 6  },
+  // SOUPS
+  { group: 'SOUPS', name: 'Minestrone',          d365: '00682899', par: 4 },
+  { group: 'SOUPS', name: 'Chicken Pasta Soup',  d365: '00682898', par: 4 },
+  { group: 'SOUPS', name: 'Pea Soup',            d365: '00684509', par: 4 },
+  { group: 'SOUPS', name: 'Carrot Soup',         d365: '00678631', par: 4 },
+  // CONTORNI
+  { group: 'CONTORNI', name: 'Hard Boiled Eggs',    d365: '2045665',  par: 8 },
+  { group: 'CONTORNI', name: 'Broccoli Rabe',       d365: '2045563',  par: 8 },
+  { group: 'CONTORNI', name: 'Caprese',             d365: '2045051',  par: 8 },
+  { group: 'CONTORNI', name: 'Roasted Beets',       d365: '2045523',  par: 6 },
+  { group: 'CONTORNI', name: 'Peas & Carrots',      d365: '00676390', par: 6 },
+  { group: 'CONTORNI', name: 'Peas & Prosciutto',   d365: '00673555', par: 6 },
+  { group: 'CONTORNI', name: 'Patate Rosemary',     d365: '00673554', par: 6 },
+  { group: 'CONTORNI', name: 'Grilled Asparagus',   d365: '2052785',  par: 8 },
+  { group: 'CONTORNI', name: 'Hummus & Peas',       d365: '00699108', par: 6 },
+  { group: 'CONTORNI', name: 'Whipped Ricotta',     d365: '00699111', par: 8 },
+  // IN HOUSE
+  { group: 'IN HOUSE', name: 'Spinach Pesto Pasta', d365: '2049205',  par: 10 },
+  { group: 'IN HOUSE', name: 'Tomato Mozz Pasta',   d365: '2049210',  par: 10 },
+  { group: 'IN HOUSE', name: 'Frittata',            d365: '00699097', par: 6  },
+  { group: 'IN HOUSE', name: 'Chicken & Asparagus', d365: '00699115', par: 6  },
+  { group: 'IN HOUSE', name: 'Salmon',              d365: '00699103', par: 6  },
+  { group: 'IN HOUSE', name: 'Grilled Chicken',     d365: '00699101', par: 6  },
+  { group: 'IN HOUSE', name: 'Chicken Milanese',    d365: '2039210',  par: 10 },
+  { group: 'IN HOUSE', name: 'Grilled Chicken 2',   d365: '2052353',  par: 5  },
+];
+
+// Transfer state: keyed by item d365 -> {floor, walkin}
+let transferData = {};
+const TRANSFER_KEY = 'pipa_ks_transfer_' + todayKey();
+
+function todayKey() {
+  const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function loadTransferData() {
+  try { transferData = JSON.parse(localStorage.getItem(TRANSFER_KEY) || '{}'); } catch(e) { transferData = {}; }
+}
+
+function saveTransferData() {
+  try { localStorage.setItem(TRANSFER_KEY, JSON.stringify(transferData)); } catch(e) {}
+}
+
+function renderTransfer() {
+  document.getElementById('transferDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  loadTransferData();
+  const groups = [];
+  const seen = {};
+  TRANSFER_ITEMS.forEach(function(item) {
+    if (!seen[item.group]) { seen[item.group] = true; groups.push(item.group); }
+  });
+  let html = '';
+  groups.forEach(function(g) {
+    const items = TRANSFER_ITEMS.filter(function(i) { return i.group === g; });
+    html += '<div class="section-group">';
+    html += '<div class="group-header"><span class="group-title">' + g + '</span><span class="group-count">' + items.length + ' items</span></div>';
+    items.forEach(function(item, idx) {
+      const key = item.d365;
+      const d = transferData[key] || {};
+      const floor = d.floor !== undefined ? d.floor : '';
+      const walkin = d.walkin !== undefined ? d.walkin : '';
+      const need = calcNeed(floor, walkin, item.par);
+      const needClass = need === '' ? 'need-zero' : (need > 0 ? 'need-pos' : 'need-over');
+      const needText = need === '' ? '—' : (need > 0 ? '+' + need : need);
+      html += '<div class="ops-row">';
+      html += '<div class="ops-row-info"><div class="ops-row-name">' + item.name + '</div>';
+      html += '<div class="ops-row-id">' + item.d365 + ' &nbsp;·&nbsp; <span class="ops-row-par">par ' + item.par + '</span></div></div>';
+      html += '<div class="count-inputs">';
+      html += '<div class="count-col"><input class="count-input" type="number" min="0" inputmode="numeric" placeholder="—" value="' + floor + '" onchange="updateTransfer(\'' + key + '\',\'floor\',this.value)"><div class="count-label">Floor</div></div>';
+      html += '<div class="count-col"><input class="count-input" type="number" min="0" inputmode="numeric" placeholder="—" value="' + walkin + '" onchange="updateTransfer(\'' + key + '\',\'walkin\',this.value)"><div class="count-label">W-in</div></div>';
+      html += '</div>';
+      html += '<div class="need-badge ' + needClass + '">' + needText + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('transferList').innerHTML = html;
+}
+
+function calcNeed(floor, walkin, par) {
+  const f = parseFloat(floor);
+  const w = parseFloat(walkin);
+  if (isNaN(f) && isNaN(w)) return '';
+  const total = (isNaN(f) ? 0 : f) + (isNaN(w) ? 0 : w);
+  return par - total;
+}
+
+function updateTransfer(key, field, val) {
+  if (!transferData[key]) transferData[key] = {};
+  transferData[key][field] = val === '' ? undefined : parseFloat(val);
+  saveTransferData();
+  // Re-render just the need badge for this item without full re-render
+  renderTransfer();
+}
+
+function clearTransfer() {
+  if (!confirm('Clear all counts for today?')) return;
+  transferData = {};
+  saveTransferData();
+  renderTransfer();
+}
+
+function shareTransfer() {
+  let lines = ['PRONTO COUNT — ' + new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})];
+  lines.push('');
+  let currentGroup = '';
+  TRANSFER_ITEMS.forEach(function(item) {
+    if (item.group !== currentGroup) { currentGroup = item.group; lines.push('── ' + item.group + ' ──'); }
+    const d = transferData[item.d365] || {};
+    const floor = d.floor !== undefined ? d.floor : '—';
+    const walkin = d.walkin !== undefined ? d.walkin : '—';
+    const need = calcNeed(d.floor, d.walkin, item.par);
+    const needStr = need === '' ? '—' : (need > 0 ? 'NEED +' + need : need <= 0 ? 'OK' : '—');
+    lines.push(item.name + ' | Floor: ' + floor + ' | W-in: ' + walkin + ' | ' + needStr);
+  });
+  const text = lines.join('\n');
+  if (navigator.share) {
+    navigator.share({ text: text, title: 'Pronto Count' }).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text).then(function() { showToast('Copied to clipboard'); });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WASTE LOG DATA
+// ═══════════════════════════════════════════════════════════════════════════
+// Same items as transfer (they track waste for the same product list)
+const WASTE_ITEMS = TRANSFER_ITEMS; // reuse
+
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+let wasteWeekOffset = 0; // 0 = current week
+let wasteData = {};
+
+function getWeekKey(offset) {
+  const d = new Date();
+  const day = d.getDay(); // 0=Sun
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1) + (offset * 7));
+  return monday.getFullYear() + '-' + String(monday.getMonth()+1).padStart(2,'0') + '-' + String(monday.getDate()).padStart(2,'0');
+}
+
+function getWeekDates(offset) {
+  const key = getWeekKey(offset);
+  const monday = new Date(key + 'T00:00:00');
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    dates.push(d);
+  }
+  return dates;
+}
+
+function loadWasteData() {
+  const key = 'pipa_ks_waste_' + getWeekKey(wasteWeekOffset);
+  try { wasteData = JSON.parse(localStorage.getItem(key) || '{}'); } catch(e) { wasteData = {}; }
+}
+
+function saveWasteData() {
+  const key = 'pipa_ks_waste_' + getWeekKey(wasteWeekOffset);
+  try { localStorage.setItem(key, JSON.stringify(wasteData)); } catch(e) {}
+}
+
+function changeWasteWeek(dir) {
+  wasteWeekOffset += dir;
+  renderWaste();
+}
+
+function renderWaste() {
+  loadWasteData();
+  const dates = getWeekDates(wasteWeekOffset);
+  const startStr = dates[0].toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const endStr = dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('wasteWeekRange').textContent = startStr + '–' + endStr;
+  document.getElementById('wasteWeekLabel').textContent = wasteWeekOffset === 0 ? 'This Week' : (wasteWeekOffset === -1 ? 'Last Week' : (wasteWeekOffset < 0 ? Math.abs(wasteWeekOffset) + ' weeks ago' : wasteWeekOffset + ' weeks ahead'));
+
+  // Day headers
+  let dayH = '';
+  DAYS.forEach(function(d) {
+    dayH += '<div style="width:32px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">' + d + '</div>';
+  });
+  document.getElementById('wasteDayHeaders').innerHTML = dayH;
+
+  const groups = [];
+  const seen = {};
+  WASTE_ITEMS.forEach(function(item) {
+    if (!seen[item.group]) { seen[item.group] = true; groups.push(item.group); }
+  });
+
+  let html = '';
+  groups.forEach(function(g) {
+    const items = WASTE_ITEMS.filter(function(i) { return i.group === g; });
+    html += '<div class="section-group">';
+    html += '<div class="group-header"><span class="group-title">' + g + '</span></div>';
+    items.forEach(function(item) {
+      const key = item.d365;
+      const d = wasteData[key] || {};
+      const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
+      html += '<div class="waste-row">';
+      html += '<div class="ops-row-info"><div class="ops-row-name">' + item.name + '</div><div class="ops-row-id">' + item.d365 + '</div></div>';
+      html += '<div class="waste-days">';
+      DAYS.forEach(function(day) {
+        const v = d[day] !== undefined ? d[day] : '';
+        const hasVal = v !== '' && parseFloat(v) > 0;
+        html += '<input class="waste-day-input' + (hasVal ? ' has-value' : '') + '" type="number" min="0" inputmode="numeric" placeholder="0" value="' + v + '" onchange="updateWaste(\'' + key + '\',\'' + day + '\',this.value,this)">';
+      });
+      html += '</div>';
+      html += '<div class="waste-total">' + (total > 0 ? total : '—') + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('wasteList').innerHTML = html;
+}
+
+function updateWaste(key, day, val, input) {
+  if (!wasteData[key]) wasteData[key] = {};
+  wasteData[key][day] = val === '' ? undefined : parseFloat(val);
+  const hasVal = val !== '' && parseFloat(val) > 0;
+  input.classList.toggle('has-value', hasVal);
+  // Update row total
+  const d = wasteData[key];
+  const total = DAYS.reduce(function(s, dy) { return s + (parseFloat(d[dy]) || 0); }, 0);
+  const row = input.closest('.waste-row');
+  row.querySelector('.waste-total').textContent = total > 0 ? total : '—';
+  saveWasteData();
+}
+
+function clearWasteWeek() {
+  if (!confirm('Clear all waste entries for this week?')) return;
+  wasteData = {};
+  saveWasteData();
+  renderWaste();
+}
+
+function shareWaste() {
+  const dates = getWeekDates(wasteWeekOffset);
+  const startStr = dates[0].toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const endStr = dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  let lines = ['PRONTO WASTE LOG — ' + startStr + '–' + endStr];
+  lines.push('');
+  lines.push('Item                    | ' + DAYS.join('  | ') + '  | Total');
+  lines.push('─'.repeat(70));
+  WASTE_ITEMS.forEach(function(item) {
+    const d = wasteData[item.d365] || {};
+    const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
+    if (total === 0) return;
+    const dayVals = DAYS.map(function(day) { return String(parseFloat(d[day]) || 0).padStart(3); });
+    lines.push(item.name.padEnd(24) + ' | ' + dayVals.join('  | ') + '  | ' + total);
+  });
+  const text = lines.join('\n');
+  if (navigator.share) {
+    navigator.share({ text: text, title: 'Pronto Waste' }).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text).then(function() { showToast('Copied to clipboard'); });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PROCUREMENT
+// ═══════════════════════════════════════════════════════════════════════════
+const PROC_ITEMS = [
+  // PORTION
+  { group: 'PORTION',          name: 'Meatballs',            d365: '2050205 / 2046890' },
+  { group: 'PORTION',          name: 'Lasagna',              d365: '2047135 / 2049237' },
+  { group: 'PORTION',          name: 'Eggplant Parm',        d365: '2049276 / 2049275' },
+  // PACK – PESTOS
+  { group: 'PACK – PESTOS',    name: 'Basil Pesto',          d365: '00682876' },
+  { group: 'PACK – PESTOS',    name: 'Pesto Calabrese',      d365: '00682877' },
+  { group: 'PACK – PESTOS',    name: 'Pesto Trapanese',      d365: '00682878' },
+  { group: 'PACK – PESTOS',    name: 'Spinach Walnut Pesto', d365: '00682879' },
+  { group: 'PACK – PESTOS',    name: 'Sundried Tomato Pesto',d365: '00682880' },
+  { group: 'PACK – PESTOS',    name: 'Apricot Mostarda',     d365: '00682881' },
+  { group: 'PACK – PESTOS',    name: 'Fig Mostarda',         d365: '00682882' },
+  // SAUCES
+  { group: 'SAUCES',           name: 'Arrabiata Sauce',      d365: '00682891' },
+  { group: 'SAUCES',           name: 'Pizza Sauce',          d365: '00682897' },
+  { group: 'SAUCES',           name: 'Cacio e Pepe Sauce',   d365: '00682894' },
+  { group: 'SAUCES',           name: 'Ragu Bolognese',       d365: '00682893' },
+  { group: 'SAUCES',           name: 'Ragu di Funghi',       d365: '00682892' },
+  { group: 'SAUCES',           name: 'Basic Tomato',         d365: '00682890' },
+  // SOUPS
+  { group: 'SOUPS',            name: 'Minestrone Soup',      d365: '00682899' },
+  { group: 'SOUPS',            name: 'Chicken Pasta Soup',   d365: '00682898' },
+  { group: 'SOUPS',            name: 'Lentil Soup',          d365: '00682902' },
+  { group: 'SOUPS',            name: 'Chicken Stock',        d365: '00682886' },
+  { group: 'SOUPS',            name: 'Vegetable Stock',      d365: '00682888' },
+  // CONTORNI
+  { group: 'CONTORNI',         name: 'Caponata',             d365: '2045041' },
+  { group: 'CONTORNI',         name: 'Chickpea Hummus',      d365: '00673548' },
+  { group: 'CONTORNI',         name: 'Beet Hummus',          d365: '00675693' },
+  { group: 'CONTORNI',         name: 'Pasta Trapanese',      d365: '00676397' },
+];
+
+const PROC_DAYS = ['Mon', 'Wed', 'Fri'];
+let procData = {};
+const PROC_KEY = 'pipa_ks_proc_' + (function() { const d = new Date(); return d.getFullYear() + '-W' + String(Math.ceil((d.getDate() - d.getDay() + 10) / 7)).padStart(2,'0'); })();
+
+function loadProcData() {
+  try { procData = JSON.parse(localStorage.getItem(PROC_KEY) || '{}'); } catch(e) { procData = {}; }
+}
+
+function saveProcData() {
+  try { localStorage.setItem(PROC_KEY, JSON.stringify(procData)); } catch(e) {}
+}
+
+function renderProc() {
+  loadProcData();
+  document.getElementById('procDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  const groups = [];
+  const seen = {};
+  PROC_ITEMS.forEach(function(item) { if (!seen[item.group]) { seen[item.group] = true; groups.push(item.group); } });
+
+  let html = '';
+  groups.forEach(function(g) {
+    const items = PROC_ITEMS.filter(function(i) { return i.group === g; });
+    html += '<div class="section-group">';
+    html += '<div class="group-header"><span class="group-title">' + g + '</span></div>';
+    items.forEach(function(item) {
+      const key = item.d365.replace(/[^a-zA-Z0-9]/g, '_');
+      const d = procData[key] || {};
+      html += '<div class="proc-row">';
+      html += '<div class="proc-info"><div class="proc-name">' + item.name + '</div><div class="proc-id">' + item.d365 + '</div></div>';
+      html += '<div class="proc-check">';
+      PROC_DAYS.forEach(function(day) {
+        const checked = !!d[day];
+        html += '<div class="day-check">';
+        html += '<div class="day-check-label">' + day + '</div>';
+        html += '<div class="day-checkbox' + (checked ? ' checked' : '') + '" onclick="toggleProc(\'' + key + '\',\'' + day + '\',this)">' + (checked ? '✓' : '') + '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('procList').innerHTML = html;
+}
+
+function toggleProc(key, day, el) {
+  if (!procData[key]) procData[key] = {};
+  const wasChecked = !!procData[key][day];
+  procData[key][day] = !wasChecked;
+  el.classList.toggle('checked', !wasChecked);
+  el.textContent = !wasChecked ? '✓' : '';
+  saveProcData();
+}
+
+function clearProc() {
+  if (!confirm('Clear all procurement checks for this week?')) return;
+  procData = {};
+  saveProcData();
+  renderProc();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
 function closeModal(id) {
   document.getElementById(id).classList.add('hidden');
 }
-
 document.querySelectorAll('.modal-overlay').forEach(function(o) {
-  o.addEventListener('click', function(e) {
-    if (e.target === o) o.classList.add('hidden');
-  });
+  o.addEventListener('click', function(e) { if (e.target === o) o.classList.add('hidden'); });
 });
 
-
-// ── PASTRY TRANSFER ─────────────────────────────────────────────────────────
-// Item list from reference sheet (Image 1). adaco = Adaco product number.
-// Items without confirmed adaco numbers are marked null.
-const PT_ITEMS = {
-  dolci: [
-    { name: 'Tiramisu di Eataly',          unit: 'Tray (15ea)', adaco: '694904' },
-    { name: 'Cocoa Powder',                unit: 'Quart',       adaco: '691795' },
-    { name: 'Nonna Cream / Mascarpone',    unit: 'Quart',       adaco: '691796' },
-    { name: 'Mini Tiramisu (lunch only)',   unit: 'Tray (15ea)', adaco: '2064828', note: 'Sun–Wed only' },
-    { name: 'Budino',                      unit: 'Tray (15ea)', adaco: '678765' },
-    { name: 'Panna Cotta ai Frutti Bosco', unit: 'Tray (15ea)', adaco: '678766' },
-    { name: 'Pistachio Gelato Base',       unit: 'Quart',       adaco: '691801' },
-    { name: 'Almond Struesel / Cookies',   unit: 'Quart',       adaco: '684660' },
-    { name: 'Powdered Sugar',              unit: 'Quart',       adaco: '691799' },
-  ],
-  toppings: [
-    { name: 'Chopped Hazelnut',   unit: 'Quart', adaco: '103912' },
-    { name: 'Chocolate Sauce',    unit: 'Quart', adaco: '684662' },
-    { name: 'Powdered Sugar',     unit: 'Quart', adaco: '691799' },
-    { name: 'Chopped Pistachio',  unit: 'Quart', adaco: '691803' },
-    { name: 'Caramel Sauce',      unit: 'Quart', adaco: '691798' },
-    { name: 'Caramelized Apples', unit: 'Quart', adaco: '694906' },
-    { name: 'Chocolate Chips',    unit: 'Quart', adaco: '691805' },
-  ]
-};
-
-// qty state: key = section-index, value = qty string
-const ptQty = {};
-
-function ptKey(section, i) { return section + '-' + i; }
-
-function ptRenderSection(sectionId, items, section) {
-  var el = document.getElementById(sectionId);
-  var html = '';
-  items.forEach(function(item, i) {
-    var k = ptKey(section, i);
-    var qty = ptQty[k] || '0';
-    var adacoStr = item.adaco ? item.adaco : '—';
-    var noteHtml = item.note ? ' <span style="font-size:0.563rem;color:var(--text3);font-weight:600;">' + item.note + '</span>' : '';
-    html += '<div class="pt-row">';
-    html +=   '<div style="flex:1;min-width:0;">';
-    html +=     '<div class="pt-name">' + item.name + noteHtml + '</div>';
-    html +=     '<div style="display:flex;gap:8px;align-items:center;margin-top:3px;">';
-    html +=       '<span class="pt-unit">' + item.unit + '</span>';
-    html +=       '<span class="pt-adaco">#' + adacoStr + '</span>';
-    html +=     '</div>';
-    html +=   '</div>';
-    html +=   '<div class="pt-qty-wrap">';
-    html +=     '<button class="pt-qty-btn" onclick="ptAdj(\'' + section + '\',' + i + ',-1)">&#8722;</button>';
-    html +=     '<input class="pt-qty" type="number" min="0" max="99" value="' + qty + '" '
-              +   'onchange="ptSet(\'' + section + '\',' + i + ',this.value)" '
-              +   'oninput="ptSet(\'' + section + '\',' + i + ',this.value)">';
-    html +=     '<button class="pt-qty-btn" onclick="ptAdj(\'' + section + '\',' + i + ',1)">&#43;</button>';
-    html +=   '</div>';
-    html += '</div>';
-  });
-  el.innerHTML = html;
-}
-
-function ptRender() {
-  // Set today's date stamp
-  var ds = document.getElementById('pt-datestamp');
-  if (ds) {
-    ds.textContent = new Date().toLocaleDateString('en-US', {weekday:'short', month:'numeric', day:'numeric', year:'2-digit'});
-  }
-  ptRenderSection('pt-items-dolci',    PT_ITEMS.dolci,    'dolci');
-  ptRenderSection('pt-items-toppings', PT_ITEMS.toppings, 'toppings');
-  ptUpdateSummary();
-  if (!ptLogEntries.length) ptLoadLog();
-}
-
-function ptAdj(section, i, delta) {
-  var k = ptKey(section, i);
-  var cur = parseFloat(ptQty[k]) || 0;
-  var next = Math.max(0, cur + delta);
-  ptQty[k] = String(next);
-  ptRender();
-}
-
-function ptSet(section, i, val) {
-  var k = ptKey(section, i);
-  var n = parseFloat(val);
-  ptQty[k] = (isNaN(n) || n < 0) ? '0' : String(n);
-  ptUpdateSummary();
-}
-
-function ptClearAll() {
-  Object.keys(ptQty).forEach(function(k) { ptQty[k] = '0'; });
-  ptRender();
-}
-
-// Build the ordered MStore entry list from all items with qty > 0
-function ptGetEntries() {
-  var entries = [];
-  ['dolci','toppings'].forEach(function(section) {
-    var items = PT_ITEMS[section];
-    items.forEach(function(item, i) {
-      var k = ptKey(section, i);
-      var qty = parseFloat(ptQty[k]) || 0;
-      if (qty > 0) {
-        entries.push({ name: item.name, unit: item.unit, adaco: item.adaco, qty: qty, key: k });
-      }
-    });
-  });
-  return entries;
-}
-
-// Track which entries have been marked done in MStore
-var ptDone = {};
-
-function ptUpdateSummary() {
-  var entries = ptGetEntries();
-  var summaryEl = document.getElementById('pt-summary');
-  var listEl    = document.getElementById('pt-entry-list');
-  var countEl   = document.getElementById('pt-summary-count');
-
-  if (!entries.length) {
-    summaryEl.style.display = 'none';
-    return;
-  }
-  summaryEl.style.display = '';
-
-  var remaining = entries.filter(function(e) { return !ptDone[e.key]; }).length;
-  countEl.textContent = remaining + ' of ' + entries.length + ' remaining';
-
-  var html = '';
-  entries.forEach(function(e) {
-    var done = !!ptDone[e.key];
-    var adacoDisplay = e.adaco ? e.adaco : 'NO # — look up';
-    html += '<div class="pt-entry-row' + (done ? ' done' : '') + '">';
-    html +=   '<div class="pt-entry-num">' + adacoDisplay + '</div>';
-    html +=   '<div class="pt-entry-info">';
-    html +=     '<div class="pt-entry-name">' + e.name + '</div>';
-    html +=     '<div class="pt-entry-qty">Qty: ' + e.qty + ' ' + e.unit + '</div>';
-    html +=   '</div>';
-    if (e.adaco) {
-      html += '<button class="copy-btn' + (done ? ' copied' : '') + '" style="margin-right:6px;" '
-            +   'onclick="ptCopyNum(this,\'' + e.adaco + '\')">' + (done ? '\u2713' : 'Copy #') + '</button>';
-    }
-    html +=   '<button class="pt-done-btn' + (done ? ' checked' : '') + '" onclick="ptToggleDone(\'' + e.key + '\')">'
-            +   (done ? '&#10003;' : '&#9711;') + '</button>';
-    html += '</div>';
-  });
-  listEl.innerHTML = html;
-  // Show/hide save button based on active entries
-  ptUpdateSaveWrap();
-}
-
-function ptCopyNum(btn, num) {
-  navigator.clipboard.writeText(num).then(function() {
-    var orig = btn.textContent;
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    setTimeout(function() {
-      btn.textContent = orig;
-      btn.classList.remove('copied');
-    }, 1800);
-  });
-}
-
-function ptToggleDone(key) {
-  ptDone[key] = !ptDone[key];
-  ptUpdateSummary();
-}
-
-
-// ── PASTRY TRANSFER — SAVE & LOG ────────────────────────────────────────────
-var ptLogEntries = [];
-
-// Set default date to today when rendering
-function ptInitDate() {
-  var el = document.getElementById('pt-save-date');
-  if (el && !el.value) {
-    var today = new Date();
-    var yyyy = today.getFullYear();
-    var mm = String(today.getMonth() + 1).padStart(2, '0');
-    var dd = String(today.getDate()).padStart(2, '0');
-    el.value = yyyy + '-' + mm + '-' + dd;
-  }
-}
-
-// Show/hide save wrap based on whether any qty > 0
-function ptUpdateSaveWrap() {
-  var entries = ptGetEntries();
-  var wrap = document.getElementById('pt-save-wrap');
-  if (wrap) {
-    wrap.style.display = entries.length ? '' : 'none';
-    if (entries.length) ptInitDate();
-  }
-}
-
-async function ptSaveEntry() {
-  var entries = ptGetEntries();
-  if (!entries.length) { showToast('No items to save'); return; }
-
-  var dateEl = document.getElementById('pt-save-date');
-  var transferDate = dateEl ? dateEl.value : '';
-  if (!transferDate) { showToast('Please set a date'); return; }
-
-  var items = entries.map(function(e) {
-    return { name: e.name, adaco: e.adaco, qty: e.qty, unit: e.unit };
-  });
-
-  var btn = document.querySelector('#pt-save-wrap .btn-primary');
-  if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
-
-  try {
-    var rows = await sbPost('pastry_transfers', { transfer_date: transferDate, items: items });
-    ptLogEntries.unshift(rows[0]);
-    ptRenderLog();
-    showToast('Entry saved — ' + items.length + ' item' + (items.length !== 1 ? 's' : ''));
-  } catch(e) {
-    showToast('Save failed — check connection');
-  } finally {
-    if (btn) { btn.textContent = '\u1F4BE Save Entry'; btn.disabled = false; }
-  }
-}
-
-async function ptLoadLog() {
-  try {
-    var rows = await sbFetch('pastry_transfers?select=id,transfer_date,items&order=transfer_date.desc&limit=14');
-    ptLogEntries = rows;
-    ptRenderLog();
-  } catch(e) {
-    // Silently fail — log is supplementary
-  }
-}
-
-function ptRenderLog() {
-  var logEl  = document.getElementById('pt-log');
-  var listEl = document.getElementById('pt-log-entries');
-  var countEl = document.getElementById('pt-log-count');
-
-  if (!ptLogEntries.length) {
-    logEl.style.display = 'none';
-    return;
-  }
-  logEl.style.display = '';
-  countEl.textContent = 'Last ' + ptLogEntries.length;
-
-  listEl.innerHTML = ptLogEntries.map(function(entry) {
-    var dateStr = entry.transfer_date
-      ? new Date(entry.transfer_date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'short', month:'numeric', day:'numeric'})
-      : '—';
-    var items = Array.isArray(entry.items) ? entry.items : [];
-    var itemsHtml = items.map(function(it) {
-      return '<div class="pt-log-item"><span class="pt-log-qty">' + it.qty + '</span>'
-           + '<span>' + it.name + (it.unit ? ' <span style="color:var(--text3);font-size:0.625rem;">' + it.unit + '</span>' : '') + '</span></div>';
-    }).join('');
-
-    return '<div class="pt-log-entry">'
-      + '<span class="pt-log-del" onclick="ptDeleteEntry(' + entry.id + ')">&#10005;</span>'
-      + '<div class="pt-log-date">' + dateStr + '</div>'
-      + '<div class="pt-log-items">' + itemsHtml + '</div>'
-      + '</div>';
-  }).join('');
-}
-
-async function ptDeleteEntry(id) {
-  if (!confirm('Delete this transfer entry?')) return;
-  try {
-    await sbDelete('pastry_transfers', id);
-    ptLogEntries = ptLogEntries.filter(function(e) { return e.id !== id; });
-    ptRenderLog();
-    showToast('Deleted');
-  } catch(e) {
-    showToast('Delete failed');
-  }
-}
-
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+loadActivations();
 </script>
 </body>
 </html>
