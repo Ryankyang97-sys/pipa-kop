@@ -122,6 +122,8 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 /* Procurement checkboxes */
 .proc-row{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--surface2);gap:10px;}
 .proc-row.proc-row-done .proc-name{color:var(--text3);text-decoration:line-through;}
+.waste-toggle-btn{flex:1;padding:10px 14px;border-radius:20px;border:1.5px solid var(--surface3);background:var(--surface2);color:var(--text3);font-family:'DM Sans',sans-serif;font-size:0.813rem;font-weight:700;cursor:pointer;transition:all 0.15s;}
+.waste-toggle-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 .proc-row:last-child{border-bottom:none;}
 .proc-check{display:flex;gap:8px;flex-shrink:0;}
 .day-check{display:flex;flex-direction:column;align-items:center;gap:3px;}
@@ -189,7 +191,6 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
       <div class="tab" onclick="switchTab('transfer',this)">Transfer</div>
       <div class="tab" onclick="switchTab('waste',this)">Waste</div>
       <div class="tab" onclick="switchTab('procurement',this)">Procurement</div>
-      <div class="tab" onclick="switchTab('cxra',this)">CxRA</div>
     </div>
   </div>
 
@@ -256,39 +257,44 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     <button class="btn btn-primary" style="margin-top:6px;" onclick="shareTransfer()">&#128228; Share Entered Items</button>
   </div>
 
-  <!-- ══ WASTE ═════════════════════════════════════════════════════════════ -->
+  <!-- WASTE (Pronto + CxRA toggle) -->
   <div class="panel" id="panel-waste">
     <div class="ops-header">
       <div>
-        <div class="section-label" style="margin:0 0 2px;">Pronto Waste Log</div>
+        <div class="section-label" style="margin:0 0 4px;">Waste Log</div>
         <div class="waste-nav">
           <button class="waste-nav-btn" onclick="changeWasteWeek(-1)">&#8249;</button>
-          <div style="font-size:0.625rem;color:var(--text2);" id="wasteWeekLabel"></div>
+          <div style="font-size:0.688rem;color:var(--text2);font-weight:600;" id="wasteWeekLabel"></div>
           <button class="waste-nav-btn" onclick="changeWasteWeek(1)">&#8250;</button>
         </div>
       </div>
       <div style="text-align:right;">
         <div class="ops-date" id="wasteWeekRange"></div>
-        <div style="font-size:0.5rem;color:var(--text3);margin-top:3px;">auto-saves</div>
+        <div style="font-size:0.5rem;color:var(--text3);margin-top:3px;">saves per week</div>
       </div>
     </div>
 
-    <!-- Day column headers -->
+    <!-- Pronto / CxRA toggle -->
+    <div style="display:flex;gap:8px;margin-bottom:18px;">
+      <button id="wasteToggleProto" class="waste-toggle-btn active" onclick="setWasteMode('pronto')">🍝 Pronto</button>
+      <button id="wasteToggleCxra" class="waste-toggle-btn" onclick="setWasteMode('cxra')">☕ CxRA</button>
+    </div>
+
+    <div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Week Summary — Non-Zero</div>
+    <div id="wasteSummary"></div>
+
+    <div style="margin-top:18px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Full Sheet</div>
     <div style="display:flex;align-items:center;padding:0 14px 4px;gap:8px;justify-content:flex-end;border-bottom:1px solid var(--surface3);margin-bottom:4px;">
       <div style="flex:1;"></div>
       <div style="display:flex;gap:4px;" id="wasteDayHeaders"></div>
       <div style="min-width:26px;text-align:right;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">Tot</div>
     </div>
-
     <div id="wasteList"></div>
 
-    <div style="margin-top:18px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Week Summary — Non-Zero</div>
-    <div id="wasteSummary"></div>
     <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearWasteWeek()">Clear Week</button>
     <button class="btn btn-primary" style="margin-top:6px;" onclick="shareWaste()">&#128228; Share Non-Zero</button>
   </div>
-
-  <!-- ══ PROCUREMENT ════════════════════════════════════════════════════════ -->
+  <!-- PROCUREMENT -->
   <div class="panel" id="panel-procurement">
     <div class="ops-header">
       <div>
@@ -309,35 +315,6 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     <div style="margin-top:18px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Full Checklist</div>
     <div id="procList"></div>
     <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearProc()">Clear This Week</button>
-  </div>
-
-  <!-- CxRA WASTE -->
-  <div class="panel" id="panel-cxra">
-    <div class="ops-header">
-      <div>
-        <div class="section-label" style="margin:0 0 4px;">CxRA Waste Log</div>
-        <div class="waste-nav">
-          <button class="waste-nav-btn" onclick="changeCxraWeek(-1)">&#8249;</button>
-          <div style="font-size:0.688rem;color:var(--text2);font-weight:600;" id="cxraWeekLabel"></div>
-          <button class="waste-nav-btn" onclick="changeCxraWeek(1)">&#8250;</button>
-        </div>
-      </div>
-      <div style="text-align:right;">
-        <div class="ops-date" id="cxraWeekRange"></div>
-        <div style="font-size:0.5rem;color:var(--text3);margin-top:3px;">saves per week</div>
-      </div>
-    </div>
-    <div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Week Summary — Non-Zero</div>
-    <div id="cxraSummary"></div>
-    <div style="margin-top:18px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Full Sheet</div>
-    <div style="display:flex;align-items:center;padding:0 14px 4px;gap:8px;justify-content:flex-end;border-bottom:1px solid var(--surface3);margin-bottom:4px;">
-      <div style="flex:1;"></div>
-      <div style="display:flex;gap:4px;" id="cxraDayHeaders"></div>
-      <div style="min-width:26px;text-align:right;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">Tot</div>
-    </div>
-    <div id="cxraList"></div>
-    <button class="btn btn-secondary" style="margin-top:12px;" onclick="clearCxraWeek()">Clear Week</button>
-    <button class="btn btn-primary" style="margin-top:6px;" onclick="shareCxra()">&#128228; Share Non-Zero</button>
   </div>
 
 </div><!-- .page -->
@@ -487,7 +464,6 @@ function switchTab(id, el) {
   if (id === 'transfer') renderTransfer();
   if (id === 'waste') renderWaste();
   if (id === 'procurement') renderProc();
-  if (id === 'cxra') renderCxra();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1028,49 +1004,61 @@ function shareTransfer() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// WASTE LOG DATA
+// WASTE LOG (unified — Pronto + CxRA toggled by wasteMode)
 // ═══════════════════════════════════════════════════════════════════════════
-// Same items as transfer (they track waste for the same product list)
-const WASTE_ITEMS = TRANSFER_ITEMS; // reuse
+const WASTE_ITEMS = TRANSFER_ITEMS; // Pronto items reuse transfer list
 
-// CxRA waste items (675xxx IDs from master file)
 const CXRA_ITEMS = [
-  // GRAB & GO – Breakfast
-  { group: 'BREAKFAST',    name: 'Hummus w/ Vegetable',      d365: '675421' },
-  { group: 'BREAKFAST',    name: 'Yogurt & Berries',         d365: '675423' },
-  { group: 'BREAKFAST',    name: 'Chia Seed Pudding',        d365: '675424' },
-  { group: 'BREAKFAST',    name: 'Overnight Oats',           d365: '675422' },
-  // FRESH FRUIT
-  { group: 'FRESH FRUIT',  name: 'Cantaloupe',               d365: '675425' },
-  { group: 'FRESH FRUIT',  name: 'Pineapple',                d365: '675426' },
-  { group: 'FRESH FRUIT',  name: 'Strawberries',             d365: '675427' },
-  { group: 'FRESH FRUIT',  name: 'Mixed Berries',            d365: '675458' },
-  // TRAMEZZINI
-  { group: 'TRAMEZZINI',   name: 'Egg Salad',                d365: '675416' },
-  { group: 'TRAMEZZINI',   name: 'Tuna Salad',               d365: '675420' },
-  { group: 'TRAMEZZINI',   name: 'Caprese',                  d365: '675419' },
-  { group: 'TRAMEZZINI',   name: 'Turkey',                   d365: '675418' },
-  { group: 'TRAMEZZINI',   name: 'Prosciutto',               d365: '675417' },
-  // SALADS
-  { group: 'SALADS',       name: 'Quinoa Salad',             d365: '675415' },
-  { group: 'SALADS',       name: 'Marinated Chickpea',       d365: '675408' },
-  { group: 'SALADS',       name: 'Antipasto Salad',          d365: '675413' },
-  { group: 'SALADS',       name: 'Brussel Kale Salad',       d365: '675410' },
-  { group: 'SALADS',       name: 'Chicken Cesar Salad',      d365: '675411' },
-  { group: 'SALADS',       name: 'Black Rice Salad',         d365: '675414' },
-  { group: 'SALADS',       name: 'Marinated Shrimp Salad',   d365: '675412' },
-  { group: 'SALADS',       name: 'Marinated Vegetable',      d365: '675409' },
+  { group: 'BREAKFAST',   name: 'Hummus w/ Vegetable',    d365: '675421' },
+  { group: 'BREAKFAST',   name: 'Yogurt & Berries',       d365: '675423' },
+  { group: 'BREAKFAST',   name: 'Chia Seed Pudding',      d365: '675424' },
+  { group: 'BREAKFAST',   name: 'Overnight Oats',         d365: '675422' },
+  { group: 'FRESH FRUIT', name: 'Cantaloupe',             d365: '675425' },
+  { group: 'FRESH FRUIT', name: 'Pineapple',              d365: '675426' },
+  { group: 'FRESH FRUIT', name: 'Strawberries',           d365: '675427' },
+  { group: 'FRESH FRUIT', name: 'Mixed Berries',          d365: '675458' },
+  { group: 'TRAMEZZINI',  name: 'Egg Salad',              d365: '675416' },
+  { group: 'TRAMEZZINI',  name: 'Tuna Salad',             d365: '675420' },
+  { group: 'TRAMEZZINI',  name: 'Caprese',                d365: '675419' },
+  { group: 'TRAMEZZINI',  name: 'Turkey',                 d365: '675418' },
+  { group: 'TRAMEZZINI',  name: 'Prosciutto',             d365: '675417' },
+  { group: 'SALADS',      name: 'Quinoa Salad',           d365: '675415' },
+  { group: 'SALADS',      name: 'Marinated Chickpea',     d365: '675408' },
+  { group: 'SALADS',      name: 'Antipasto Salad',        d365: '675413' },
+  { group: 'SALADS',      name: 'Brussel Kale Salad',     d365: '675410' },
+  { group: 'SALADS',      name: 'Chicken Cesar Salad',    d365: '675411' },
+  { group: 'SALADS',      name: 'Black Rice Salad',       d365: '675414' },
+  { group: 'SALADS',      name: 'Marinated Shrimp Salad', d365: '675412' },
+  { group: 'SALADS',      name: 'Marinated Vegetable',    d365: '675409' },
 ];
 
 const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-let wasteWeekOffset = 0; // 0 = current week
-let wasteData = {};
+let wasteWeekOffset = 0;
+let wasteMode = 'pronto'; // 'pronto' | 'cxra'
+
+// Storage key includes mode so the two logs never collide
+function wasteStorageKey() {
+  return 'pipa_ks_waste_' + wasteMode + '_' + getWeekKey(wasteWeekOffset);
+}
+
+function getActiveItems() {
+  return wasteMode === 'pronto' ? WASTE_ITEMS : CXRA_ITEMS;
+}
+
+function getActiveData() {
+  const key = wasteStorageKey();
+  try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch(e) { return {}; }
+}
+
+function saveActiveData(data) {
+  try { localStorage.setItem(wasteStorageKey(), JSON.stringify(data)); } catch(e) {}
+}
 
 function getWeekKey(offset) {
   const d = new Date();
-  const day = d.getDay(); // 0=Sun
+  const day = d.getDay();
   const monday = new Date(d);
-  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1) + (offset * 7));
+  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1) + ((offset || 0) * 7));
   return monday.getFullYear() + '-' + String(monday.getMonth()+1).padStart(2,'0') + '-' + String(monday.getDate()).padStart(2,'0');
 }
 
@@ -1086,80 +1074,46 @@ function getWeekDates(offset) {
   return dates;
 }
 
-function loadWasteData() {
-  const key = 'pipa_ks_waste_' + getWeekKey(wasteWeekOffset);
-  try { wasteData = JSON.parse(localStorage.getItem(key) || '{}'); } catch(e) { wasteData = {}; }
-}
-
-function saveWasteData() {
-  const key = 'pipa_ks_waste_' + getWeekKey(wasteWeekOffset);
-  try { localStorage.setItem(key, JSON.stringify(wasteData)); } catch(e) {}
-}
-
 function changeWasteWeek(dir) {
   wasteWeekOffset += dir;
   renderWaste();
 }
 
-function renderWasteSummary() {
-  const el = document.getElementById('wasteSummary');
-  const nonZero = WASTE_ITEMS.filter(function(item) {
-    const d = wasteData[item.d365] || {};
-    return DAYS.some(function(day) { return parseFloat(d[day]) > 0; });
-  });
-  if (!nonZero.length) {
-    el.innerHTML = '<div style="font-size:0.75rem;color:var(--text3);padding:8px 0 4px;">No waste entries this week.</div>';
-    return;
-  }
-  let html = '<div class="section-group">';
-  nonZero.forEach(function(item) {
-    const d = wasteData[item.d365] || {};
-    const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
-    const dayBreakdown = DAYS.map(function(day) {
-      const v = parseFloat(d[day]) || 0;
-      return v > 0 ? '<span style="font-family:JetBrains Mono,monospace;font-size:0.625rem;">' + day.charAt(0) + ':' + v + '</span>' : '';
-    }).filter(Boolean).join(' ');
-    html += '<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--surface2);">';
-    html += '<div style="flex:1;min-width:0;">';
-    html += '<div class="ops-row-name">' + item.name + '</div>';
-    html += '<div style="font-size:0.625rem;color:var(--text3);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;">' + dayBreakdown + '</div>';
-    html += '</div>';
-    html += '<div style="font-family:JetBrains Mono,monospace;font-size:0.875rem;font-weight:700;color:var(--accent);min-width:28px;text-align:right;">' + total + '</div>';
-    html += '</div>';
-  });
-  html += '</div>';
-  el.innerHTML = html;
+function setWasteMode(mode) {
+  wasteMode = mode;
+  document.getElementById('wasteToggleProto').classList.toggle('active', mode === 'pronto');
+  document.getElementById('wasteToggleCxra').classList.toggle('active', mode === 'cxra');
+  renderWaste();
 }
 
 function renderWaste() {
-  loadWasteData();
+  const data = getActiveData();
   const dates = getWeekDates(wasteWeekOffset);
   const startStr = dates[0].toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  const endStr = dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const endStr   = dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   document.getElementById('wasteWeekRange').textContent = startStr + '–' + endStr;
   document.getElementById('wasteWeekLabel').textContent = wasteWeekOffset === 0 ? 'This Week' : (wasteWeekOffset === -1 ? 'Last Week' : (wasteWeekOffset < 0 ? Math.abs(wasteWeekOffset) + ' weeks ago' : wasteWeekOffset + ' weeks ahead'));
 
-  // Day headers
   let dayH = '';
   DAYS.forEach(function(d) {
     dayH += '<div style="width:32px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">' + d + '</div>';
   });
   document.getElementById('wasteDayHeaders').innerHTML = dayH;
 
+  const items = getActiveItems();
   const groups = [];
   const seen = {};
-  WASTE_ITEMS.forEach(function(item) {
+  items.forEach(function(item) {
     if (!seen[item.group]) { seen[item.group] = true; groups.push(item.group); }
   });
 
   let html = '';
   groups.forEach(function(g) {
-    const items = WASTE_ITEMS.filter(function(i) { return i.group === g; });
+    const gItems = items.filter(function(i) { return i.group === g; });
     html += '<div class="section-group">';
     html += '<div class="group-header"><span class="group-title">' + g + '</span></div>';
-    items.forEach(function(item) {
-      const key = item.d365;
-      const d = wasteData[key] || {};
+    gItems.forEach(function(item) {
+      const d = data[item.d365] || {};
       const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
       html += '<div class="waste-row">';
       html += '<div class="ops-row-info"><div class="ops-row-name">' + item.name + '</div><div class="ops-row-id">' + item.d365 + '</div></div>';
@@ -1167,7 +1121,7 @@ function renderWaste() {
       DAYS.forEach(function(day) {
         const v = d[day] !== undefined ? d[day] : '';
         const hasVal = v !== '' && parseFloat(v) > 0;
-        html += '<input class="waste-day-input' + (hasVal ? ' has-value' : '') + '" type="number" min="0" inputmode="numeric" placeholder="0" value="' + v + '" onchange="updateWaste(\'' + key + '\',\'' + day + '\',this.value,this)">';
+        html += '<input class="waste-day-input' + (hasVal ? ' has-value' : '') + '" type="number" min="0" inputmode="numeric" placeholder="0" value="' + v + '" onchange="updateWaste(\'' + item.d365 + '\',\'' + day + '\',this.value,this)">';
       });
       html += '</div>';
       html += '<div class="waste-total">' + (total > 0 ? total : '—') + '</div>';
@@ -1176,142 +1130,25 @@ function renderWaste() {
     html += '</div>';
   });
   document.getElementById('wasteList').innerHTML = html;
-}
-
-function updateWaste(key, day, val, input) {
-  if (!wasteData[key]) wasteData[key] = {};
-  wasteData[key][day] = val === '' ? undefined : parseFloat(val);
-  const hasVal = val !== '' && parseFloat(val) > 0;
-  input.classList.toggle('has-value', hasVal);
-  // Update row total
-  const d = wasteData[key];
-  const total = DAYS.reduce(function(s, dy) { return s + (parseFloat(d[dy]) || 0); }, 0);
-  const row = input.closest('.waste-row');
-  row.querySelector('.waste-total').textContent = total > 0 ? total : '—';
-  saveWasteData();
   renderWasteSummary();
 }
 
-function clearWasteWeek() {
-  if (!confirm('Clear all waste entries for this week?')) return;
-  wasteData = {};
-  saveWasteData();
-  renderWaste();
-}
-
-function shareWaste() {
-  const dates = getWeekDates(wasteWeekOffset);
-  const startStr = dates[0].toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  const endStr = dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  let lines = ['PRONTO WASTE LOG — ' + startStr + '–' + endStr];
-  lines.push('');
-  lines.push('Item                    | ' + DAYS.join('  | ') + '  | Total');
-  lines.push('─'.repeat(70));
-  WASTE_ITEMS.forEach(function(item) {
-    const d = wasteData[item.d365] || {};
-    const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
-    if (total === 0) return;
-    const dayVals = DAYS.map(function(day) { return String(parseFloat(d[day]) || 0).padStart(3); });
-    lines.push(item.name.padEnd(24) + ' | ' + dayVals.join('  | ') + '  | ' + total);
-  });
-  const text = lines.join('\n');
-  if (navigator.share) {
-    navigator.share({ text: text, title: 'Pronto Waste' }).catch(function(){});
-  } else {
-    navigator.clipboard.writeText(text).then(function() { showToast('Copied to clipboard'); });
-  }
-}
-
-
-// ═══════════════════════════════════════════════════════════════════════════
-// CxRA WASTE
-// ═══════════════════════════════════════════════════════════════════════════
-let cxraWeekOffset = 0;
-let cxraData = {};
-
-function cxraWeekKey(offset) {
-  const d = new Date();
-  const day = d.getDay();
-  const monday = new Date(d);
-  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1) + ((offset || 0) * 7));
-  return monday.getFullYear() + '-' + String(monday.getMonth()+1).padStart(2,'0') + '-' + String(monday.getDate()).padStart(2,'0');
-}
-
-function loadCxraData() {
-  const key = 'pipa_ks_cxra_' + cxraWeekKey(cxraWeekOffset);
-  try { cxraData = JSON.parse(localStorage.getItem(key) || '{}'); } catch(e) { cxraData = {}; }
-}
-
-function saveCxraData() {
-  const key = 'pipa_ks_cxra_' + cxraWeekKey(cxraWeekOffset);
-  try { localStorage.setItem(key, JSON.stringify(cxraData)); } catch(e) {}
-}
-
-function changeCxraWeek(dir) {
-  cxraWeekOffset += dir;
-  renderCxra();
-}
-
-function renderCxra() {
-  loadCxraData();
-  const dates = getWeekDates(cxraWeekOffset);
-  const startStr = dates[0].toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  const endStr   = dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  document.getElementById('cxraWeekRange').textContent = startStr + '\u2013' + endStr;
-  document.getElementById('cxraWeekLabel').textContent = cxraWeekOffset === 0 ? 'This Week' : (cxraWeekOffset === -1 ? 'Last Week' : (cxraWeekOffset < 0 ? Math.abs(cxraWeekOffset) + ' weeks ago' : cxraWeekOffset + ' weeks ahead'));
-
-  let dayH = '';
-  DAYS.forEach(function(d) {
-    dayH += '<div style="width:32px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">' + d + '</div>';
-  });
-  document.getElementById('cxraDayHeaders').innerHTML = dayH;
-
-  const groups = [];
-  const seen = {};
-  CXRA_ITEMS.forEach(function(item) {
-    if (!seen[item.group]) { seen[item.group] = true; groups.push(item.group); }
-  });
-
-  let html = '';
-  groups.forEach(function(g) {
-    const items = CXRA_ITEMS.filter(function(i) { return i.group === g; });
-    html += '<div class="section-group">';
-    html += '<div class="group-header"><span class="group-title">' + g + '</span></div>';
-    items.forEach(function(item) {
-      const key = item.d365;
-      const d = cxraData[key] || {};
-      const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
-      html += '<div class="waste-row">';
-      html += '<div class="ops-row-info"><div class="ops-row-name">' + item.name + '</div><div class="ops-row-id">' + item.d365 + '</div></div>';
-      html += '<div class="waste-days">';
-      DAYS.forEach(function(day) {
-        const v = d[day] !== undefined ? d[day] : '';
-        const hasVal = v !== '' && parseFloat(v) > 0;
-        html += '<input class="waste-day-input' + (hasVal ? ' has-value' : '') + '" type="number" min="0" inputmode="numeric" placeholder="0" value="' + v + '" onchange="updateCxra(\'' + key + '\',\'' + day + '\',this.value,this)">';
-      });
-      html += '</div>';
-      html += '<div class="waste-total">' + (total > 0 ? total : '\u2014') + '</div>';
-      html += '</div>';
-    });
-    html += '</div>';
-  });
-  document.getElementById('cxraList').innerHTML = html;
-  renderCxraSummary();
-}
-
-function renderCxraSummary() {
-  const el = document.getElementById('cxraSummary');
-  const nonZero = CXRA_ITEMS.filter(function(item) {
-    const d = cxraData[item.d365] || {};
+function renderWasteSummary() {
+  const el = document.getElementById('wasteSummary');
+  const data = getActiveData();
+  const items = getActiveItems();
+  const nonZero = items.filter(function(item) {
+    const d = data[item.d365] || {};
     return DAYS.some(function(day) { return parseFloat(d[day]) > 0; });
   });
   if (!nonZero.length) {
-    el.innerHTML = '<div style="font-size:0.75rem;color:var(--text3);padding:8px 0 4px;">No CxRA waste entries this week.</div>';
+    const label = wasteMode === 'pronto' ? 'Pronto' : 'CxRA';
+    el.innerHTML = '<div style="font-size:0.75rem;color:var(--text3);padding:8px 0 4px;">No ' + label + ' waste entries this week.</div>';
     return;
   }
   let html = '<div class="section-group">';
   nonZero.forEach(function(item) {
-    const d = cxraData[item.d365] || {};
+    const d = data[item.d365] || {};
     const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
     const dayBreakdown = DAYS.map(function(day) {
       const v = parseFloat(d[day]) || 0;
@@ -1329,47 +1166,49 @@ function renderCxraSummary() {
   el.innerHTML = html;
 }
 
-function updateCxra(key, day, val, input) {
-  if (!cxraData[key]) cxraData[key] = {};
-  cxraData[key][day] = val === '' ? undefined : parseFloat(val);
+function updateWaste(key, day, val, input) {
+  const data = getActiveData();
+  if (!data[key]) data[key] = {};
+  if (val === '') { delete data[key][day]; } else { data[key][day] = parseFloat(val); }
   const hasVal = val !== '' && parseFloat(val) > 0;
   input.classList.toggle('has-value', hasVal);
-  const d = cxraData[key];
-  const total = DAYS.reduce(function(s, dy) { return s + (parseFloat(d[dy]) || 0); }, 0);
-  const row = input.closest('.waste-row');
-  row.querySelector('.waste-total').textContent = total > 0 ? total : '\u2014';
-  saveCxraData();
-  renderCxraSummary();
+  const total = DAYS.reduce(function(s, dy) { return s + (parseFloat(data[key][dy]) || 0); }, 0);
+  input.closest('.waste-row').querySelector('.waste-total').textContent = total > 0 ? total : '—';
+  saveActiveData(data);
+  renderWasteSummary();
 }
 
-function clearCxraWeek() {
-  if (!confirm('Clear all CxRA waste entries for this week?')) return;
-  cxraData = {};
-  saveCxraData();
-  renderCxra();
+function clearWasteWeek() {
+  const label = wasteMode === 'pronto' ? 'Pronto' : 'CxRA';
+  if (!confirm('Clear all ' + label + ' waste entries for this week?')) return;
+  saveActiveData({});
+  renderWaste();
 }
 
-function shareCxra() {
-  const dates = getWeekDates(cxraWeekOffset);
+function shareWaste() {
+  const dates = getWeekDates(wasteWeekOffset);
   const startStr = dates[0].toLocaleDateString('en-US',{month:'short',day:'numeric'});
   const endStr   = dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  const nonZero = CXRA_ITEMS.filter(function(item) {
-    const d = cxraData[item.d365] || {};
+  const data = getActiveData();
+  const items = getActiveItems();
+  const label = wasteMode === 'pronto' ? 'PRONTO' : 'CxRA';
+  const nonZero = items.filter(function(item) {
+    const d = data[item.d365] || {};
     return DAYS.some(function(day) { return parseFloat(d[day]) > 0; });
   });
   if (!nonZero.length) { showToast('No entries to export'); return; }
-  let lines = ['CxRA WASTE LOG \u2014 ' + startStr + '\u2013' + endStr, ''];
+  let lines = [label + ' WASTE LOG — ' + startStr + '–' + endStr, ''];
   let currentGroup = '';
   nonZero.forEach(function(item) {
-    if (item.group !== currentGroup) { currentGroup = item.group; lines.push('\u2500\u2500 ' + item.group + ' \u2500\u2500'); }
-    const d = cxraData[item.d365] || {};
+    if (item.group !== currentGroup) { currentGroup = item.group; lines.push('── ' + item.group + ' ──'); }
+    const d = data[item.d365] || {};
     const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
     const dayStr = DAYS.map(function(day) { const v = parseFloat(d[day]) || 0; return v > 0 ? day + ':' + v : ''; }).filter(Boolean).join('  ');
     lines.push(item.name + '  |  ' + dayStr + '  |  Total: ' + total);
   });
   const text = lines.join('\n');
   if (navigator.share) {
-    navigator.share({ text: text, title: 'CxRA Waste' }).catch(function(){});
+    navigator.share({ text: text, title: label + ' Waste' }).catch(function(){});
   } else {
     navigator.clipboard.writeText(text).then(function() { showToast('Copied to clipboard'); });
   }
