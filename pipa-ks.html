@@ -872,52 +872,52 @@ function copyEmail() {
 // ═══════════════════════════════════════════════════════════════════════════
 const TRANSFER_ITEMS = [
   // PORTION
-  { group: 'PORTION', name: 'Meatballs L',       d365: '2050205',  par: 4  },
-  { group: 'PORTION', name: 'Meatballs S',        d365: '2046890',  par: 10 },
-  { group: 'PORTION', name: 'Eggplant Parm L',    d365: '2049276',  par: 4  },
-  { group: 'PORTION', name: 'Eggplant Parm S',    d365: '2049275',  par: 6  },
-  { group: 'PORTION', name: 'Lasagna L',           d365: '2047135',  par: 4  },
-  { group: 'PORTION', name: 'Lasagna S',           d365: '2049237',  par: 15 },
-  { group: 'PORTION', name: 'Lasagna Verdure L',   d365: '00673560', par: 4  },
-  { group: 'PORTION', name: 'Lasagna Verdure S',   d365: '00673557', par: 15 },
-  { group: 'PORTION', name: 'Gnocchi Sorrentina',  d365: '2039049',  par: 6  },
+  { group:'PORTION',         name:'meatballs L',           d365:'2050205',  par:4  },
+  { group:'PORTION',         name:'meatballs S',           d365:'2046890',  par:10 },
+  { group:'PORTION',         name:'eggplant parm L',       d365:'2049276',  par:4  },
+  { group:'PORTION',         name:'eggplant parm S',       d365:'2049275',  par:6  },
+  { group:'PORTION',         name:'lasagna L',             d365:'2047135',  par:4  },
+  { group:'PORTION',         name:'lasagna S',             d365:'2049237',  par:15 },
+  { group:'PORTION',         name:'lasagna verdure L',     d365:'00673560', par:4  },
+  { group:'PORTION',         name:'lasagna verdure S',     d365:'00673557', par:15 },
+  { group:'PORTION',         name:'gnocchi sorrentina',    d365:'2039049',  par:6  },
   // PESTOS / SAUCES
-  { group: 'PESTOS / SAUCES', name: 'Basil Pesto',           d365: '00682876', par: 10 },
-  { group: 'PESTOS / SAUCES', name: 'Spinach Walnut Pesto',  d365: '00682879', par: 10 },
-  { group: 'PESTOS / SAUCES', name: 'Pea Fava Pesto',        d365: '00699093', par: 10 },
-  { group: 'PESTOS / SAUCES', name: 'Herb Butter',           d365: '00699091', par: 10 },
-  { group: 'PESTOS / SAUCES', name: 'Apricot Mostarda',      d365: '00682881', par: 10 },
-  { group: 'PESTOS / SAUCES', name: 'Fig Mostarda',          d365: '00682882', par: 10 },
-  { group: 'PESTOS / SAUCES', name: 'Pizza Sauce',           d365: '00682897', par: 4  },
-  { group: 'PESTOS / SAUCES', name: 'Walnut Sauce',          d365: '00699092', par: 10 },
-  { group: 'PESTOS / SAUCES', name: 'Cacio e Pepe',          d365: '00682894', par: 10 },
-  { group: 'PESTOS / SAUCES', name: 'Ragu Bolognese',        d365: '00682893', par: 6  },
-  { group: 'PESTOS / SAUCES', name: 'Basic Tomato',          d365: '00682890', par: 6  },
+  { group:'PESTOS / SAUCES', name:'basil pesto',           d365:'00682876', par:10 },
+  { group:'PESTOS / SAUCES', name:'spinach walnut pesto',  d365:'00682879', par:10 },
+  { group:'PESTOS / SAUCES', name:'pea fava pesto',        d365:'00699093', par:10 },
+  { group:'PESTOS / SAUCES', name:'herb butter',           d365:'00699091', par:10 },
+  { group:'PESTOS / SAUCES', name:'apricot mostarda',      d365:'00682881', par:10 },
+  { group:'PESTOS / SAUCES', name:'fig mostarda',          d365:'00682882', par:10 },
+  { group:'PESTOS / SAUCES', name:'pizza sauce',           d365:'00682897', par:4  },
+  { group:'PESTOS / SAUCES', name:'walnut sauce',          d365:'00699092', par:10 },
+  { group:'PESTOS / SAUCES', name:'cacio e pepe',          d365:'00682894', par:10 },
+  { group:'PESTOS / SAUCES', name:'ragu bolognese',        d365:'00682893', par:6  },
+  { group:'PESTOS / SAUCES', name:'basic tomato',          d365:'00682890', par:6  },
   // SOUPS
-  { group: 'SOUPS', name: 'Minestrone',          d365: '00682899', par: 4 },
-  { group: 'SOUPS', name: 'Chicken Pasta Soup',  d365: '00682898', par: 4 },
-  { group: 'SOUPS', name: 'Pea Soup',            d365: '00684509', par: 4 },
-  { group: 'SOUPS', name: 'Carrot Soup',         d365: '00678631', par: 4 },
+  { group:'SOUPS',           name:'minestrone soup',       d365:'00682899', par:4  },
+  { group:'SOUPS',           name:'chicken pasta soup',    d365:'00682898', par:4  },
+  { group:'SOUPS',           name:'pea soup',              d365:'00684509', par:4  },
+  { group:'SOUPS',           name:'carrot soup',           d365:'00678631', par:4  },
   // CONTORNI
-  { group: 'CONTORNI', name: 'Hard Boiled Eggs',    d365: '2045665',  par: 8 },
-  { group: 'CONTORNI', name: 'Broccoli Rabe',       d365: '2045563',  par: 8 },
-  { group: 'CONTORNI', name: 'Caprese',             d365: '2045051',  par: 8 },
-  { group: 'CONTORNI', name: 'Roasted Beets',       d365: '2045523',  par: 6 },
-  { group: 'CONTORNI', name: 'Peas & Carrots',      d365: '00676390', par: 6 },
-  { group: 'CONTORNI', name: 'Peas & Prosciutto',   d365: '00673555', par: 6 },
-  { group: 'CONTORNI', name: 'Patate Rosemary',     d365: '00673554', par: 6 },
-  { group: 'CONTORNI', name: 'Grilled Asparagus',   d365: '2052785',  par: 8 },
-  { group: 'CONTORNI', name: 'Hummus & Peas',       d365: '00699108', par: 6 },
-  { group: 'CONTORNI', name: 'Whipped Ricotta',     d365: '00699111', par: 8 },
+  { group:'CONTORNI',        name:'hard boiled eggs',      d365:'2045665',  par:8  },
+  { group:'CONTORNI',        name:'broccoli rabe',         d365:'2045563',  par:8  },
+  { group:'CONTORNI',        name:'caprese',               d365:'2045051',  par:8  },
+  { group:'CONTORNI',        name:'roasted beets',         d365:'2045523',  par:6  },
+  { group:'CONTORNI',        name:'peas and carrots',      d365:'00676390', par:6  },
+  { group:'CONTORNI',        name:'peas and prosciutto',   d365:'00673555', par:6  },
+  { group:'CONTORNI',        name:'patate rosemary',       d365:'00673554', par:6  },
+  { group:'CONTORNI',        name:'grilled asparagus',     d365:'2052785',  par:8  },
+  { group:'CONTORNI',        name:'hummus and peas',       d365:'00699108', par:6  },
+  { group:'CONTORNI',        name:'whipped ricotta',       d365:'00699111', par:8  },
   // IN HOUSE
-  { group: 'IN HOUSE', name: 'Spinach Pesto Pasta', d365: '2049205',  par: 10 },
-  { group: 'IN HOUSE', name: 'Tomato Mozz Pasta',   d365: '2049210',  par: 10 },
-  { group: 'IN HOUSE', name: 'Frittata',            d365: '00699097', par: 6  },
-  { group: 'IN HOUSE', name: 'Chicken & Asparagus', d365: '00699115', par: 6  },
-  { group: 'IN HOUSE', name: 'Salmon',              d365: '00699103', par: 6  },
-  { group: 'IN HOUSE', name: 'Grilled Chicken',     d365: '00699101', par: 6  },
-  { group: 'IN HOUSE', name: 'Chicken Milanese',    d365: '2039210',  par: 10 },
-  { group: 'IN HOUSE', name: 'Grilled Chicken 2',   d365: '2052353',  par: 5  },
+  { group:'IN HOUSE',        name:'spinach pesto pasta',   d365:'2049205',  par:10 },
+  { group:'IN HOUSE',        name:'tomato mozz pasta',     d365:'2049210',  par:10 },
+  { group:'IN HOUSE',        name:'frittata',              d365:'00699097', par:6  },
+  { group:'IN HOUSE',        name:'chicken asparagus',     d365:'00699115', par:6  },
+  { group:'IN HOUSE',        name:'salmon',                d365:'00699103', par:6  },
+  { group:'IN HOUSE',        name:'grilled chicken (plain)', d365:'00699101',par:6 },
+  { group:'IN HOUSE',        name:'chicken milanese',      d365:'2039210',  par:10 },
+  { group:'IN HOUSE',        name:'grilled chicken',       d365:'2052353',  par:5  },
 ];
 
 // ── TRANSFER STATE ──────────────────────────────────────────────────────────
@@ -995,9 +995,12 @@ function renderTransfer() {
 
 function renderTransferSummary() {
   // Only items that have at least one value entered
-  const entered = TRANSFER_ITEMS.filter(function(item) {
+  var allTransferItems = TRANSFER_ITEMS.concat(transferCustomItems.map(function(c){
+    return { group:'CUSTOM', name:c.name, d365:c.key, par:c.par||0 };
+  }));
+  const entered = allTransferItems.filter(function(item) {
     const d = transferData[item.d365] || {};
-    return d.floor !== undefined || d.walkin !== undefined;
+    return d.total !== undefined || d.floor !== undefined || d.walkin !== undefined;
   });
   const summaryEl = document.getElementById('transferSummary');
   if (!entered.length) {
@@ -1005,8 +1008,13 @@ function renderTransferSummary() {
     return;
   }
   // Group by need: needs transfer first, then OK, then over par
-  const needsTransfer = entered.filter(function(i) { const d = transferData[i.d365] || {}; return calcNeed(d.floor, d.walkin, i.par) > 0; });
-  const atOrOver    = entered.filter(function(i) { const d = transferData[i.d365] || {}; return calcNeed(d.floor, d.walkin, i.par) <= 0; });
+  function getTotal(d365) {
+    var d = transferData[d365] || {};
+    if (d.total !== undefined) return d.total;
+    return (d.floor||0) + (d.walkin||0);
+  }
+  const needsTransfer = entered.filter(function(i) { return i.par - getTotal(i.d365) > 0; });
+  const atOrOver    = entered.filter(function(i) { return i.par - getTotal(i.d365) <= 0; });
 
   let html = '';
   if (needsTransfer.length) {
@@ -1015,9 +1023,14 @@ function renderTransferSummary() {
     needsTransfer.forEach(function(item) {
       const d = transferData[item.d365] || {};
       const need = calcNeed(d.floor, d.walkin, item.par);
+      var tot = getTotal(item.d365);
       html += '<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--surface2);">';
-      html += '<div style="flex:1;min-width:0;"><div class="ops-row-name">' + item.name + '</div>';
-      html += '<div class="ops-row-id">Floor: ' + (d.floor !== undefined ? d.floor : '—') + ' &nbsp; W-in: ' + (d.walkin !== undefined ? d.walkin : '—') + ' &nbsp; par: ' + item.par + '</div></div>';
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div class="ops-row-name">'+item.name+'</div>';
+      html += '<div style="display:flex;gap:8px;align-items:center;margin-top:2px;">';
+      html += '<span style="font-family:JetBrains Mono,monospace;font-size:0.625rem;color:var(--accent);background:var(--accent-dim);padding:2px 6px;border-radius:4px;letter-spacing:0.04em;">'+item.d365+'</span>';
+      html += '<span class="ops-row-id">count: '+tot+' &nbsp; par: '+item.par+'</span>';
+      html += '</div></div>';
       html += '<div class="need-badge need-pos">+' + need + '</div>';
       html += '</div>';
     });
@@ -1029,9 +1042,14 @@ function renderTransferSummary() {
     atOrOver.forEach(function(item) {
       const d = transferData[item.d365] || {};
       const need = calcNeed(d.floor, d.walkin, item.par);
+      var tot2 = getTotal(item.d365);
       html += '<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--surface2);">';
-      html += '<div style="flex:1;min-width:0;"><div class="ops-row-name">' + item.name + '</div>';
-      html += '<div class="ops-row-id">Floor: ' + (d.floor !== undefined ? d.floor : '—') + ' &nbsp; W-in: ' + (d.walkin !== undefined ? d.walkin : '—') + ' &nbsp; par: ' + item.par + '</div></div>';
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div class="ops-row-name">'+item.name+'</div>';
+      html += '<div style="display:flex;gap:8px;align-items:center;margin-top:2px;">';
+      html += '<span style="font-family:JetBrains Mono,monospace;font-size:0.625rem;color:var(--accent);background:var(--accent-dim);padding:2px 6px;border-radius:4px;letter-spacing:0.04em;">'+item.d365+'</span>';
+      html += '<span class="ops-row-id">count: '+tot2+' &nbsp; par: '+item.par+'</span>';
+      html += '</div></div>';
       html += '<div class="need-badge need-over">' + need + '</div>';
       html += '</div>';
     });
@@ -1050,13 +1068,27 @@ function calcNeed(floor, walkin, par) {
 
 function updateTransfer(key, field, val) {
   if (!transferData[key]) transferData[key] = {};
-  if (val === '') {
-    delete transferData[key][field];
-  } else {
-    transferData[key][field] = parseFloat(val);
-  }
+  if (val === '') { delete transferData[key][field]; }
+  else { transferData[key][field] = parseFloat(val); }
   saveTransferData();
   renderTransfer();
+}
+
+function updateTransferTotal(key, val) {
+  if (!transferData[key]) transferData[key] = {};
+  if (val === '') { delete transferData[key].total; }
+  else { transferData[key].total = parseFloat(val); }
+  saveTransferData();
+  // Update just the NEED badge without full re-render for responsiveness
+  var item = TRANSFER_ITEMS.concat(transferCustomItems.map(function(c){
+    return { d365:c.key, par:c.par||0 };
+  })).find(function(i){ return i.d365===key; });
+  if (item) {
+    var need = val === '' ? null : item.par - parseFloat(val);
+    var badges = document.querySelectorAll('.waste-row .need-badge');
+    // Full re-render to keep summary in sync
+    renderTransferSummary();
+  }
 }
 
 function clearTransfer() {
@@ -1651,27 +1683,30 @@ function saveActiveData(data) {
 async function saveTransferToSupabase() {
   const btn = document.getElementById('transferSaveBtn');
   const iso = dateKey(transferDateOffset);
-  const entered = TRANSFER_ITEMS.filter(function(item) {
+  var saveItems = TRANSFER_ITEMS.concat(transferCustomItems.map(function(c){
+    return { d365:c.key, name:c.name, par:c.par||0 };
+  }));
+  const entered = saveItems.filter(function(item) {
     const d = transferData[item.d365] || {};
-    return d.floor !== undefined || d.walkin !== undefined;
+    return d.total !== undefined || d.floor !== undefined || d.walkin !== undefined;
   });
   if (!entered.length) { showToast('No counts to save'); return; }
   if (btn) btn.textContent = 'Saving…';
   const rows = entered.map(function(item) {
     const d = transferData[item.d365] || {};
-    const floor  = d.floor  !== undefined ? d.floor  : null;
-    const walkin = d.walkin !== undefined ? d.walkin : null;
-    const need   = (floor !== null || walkin !== null)
-      ? item.par - ((floor || 0) + (walkin || 0)) : null;
+    // 'total' is the new single-field mode; legacy floor/walkin also supported
+    const total = d.total !== undefined ? d.total
+                : (d.floor||0) + (d.walkin||0);
+    const need  = item.par - total;
     return {
       shift_date:    iso,
       d365_id:       item.d365,
       item_name:     item.name,
       par:           item.par,
-      floor_count:   floor,
-      walkin_count:  walkin,
+      floor_count:   total,    // store total in floor_count for DB compatibility
+      walkin_count:  null,
       need:          need,
-      complete:      need !== null && need <= 0,
+      complete:      need <= 0,
       date_estimated: false,
     };
   });
@@ -2045,19 +2080,22 @@ function renderTransfer() {
     items.forEach(function(item) {
       var key = item.d365;
       var dat = transferData[key] || {};
-      var floor  = dat.floor  !== undefined ? dat.floor  : '';
-      var walkin = dat.walkin !== undefined ? dat.walkin : '';
-      var need = calcNeed(floor, walkin, item.par);
-      var nc = need==='' ? 'need-zero' : need>0 ? 'need-pos' : 'need-over';
-      var nt = need==='' ? '&#x2014;' : need>0 ? '+'+need : need;
+      // Support both 'total' (new) and legacy floor+walkin
+      var total = dat.total !== undefined ? dat.total
+                : (dat.floor !== undefined || dat.walkin !== undefined)
+                  ? ((dat.floor||0) + (dat.walkin||0)) : '';
+      var need  = total !== '' ? (item.par - parseFloat(total)) : null;
+      var nc    = need===null ? 'need-zero' : need>0 ? 'need-pos' : 'need-over';
+      var nt    = need===null ? '&#x2014;' : need>0 ? '+'+need : need;
       html += '<div class="waste-row" style="padding:10px 14px;">';
-      html += '<div class="ops-row-info"><div class="ops-row-name">'+item.name+'</div>';
-      html += '<div class="ops-row-id">'+(key.startsWith('custom-')?'custom':key)+' &nbsp;&#xB7;&nbsp; <span class="ops-row-par">par '+item.par+'</span></div></div>';
-      html += '<div style="display:flex;gap:6px;flex-shrink:0;">';
-      html += '<div class="count-col"><input class="count-input" type="number" min="0" inputmode="numeric" placeholder="&#x2014;" value="'+floor+'" onchange="updateTransfer(\''+key+'\',\'floor\',this.value)"><div class="count-label">Floor</div></div>';
-      html += '<div class="count-col"><input class="count-input" type="number" min="0" inputmode="numeric" placeholder="&#x2014;" value="'+walkin+'" onchange="updateTransfer(\''+key+'\',\'walkin\',this.value)"><div class="count-label">W-in</div></div>';
+      html += '<div class="ops-row-info" style="flex:1;min-width:0;">';
+      html += '<div class="ops-row-name">'+item.name+'</div>';
+      html += '<div class="ops-row-id" style="font-size:0.563rem;color:var(--text3);">'+(key.startsWith('custom-')?'custom':key)+' &nbsp;&#xB7;&nbsp; <span class="ops-row-par">par '+item.par+'</span></div>';
       html += '</div>';
+      html += '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">';
+      html += '<div class="count-col"><input class="count-input" type="number" min="0" inputmode="numeric" placeholder="&#x2014;" value="'+total+'" onchange="updateTransferTotal(\''+key+'\',this.value)"><div class="count-label">Total</div></div>';
       html += '<div class="need-badge '+nc+'">'+nt+'</div>';
+      html += '</div>';
       html += '</div>';
     });
     html += '</div>';
@@ -2065,7 +2103,6 @@ function renderTransfer() {
   document.getElementById('transferList').innerHTML = html;
   renderTransferSummary();
 }
-
 // ── WASTE — custom items ─────────────────────────────────────────────────────
 var wasteCustomItems = { pronto: [], cxra: [] };
 
