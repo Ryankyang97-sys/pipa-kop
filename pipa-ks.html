@@ -179,6 +179,18 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .pt-entry-copy{flex-shrink:0;}
 .pt-done-btn{flex-shrink:0;width:28px;height:28px;border-radius:8px;border:1px solid var(--surface3);background:var(--surface2);color:var(--text3);font-size:0.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .pt-done-btn.checked{background:var(--green-dim);border-color:var(--green-border);color:#4CAF82;}
+
+/* ── PASTRY TRANSFER LOG ── */
+.pt-log{background:var(--surface);border-radius:14px;border:1px solid var(--surface3);margin-top:16px;overflow:hidden;}
+.pt-log-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--surface3);}
+.pt-log-title{font-size:0.875rem;font-weight:700;}
+.pt-log-entry{padding:12px 16px;border-bottom:1px solid var(--surface2);}
+.pt-log-entry:last-child{border-bottom:none;}
+.pt-log-date{font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;}
+.pt-log-items{font-size:0.75rem;color:var(--text2);line-height:1.7;}
+.pt-log-item{display:flex;gap:8px;}
+.pt-log-qty{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text);min-width:24px;}
+.pt-log-del{color:var(--text3);font-size:0.75rem;cursor:pointer;padding:2px 6px;float:right;}
 </style>
 </head>
 <body>
@@ -293,6 +305,26 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
         <span class="pt-summary-count" id="pt-summary-count"></span>
       </div>
       <div id="pt-entry-list"></div>
+    </div>
+
+    <!-- Save Entry -->
+    <div id="pt-save-wrap" style="display:none;margin-top:12px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div style="flex:1;">
+          <label class="form-label" style="margin-bottom:4px;">Transfer Date</label>
+          <input class="form-input" type="date" id="pt-save-date" style="padding:9px 12px;font-size:0.813rem;">
+        </div>
+        <button class="btn btn-primary btn-sm" style="margin-top:18px;height:38px;" onclick="ptSaveEntry()">&#128190; Save Entry</button>
+      </div>
+    </div>
+
+    <!-- Transfer Log -->
+    <div class="pt-log" id="pt-log" style="display:none;">
+      <div class="pt-log-header">
+        <span class="pt-log-title">&#128196; Transfer Log</span>
+        <span id="pt-log-count" style="font-size:0.688rem;color:var(--text3);"></span>
+      </div>
+      <div id="pt-log-entries"></div>
     </div>
 
   </div>
@@ -1054,6 +1086,7 @@ function ptRender() {
   ptRenderSection('pt-items-dolci',    PT_ITEMS.dolci,    'dolci');
   ptRenderSection('pt-items-toppings', PT_ITEMS.toppings, 'toppings');
   ptUpdateSummary();
+  if (!ptLogEntries.length) ptLoadLog();
 }
 
 function ptAdj(section, i, delta) {
@@ -1129,6 +1162,8 @@ function ptUpdateSummary() {
     html += '</div>';
   });
   listEl.innerHTML = html;
+  // Show/hide save button based on active entries
+  ptUpdateSaveWrap();
 }
 
 function ptCopyNum(btn, num) {
@@ -1146,6 +1181,111 @@ function ptCopyNum(btn, num) {
 function ptToggleDone(key) {
   ptDone[key] = !ptDone[key];
   ptUpdateSummary();
+}
+
+
+// ── PASTRY TRANSFER — SAVE & LOG ────────────────────────────────────────────
+var ptLogEntries = [];
+
+// Set default date to today when rendering
+function ptInitDate() {
+  var el = document.getElementById('pt-save-date');
+  if (el && !el.value) {
+    var today = new Date();
+    var yyyy = today.getFullYear();
+    var mm = String(today.getMonth() + 1).padStart(2, '0');
+    var dd = String(today.getDate()).padStart(2, '0');
+    el.value = yyyy + '-' + mm + '-' + dd;
+  }
+}
+
+// Show/hide save wrap based on whether any qty > 0
+function ptUpdateSaveWrap() {
+  var entries = ptGetEntries();
+  var wrap = document.getElementById('pt-save-wrap');
+  if (wrap) {
+    wrap.style.display = entries.length ? '' : 'none';
+    if (entries.length) ptInitDate();
+  }
+}
+
+async function ptSaveEntry() {
+  var entries = ptGetEntries();
+  if (!entries.length) { showToast('No items to save'); return; }
+
+  var dateEl = document.getElementById('pt-save-date');
+  var transferDate = dateEl ? dateEl.value : '';
+  if (!transferDate) { showToast('Please set a date'); return; }
+
+  var items = entries.map(function(e) {
+    return { name: e.name, adaco: e.adaco, qty: e.qty, unit: e.unit };
+  });
+
+  var btn = document.querySelector('#pt-save-wrap .btn-primary');
+  if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
+
+  try {
+    var rows = await sbPost('pastry_transfers', { transfer_date: transferDate, items: items });
+    ptLogEntries.unshift(rows[0]);
+    ptRenderLog();
+    showToast('Entry saved — ' + items.length + ' item' + (items.length !== 1 ? 's' : ''));
+  } catch(e) {
+    showToast('Save failed — check connection');
+  } finally {
+    if (btn) { btn.textContent = '\u1F4BE Save Entry'; btn.disabled = false; }
+  }
+}
+
+async function ptLoadLog() {
+  try {
+    var rows = await sbFetch('pastry_transfers?select=id,transfer_date,items&order=transfer_date.desc&limit=14');
+    ptLogEntries = rows;
+    ptRenderLog();
+  } catch(e) {
+    // Silently fail — log is supplementary
+  }
+}
+
+function ptRenderLog() {
+  var logEl  = document.getElementById('pt-log');
+  var listEl = document.getElementById('pt-log-entries');
+  var countEl = document.getElementById('pt-log-count');
+
+  if (!ptLogEntries.length) {
+    logEl.style.display = 'none';
+    return;
+  }
+  logEl.style.display = '';
+  countEl.textContent = 'Last ' + ptLogEntries.length;
+
+  listEl.innerHTML = ptLogEntries.map(function(entry) {
+    var dateStr = entry.transfer_date
+      ? new Date(entry.transfer_date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'short', month:'numeric', day:'numeric'})
+      : '—';
+    var items = Array.isArray(entry.items) ? entry.items : [];
+    var itemsHtml = items.map(function(it) {
+      return '<div class="pt-log-item"><span class="pt-log-qty">' + it.qty + '</span>'
+           + '<span>' + it.name + (it.unit ? ' <span style="color:var(--text3);font-size:0.625rem;">' + it.unit + '</span>' : '') + '</span></div>';
+    }).join('');
+
+    return '<div class="pt-log-entry">'
+      + '<span class="pt-log-del" onclick="ptDeleteEntry(' + entry.id + ')">&#10005;</span>'
+      + '<div class="pt-log-date">' + dateStr + '</div>'
+      + '<div class="pt-log-items">' + itemsHtml + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+async function ptDeleteEntry(id) {
+  if (!confirm('Delete this transfer entry?')) return;
+  try {
+    await sbDelete('pastry_transfers', id);
+    ptLogEntries = ptLogEntries.filter(function(e) { return e.id !== id; });
+    ptRenderLog();
+    showToast('Deleted');
+  } catch(e) {
+    showToast('Delete failed');
+  }
 }
 
 </script>
