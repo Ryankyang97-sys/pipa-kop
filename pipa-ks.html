@@ -330,10 +330,10 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     <div id="wasteSummary"></div>
 
     <div style="margin-top:18px;font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:6px;">Full Sheet</div>
-    <div style="display:flex;align-items:center;padding:0 14px 4px;gap:8px;justify-content:flex-end;border-bottom:1px solid var(--surface3);margin-bottom:4px;">
-      <div style="flex:1;"></div>
-      <div style="display:flex;gap:4px;" id="wasteDayHeaders"></div>
-      <div style="min-width:26px;text-align:right;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">Tot</div>
+    <div style="display:flex;align-items:center;padding:0 14px 4px;gap:8px;border-bottom:1px solid var(--surface3);margin-bottom:4px;">
+      <div style="flex:1;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">Item</div>
+      <div style="width:72px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">D365 #</div>
+      <div style="width:56px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">Total</div>
     </div>
     <div id="wasteList"></div>
 
@@ -360,8 +360,15 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
         <div style="font-size:0.5rem;color:var(--text3);margin-top:3px;" id="pastrySourceLabel"></div>
       </div>
     </div>
-    <div id="pastryContent"><div class="empty-state"><div class="empty-icon">&#x1F950;</div><div class="empty-msg">Loading&#x2026;</div></div></div>
-    <button class="btn btn-secondary" style="margin-top:14px;" onclick="openPastryManual()">+ Add / Edit Entry</button>
+    <!-- column headers -->
+    <div style="display:flex;align-items:center;padding:0 14px 4px;gap:6px;border-bottom:1px solid var(--surface3);margin-bottom:4px;">
+      <div style="flex:1;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">Item</div>
+      <div style="width:72px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">D365 #</div>
+      <div style="width:48px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">On Hand</div>
+      <div style="width:48px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">Order</div>
+    </div>
+    <div id="pastryList"></div>
+    <button class="btn btn-secondary" style="margin-top:14px;" onclick="openPastryManual()">+ Add Item</button>
     <button class="btn btn-primary" style="margin-top:6px;background:#1A6B35;" onclick="exportAdacoPastry()">&#11123; Export to Adaco</button>
     <button class="btn btn-secondary" style="margin-top:6px;border-color:var(--accent-border);color:var(--accent);" id="pastrySaveBtn" onclick="savePastryToSupabase()">&#9729; Save to Supabase</button>
   </div>
@@ -1214,22 +1221,17 @@ function setWasteMode(mode) {
 }
 
 function renderWaste() {
-  const data = getActiveData();
+  const data  = getActiveData();
   const dates = getWeekDates(wasteWeekOffset);
   const startStr = dates[0].toLocaleDateString('en-US',{month:'short',day:'numeric'});
   const endStr   = dates[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  document.getElementById('wasteWeekRange').textContent = startStr + '–' + endStr;
+  document.getElementById('wasteWeekRange').textContent = startStr + '\u2013' + endStr;
   document.getElementById('wasteWeekLabel').textContent = wasteWeekOffset === 0 ? 'This Week' : (wasteWeekOffset === -1 ? 'Last Week' : (wasteWeekOffset < 0 ? Math.abs(wasteWeekOffset) + ' weeks ago' : wasteWeekOffset + ' weeks ahead'));
+  var dhEl = document.getElementById('wasteDayHeaders');
+  if (dhEl) dhEl.innerHTML = '';
 
-  let dayH = '';
-  DAYS.forEach(function(d) {
-    dayH += '<div style="width:32px;text-align:center;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);">' + d + '</div>';
-  });
-  document.getElementById('wasteDayHeaders').innerHTML = dayH;
-
-  const items = getActiveItems();
-  const groups = [];
-  const seen = {};
+  const items  = getActiveItems();
+  const groups = []; const seen = {};
   items.forEach(function(item) {
     if (!seen[item.group]) { seen[item.group] = true; groups.push(item.group); }
   });
@@ -1238,20 +1240,18 @@ function renderWaste() {
   groups.forEach(function(g) {
     const gItems = items.filter(function(i) { return i.group === g; });
     html += '<div class="section-group">';
-    html += '<div class="group-header"><span class="group-title">' + g + '</span></div>';
+    html += '<div class="group-header"><span class="group-title">' + g + '</span><span class="group-count">' + gItems.length + ' items</span></div>';
     gItems.forEach(function(item) {
       const d = data[item.d365] || {};
-      const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
-      html += '<div class="waste-row">';
-      html += '<div class="ops-row-info"><div class="ops-row-name">' + item.name + '</div><div class="ops-row-id">' + item.d365 + '</div></div>';
-      html += '<div class="waste-days">';
-      DAYS.forEach(function(day) {
-        const v = d[day] !== undefined ? d[day] : '';
-        const hasVal = v !== '' && parseFloat(v) > 0;
-        html += '<input class="waste-day-input' + (hasVal ? ' has-value' : '') + '" type="number" min="0" inputmode="numeric" placeholder="0" value="' + v + '" onchange="updateWaste(\'' + item.d365 + '\',\'' + day + '\',this.value,this)">';
-      });
-      html += '</div>';
-      html += '<div class="waste-total">' + (total > 0 ? total : '—') + '</div>';
+      // Support both new _total field and legacy per-day data
+      const savedTotal = d._total !== undefined ? d._total
+        : DAYS.reduce(function(s,day){ return s + (parseFloat(d[day])||0); }, 0);
+      const displayD365 = d._d365 !== undefined ? d._d365 : item.d365;
+      const hasVal = savedTotal > 0;
+      html += '<div class="waste-row" style="display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--surface2);gap:6px;">';
+      html += '<div class="ops-row-info" style="flex:1;min-width:0;"><div class="ops-row-name">' + item.name + '</div></div>';
+      html += '<input class="count-input" style="width:72px;font-size:0.625rem;text-align:center;font-family:\'JetBrains Mono\',monospace;" type="text" inputmode="numeric" placeholder="D365 #" value="' + displayD365 + '" onchange="updateWasteD365(\'' + item.d365 + '\',this.value)" onclick="this.select()">';
+      html += '<input class="count-input' + (hasVal ? ' has-value' : '') + '" style="width:56px;text-align:center;" type="number" min="0" inputmode="numeric" placeholder="0" value="' + (savedTotal > 0 ? savedTotal : '') + '" onchange="updateWasteTotal(\'' + item.d365 + '\',this.value)">';
       html += '</div>';
     });
     html += '</div>';
@@ -1260,13 +1260,32 @@ function renderWaste() {
   renderWasteSummary();
 }
 
+function updateWasteTotal(key, val) {
+  var data = getActiveData();
+  if (!data[key]) data[key] = {};
+  if (val === '' || parseFloat(val) === 0) { delete data[key]._total; }
+  else { data[key]._total = parseFloat(val); }
+  saveActiveData(data);
+  renderWasteSummary();
+}
+
+function updateWasteD365(originalKey, newVal) {
+  var data = getActiveData();
+  if (!data[originalKey]) data[originalKey] = {};
+  data[originalKey]._d365 = newVal.trim();
+  saveActiveData(data);
+}
+
 function renderWasteSummary() {
   const el = document.getElementById('wasteSummary');
   const data = getActiveData();
   const items = getActiveItems();
   const nonZero = items.filter(function(item) {
     const d = data[item.d365] || {};
-    return DAYS.some(function(day) { return parseFloat(d[day]) > 0; });
+    // Support both new _total field and legacy per-day data
+    const tot = d._total !== undefined ? d._total
+      : DAYS.reduce(function(s,day){ return s+(parseFloat(d[day])||0); }, 0);
+    return tot > 0;
   });
   if (!nonZero.length) {
     const label = wasteMode === 'pronto' ? 'Pronto' : 'CxRA';
@@ -1276,16 +1295,15 @@ function renderWasteSummary() {
   let html = '<div class="section-group">';
   nonZero.forEach(function(item) {
     const d = data[item.d365] || {};
-    const total = DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
-    const dayBreakdown = DAYS.map(function(day) {
-      const v = parseFloat(d[day]) || 0;
-      return v > 0 ? '<span style="font-family:JetBrains Mono,monospace;font-size:0.625rem;">' + day.charAt(0) + ':' + v + '</span>' : '';
-    }).filter(Boolean).join(' ');
+    const total = d._total !== undefined ? d._total
+      : DAYS.reduce(function(s, day) { return s + (parseFloat(d[day]) || 0); }, 0);
+    const displayD365 = d._d365 !== undefined ? d._d365 : item.d365;
+    const dayBreakdown = '';
     html += '<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--surface2);">';
     html += '<div style="flex:1;min-width:0;">';
     html += '<div class="ops-row-name">' + item.name + '</div>';
     html += '<div style="display:flex;gap:6px;align-items:center;margin-top:2px;flex-wrap:wrap;">';
-    html += '<span style="font-family:JetBrains Mono,monospace;font-size:0.625rem;color:var(--accent);background:var(--accent-dim);padding:2px 6px;border-radius:4px;">' + item.d365 + '</span> ' + dayBreakdown;
+    html += '<span style="font-family:JetBrains Mono,monospace;font-size:0.625rem;color:var(--accent);background:var(--accent-dim);padding:2px 6px;border-radius:4px;">' + displayD365 + '</span>';
     html += '</div>';
     html += '</div>';
     html += '<div style="font-family:JetBrains Mono,monospace;font-size:0.875rem;font-weight:700;color:var(--accent);min-width:28px;text-align:right;">' + total + '</div>';
@@ -2252,9 +2270,7 @@ function getPastryD365(itemName) {
 var _origRenderPastry = renderPastry;
 function renderPastry() {
   var iso = dateKey(pastryDateOffset);
-  var localRows = DB.get('pastry_local_'+iso) || [];
-  pastryLocalEntries[iso] = localRows;
-  var d = new Date();
+  var d   = new Date();
   d.setDate(d.getDate() + pastryDateOffset);
   document.getElementById('pastryDateLabel').textContent =
     pastryDateOffset===0 ? 'Today' : pastryDateOffset===-1 ? 'Yesterday' :
@@ -2262,70 +2278,73 @@ function renderPastry() {
   document.getElementById('pastryDateSub').textContent =
     d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   document.getElementById('pastrySourceLabel').textContent = '';
-  var el = document.getElementById('pastryContent');
-  el.innerHTML = '<div class="empty-state" style="padding:20px 0;"><div class="empty-msg">Loading&#x2026;</div></div>';
 
-  sbFetch('ks_pastry_orders?shift_date=eq.'+iso+'&order=is_topping,item_name').then(function(dbRows) {
-    var merged = dbRows.slice();
-    localRows.forEach(function(lr) {
-      var ex = merged.find(function(r){ return r.item_name===lr.item_name; });
-      if (ex) Object.assign(ex, lr);
-      else merged.push(lr);
-    });
-    if (!merged.length) {
-      el.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F950;</div><div class="empty-msg">No pastry order for this date.<br><span style="font-size:0.75rem;color:var(--text3);">Use + Add / Edit Entry to log one.</span></div></div>';
-      return;
-    }
-    var srcLabel = dbRows.length && localRows.length ? '&#x1F4CB; DB + local' :
-                   localRows.length ? 'local only' : '&#x1F4CB; Backlog';
-    document.getElementById('pastrySourceLabel').innerHTML =
-      '<span class="backlog-badge">'+srcLabel+'</span>';
+  // Load saved data from localStorage (keyed by date)
+  var saved = DB.get('pastry_' + iso) || {};
 
-    var mainItems = merged.filter(function(r){ return !r.is_topping; });
-    var toppings  = merged.filter(function(r){ return r.is_topping; });
-
-    var html = '<div style="display:flex;padding:0 14px 6px;gap:8px;border-bottom:1px solid var(--surface3);margin-bottom:4px;">';
-    html += '<div style="flex:1;font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">Item</div>';
-    html += '<div class="pastry-col-hdr" style="width:60px;">On Hand</div>';
-    html += '<div class="pastry-col-hdr" style="width:60px;">Ordered</div></div>';
-
-    function buildSection(title, items) {
-      if (!items.length) return '';
-      var s = '<div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin:12px 0 6px;">'+title+'</div>';
-      s += '<div class="pastry-section">';
-      items.forEach(function(r) {
-        var onH = r.on_hand!=null ? r.on_hand : '&#x2014;';
-        var ord = r.order_qty!=null ? r.order_qty : '&#x2014;';
-        var isLocal = !!localRows.find(function(l){ return l.item_name===r.item_name; });
-        var pd365 = r.d365_id || getPastryD365(r.item_name);
-        s += '<div class="pastry-row'+(r.is_topping?' topping-row':'')+ '" onclick="editPastryRow(\''+r.item_name.replace(/'/g,"&#39;")+'\','+JSON.stringify(r).replace(/</g,'&lt;')+')" style="cursor:pointer;">';
-        s += '<div><div class="ops-row-name">'+r.item_name+(isLocal?' <span style="font-size:0.5rem;color:var(--accent);">&#x25CF;</span>':'')+'</div>';
-        s += '<div style="display:flex;gap:6px;align-items:center;margin-top:2px;flex-wrap:wrap;">';
-        if (pd365) s += '<span style="font-family:JetBrains Mono,monospace;font-size:0.625rem;color:var(--accent);background:var(--accent-dim);padding:2px 6px;border-radius:4px;letter-spacing:0.04em;">'+pd365+'</span>';
-        if (r.week_par) s += '<span class="ops-row-id" style="font-size:0.563rem;">wk: '+r.week_par+(r.weekend_par?' / wknd: '+r.weekend_par:'')+'</span>';
-        s += '</div>';
-        if (r.notes) s += '<div style="font-size:0.563rem;color:#E07070;margin-top:2px;">'+r.notes+'</div>';
-        s += '</div>';
-        s += '<div class="pastry-val">'+onH+'</div>';
-        s += '<div class="pastry-val '+(parseFloat(ord)>0?'ordered':'zero')+'">'+ord+'</div>';
-        s += '</div>';
-      });
-      s += '</div>';
-      return s;
-    }
-    html += buildSection('Dolci / Pastry', mainItems);
-    html += buildSection('Toppings &#x2014; Cannoli &amp; Gelato', toppings);
-    el.innerHTML = html;
-  }).catch(function() {
-    if (localRows.length) {
-      document.getElementById('pastrySourceLabel').innerHTML = '<span class="backlog-badge">local only</span>';
-      el.innerHTML = '<div style="font-size:0.75rem;color:#E07070;padding:8px 0 12px;">&#x26A0; DB unavailable &#x2014; showing local entries only</div>';
-    } else {
-      el.innerHTML = '<div class="empty-state"><div class="empty-msg">Could not load. Use + Add / Edit Entry to enter manually.</div></div>';
-    }
+  // Build inline list from PASTRY_ITEMS + any custom local additions
+  var localExtra = DB.get('pastry_local_' + iso) || [];
+  // Merge PASTRY_ITEMS with local additions, custom items at end
+  var allItems = PASTRY_ITEMS.slice();
+  localExtra.forEach(function(lr) {
+    var exists = allItems.find(function(p){ return p.name === lr.item_name; });
+    if (!exists) allItems.push({ group: lr.group || 'CUSTOM', name: lr.item_name,
+      d365: lr.d365_id || null, unit: lr.unit || null, wk_par: lr.week_par || null, wknd_par: lr.weekend_par || null });
   });
+
+  var groups = []; var seen = {};
+  allItems.forEach(function(item) {
+    if (!seen[item.group]) { seen[item.group] = true; groups.push(item.group); }
+  });
+
+  var html = '';
+  groups.forEach(function(g) {
+    var gItems = allItems.filter(function(i){ return i.group === g; });
+    html += '<div class="section-group">';
+    html += '<div class="group-header"><span class="group-title">' + g + '</span><span class="group-count">' + gItems.length + ' items</span></div>';
+    gItems.forEach(function(item) {
+      var key   = item.name; // use name as key since d365 may be null
+      var entry = saved[key] || {};
+      // D365 override: user may have edited inline
+      var displayD365 = entry._d365 !== undefined ? entry._d365 : (item.d365 || '');
+      var onHand  = entry.on_hand  !== undefined ? entry.on_hand  : '';
+      var ordered = entry.order_qty !== undefined ? entry.order_qty : '';
+      var hasOrder = ordered !== '' && parseFloat(ordered) > 0;
+      html += '<div class="waste-row" style="display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--surface2);gap:6px;">';
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div class="ops-row-name">' + item.name + '</div>';
+      if (item.wk_par) html += '<div class="ops-row-id" style="font-size:0.5rem;">wk: ' + item.wk_par + (item.wknd_par ? ' / wknd: ' + item.wknd_par : '') + (item.unit ? ' \u00b7 ' + item.unit : '') + '</div>';
+      if (item.notes) html += '<div style="font-size:0.563rem;color:#E07070;margin-top:2px;">' + item.notes + '</div>';
+      html += '</div>';
+      // Editable D365# field
+      html += '<input class="count-input" style="width:72px;font-size:0.625rem;text-align:center;font-family:JetBrains Mono,monospace;" type="text" inputmode="numeric" placeholder="D365 #" value="' + displayD365 + '" onchange="updatePastryD365(\'' + key.replace(/'/g,"\\'") + '\',this.value)" onclick="this.select()">';
+      // On Hand
+      html += '<input class="count-input" style="width:48px;text-align:center;" type="number" min="0" inputmode="numeric" placeholder="\u2014" value="' + onHand + '" onchange="updatePastryEntry(\'' + key.replace(/'/g,"\\'") + '\',\'on_hand\',this.value)">';
+      // Order qty — highlight if > 0
+      html += '<input class="count-input' + (hasOrder ? ' has-value' : '') + '" style="width:48px;text-align:center;" type="number" min="0" inputmode="numeric" placeholder="\u2014" value="' + ordered + '" onchange="updatePastryEntry(\'' + key.replace(/'/g,"\\'") + '\',\'order_qty\',this.value)">';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('pastryList').innerHTML = html;
 }
 
+function updatePastryEntry(key, field, val) {
+  var iso  = dateKey(pastryDateOffset);
+  var saved = DB.get('pastry_' + iso) || {};
+  if (!saved[key]) saved[key] = {};
+  if (val === '') { delete saved[key][field]; }
+  else { saved[key][field] = parseFloat(val); }
+  DB.set('pastry_' + iso, saved);
+}
+
+function updatePastryD365(key, newVal) {
+  var iso  = dateKey(pastryDateOffset);
+  var saved = DB.get('pastry_' + iso) || {};
+  if (!saved[key]) saved[key] = {};
+  saved[key]._d365 = newVal.trim();
+  DB.set('pastry_' + iso, saved);
+}
 function editPastryRow(name, rowData) {
   // Pre-fill the manual modal with existing values for editing
   document.getElementById('pm-name').value = name;
@@ -2600,12 +2619,17 @@ window.exportAdacoWaste = function() {
   var rows = items
     .filter(function(item){
       var d = data[item.d365] || {};
-      return DAYS.some(function(day){ return parseFloat(d[day]) > 0; });
+      var tot = d._total !== undefined ? d._total
+        : DAYS.reduce(function(s,day){ return s+(parseFloat(d[day])||0); },0);
+      return tot > 0;
     })
     .map(function(item){
       var d = data[item.d365] || {};
-      var total = DAYS.reduce(function(s,day){ return s+(parseFloat(d[day])||0); },0);
-      var code = String(item.d365).replace(/^0+/,'').padStart(8,'0');
+      var total = d._total !== undefined ? d._total
+        : DAYS.reduce(function(s,day){ return s+(parseFloat(d[day])||0); },0);
+      // Use user-edited D365 if set, else fall back to item list D365
+      var rawCode = d._d365 || String(item.d365);
+      var code = rawCode.replace(/^0+/,'').padStart(8,'0');
       return { code:code, qty:total, batch:null };
     });
   var weekStart = getWeekKey(wasteWeekOffset);
@@ -2614,39 +2638,31 @@ window.exportAdacoWaste = function() {
 };
 
 window.exportAdacoPastry = function() {
-  var iso = dateKey(pastryDateOffset);
-  // Pull from Supabase then merge local, same as renderPastry
-  sbFetch('ks_pastry_orders?shift_date=eq.'+iso+'&order=is_topping,item_name').then(function(dbRows){
-    var localRows = DB.get('pastry_local_'+iso) || [];
-    var merged = dbRows.slice();
-    localRows.forEach(function(lr){
-      var ex = merged.find(function(r){ return r.item_name===lr.item_name; });
-      if(ex) Object.assign(ex,lr); else merged.push(lr);
-    });
-    var rows = merged
-      .filter(function(r){ return r.order_qty != null && parseFloat(r.order_qty) > 0; })
-      .map(function(r){
-        var d365 = r.d365_id || getPastryD365(r.item_name);
-        if(!d365){ showToast('No D365# for: ' + r.item_name + ' — skipped'); return null; }
-        var code = String(d365).replace(/^0+/,'').padStart(8,'0');
-        return { code:code, qty:parseFloat(r.order_qty), batch:null };
-      })
-      .filter(Boolean);
-    downloadXlsx(rows, 'adaco_pastry_' + iso + '.xlsx');
-  }).catch(function(){
-    // Fall back to local only
-    var localRows = DB.get('pastry_local_'+iso) || [];
-    var rows = localRows
-      .filter(function(r){ return r.order_qty != null && parseFloat(r.order_qty) > 0; })
-      .map(function(r){
-        var d365 = r.d365_id || getPastryD365(r.item_name);
-        if(!d365) return null;
-        var code = String(d365).replace(/^0+/,'').padStart(8,'0');
-        return { code:code, qty:parseFloat(r.order_qty), batch:null };
-      })
-      .filter(Boolean);
-    downloadXlsx(rows, 'adaco_pastry_' + iso + '.xlsx');
+  var iso   = dateKey(pastryDateOffset);
+  var saved = DB.get('pastry_' + iso) || {};
+
+  // Build item list from PASTRY_ITEMS + any custom local additions
+  var localExtra = DB.get('pastry_local_' + iso) || [];
+  var allItems = PASTRY_ITEMS.slice();
+  localExtra.forEach(function(lr) {
+    var exists = allItems.find(function(p){ return p.name === lr.item_name; });
+    if (!exists) allItems.push({ name: lr.item_name, d365: lr.d365_id || null });
   });
+
+  var skipped = [];
+  var rows = allItems
+    .map(function(item) {
+      var entry = saved[item.name] || {};
+      if (!entry.order_qty || parseFloat(entry.order_qty) <= 0) return null;
+      var rawCode = entry._d365 || item.d365;
+      if (!rawCode) { skipped.push(item.name); return null; }
+      var code = String(rawCode).replace(/^0+/,'').padStart(8,'0');
+      return { code: code, qty: parseFloat(entry.order_qty), batch: null };
+    })
+    .filter(Boolean);
+
+  if (skipped.length) showToast('Skipped (no D365#): ' + skipped.slice(0,3).join(', ') + (skipped.length > 3 ? '...' : ''));
+  downloadXlsx(rows, 'adaco_pastry_' + iso + '.xlsx');
 };
 
 })(); // IIFE end
