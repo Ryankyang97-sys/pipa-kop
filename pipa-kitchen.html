@@ -15,27 +15,35 @@
   --text:#F0EDE8;--text2:#8A8680;--text3:#5A5650;
   --accent:#B85C00;--accent-dim:rgba(184,92,0,0.15);--accent-border:rgba(184,92,0,0.35);
   --green:#2D7A4F;--green-dim:rgba(45,122,79,0.12);--green-border:rgba(45,122,79,0.3);
-  --red:#8B2020;--red-dim:rgba(139,32,32,0.2);--red-border:rgba(200,80,80,0.4);
   --blue-dim:rgba(40,80,160,0.15);--blue-border:rgba(60,120,220,0.35);
   --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
 }
 html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100%;-webkit-text-size-adjust:none;}
-.page{padding:calc(var(--safe-top) + 40px) 16px calc(var(--safe-bottom) + 72px);max-width:480px;margin:0 auto;}
-.nav-back{display:flex;align-items:center;gap:6px;margin-bottom:20px;text-decoration:none;color:var(--text3);font-size:0.75rem;font-weight:600;}
+.page{padding:calc(var(--safe-top) + 40px) 16px calc(var(--safe-bottom) + 24px);max-width:480px;margin:0 auto;}
+
+/* NAV */
+.nav-back{display:flex;align-items:center;gap:6px;margin-bottom:16px;text-decoration:none;color:var(--text3);font-size:0.75rem;font-weight:600;}
 .wordmark{font-size:1.35rem;font-weight:700;letter-spacing:-0.02em;}
 .wordmark span{color:var(--accent);}
 .wordmark-sub{font-size:0.688rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-top:3px;}
 
+/* SHARED DATE NAV — above tabs */
+.date-nav-global{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--surface2);border-radius:10px;padding:8px 12px;margin-top:16px;}
+.date-nav-btn{background:var(--surface2);border:none;color:var(--text2);font-size:1.1rem;width:32px;height:32px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.date-nav-center{text-align:center;flex:1;}
+.date-label{font-size:0.875rem;font-weight:700;color:var(--text);}
+.date-sub{font-size:0.625rem;color:var(--text3);margin-top:1px;}
+
 /* TABS */
-.tabs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:18px -16px 0;padding:0 16px;}
+.tabs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:14px -16px 0;padding:0 16px;}
 .tabs-wrap::-webkit-scrollbar{display:none;}
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--surface2);width:max-content;min-width:100%;}
-.tab{padding:8px 12px 10px;font-size:0.675rem;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap;flex-shrink:0;user-select:none;}
+.tab{padding:8px 14px 10px;font-size:0.675rem;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap;flex-shrink:0;user-select:none;}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .panel{display:none;padding-top:18px;}
 .panel.active{display:block;}
 
-/* SECTION LABELS */
+/* SECTION LABEL */
 .section-label{font-size:0.563rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
 
 /* SEARCH */
@@ -55,7 +63,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .result-vendor{font-size:0.688rem;color:var(--text2);}
 .no-results{padding:16px 14px;font-size:0.813rem;color:var(--text3);text-align:center;}
 
-/* RECIPE DETAIL */
+/* LOOKUP DETAIL */
 .detail-card{background:var(--surface);border:1px solid var(--surface2);border-radius:10px;overflow:hidden;margin-top:10px;}
 .detail-header{padding:12px 14px;border-bottom:1px solid var(--surface2);}
 .detail-title{font-size:0.875rem;font-weight:700;color:var(--text);line-height:1.3;}
@@ -63,35 +71,35 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .detail-ids{display:flex;gap:10px;margin-top:6px;}
 .id-chip{font-family:'JetBrains Mono',monospace;font-size:0.688rem;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);padding:2px 8px;border-radius:4px;}
 .detail-close{float:right;font-size:0.75rem;color:var(--text3);cursor:pointer;margin-top:2px;}
-.ing-row{display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--surface2);gap:8px;}
-.ing-row:last-child{border-bottom:none;}
-.ing-id{font-family:'JetBrains Mono',monospace;font-size:0.625rem;color:var(--text3);width:60px;flex-shrink:0;}
-.ing-name{font-size:0.75rem;color:var(--text);flex:1;}
 
-/* GROUP CARDS */
-.group-section{margin-bottom:18px;}
+/* OUTLET TOGGLE */
+.outlet-toggle{display:flex;margin-bottom:14px;border-radius:8px;overflow:hidden;border:1px solid var(--surface3);}
+.outlet-btn{flex:1;padding:9px 0;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;background:var(--surface2);color:var(--text3);border:none;cursor:pointer;transition:background 0.15s,color 0.15s;}
+.outlet-btn.active{background:var(--accent);color:#fff;}
+
+/* ORDER TABLE */
+.group-section{margin-bottom:20px;}
 .group-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface2);border-radius:8px 8px 0 0;}
 .group-title{font-size:0.625rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);}
+.group-meta{display:flex;align-items:center;gap:8px;}
 .group-count{font-size:0.563rem;color:var(--text3);}
+.group-export{background:var(--surface3);border:none;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.563rem;font-weight:700;padding:3px 8px;border-radius:4px;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;}
+.group-export:active{opacity:0.7;}
 
-/* COUNT / ORDER ROWS */
-.item-row{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid var(--surface2);gap:8px;background:var(--surface);}
-.item-row:first-of-type{border-radius:0;}
+.col-heads{display:flex;align-items:center;padding:4px 12px 6px;gap:8px;background:var(--surface);border-left:1px solid var(--surface2);border-right:1px solid var(--surface2);}
+.col-head{font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);text-align:center;}
+
+.item-row{display:flex;align-items:center;padding:9px 12px;border-bottom:1px solid var(--surface2);gap:8px;background:var(--surface);}
 .item-row:last-child{border-bottom:none;border-radius:0 0 8px 8px;}
 .item-info{flex:1;min-width:0;}
 .item-name{font-size:0.813rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .item-d365{font-family:'JetBrains Mono',monospace;font-size:0.563rem;color:var(--text3);margin-top:2px;}
-.item-vendor{font-size:0.563rem;color:var(--text3);}
-.count-input{background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.813rem;text-align:center;padding:6px 4px;width:60px;flex-shrink:0;-moz-appearance:textfield;}
-.count-input::-webkit-inner-spin-button,.count-input::-webkit-outer-spin-button{-webkit-appearance:none;}
-.count-input:focus{outline:none;border-color:var(--accent);}
-.count-input.has-value{border-color:var(--accent);color:var(--accent);}
-.par-badge{font-size:0.563rem;color:var(--text3);text-align:center;width:36px;flex-shrink:0;}
-.suggest-badge{font-family:'JetBrains Mono',monospace;font-size:0.875rem;font-weight:600;text-align:center;width:44px;flex-shrink:0;}
-.suggest-ok{color:var(--text3);}
-.suggest-need{color:var(--accent);}
-.col-heads{display:flex;align-items:center;padding:4px 12px 6px;gap:8px;}
-.col-head{font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);text-align:center;}
+
+.num-input{background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.813rem;text-align:center;padding:6px 4px;flex-shrink:0;-moz-appearance:textfield;}
+.num-input::-webkit-inner-spin-button,.num-input::-webkit-outer-spin-button{-webkit-appearance:none;}
+.num-input:focus{outline:none;border-color:var(--accent);}
+.num-input.has-value{border-color:var(--accent);color:var(--accent);}
+.par-badge{font-size:0.563rem;color:var(--text3);text-align:center;width:32px;flex-shrink:0;}
 
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:0.813rem;font-weight:700;cursor:pointer;transition:opacity 0.15s;}
@@ -100,96 +108,26 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .btn-ghost{background:transparent;border:1px solid var(--surface3);color:var(--text2);}
 .btn:active{opacity:0.75;}
 .btn-full{width:100%;margin-top:12px;}
-.btn-row{display:flex;gap:8px;margin-top:12px;}
-
-/* DATE NAV */
-.date-nav{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--surface2);border-radius:10px;padding:10px 14px;margin-bottom:14px;}
-.date-nav-btn{background:var(--surface2);border:none;color:var(--text2);font-size:1rem;width:32px;height:32px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.date-nav-center{text-align:center;}
-.date-label{font-size:0.875rem;font-weight:700;color:var(--text);}
-.date-sub{font-size:0.625rem;color:var(--text3);margin-top:2px;}
-
-/* FILTER PILLS */
-.filter-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;}
-.filter-row::-webkit-scrollbar{display:none;}
-.filter-pill{flex-shrink:0;padding:5px 12px;border-radius:20px;border:1.5px solid var(--surface3);background:var(--surface2);color:var(--text3);font-family:'DM Sans',sans-serif;font-size:0.688rem;font-weight:700;cursor:pointer;}
-.filter-pill.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-
-/* RECIPE SELECTOR */
-.recipe-selector{background:var(--surface);border:1px solid var(--surface2);border-radius:10px;margin-bottom:14px;overflow:hidden;}
-.recipe-selector-header{padding:12px 14px;border-bottom:1px solid var(--surface2);display:flex;align-items:center;justify-content:space-between;}
-.recipe-selector-title{font-size:0.813rem;font-weight:700;color:var(--text);}
-.recipe-selector-sub{font-size:0.625rem;color:var(--text3);margin-top:2px;}
-.recipe-list{max-height:220px;overflow-y:auto;}
-.recipe-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--surface2);cursor:pointer;}
-.recipe-item:last-child{border-bottom:none;}
-.recipe-item:active{background:var(--surface2);}
-.recipe-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--surface3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.75rem;}
-.recipe-check.checked{background:var(--accent);border-color:var(--accent);color:#fff;}
-.recipe-label{font-size:0.75rem;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.recipe-num{font-family:'JetBrains Mono',monospace;font-size:0.563rem;color:var(--text3);}
+.btn-row{display:flex;gap:8px;margin-top:14px;}
 
 /* STATUS PILLS */
 .status-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
 .status-pill{font-size:0.625rem;font-weight:700;padding:4px 10px;border-radius:20px;}
 .status-green{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);}
 .status-orange{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
-.status-red{background:var(--red-dim);color:#e07070;border:1px solid var(--red-border);}
 .status-blue{background:var(--blue-dim);color:#80aaff;border:1px solid var(--blue-border);}
 
-/* INVOICE CARDS */
-.inv-card{background:var(--surface);border:1px solid var(--surface2);border-radius:10px;margin-bottom:10px;overflow:hidden;}
-.inv-card-header{padding:12px 14px;border-bottom:1px solid var(--surface2);}
-.inv-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
-.inv-card-title{font-size:0.875rem;font-weight:700;color:var(--text);}
-.inv-card-date{font-size:0.625rem;color:var(--text3);margin-top:3px;}
-.inv-card-body{padding:12px 14px;}
-.inv-field{margin-bottom:10px;}
-.inv-field-label{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px;}
-.inv-field input,.inv-field textarea{width:100%;background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.813rem;padding:8px 10px;outline:none;}
-.inv-field input:focus,.inv-field textarea:focus{border-color:var(--accent);}
-.inv-field textarea{resize:none;height:60px;}
-.inv-field-row{display:flex;gap:8px;}
-.inv-field-row .inv-field{flex:1;}
-
 /* TOAST */
-#toast{position:fixed;bottom:calc(var(--safe-bottom) + 78px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface3);color:var(--text);font-size:0.813rem;font-weight:600;padding:10px 18px;border-radius:24px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:999;white-space:nowrap;}
+#toast{position:fixed;bottom:calc(var(--safe-bottom) + 24px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface3);color:var(--text);font-size:0.813rem;font-weight:600;padding:10px 18px;border-radius:24px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:999;white-space:nowrap;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* LOADING */
-.loading{text-align:center;padding:28px 16px;color:var(--text3);font-size:0.813rem;}
+/* LOADING / EMPTY */
+.loading{text-align:center;padding:32px 16px;color:var(--text3);font-size:0.813rem;}
 .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--surface3);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin-bottom:8px;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
-/* EMPTY STATE */
-.empty-state{text-align:center;padding:40px 16px;color:var(--text3);}
+.empty-state{text-align:center;padding:44px 16px;color:var(--text3);}
 .empty-icon{font-size:2rem;margin-bottom:8px;}
-.empty-msg{font-size:0.813rem;}
-
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:800;display:none;align-items:flex-end;}
-.modal-overlay.show{display:flex;}
-.modal{background:var(--surface);border-radius:16px 16px 0 0;width:100%;max-width:480px;margin:0 auto;max-height:85vh;overflow-y:auto;padding:20px 16px calc(var(--safe-bottom) + 20px);}
-.modal-title{font-size:1rem;font-weight:700;margin-bottom:16px;}
-.modal-close{float:right;background:var(--surface2);border:none;color:var(--text2);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;}
-
-/* OUTLET TOGGLE */
-.outlet-toggle{display:flex;gap:0;margin-bottom:14px;border-radius:8px;overflow:hidden;border:1px solid var(--surface3);}
-.outlet-btn{flex:1;padding:9px 0;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;background:var(--surface2);color:var(--text3);border:none;cursor:pointer;transition:background 0.15s,color 0.15s;}
-.outlet-btn.active{background:var(--accent);color:#fff;}
-.outlet-btn:first-child{border-radius:7px 0 0 7px;}
-.outlet-btn:last-child{border-radius:0 7px 7px 0;}
-
-/* EDT group badge */
-.edt-group-badge{display:inline-block;font-size:0.5rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);margin-left:6px;vertical-align:middle;}
-
-/* DELIVERY CONFIRM */
-.confirm-row{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid var(--surface2);gap:8px;}
-.confirm-row:last-child{border-bottom:none;}
-.confirm-name{font-size:0.813rem;color:var(--text);flex:1;}
-.confirm-qty{font-family:'JetBrains Mono',monospace;font-size:0.688rem;color:var(--text2);width:36px;text-align:right;flex-shrink:0;}
-.confirm-check{width:24px;height:24px;border-radius:6px;border:1.5px solid var(--surface3);background:var(--surface2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.875rem;}
-.confirm-check.checked{background:var(--green);border-color:var(--green);color:#fff;}
+.empty-msg{font-size:0.813rem;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -199,18 +137,27 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
   <div class="wordmark">Kitchen <span>Tool</span></div>
   <div class="wordmark-sub">EKP · BOH Operations</div>
 
+  <!-- ── SHARED DATE NAV ─────────────────────────────────────── -->
+  <div class="date-nav-global">
+    <button class="date-nav-btn" onclick="shiftDate(-1)">‹</button>
+    <div class="date-nav-center">
+      <div class="date-label" id="globalDateLabel">Today</div>
+      <div class="date-sub" id="globalDateSub"></div>
+    </div>
+    <button class="date-nav-btn" onclick="shiftDate(1)">›</button>
+  </div>
+
+  <!-- ── TABS ───────────────────────────────────────────────── -->
   <div class="tabs-wrap">
     <div class="tabs">
       <div class="tab active" onclick="switchTab('lookup',this)">D365</div>
-      <div class="tab" onclick="switchTab('count',this)">Count</div>
       <div class="tab" onclick="switchTab('edt',this)">EDT</div>
       <div class="tab" onclick="switchTab('orders',this)">Orders</div>
-      <div class="tab" onclick="switchTab('invoices',this)">Invoices</div>
     </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════
-       TAB 1 — D365 LOOKUP
+       TAB — D365 LOOKUP
   ═══════════════════════════════════════════════════════════ -->
   <div class="panel active" id="panel-lookup">
     <div class="section-label">Search D365 Products</div>
@@ -219,169 +166,52 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
       <input class="search-input" id="lookupQ" type="search" placeholder="D365 #, Adaco ID, or name…"
         oninput="dLookup(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
-    <div class="search-hint">e.g. "01137973" or "chicken breast" or "1137973"</div>
+    <div class="search-hint">e.g. "01137973" or "chicken breast"</div>
     <div class="results-box" id="lookupResults"></div>
     <div id="lookupDetail"></div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════
-       TAB 2 — COUNT
-  ═══════════════════════════════════════════════════════════ -->
-  <div class="panel" id="panel-count">
-    <div class="date-nav">
-      <button class="date-nav-btn" onclick="shiftCountDate(-1)">‹</button>
-      <div class="date-nav-center">
-        <div class="date-label" id="countDateLabel">Today</div>
-        <div class="date-sub" id="countDateSub"></div>
-      </div>
-      <button class="date-nav-btn" onclick="shiftCountDate(1)">›</button>
-    </div>
-
-    <div id="countRecipeSelector">
-      <div class="section-label">Active Recipes</div>
-      <div id="countRecipeList" class="recipe-selector">
-        <div class="loading"><div class="spinner"></div><br>Loading recipes…</div>
-      </div>
-    </div>
-
-    <div id="countItemsWrap" style="display:none;">
-      <div class="section-label" id="countItemsLabel">Items to Count</div>
-      <div class="status-row" id="countStatus"></div>
-      <div id="countItems"></div>
-      <button class="btn btn-primary btn-full" onclick="saveCount()">☁ Save Count</button>
-      <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="showCountRecipes()">← Change Recipes</button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════
-       TAB 3 — ORDERS
-  ═══════════════════════════════════════════════════════════ -->
-  <div class="panel" id="panel-orders">
-    <div class="date-nav">
-      <button class="date-nav-btn" onclick="shiftOrderDate(-1)">‹</button>
-      <div class="date-nav-center">
-        <div class="date-label" id="orderDateLabel">Today</div>
-        <div class="date-sub" id="orderDateSub"></div>
-      </div>
-      <button class="date-nav-btn" onclick="shiftOrderDate(1)">›</button>
-    </div>
-
-    <div class="filter-row" id="orderVendorFilter"></div>
-
-    <div class="col-heads" style="padding-right:12px;">
-      <div style="flex:1;"></div>
-      <div class="col-head" style="width:60px;">On Hand</div>
-      <div class="col-head" style="width:36px;">Par</div>
-      <div class="col-head" style="width:44px;">Order</div>
-    </div>
-
-    <div id="orderItems">
-      <div class="loading"><div class="spinner"></div><br>Loading orders…</div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" style="flex:1;" onclick="copyOrderText()">📋 Copy Order</button>
-      <button class="btn btn-secondary" style="flex:1;" onclick="exportOrderXLSX()">⬇ Export XLSX</button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════
-       TAB 3 — EDT (outlet-scoped ordering)
+       TAB — EDT
   ═══════════════════════════════════════════════════════════ -->
   <div class="panel" id="panel-edt">
+
     <!-- Outlet toggle -->
     <div class="outlet-toggle">
       <button class="outlet-btn active" id="edt-ob-pipa" onclick="setEdtOutlet('pipa',this)">PiPa</button>
       <button class="outlet-btn" id="edt-ob-pronto" onclick="setEdtOutlet('pronto',this)">Pronto</button>
     </div>
 
-    <div class="date-nav" style="margin-bottom:14px;">
-      <button class="date-nav-btn" onclick="shiftEdtDate(-1)">‹</button>
-      <div class="date-nav-center">
-        <div class="date-label" id="edtDateLabel">Today</div>
-        <div class="date-sub" id="edtDateSub"></div>
-      </div>
-      <button class="date-nav-btn" onclick="shiftEdtDate(1)">›</button>
-    </div>
+    <!-- Status -->
+    <div class="status-row" id="edtStatus"></div>
 
-    <div class="col-heads" style="padding-right:12px;">
+    <!-- Column headers + item list -->
+    <div id="edtColHeads" style="display:none;" class="col-heads">
       <div style="flex:1;"></div>
-      <div class="col-head" style="width:60px;">On Hand</div>
-      <div class="col-head" style="width:36px;">Par</div>
-      <div class="col-head" style="width:44px;">Order</div>
+      <div class="col-head" style="width:52px;">On Hand</div>
+      <div class="col-head" style="width:32px;">Par</div>
+      <div class="col-head" style="width:52px;">Order</div>
     </div>
 
-    <div id="edtItems">
+    <div id="edtBody">
       <div class="loading"><div class="spinner"></div><br>Loading EDT…</div>
     </div>
 
-    <div class="btn-row">
-      <button class="btn btn-primary" style="flex:1;" onclick="copyEdtOrder()">📋 Copy Order</button>
-      <button class="btn btn-secondary" style="flex:1;" onclick="saveEdtOrders()">☁ Save</button>
-    </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════
-       TAB 5 — INVOICES
+       TAB — ORDERS (stub — vendors coming next)
   ═══════════════════════════════════════════════════════════ -->
-  <div class="panel" id="panel-invoices">
-    <button class="btn btn-primary btn-full" onclick="openNewInvoice()" style="margin-bottom:14px;">+ New Delivery Log</button>
-    <div id="invoiceList">
-      <div class="loading"><div class="spinner"></div><br>Loading…</div>
+  <div class="panel" id="panel-orders">
+    <div class="empty-state">
+      <div class="empty-icon">🏗</div>
+      <div class="empty-msg">Vendor orders coming soon.<br>Use EDT tab for EDT items.</div>
     </div>
   </div>
 
 </div><!-- /page -->
 
-<!-- TOAST -->
 <div id="toast"></div>
-
-<!-- NEW INVOICE MODAL -->
-<div class="modal-overlay" id="invModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('invModal')">✕</button>
-    <div class="modal-title" id="invModalTitle">New Delivery Log</div>
-    <div class="inv-field">
-      <div class="inv-field-label">Vendor</div>
-      <input id="invVendor" placeholder="e.g. Baldor, US Foods, Sysco…">
-    </div>
-    <div class="inv-field-row">
-      <div class="inv-field">
-        <div class="inv-field-label">Delivery Date</div>
-        <input id="invDate" type="date">
-      </div>
-      <div class="inv-field">
-        <div class="inv-field-label">PO #</div>
-        <input id="invPO" placeholder="POKP…">
-      </div>
-    </div>
-    <div class="inv-field-row">
-      <div class="inv-field">
-        <div class="inv-field-label">Invoice #</div>
-        <input id="invNum" placeholder="Invoice #">
-      </div>
-      <div class="inv-field">
-        <div class="inv-field-label">Amount ($)</div>
-        <input id="invAmt" type="number" step="0.01" placeholder="0.00">
-      </div>
-    </div>
-    <div class="inv-field">
-      <div class="inv-field-label">Notes / Discrepancies</div>
-      <textarea id="invNotes" placeholder="Short / damaged items, temp issues…"></textarea>
-    </div>
-    <button class="btn btn-primary btn-full" onclick="saveInvoice()">Save Delivery Log</button>
-  </div>
-</div>
-
-<!-- DELIVERY ITEMS MODAL -->
-<div class="modal-overlay" id="delivModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('delivModal')">✕</button>
-    <div class="modal-title" id="delivModalTitle">Log Items</div>
-    <div id="delivItems"></div>
-    <button class="btn btn-primary btn-full" style="margin-top:12px;" onclick="confirmDelivery()">Confirm Receipt</button>
-  </div>
-</div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
@@ -393,89 +223,74 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 function sbHeaders() {
   return { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
 }
-
 async function sbGet(path) {
   const r = await fetch(SB_URL + '/rest/v1/' + path, { headers: sbHeaders() });
-  if (!r.ok) throw new Error('SB ' + r.status);
+  if (!r.ok) throw new Error('SB ' + r.status + ' ' + path.split('?')[0]);
   return r.json();
 }
-
-async function sbPost(table, body) {
-  const r = await fetch(SB_URL + '/rest/v1/' + table, {
-    method: 'POST',
-    headers: Object.assign({}, sbHeaders(), { 'Prefer': 'return=representation' }),
-    body: JSON.stringify(body)
-  });
-  if (!r.ok) throw new Error('SB POST ' + r.status);
-  return r.json();
-}
-
 async function sbUpsert(table, body, onConflict) {
   const r = await fetch(SB_URL + '/rest/v1/' + table + '?on_conflict=' + onConflict, {
     method: 'POST',
-    headers: Object.assign({}, sbHeaders(), { 'Prefer': 'return=representation,resolution=merge-duplicates' }),
+    headers: Object.assign({}, sbHeaders(), { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
     body: JSON.stringify(body)
   });
-  if (!r.ok) { const t = await r.text(); throw new Error('SB UPSERT ' + r.status + ' ' + t); }
-  return r.json();
+  if (!r.ok) throw new Error('SB upsert ' + r.status);
 }
 
-async function sbPatch(table, filter, body) {
-  const r = await fetch(SB_URL + '/rest/v1/' + table + '?' + filter, {
-    method: 'PATCH',
-    headers: Object.assign({}, sbHeaders(), { 'Prefer': 'return=representation' }),
-    body: JSON.stringify(body)
-  });
-  if (!r.ok) throw new Error('SB PATCH ' + r.status);
-  return r.json();
-}
+// ═══════════════════════════════════════════════════════════════════
+// SHARED DATE STATE
+// ═══════════════════════════════════════════════════════════════════
+let dateOffset = 0; // days from today
 
-function debounce(fn, ms) {
-  let t; return function() { const a = arguments; clearTimeout(t); t = setTimeout(function(){ fn.apply(null,a); }, ms); };
-}
-
-function showToast(msg, dur) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(function(){ el.classList.remove('show'); }, dur || 2200);
-}
-
-function pad365(id) {
-  if (!id) return '';
-  return String(id).padStart(8, '0');
-}
-
-function dateIso(offset) {
+function dateIso(off) {
   const d = new Date();
-  d.setDate(d.getDate() + offset);
+  d.setDate(d.getDate() + (off !== undefined ? off : dateOffset));
   return d.toISOString().slice(0, 10);
 }
-
-function dateFmt(offset) {
+function dateFmt(off) {
   const d = new Date();
-  d.setDate(d.getDate() + offset);
-  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  d.setDate(d.getDate() + (off !== undefined ? off : dateOffset));
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+function updateDateUI() {
+  const lbl = dateOffset === 0 ? 'Today' : dateOffset === -1 ? 'Yesterday' : dateFmt();
+  document.getElementById('globalDateLabel').textContent = lbl;
+  document.getElementById('globalDateSub').textContent = dateFmt();
+}
+function shiftDate(dir) {
+  dateOffset += dir;
+  updateDateUI();
+  // Reload whichever ordering tab is active
+  if (activeTab === 'edt') loadEdtOrders();
 }
 
-function openModal(id) { document.getElementById(id).classList.add('show'); }
-function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+// ═══════════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════════
+function debounce(fn, ms) { let t; return function() { const a = arguments; clearTimeout(t); t = setTimeout(function() { fn.apply(null, a); }, ms); }; }
+function showToast(msg, dur) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(function() { el.classList.remove('show'); }, dur || 2400); }
+function pad365(id) { return id ? String(id).padStart(8, '0') : ''; }
+function copyText(txt, msg) {
+  if (navigator.clipboard) { navigator.clipboard.writeText(txt).then(function() { showToast(msg || 'Copied'); }); }
+  else { const el = document.createElement('textarea'); el.value = txt; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); showToast(msg || 'Copied'); }
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // TAB SWITCHING
 // ═══════════════════════════════════════════════════════════════════
+let activeTab = 'lookup';
+
 function switchTab(id, el) {
-  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
-  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
   el.classList.add('active');
   document.getElementById('panel-' + id).classList.add('active');
-  if (id === 'count') initCount();
-  if (id === 'orders') initOrders();
+  activeTab = id;
   if (id === 'edt') initEDT();
-  if (id === 'invoices') loadInvoices();
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TAB 1 — D365 LOOKUP
+// TAB — D365 LOOKUP
 // ═══════════════════════════════════════════════════════════════════
 const dLookup = debounce(runLookup, 300);
 
@@ -496,7 +311,7 @@ async function runLookup(val) {
     const data = await sbGet(q);
     if (!data.length) { res.innerHTML = '<div class="no-results">No results for "' + val + '"</div>'; return; }
     res.innerHTML = data.map(function(r) {
-      return '<div class="result-row" onclick="showLookupDetail(' + JSON.stringify(r).replace(/"/g,'&quot;') + ')">' +
+      return '<div class="result-row" onclick="showLookupDetail(' + JSON.stringify(r).replace(/"/g, '&quot;') + ')">' +
         '<div class="result-name">' + r.name + '</div>' +
         '<div class="result-meta">' +
         '<span class="result-id">' + pad365(r.d365_id) + '</span>' +
@@ -526,13 +341,11 @@ function showLookupDetail(item) {
     '<div style="margin-top:8px;font-size:0.688rem;color:var(--text3);">' +
     (item.purchase_unit ? 'Order unit: ' + item.purchase_unit : '') +
     (item.packaging_unit ? ' · Pack: ' + item.packaging_unit : '') +
-    '</div>' +
-    '</div>' +
+    '</div></div>' +
     '<div style="padding:10px 14px;display:flex;gap:8px;">' +
     '<button class="btn btn-secondary" style="flex:1;font-size:0.75rem;" onclick="copyText(\'' + pad365(item.d365_id) + '\',\'D365 # copied\')">Copy D365 #</button>' +
     (item.adaco_id ? '<button class="btn btn-ghost" style="flex:1;font-size:0.75rem;" onclick="copyText(\'' + item.adaco_id + '\',\'Adaco ID copied\')">Copy Adaco ID</button>' : '') +
-    '</div>' +
-    '</div>';
+    '</div></div>';
   loadRecipesForItem(item.d365_id, d);
 }
 
@@ -541,603 +354,271 @@ async function loadRecipesForItem(d365Id, container) {
     const stripped = String(d365Id).replace(/^0+/, '') || '0';
     const items = await sbGet('ks_recipe_items?or=(d365_id.eq.' + encodeURIComponent(d365Id) + ',d365_id.eq.' + encodeURIComponent(stripped) + ')&select=recipe_number&limit=50');
     if (!items.length) return;
-    const nums = items.map(function(i){ return i.recipe_number; });
+    const nums = items.map(function(i) { return i.recipe_number; });
     const recipes = await sbGet('ks_recipes?recipe_number=in.(' + nums.join(',') + ')&select=recipe_number,name,outlet,active&order=name');
     const html = '<div style="background:var(--surface);border:1px solid var(--surface2);border-radius:10px;margin-top:10px;">' +
       '<div style="padding:10px 14px;border-bottom:1px solid var(--surface2);font-size:0.563rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">Used in ' + recipes.length + ' recipe(s)</div>' +
-      recipes.map(function(r){
-        return '<div style="padding:9px 14px;border-bottom:1px solid var(--surface2);"><div style="font-size:0.75rem;color:var(--text);">' + r.name + '</div>' +
+      recipes.map(function(r) {
+        return '<div style="padding:9px 14px;border-bottom:1px solid var(--surface2);">' +
+          '<div style="font-size:0.75rem;color:var(--text);">' + r.name + '</div>' +
           '<div style="font-size:0.563rem;color:var(--text3);margin-top:2px;">' + r.recipe_number + ' · ' + r.outlet + (r.active ? '' : ' · inactive') + '</div></div>';
       }).join('') + '</div>';
     container.insertAdjacentHTML('beforeend', html);
   } catch(e) {}
 }
 
-function copyText(txt, msg) {
-  if (navigator.clipboard) { navigator.clipboard.writeText(txt).then(function(){ showToast(msg || 'Copied'); }); }
-  else { const el = document.createElement('textarea'); el.value = txt; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); showToast(msg || 'Copied'); }
-}
-
 // ═══════════════════════════════════════════════════════════════════
-// TAB 2 — COUNT
+// TAB — EDT  (outlet-scoped ordering + per-outlet CSV export)
 // ═══════════════════════════════════════════════════════════════════
-let countOffset = 0;
-let allRecipes = null; // {recipe_number, name, outlet}[]
-let activeCountRecipes = {}; // recipe_number → true
-let countData = {}; // d365_id → qty (number)
-let countItems = []; // [{d365_id, name, vendor_name, purchase_unit}] deduplicated
+let edtOutlet = 'pipa';
+let edtProducts = { pipa: null, pronto: null }; // cached product lists per outlet
+let edtOnHand  = {};   // d365_id → on-hand qty  (shared across outlets)
+let edtPars    = {};   // d365_id → par           (shared across outlets)
+let edtOrders  = { pipa: {}, pronto: {} }; // d365_id → order qty, per outlet
+let edtInited  = false;
 
-function updateCountDateUI() {
-  document.getElementById('countDateLabel').textContent =
-    countOffset === 0 ? 'Today' : countOffset === -1 ? 'Yesterday' : dateFmt(countOffset);
-  document.getElementById('countDateSub').textContent = dateFmt(countOffset);
-}
-
-function shiftCountDate(dir) { countOffset += dir; updateCountDateUI(); }
-
-async function initCount() {
-  updateCountDateUI();
-  if (allRecipes) { renderCountRecipes(); return; }
-  document.getElementById('countRecipeList').innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading recipes…</div>';
-  try {
-    allRecipes = await sbGet('ks_recipes?select=recipe_number,name,outlet,active&order=name&active=eq.true');
-    renderCountRecipes();
-  } catch(e) {
-    document.getElementById('countRecipeList').innerHTML = '<div class="no-results">Error: ' + e.message + '</div>';
-  }
-}
-
-function renderCountRecipes() {
-  const groups = {};
-  allRecipes.forEach(function(r) {
-    if (!groups[r.outlet]) groups[r.outlet] = [];
-    groups[r.outlet].push(r);
-  });
-  let html = '';
-  Object.keys(groups).sort().forEach(function(outlet) {
-    html += '<div class="group-header"><span class="group-title">' + outlet + '</span><span class="group-count">' + groups[outlet].length + '</span></div>';
-    groups[outlet].forEach(function(r) {
-      const checked = !!activeCountRecipes[r.recipe_number];
-      html += '<div class="recipe-item" onclick="toggleCountRecipe(\'' + r.recipe_number + '\')" id="cr_' + r.recipe_number + '">' +
-        '<div class="recipe-check' + (checked ? ' checked' : '') + '" id="crcheck_' + r.recipe_number + '">' + (checked ? '✓' : '') + '</div>' +
-        '<div style="flex:1;min-width:0;"><div class="recipe-label">' + r.name + '</div><div class="recipe-num">' + r.recipe_number + '</div></div>' +
-        '</div>';
-    });
-  });
-  document.getElementById('countRecipeList').innerHTML = '<div class="recipe-list">' + html + '</div>' +
-    '<div style="padding:12px 14px;border-top:1px solid var(--surface2);display:flex;gap:8px;">' +
-    '<button class="btn btn-secondary" style="flex:1;font-size:0.75rem;" onclick="selectAllCountRecipes()">Select All</button>' +
-    '<button class="btn btn-primary" style="flex:1;font-size:0.75rem;" onclick="buildCountItems()">Build Count List →</button>' +
-    '</div>';
-}
-
-function toggleCountRecipe(num) {
-  activeCountRecipes[num] = !activeCountRecipes[num];
-  const check = document.getElementById('crcheck_' + num);
-  if (check) { check.className = 'recipe-check' + (activeCountRecipes[num] ? ' checked' : ''); check.textContent = activeCountRecipes[num] ? '✓' : ''; }
-}
-
-function selectAllCountRecipes() {
-  allRecipes.forEach(function(r){ activeCountRecipes[r.recipe_number] = true; });
-  renderCountRecipes();
-}
-
-async function buildCountItems() {
-  const selected = Object.keys(activeCountRecipes).filter(function(k){ return activeCountRecipes[k]; });
-  if (!selected.length) { showToast('Select at least one recipe'); return; }
-  document.getElementById('countItemsWrap').innerHTML = '<div class="loading"><div class="spinner"></div><br>Building count list…</div>';
-  document.getElementById('countRecipeSelector').style.display = 'none';
-  document.getElementById('countItemsWrap').style.display = 'block';
-  try {
-    // Get all d365 items for selected recipes
-    const recipeItems = await sbGet('ks_recipe_items?recipe_number=in.(' + selected.join(',') + ')&select=d365_id&limit=2000');
-    const d365ids = [...new Set(recipeItems.map(function(i){ return i.d365_id; }))];
-    if (!d365ids.length) { document.getElementById('countItemsWrap').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">No items in selected recipes</div></div>'; return; }
-    // Fetch product details
-    const products = await sbGet('kitchen_products?d365_id=in.(' + d365ids.join(',') + ')&select=d365_id,name,vendor_name,purchase_unit&order=name&limit=500');
-    // Load existing counts for this date
-    const iso = dateIso(countOffset);
-    const existing = await sbGet('kitchen_count?count_date=eq.' + iso + '&d365_id=in.(' + d365ids.join(',') + ')&select=d365_id,qty&limit=500');
-    countData = {};
-    existing.forEach(function(e){ countData[e.d365_id] = e.qty; });
-    countItems = products;
-    renderCountItems();
-  } catch(e) {
-    document.getElementById('countItemsWrap').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-msg">Error: ' + e.message + '</div></div>';
-  }
-}
-
-function renderCountItems() {
-  const iso = dateIso(countOffset);
-  document.getElementById('countDateLabel').textContent = countOffset === 0 ? 'Today' : dateFmt(countOffset);
-  const entered = countItems.filter(function(p){ return countData[p.d365_id] !== undefined; }).length;
-  document.getElementById('countStatus').innerHTML =
-    '<span class="status-pill status-blue">' + countItems.length + ' items</span>' +
-    '<span class="status-pill status-' + (entered === countItems.length ? 'green' : 'orange') + '">' + entered + ' entered</span>' +
-    '<span class="status-pill status-blue">' + iso + '</span>';
-  // Group by vendor
-  const groups = {};
-  countItems.forEach(function(p) {
-    const v = p.vendor_name || 'No Vendor';
-    if (!groups[v]) groups[v] = [];
-    groups[v].push(p);
-  });
-  let html = '';
-  Object.keys(groups).sort().forEach(function(vendor) {
-    const items = groups[vendor];
-    html += '<div class="group-section"><div class="group-header"><span class="group-title">' + vendor + '</span><span class="group-count">' + items.length + '</span></div>';
-    items.forEach(function(p) {
-      const val = countData[p.d365_id] !== undefined ? countData[p.d365_id] : '';
-      const hasVal = val !== '';
-      html += '<div class="item-row">' +
-        '<div class="item-info"><div class="item-name">' + p.name + '</div><div class="item-d365">' + pad365(p.d365_id) + (p.purchase_unit ? ' · ' + p.purchase_unit : '') + '</div></div>' +
-        '<input class="count-input' + (hasVal ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal" placeholder="—" value="' + val + '"' +
-        ' onchange="setCountVal(\'' + p.d365_id + '\',this)" onclick="this.select()" id="ci_' + p.d365_id + '">' +
-        '</div>';
-    });
-    html += '</div>';
-  });
-  document.getElementById('countItems').innerHTML = html;
-  document.getElementById('countItemsLabel').textContent = 'Items to Count — ' + dateIso(countOffset);
-  // Rebuild wrap
-  const wrap = document.getElementById('countItemsWrap');
-  wrap.style.display = 'block';
-}
-
-function setCountVal(d365id, inputEl) {
-  const val = parseFloat(inputEl.value);
-  if (isNaN(val) || val < 0) { countData[d365id] = undefined; inputEl.classList.remove('has-value'); }
-  else { countData[d365id] = val; inputEl.classList.add('has-value'); }
-  // Update status
-  const entered = countItems.filter(function(p){ return countData[p.d365_id] !== undefined; }).length;
-  const iso = dateIso(countOffset);
-  document.getElementById('countStatus').innerHTML =
-    '<span class="status-pill status-blue">' + countItems.length + ' items</span>' +
-    '<span class="status-pill status-' + (entered === countItems.length ? 'green' : 'orange') + '">' + entered + ' entered</span>' +
-    '<span class="status-pill status-blue">' + iso + '</span>';
-}
-
-function showCountRecipes() {
-  document.getElementById('countRecipeSelector').style.display = 'block';
-  document.getElementById('countItemsWrap').style.display = 'none';
-}
-
-async function saveCount() {
-  const iso = dateIso(countOffset);
-  const rows = countItems
-    .filter(function(p){ return countData[p.d365_id] !== undefined; })
-    .map(function(p){ return { count_date: iso, d365_id: p.d365_id, item_name: p.name, qty: countData[p.d365_id] }; });
-  if (!rows.length) { showToast('No counts to save'); return; }
-  const btn = document.querySelector('#countItemsWrap .btn-primary');
-  if (btn) btn.textContent = 'Saving…';
-  try {
-    await sbUpsert('kitchen_count', rows, 'count_date,d365_id');
-    // Also mirror to inventory_trend for Trend tab
-    const trendRows = rows.map(function(r){ return { snap_date: iso, d365: r.d365_id, item_name: r.item_name, category: 'KITCHEN', count: r.qty }; });
-    await sbUpsert('inventory_trend', trendRows, 'snap_date,d365');
-    showToast('Saved ' + rows.length + ' counts ✓');
-  } catch(e) {
-    showToast('Error: ' + e.message);
-  } finally {
-    if (btn) btn.textContent = '☁ Save Count';
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// TAB 3 — ORDERS (par vs count, suggest, XLSX export)
-// ═══════════════════════════════════════════════════════════════════
-let orderOffset = 0;
-let orderPars = {};  // d365_id → {par, vendor, name, unit}
-let orderCounts = {}; // d365_id → qty
-let orderItems = []; // [{d365_id, name, vendor_name, purchase_unit, par}]
-let orderVendorFilter = 'ALL';
-let edtOrderItems = { pipa: [], pronto: [] }; // EDT items for each outlet
-
-function updateOrderDateUI() {
-  const lbl = orderOffset === 0 ? 'Today' : orderOffset === -1 ? 'Yesterday' : dateFmt(orderOffset);
-  document.getElementById('orderDateLabel').textContent = lbl;
-  document.getElementById('orderDateSub').textContent = dateFmt(orderOffset);
-}
-
-function shiftOrderDate(dir) { orderOffset += dir; updateOrderDateUI(); loadOrderCounts(); }
-
-async function initOrders() {
-  updateOrderDateUI();
-  await loadOrderData();
-}
-
-async function loadOrderData() {
-  document.getElementById('orderItems').innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading…</div>';
-  try {
-    // Load par overrides from Supabase
-    const overrides = await sbGet('kitchen_pars?select=d365_id,par,vendor_name,notes&limit=1000');
-    overrides.forEach(function(o){ orderPars[o.d365_id] = o; });
-    // Load all kitchen products that have pars set
-    if (overrides.length) {
-      const d365ids = overrides.map(function(o){ return o.d365_id; });
-      const products = await sbGet('kitchen_products?d365_id=in.(' + d365ids.join(',') + ')&select=d365_id,name,vendor_name,purchase_unit&order=name&limit=500');
-      orderItems = products.map(function(p){
-        const par = orderPars[p.d365_id] || {};
-        return { d365_id: p.d365_id, name: p.name, vendor_name: par.vendor_name || p.vendor_name, purchase_unit: p.purchase_unit, par: par.par || null };
-      });
-    }
-    // Load EDT items for both outlets
-    await Promise.all([
-      ensureEdtProducts('pipa').then(function(){ edtOrderItems.pipa = edtProducts.pipa || []; }),
-      ensureEdtProducts('pronto').then(function(){ edtOrderItems.pronto = edtProducts.pronto || []; })
-    ]);
-    // Load EDT saved orders for this date
-    const iso = dateIso(orderOffset);
-    try {
-      const savedEdt = await sbGet('kitchen_edt_orders?order_date=eq.' + iso + '&select=d365_id,outlet,qty&limit=500');
-      savedEdt.forEach(function(r){
-        if (r.outlet === edtOutlet) edtOrders[r.d365_id] = r.qty;
-        // Also seed edtCounts from edtPars if needed
-      });
-    } catch(e2) {}
-    await loadOrderCounts();
-  } catch(e) {
-    document.getElementById('orderItems').innerHTML = '<div class="no-results">Error: ' + e.message + '</div>';
-  }
-}
-
-async function loadOrderCounts() {
-  const iso = dateIso(orderOffset);
-  try {
-    const counts = await sbGet('kitchen_count?count_date=eq.' + iso + '&select=d365_id,qty&limit=500');
-    orderCounts = {};
-    counts.forEach(function(c){ orderCounts[c.d365_id] = c.qty; });
-    renderOrders();
-  } catch(e) {
-    renderOrders();
-  }
-}
-
-function renderOrders() {
-  if (!orderItems.length && !edtOrderItems.pipa.length && !edtOrderItems.pronto.length) {
-    document.getElementById('orderItems').innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-msg">No items with pars set.<br>Set pars via "Edit Par" on each item.</div></div>';
-    buildVendorFilter([]);
-    return;
-  }
-  // Build vendor list (regular vendors + EDT groups)
-  const vendors = [...new Set(orderItems.map(function(i){ return i.vendor_name || 'No Vendor'; }))].sort();
-  const edtGroups = [];
-  if (edtOrderItems.pipa.length) edtGroups.push('EDT - CK - PiPa');
-  if (edtOrderItems.pronto.length) edtGroups.push('EDT - CK - Pronto');
-  buildVendorFilter(vendors.concat(edtGroups));
-
-  let html = '';
-
-  // Render EDT PiPa group
-  if (orderVendorFilter === 'ALL' || orderVendorFilter === 'EDT - CK - PiPa') {
-    if (edtOrderItems.pipa.length) {
-      html += renderEdtOrderGroup(edtOrderItems.pipa, 'pipa', 'EDT - CK - PiPa');
-    }
-  }
-  // Render EDT Pronto group
-  if (orderVendorFilter === 'ALL' || orderVendorFilter === 'EDT - CK - Pronto') {
-    if (edtOrderItems.pronto.length) {
-      html += renderEdtOrderGroup(edtOrderItems.pronto, 'pronto', 'EDT - CK - Pronto');
-    }
-  }
-
-  // Render regular vendors
-  const filtered = orderVendorFilter === 'ALL' ? orderItems :
-    (edtGroups.includes(orderVendorFilter) ? [] :
-      orderItems.filter(function(i){ return (i.vendor_name || 'No Vendor') === orderVendorFilter; }));
-  const groups = {};
-  filtered.forEach(function(p){
-    const v = p.vendor_name || 'No Vendor';
-    if (!groups[v]) groups[v] = [];
-    groups[v].push(p);
-  });
-  Object.keys(groups).sort().forEach(function(vendor) {
-    const items = groups[vendor];
-    html += '<div class="group-section"><div class="group-header"><span class="group-title">' + vendor + '</span><span class="group-count">' + items.length + ' items</span></div>';
-    items.forEach(function(p) {
-      const onHand = orderCounts[p.d365_id] !== undefined ? orderCounts[p.d365_id] : '';
-      const par = p.par !== null && p.par !== undefined ? p.par : null;
-      const suggest = (par !== null && onHand !== '') ? Math.max(0, par - onHand) : null;
-      const hasCount = onHand !== '';
-      const needsOrder = suggest !== null && suggest > 0;
-      html += '<div class="item-row">' +
-        '<div class="item-info">' +
-          '<div class="item-name">' + p.name + '</div>' +
-          '<div class="item-d365">' + pad365(p.d365_id) + (p.purchase_unit ? ' · ' + p.purchase_unit : '') + '</div>' +
-        '</div>' +
-        '<input class="count-input' + (hasCount ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal" placeholder="—" value="' + onHand + '"' +
-          ' onchange="setOrderCount(\'' + p.d365_id + '\',this)" onclick="this.select()" style="width:60px;">' +
-        '<div class="par-badge">' + (par !== null ? par : '—') + '</div>' +
-        '<div class="suggest-badge ' + (needsOrder ? 'suggest-need' : 'suggest-ok') + '">' + (suggest !== null ? suggest : '—') + '</div>' +
-        '</div>';
-    });
-    html += '</div>';
-  });
-
-  document.getElementById('orderItems').innerHTML = html || '<div class="empty-state"><div class="empty-icon">✓</div><div class="empty-msg">Nothing to order for this vendor</div></div>';
-}
-
-function renderEdtOrderGroup(items, outlet, groupLabel) {
-  let html = '<div class="group-section"><div class="group-header"><span class="group-title">' + groupLabel + '</span><span class="group-count">' + items.length + ' items</span></div>';
-  items.forEach(function(p) {
-    const onHand = edtCounts[p.d365_id] !== undefined ? edtCounts[p.d365_id] : '';
-    const par = edtPars[p.d365_id] !== undefined ? edtPars[p.d365_id] : null;
-    const saved = (edtOrders && outlet === edtOutlet && edtOrders[p.d365_id] !== undefined) ? edtOrders[p.d365_id] : '';
-    const suggest = (par !== null && onHand !== '') ? Math.max(0, par - onHand) : null;
-    const hasCount = onHand !== '';
-    const hasOrder = saved !== '' && saved > 0;
-    const shortName = p.name.replace(/^EDT\s*-\s*CK\s*-\s*[^-]+-\s*/i, '').replace(/^EDT\s*-\s*[^-]+-\s*/i, '');
-    html += '<div class="item-row">' +
-      '<div class="item-info">' +
-        '<div class="item-name">' + shortName + '</div>' +
-        '<div class="item-d365">' + pad365(p.d365_id) + (p.purchase_unit ? ' · ' + p.purchase_unit : '') + '</div>' +
-      '</div>' +
-      '<input class="count-input' + (hasCount ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal" placeholder="—" value="' + onHand + '"' +
-        ' onchange="setEdtCountFromOrders(\'' + p.d365_id + '\',this)" onclick="this.select()" style="width:60px;">' +
-      '<div class="par-badge">' + (par !== null ? par : '—') + '</div>' +
-      '<input class="count-input' + (hasOrder ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal" placeholder="—" value="' + saved + '"' +
-        ' onchange="setEdtOrderFromOrders(\'' + p.d365_id + '\',\'' + outlet + '\',this)" onclick="this.select()" style="width:44px;">' +
-      '</div>';
-  });
-  html += '</div>';
-  return html;
-}
-
-function setEdtCountFromOrders(d365id, inputEl) {
-  const val = parseFloat(inputEl.value);
-  if (!isNaN(val) && val >= 0) { edtCounts[d365id] = val; inputEl.classList.add('has-value'); }
-  else { delete edtCounts[d365id]; inputEl.classList.remove('has-value'); }
-}
-
-function setEdtOrderFromOrders(d365id, outlet, inputEl) {
-  const val = parseFloat(inputEl.value);
-  if (!isNaN(val) && val >= 0) { edtOrders[d365id] = val; inputEl.classList.add('has-value'); }
-  else { delete edtOrders[d365id]; inputEl.classList.remove('has-value'); }
-  // Persist immediately
-  clearTimeout(inputEl._t);
-  inputEl._t = setTimeout(function(){
-    if (!isNaN(val) && val >= 0) {
-      sbUpsert('kitchen_edt_orders', [{ order_date: dateIso(orderOffset), d365_id: d365id, outlet: outlet, qty: val }], 'order_date,d365_id,outlet').catch(function(){});
-    }
-  }, 1500);
-}
-
-function buildVendorFilter(vendors) {
-  let html = '<div class="filter-pill' + (orderVendorFilter === 'ALL' ? ' active' : '') + '" onclick="setOrderVendor(\'ALL\')">All</div>';
-  vendors.forEach(function(v){
-    html += '<div class="filter-pill' + (orderVendorFilter === v ? ' active' : '') + '" onclick="setOrderVendor(\'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
-  });
-  document.getElementById('orderVendorFilter').innerHTML = html;
-}
-
-function setOrderVendor(v) { orderVendorFilter = v; renderOrders(); }
-
-function setOrderCount(d365id, inputEl) {
-  const val = parseFloat(inputEl.value);
-  if (!isNaN(val) && val >= 0) {
-    orderCounts[d365id] = val;
-    inputEl.classList.add('has-value');
-    // Update suggest badge inline
-    const row = inputEl.closest('.item-row');
-    if (row) {
-      const p = orderItems.find(function(i){ return i.d365_id === d365id; });
-      if (p && p.par !== null) {
-        const suggest = Math.max(0, p.par - val);
-        const badge = row.querySelector('.suggest-badge');
-        if (badge) { badge.textContent = suggest; badge.className = 'suggest-badge ' + (suggest > 0 ? 'suggest-need' : 'suggest-ok'); }
-      }
-    }
-  } else {
-    delete orderCounts[d365id];
-    inputEl.classList.remove('has-value');
-  }
-  // Persist to Supabase
-  clearTimeout(inputEl._saveT);
-  inputEl._saveT = setTimeout(function(){
-    if (!isNaN(val) && val >= 0) {
-      sbUpsert('kitchen_count', [{ count_date: dateIso(orderOffset), d365_id: d365id, item_name: (orderItems.find(function(i){ return i.d365_id===d365id; })||{}).name||'', qty: val }], 'count_date,d365_id').catch(function(){});
-    }
-  }, 1500);
-}
-
-function copyOrderText() {
-  const lines = orderItems
-    .filter(function(p){ return p.par !== null && orderCounts[p.d365_id] !== undefined && Math.max(0, p.par - orderCounts[p.d365_id]) > 0; })
-    .map(function(p){ return Math.max(0, p.par - orderCounts[p.d365_id]) + ' × ' + p.name + ' (' + pad365(p.d365_id) + ')'; });
-  if (!lines.length) { showToast('No items to order'); return; }
-  const text = 'EATALY KOP KITCHEN ORDER — ' + dateIso(orderOffset) + '\n\n' + lines.join('\n');
-  if (navigator.share) {
-    navigator.share({ text: text }).catch(function(){});
-  } else {
-    copyText(text, 'Order copied (' + lines.length + ' items)');
-  }
-}
-
-function exportOrderXLSX() {
-  // Client-side XLSX (ODS-compatible XML) — no CDN
-  const iso = dateIso(orderOffset);
-  const rows = orderItems.map(function(p){
-    const onHand = orderCounts[p.d365_id] !== undefined ? orderCounts[p.d365_id] : '';
-    const suggest = (p.par !== null && onHand !== '') ? Math.max(0, p.par - onHand) : '';
-    return [p.vendor_name||'', pad365(p.d365_id), p.name, p.purchase_unit||'', p.par!==null?p.par:'', onHand, suggest];
-  });
-  const header = ['VENDOR','D365 ID','ITEM NAME','UNIT','PAR','ON HAND','ORDER QTY'];
-  // Build CSV for simplicity (opens in Excel)
-  let csv = header.join(',') + '\n';
-  rows.forEach(function(r){
-    csv += r.map(function(c){ return '"' + String(c).replace(/"/g,'""') + '"'; }).join(',') + '\n';
-  });
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'EKP_Kitchen_Order_' + iso + '.csv';
-  a.click();
-  showToast('Order exported ✓');
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// TAB 3 — EDT (outlet-scoped ordering, no schedule)
-// ═══════════════════════════════════════════════════════════════════
-let edtOutlet = 'pipa';  // 'pipa' | 'pronto'
-let edtOffset = 0;
-let edtProducts = { pipa: null, pronto: null }; // cached product lists
-let edtCounts = {};   // d365_id → on-hand qty (shared)
-let edtPars = {};     // d365_id → par
-let edtOrders = {};   // d365_id → order qty for current outlet/date
-
-function edtDateIso(off) { return dateIso(off !== undefined ? off : edtOffset); }
-
-function updateEdtDateUI() {
-  const lbl = edtOffset === 0 ? 'Today' : edtOffset === -1 ? 'Yesterday' : dateFmt(edtOffset);
-  document.getElementById('edtDateLabel').textContent = lbl;
-  document.getElementById('edtDateSub').textContent = dateFmt(edtOffset);
-}
-
-function shiftEdtDate(dir) { edtOffset += dir; updateEdtDateUI(); loadEdtOrders(); }
-
-function setEdtOutlet(o, btn) {
-  edtOutlet = o;
-  document.querySelectorAll('.outlet-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  renderEdtItems();
-  loadEdtOrders();
-}
+// --- Init & load --------------------------------------------------
 
 async function initEDT() {
-  updateEdtDateUI();
-  // Load products for both outlets if not cached
-  await Promise.all([
-    ensureEdtProducts('pipa'),
-    ensureEdtProducts('pronto')
-  ]);
-  await loadEdtCounts();
-  await loadEdtOrders();
-}
-
-async function ensureEdtProducts(outlet) {
-  if (edtProducts[outlet]) return;
-  // EDT CK items: name starts with "EDT - CK" or contains "EDT" and macrofamily CK
-  // Filter by outlet keyword in name: PIPA / PiPa or PRONTO
-  const kw = outlet === 'pipa' ? 'PIPA' : 'PRONTO';
-  try {
-    const rows = await sbGet('kitchen_products?name=ilike.*EDT*' + kw + '*&macrofamily=eq.CK&select=d365_id,name,vendor_name,purchase_unit&order=name&limit=500');
-    // Also try without outlet keyword — some items may just say "EDT - CK"
-    // We'll show all CK EDT items and let user select outlet
-    if (!rows.length) {
-      // Fallback: all CK EDT items split by outlet pill in name
-      const all = await sbGet('kitchen_products?name=ilike.*EDT*&macrofamily=eq.CK&select=d365_id,name,vendor_name,purchase_unit&order=name&limit=500');
-      edtProducts[outlet] = all;
-    } else {
-      edtProducts[outlet] = rows;
+  if (!edtInited) {
+    edtInited = true;
+    updateEdtStatus('loading');
+    try {
+      await Promise.all([ensureEdtProducts('pipa'), ensureEdtProducts('pronto')]);
+      await loadEdtMeta();   // pars
+      await loadEdtOrders(); // saved order qtys + on-hand for today
+    } catch(e) {
+      document.getElementById('edtBody').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-msg">Error loading EDT:<br>' + e.message + '</div></div>';
     }
-  } catch(e) {
-    edtProducts[outlet] = [];
+  } else {
+    renderEdtItems();
   }
 }
 
-async function loadEdtCounts() {
-  const iso = edtDateIso();
+// Fetch EDT CK items for one outlet. Outlets are distinguished by the
+// presence of "PIPA" or "PRONTO" in the product name (case-insensitive).
+// Falls back to ALL CK EDT items if the outlet keyword returns nothing.
+async function ensureEdtProducts(outlet) {
+  if (edtProducts[outlet] !== null) return;
+  const kw = outlet === 'pipa' ? 'PIPA' : 'PRONTO';
+  let rows = await sbGet(
+    'kitchen_products?name=ilike.*EDT*' + kw + '*&macrofamily=eq.CK' +
+    '&select=d365_id,name,purchase_unit&order=name&limit=500'
+  );
+  if (!rows.length) {
+    // No outlet-specific items — share all CK EDT items between outlets
+    rows = await sbGet(
+      'kitchen_products?name=ilike.*EDT*&macrofamily=eq.CK' +
+      '&select=d365_id,name,purchase_unit&order=name&limit=500'
+    );
+  }
+  edtProducts[outlet] = rows;
+}
+
+// Load pars for all EDT items (both outlets combined)
+async function loadEdtMeta() {
+  const allItems = (edtProducts.pipa || []).concat(edtProducts.pronto || []);
+  if (!allItems.length) return;
+  const ids = [...new Set(allItems.map(function(p) { return p.d365_id; }))];
   try {
-    // Reuse kitchen_count table for on-hand
-    const all = edtProducts.pipa.concat(edtProducts.pronto || []);
-    const ids = [...new Set(all.map(function(p){ return p.d365_id; }))];
-    if (!ids.length) return;
-    const counts = await sbGet('kitchen_count?count_date=eq.' + iso + '&d365_id=in.(' + ids.join(',') + ')&select=d365_id,qty&limit=500');
-    counts.forEach(function(c){ edtCounts[c.d365_id] = c.qty; });
-    // Also load pars
     const pars = await sbGet('kitchen_pars?d365_id=in.(' + ids.join(',') + ')&select=d365_id,par&limit=500');
-    pars.forEach(function(p){ edtPars[p.d365_id] = p.par; });
+    pars.forEach(function(p) { edtPars[p.d365_id] = p.par; });
   } catch(e) {}
 }
 
+// Load saved order quantities + on-hand counts for the shared date
 async function loadEdtOrders() {
-  const iso = edtDateIso();
-  edtOrders = {};
+  const iso = dateIso();
+  updateEdtStatus('loading');
+
+  // Reset orders for fresh load
+  edtOrders = { pipa: {}, pronto: {} };
+  edtOnHand = {};
+
+  // Load saved EDT order qtys
   try {
-    const rows = await sbGet('kitchen_edt_orders?order_date=eq.' + iso + '&outlet=eq.' + edtOutlet + '&select=d365_id,qty&limit=500');
-    rows.forEach(function(r){ edtOrders[r.d365_id] = r.qty; });
+    const rows = await sbGet(
+      'kitchen_edt_orders?order_date=eq.' + iso + '&select=d365_id,outlet,qty&limit=1000'
+    );
+    rows.forEach(function(r) {
+      if (edtOrders[r.outlet]) edtOrders[r.outlet][r.d365_id] = r.qty;
+    });
   } catch(e) {
-    // Table may not exist yet — silent fail, orders just won't pre-fill
+    // Table may not exist yet — silent fail
   }
+
+  // Load on-hand counts for this date
+  const allItems = (edtProducts.pipa || []).concat(edtProducts.pronto || []);
+  const ids = [...new Set(allItems.map(function(p) { return p.d365_id; }))];
+  if (ids.length) {
+    try {
+      const counts = await sbGet(
+        'kitchen_count?count_date=eq.' + iso + '&d365_id=in.(' + ids.join(',') + ')&select=d365_id,qty&limit=500'
+      );
+      counts.forEach(function(c) { edtOnHand[c.d365_id] = c.qty; });
+    } catch(e) {}
+  }
+
   renderEdtItems();
+}
+
+// --- Render -------------------------------------------------------
+
+function updateEdtStatus(state) {
+  if (state === 'loading') {
+    document.getElementById('edtStatus').innerHTML = '';
+    document.getElementById('edtColHeads').style.display = 'none';
+    document.getElementById('edtBody').innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading…</div>';
+  }
 }
 
 function renderEdtItems() {
   const items = edtProducts[edtOutlet] || [];
+  const outletLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
+  const orders = edtOrders[edtOutlet];
+  const iso = dateIso();
+
+  // Status pills
+  const withOrder = items.filter(function(p) { return orders[p.d365_id] > 0; }).length;
+  document.getElementById('edtStatus').innerHTML =
+    '<span class="status-pill status-blue">' + items.length + ' items · ' + outletLabel + '</span>' +
+    (withOrder ? '<span class="status-pill status-orange">' + withOrder + ' ordered</span>' : '') +
+    '<span class="status-pill status-blue">' + iso + '</span>';
+
   if (!items.length) {
-    document.getElementById('edtItems').innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-msg">No EDT - CK items found for ' + (edtOutlet === 'pipa' ? 'PiPa' : 'Pronto') + '.<br>Items need "EDT" and "' + (edtOutlet === 'pipa' ? 'PIPA' : 'PRONTO') + '" in name with macrofamily CK.</div></div>';
+    document.getElementById('edtColHeads').style.display = 'none';
+    document.getElementById('edtBody').innerHTML =
+      '<div class="empty-state"><div class="empty-icon">📦</div>' +
+      '<div class="empty-msg">No EDT · CK items found for ' + outletLabel + '.<br>' +
+      'Items need "EDT" + "' + (edtOutlet === 'pipa' ? 'PIPA' : 'PRONTO') + '" in name,<br>macrofamily = CK.</div></div>';
     return;
   }
 
-  // Group by a sub-label extracted from name
-  // e.g. "EDT - CK - PIPA - Chicken Breast" → vendor group "CK - PIPA"
-  // Use vendor_name if set, otherwise parse from name
+  document.getElementById('edtColHeads').style.display = 'flex';
+
+  // Group by sub-category parsed from the name
+  // Pattern: "EDT - CK - [GROUP] - Item description"
+  // Display name = everything after "EDT - CK - [GROUP] - "
   const groups = {};
   items.forEach(function(p) {
-    // Parse category from name: "EDT - [CAT] - [ITEM]" or just use vendor_name
-    let grp = p.vendor_name || 'EDT';
-    // Try to extract the part after "EDT - CK - " prefix
-    const m = p.name.match(/^EDT\s*-\s*CK\s*-\s*([^-]+)\s*-/i);
-    if (m) grp = m[1].trim();
-    else { const m2 = p.name.match(/^EDT\s*-\s*([^-]+)\s*-/i); if (m2) grp = m2[1].trim(); }
-    if (!groups[grp]) groups[grp] = [];
-    groups[grp].push(p);
+    const parsed = parseEdtName(p.name);
+    if (!groups[parsed.group]) groups[parsed.group] = [];
+    groups[parsed.group].push({ product: p, shortName: parsed.shortName });
   });
 
-  const outletLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
   let html = '';
   Object.keys(groups).sort().forEach(function(grpName) {
     const grpItems = groups[grpName];
-    html += '<div class="group-section">' +
-      '<div class="group-header"><span class="group-title">EDT · ' + outletLabel + '<span class="edt-group-badge">' + grpName + '</span></span><span class="group-count">' + grpItems.length + '</span></div>';
-    grpItems.forEach(function(p) {
-      const onHand = edtCounts[p.d365_id] !== undefined ? edtCounts[p.d365_id] : '';
-      const par = edtPars[p.d365_id] !== undefined ? edtPars[p.d365_id] : null;
-      const ordQty = edtOrders[p.d365_id] !== undefined ? edtOrders[p.d365_id] : '';
-      const hasCount = onHand !== '';
-      const suggest = (par !== null && hasCount) ? Math.max(0, par - onHand) : null;
-      const hasOrder = ordQty !== '' && ordQty > 0;
-      html += '<div class="item-row">' +
-        '<div class="item-info">' +
-          '<div class="item-name">' + p.name.replace(/^EDT\s*-\s*CK\s*-\s*[^-]+-\s*/i, '').replace(/^EDT\s*-\s*[^-]+-\s*/i, '') + '</div>' +
-          '<div class="item-d365">' + pad365(p.d365_id) + (p.purchase_unit ? ' · ' + p.purchase_unit : '') + '</div>' +
-        '</div>' +
-        '<input class="count-input' + (hasCount ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal" placeholder="—" value="' + onHand + '"' +
-          ' onchange="setEdtCount(\'' + p.d365_id + '\',this)" onclick="this.select()" style="width:60px;" id="edt_oh_' + p.d365_id + '">' +
-        '<div class="par-badge">' + (par !== null ? par : '—') + '</div>' +
-        '<input class="count-input' + (hasOrder ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal" placeholder="—" value="' + ordQty + '"' +
-          ' onchange="setEdtOrder(\'' + p.d365_id + '\',this)" onclick="this.select()" style="width:44px;" id="edt_ord_' + p.d365_id + '">' +
+    const grpKey = edtOutlet + '_' + grpName.replace(/\s+/g, '_');
+    html +=
+      '<div class="group-section">' +
+        '<div class="group-header">' +
+          '<span class="group-title">EDT · ' + outletLabel + ' · ' + grpName + '</span>' +
+          '<div class="group-meta">' +
+            '<span class="group-count">' + grpItems.length + '</span>' +
+            '<button class="group-export" onclick="exportEdtGroup(\'' + grpKey + '\')">⬇ CSV</button>' +
+          '</div>' +
+        '</div>';
+
+    grpItems.forEach(function(entry) {
+      const p = entry.product;
+      const onHand = edtOnHand[p.d365_id] !== undefined ? edtOnHand[p.d365_id] : '';
+      const par    = edtPars[p.d365_id]   !== undefined ? edtPars[p.d365_id]   : null;
+      const ordQty = orders[p.d365_id]    !== undefined ? orders[p.d365_id]     : '';
+      const hasOH  = onHand !== '';
+      const hasOrd = ordQty !== '' && Number(ordQty) > 0;
+
+      html +=
+        '<div class="item-row" data-grp="' + grpKey + '" data-d365="' + p.d365_id + '">' +
+          '<div class="item-info">' +
+            '<div class="item-name">' + entry.shortName + '</div>' +
+            '<div class="item-d365">' + pad365(p.d365_id) + (p.purchase_unit ? ' · ' + p.purchase_unit : '') + '</div>' +
+          '</div>' +
+          '<input class="num-input' + (hasOH ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal"' +
+            ' placeholder="—" value="' + onHand + '" style="width:52px;"' +
+            ' onchange="setEdtOnHand(\'' + p.d365_id + '\',\'' + (p.name || '').replace(/'/g, '') + '\',this)"' +
+            ' onclick="this.select()" id="edt_oh_' + p.d365_id + '">' +
+          '<div class="par-badge">' + (par !== null ? par : '—') + '</div>' +
+          '<input class="num-input' + (hasOrd ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal"' +
+            ' placeholder="—" value="' + ordQty + '" style="width:52px;"' +
+            ' onchange="setEdtOrder(\'' + p.d365_id + '\',this)"' +
+            ' onclick="this.select()" id="edt_ord_' + p.d365_id + '">' +
         '</div>';
     });
+
     html += '</div>';
   });
-  document.getElementById('edtItems').innerHTML = html;
+
+  // Per-outlet full CSV export button at bottom
+  html +=
+    '<button class="btn btn-secondary btn-full" style="margin-top:4px;" onclick="exportEdtAll()">' +
+    '⬇ Export All ' + outletLabel + ' EDT</button>';
+
+  document.getElementById('edtBody').innerHTML = html;
+
+  // Store group→items mapping for export
+  buildEdtGroupMap(groups);
 }
 
-function setEdtCount(d365id, inputEl) {
+// --- Name parsing -------------------------------------------------
+
+function parseEdtName(name) {
+  // "EDT - CK - PIPA - Chicken Breast Diced" → group="PIPA", shortName="Chicken Breast Diced"
+  // "EDT - CK - PRONTO - Pasta" → group="PRONTO", shortName="Pasta"
+  // "EDT - CK - Chicken" → group="CK", shortName="Chicken"
+  // Fallback: group="EDT", shortName=name
+  const m = name.match(/^EDT\s*-\s*CK\s*-\s*([A-Z0-9]+)\s*-\s*(.+)$/i);
+  if (m) return { group: m[1].trim().toUpperCase(), shortName: m[2].trim() };
+  const m2 = name.match(/^EDT\s*-\s*([A-Z0-9]+)\s*-\s*(.+)$/i);
+  if (m2) return { group: m2[1].trim().toUpperCase(), shortName: m2[2].trim() };
+  return { group: 'EDT', shortName: name };
+}
+
+// --- Group map for export -----------------------------------------
+
+let edtGroupMap = {}; // grpKey → [{d365_id, shortName, purchase_unit}]
+
+function buildEdtGroupMap(groups) {
+  edtGroupMap = {};
+  const outlet = edtOutlet;
+  Object.keys(groups).forEach(function(grpName) {
+    const grpKey = outlet + '_' + grpName.replace(/\s+/g, '_');
+    edtGroupMap[grpKey] = groups[grpName].map(function(e) {
+      return { d365_id: e.product.d365_id, shortName: e.shortName, purchase_unit: e.product.purchase_unit || '' };
+    });
+  });
+}
+
+// --- Input handlers -----------------------------------------------
+
+function setEdtOnHand(d365id, itemName, inputEl) {
   const val = parseFloat(inputEl.value);
   if (!isNaN(val) && val >= 0) {
-    edtCounts[d365id] = val;
+    edtOnHand[d365id] = val;
     inputEl.classList.add('has-value');
-    // Update suggested order inline (par - on hand)
+    // Auto-suggest order qty = max(0, par - on hand) if order field is empty
     const par = edtPars[d365id];
     if (par !== null && par !== undefined) {
       const ordEl = document.getElementById('edt_ord_' + d365id);
-      if (ordEl && ordEl.value === '') {
+      if (ordEl && (ordEl.value === '' || ordEl.value === '0')) {
         const sug = Math.max(0, par - val);
-        if (sug > 0) { ordEl.value = sug; ordEl.classList.add('has-value'); edtOrders[d365id] = sug; }
+        if (sug > 0) {
+          ordEl.value = sug;
+          ordEl.classList.add('has-value');
+          edtOrders[edtOutlet][d365id] = sug;
+        }
       }
     }
   } else {
-    delete edtCounts[d365id];
+    delete edtOnHand[d365id];
     inputEl.classList.remove('has-value');
   }
+  // Debounced save to kitchen_count
   clearTimeout(inputEl._t);
-  inputEl._t = setTimeout(function(){
-    if (!isNaN(val) && val >= 0) {
-      const items = edtProducts[edtOutlet] || [];
-      const p = items.find(function(i){ return i.d365_id === d365id; });
-      sbUpsert('kitchen_count', [{ count_date: edtDateIso(), d365_id: d365id, item_name: p ? p.name : '', qty: val }], 'count_date,d365_id').catch(function(){});
+  inputEl._t = setTimeout(function() {
+    const v = parseFloat(inputEl.value);
+    if (!isNaN(v) && v >= 0) {
+      sbUpsert('kitchen_count', [{ count_date: dateIso(), d365_id: d365id, item_name: itemName, qty: v }], 'count_date,d365_id').catch(function() {});
     }
   }, 1500);
 }
@@ -1145,220 +626,82 @@ function setEdtCount(d365id, inputEl) {
 function setEdtOrder(d365id, inputEl) {
   const val = parseFloat(inputEl.value);
   if (!isNaN(val) && val >= 0) {
-    edtOrders[d365id] = val;
+    edtOrders[edtOutlet][d365id] = val;
     inputEl.classList.add('has-value');
   } else {
-    delete edtOrders[d365id];
+    delete edtOrders[edtOutlet][d365id];
     inputEl.classList.remove('has-value');
   }
-}
-
-async function saveEdtOrders() {
-  const iso = edtDateIso();
-  const rows = Object.keys(edtOrders)
-    .filter(function(d){ return edtOrders[d] > 0; })
-    .map(function(d){ return { order_date: iso, d365_id: d, outlet: edtOutlet, qty: edtOrders[d] }; });
-  if (!rows.length) { showToast('No EDT quantities to save'); return; }
-  try {
-    await sbUpsert('kitchen_edt_orders', rows, 'order_date,d365_id,outlet');
-    showToast('EDT saved (' + rows.length + ' items) ✓');
-  } catch(e) {
-    showToast('Error: ' + e.message);
-  }
-}
-
-function copyEdtOrder() {
-  const items = edtProducts[edtOutlet] || [];
-  const outletLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  const lines = [];
-  items.forEach(function(p){
-    const qty = edtOrders[p.d365_id];
-    if (qty && qty > 0) {
-      const shortName = p.name.replace(/^EDT\s*-\s*CK\s*-\s*[^-]+-\s*/i, '').replace(/^EDT\s*-\s*[^-]+-\s*/i, '');
-      lines.push(qty + (p.purchase_unit ? ' ' + p.purchase_unit : '') + ' — ' + shortName + ' (' + pad365(p.d365_id) + ')');
+  // Debounced save to kitchen_edt_orders
+  clearTimeout(inputEl._t);
+  inputEl._t = setTimeout(function() {
+    const v = parseFloat(inputEl.value);
+    if (!isNaN(v) && v >= 0) {
+      sbUpsert('kitchen_edt_orders', [{ order_date: dateIso(), d365_id: d365id, outlet: edtOutlet, qty: v }], 'order_date,d365_id,outlet').catch(function() {});
     }
+  }, 1500);
+}
+
+// --- Outlet switching ---------------------------------------------
+
+function setEdtOutlet(o, btn) {
+  edtOutlet = o;
+  document.querySelectorAll('.outlet-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderEdtItems();
+}
+
+// --- CSV export ---------------------------------------------------
+
+// Build CSV rows: D365 ID, Qty, Unit — only items with qty > 0
+function buildEdtCsvRows(items) {
+  const orders = edtOrders[edtOutlet];
+  const rows = [['D365 ID', 'QTY', 'UNIT']];
+  items.forEach(function(entry) {
+    const qty = orders[entry.d365_id];
+    if (!qty || Number(qty) <= 0) return;
+    rows.push([pad365(entry.d365_id), qty, entry.purchase_unit]);
   });
-  if (!lines.length) { showToast('No items to order'); return; }
-  const text = 'EATALY KOP · EDT · ' + outletLabel.toUpperCase() + ' ORDER · ' + edtDateIso() + '\n\n' + lines.join('\n');
-  if (navigator.share) { navigator.share({ text: text }).catch(function(){}); }
-  else { copyText(text, 'EDT order copied (' + lines.length + ' items)'); }
+  return rows;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// TAB 5 — INVOICES
-// ═══════════════════════════════════════════════════════════════════
-let invoices = [];
-let activeInvoiceId = null;
-
-async function loadInvoices() {
-  document.getElementById('invoiceList').innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading…</div>';
-  try {
-    invoices = await sbGet('kitchen_invoices?select=*&order=delivery_date.desc&limit=100');
-    renderInvoices();
-  } catch(e) {
-    document.getElementById('invoiceList').innerHTML = '<div class="no-results">Error: ' + e.message + '</div>';
-  }
+function downloadCsv(rows, filename) {
+  if (rows.length <= 1) { showToast('No items with qty > 0'); return; }
+  const csv = rows.map(function(r) {
+    return r.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
+  }).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  showToast('Exported ' + (rows.length - 1) + ' item(s) ✓');
 }
 
-function renderInvoices() {
-  if (!invoices.length) {
-    document.getElementById('invoiceList').innerHTML = '<div class="empty-state"><div class="empty-icon">🧾</div><div class="empty-msg">No delivery logs yet.<br>Tap "+ New Delivery Log" to start.</div></div>';
-    return;
-  }
-  document.getElementById('invoiceList').innerHTML = invoices.map(function(inv) {
-    return '<div class="inv-card">' +
-      '<div class="inv-card-header">' +
-        '<div class="inv-card-top">' +
-          '<div><div class="inv-card-title">' + inv.vendor + '</div><div class="inv-card-date">' + inv.delivery_date + (inv.po_number ? ' · PO ' + inv.po_number : '') + (inv.invoice_number ? ' · Inv ' + inv.invoice_number : '') + '</div></div>' +
-          (inv.amount ? '<div style="font-family:JetBrains Mono,monospace;font-size:0.875rem;font-weight:600;color:var(--accent);flex-shrink:0;">$' + Number(inv.amount).toFixed(2) + '</div>' : '') +
-        '</div>' +
-        (inv.notes ? '<div style="font-size:0.688rem;color:var(--text3);margin-top:6px;">' + inv.notes + '</div>' : '') +
-      '</div>' +
-      '<div style="padding:10px 14px;display:flex;gap:8px;">' +
-        '<button class="btn btn-secondary" style="flex:1;font-size:0.75rem;" onclick="openDelivItems(' + inv.id + ')">📦 Log Items</button>' +
-        '<button class="btn btn-ghost" style="font-size:0.75rem;" onclick="deleteInvoice(' + inv.id + ')">🗑</button>' +
-      '</div>' +
-      '</div>';
-  }).join('');
+// Export a single group
+function exportEdtGroup(grpKey) {
+  const items = edtGroupMap[grpKey];
+  if (!items) { showToast('Group not found'); return; }
+  const outletLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
+  const grpLabel = grpKey.replace(edtOutlet + '_', '').replace(/_/g, '-');
+  const filename = 'EDT_' + outletLabel + '_' + grpLabel + '_' + dateIso() + '.csv';
+  downloadCsv(buildEdtCsvRows(items), filename);
 }
 
-function openNewInvoice() {
-  activeInvoiceId = null;
-  document.getElementById('invModalTitle').textContent = 'New Delivery Log';
-  document.getElementById('invVendor').value = '';
-  document.getElementById('invDate').value = dateIso(0);
-  document.getElementById('invPO').value = '';
-  document.getElementById('invNum').value = '';
-  document.getElementById('invAmt').value = '';
-  document.getElementById('invNotes').value = '';
-  openModal('invModal');
-}
-
-async function saveInvoice() {
-  const vendor = document.getElementById('invVendor').value.trim();
-  if (!vendor) { showToast('Vendor is required'); return; }
-  const body = {
-    vendor: vendor,
-    delivery_date: document.getElementById('invDate').value || dateIso(0),
-    po_number: document.getElementById('invPO').value.trim() || null,
-    invoice_number: document.getElementById('invNum').value.trim() || null,
-    amount: parseFloat(document.getElementById('invAmt').value) || null,
-    notes: document.getElementById('invNotes').value.trim() || null
-  };
-  try {
-    await sbPost('kitchen_invoices', body);
-    closeModal('invModal');
-    showToast('Delivery log saved ✓');
-    loadInvoices();
-  } catch(e) {
-    showToast('Error: ' + e.message);
-  }
-}
-
-async function deleteInvoice(id) {
-  if (!confirm('Delete this delivery log?')) return;
-  try {
-    await fetch(SB_URL + '/rest/v1/kitchen_invoices?id=eq.' + id, { method: 'DELETE', headers: sbHeaders() });
-    showToast('Deleted');
-    loadInvoices();
-  } catch(e) { showToast('Error: ' + e.message); }
-}
-
-async function openDelivItems(invoiceId) {
-  activeInvoiceId = invoiceId;
-  const inv = invoices.find(function(i){ return i.id === invoiceId; });
-  document.getElementById('delivModalTitle').textContent = 'Items — ' + (inv ? inv.vendor : '');
-  document.getElementById('delivItems').innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading…</div>';
-  openModal('delivModal');
-  try {
-    const items = await sbGet('kitchen_delivery_items?invoice_id=eq.' + invoiceId + '&select=*&order=item_name');
-    renderDelivItems(items);
-  } catch(e) {
-    document.getElementById('delivItems').innerHTML = '<div class="no-results">Error: ' + e.message + '</div>';
-  }
-}
-
-function renderDelivItems(items) {
-  const inv = invoices.find(function(i){ return i.id === activeInvoiceId; });
-  let html = '<div style="background:var(--surface);border:1px solid var(--surface2);border-radius:10px;overflow:hidden;margin-bottom:10px;">';
-  if (items.length) {
-    items.forEach(function(item) {
-      html += '<div class="confirm-row">' +
-        '<div class="confirm-name"><div style="font-size:0.813rem;">' + item.item_name + '</div><div style="font-size:0.563rem;font-family:JetBrains Mono,monospace;color:var(--text3);">' + pad365(item.d365_id) + '</div></div>' +
-        '<div class="confirm-qty">' + item.qty_received + ' ' + (item.unit||'') + '</div>' +
-        '<div class="confirm-check' + (item.confirmed ? ' checked' : '') + '" onclick="toggleConfirm(' + item.id + ',this)">' + (item.confirmed ? '✓' : '') + '</div>' +
-        '</div>';
-    });
-  } else {
-    html += '<div class="no-results">No items logged yet</div>';
-  }
-  html += '</div>';
-  // Add item form
-  html += '<div style="background:var(--surface);border:1px solid var(--surface2);border-radius:10px;padding:12px 14px;">' +
-    '<div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:8px;">Add Item</div>' +
-    '<div style="display:flex;gap:6px;margin-bottom:6px;"><input id="diD365" placeholder="D365 #" style="width:90px;background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:JetBrains Mono,monospace;font-size:0.75rem;padding:7px 8px;" inputmode="numeric">' +
-    '<input id="diName" placeholder="Item name" style="flex:1;background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:DM Sans,sans-serif;font-size:0.75rem;padding:7px 8px;"></div>' +
-    '<div style="display:flex;gap:6px;">' +
-    '<input id="diQty" placeholder="Qty" type="number" style="width:70px;background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:JetBrains Mono,monospace;font-size:0.75rem;padding:7px 8px;" inputmode="decimal">' +
-    '<input id="diUnit" placeholder="Unit (case, lb…)" style="flex:1;background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:DM Sans,sans-serif;font-size:0.75rem;padding:7px 8px;">' +
-    '<button class="btn btn-primary" style="font-size:0.75rem;padding:7px 12px;" onclick="addDelivItem()">Add</button>' +
-    '</div></div>';
-  document.getElementById('delivItems').innerHTML = html;
-}
-
-async function addDelivItem() {
-  const d365 = document.getElementById('diD365').value.trim();
-  const name = document.getElementById('diName').value.trim();
-  const qty = parseFloat(document.getElementById('diQty').value);
-  const unit = document.getElementById('diUnit').value.trim();
-  if (!name || isNaN(qty)) { showToast('Name and qty required'); return; }
-  try {
-    await sbPost('kitchen_delivery_items', [{
-      invoice_id: activeInvoiceId,
-      d365_id: d365 || null,
-      item_name: name,
-      qty_received: qty,
-      unit: unit || null,
-      confirmed: false
-    }]);
-    const items = await sbGet('kitchen_delivery_items?invoice_id=eq.' + activeInvoiceId + '&select=*&order=item_name');
-    renderDelivItems(items);
-  } catch(e) { showToast('Error: ' + e.message); }
-}
-
-async function toggleConfirm(itemId, el) {
-  const nowConfirmed = !el.classList.contains('checked');
-  el.classList.toggle('checked', nowConfirmed);
-  el.textContent = nowConfirmed ? '✓' : '';
-  try {
-    await sbPatch('kitchen_delivery_items', 'id=eq.' + itemId, { confirmed: nowConfirmed });
-  } catch(e) { showToast('Error: ' + e.message); }
-}
-
-async function confirmDelivery() {
-  const items = await sbGet('kitchen_delivery_items?invoice_id=eq.' + activeInvoiceId + '&select=*');
-  const confirmed = items.filter(function(i){ return i.confirmed; });
-  if (!confirmed.length) { showToast('No items checked yet'); return; }
-  // Mirror confirmed items to inventory_trend and kitchen_count
-  const iso = (invoices.find(function(i){ return i.id === activeInvoiceId; }) || {}).delivery_date || dateIso(0);
-  const trendRows = confirmed.filter(function(i){ return i.d365_id; }).map(function(i){
-    return { snap_date: iso, d365: i.d365_id, item_name: i.item_name, category: 'KITCHEN_RECEIVE', count: i.qty_received };
-  });
-  if (trendRows.length) {
-    try { await sbUpsert('inventory_trend', trendRows, 'snap_date,d365'); } catch(e){}
-  }
-  showToast('Receipt confirmed — ' + confirmed.length + ' items ✓');
-  closeModal('delivModal');
+// Export all groups for current outlet
+function exportEdtAll() {
+  const allItems = [];
+  Object.values(edtGroupMap).forEach(function(items) { items.forEach(function(i) { allItems.push(i); }); });
+  const outletLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
+  const filename = 'EDT_' + outletLabel + '_' + dateIso() + '.csv';
+  downloadCsv(buildEdtCsvRows(allItems), filename);
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', function() {
-  updateCountDateUI();
-  updateOrderDateUI();
-  // Set today's date in invoice modal
-  document.getElementById('invDate').value = dateIso(0);
+  updateDateUI();
 });
 </script>
 </body>
