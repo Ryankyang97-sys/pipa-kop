@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Kitchen">
@@ -15,34 +15,35 @@
   --text:#F0EDE8;--text2:#8A8680;--text3:#5A5650;
   --accent:#B85C00;--accent-dim:rgba(184,92,0,0.15);--accent-border:rgba(184,92,0,0.35);
   --green:#2D7A4F;--green-dim:rgba(45,122,79,0.12);--green-border:rgba(45,122,79,0.3);
+  --red:#8B2020;--red-dim:rgba(139,32,32,0.2);--red-border:rgba(200,80,80,0.4);
+  --blue-dim:rgba(40,80,160,0.15);--blue-border:rgba(60,120,220,0.35);
   --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
 }
 html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100%;-webkit-text-size-adjust:none;}
-.page{padding:calc(var(--safe-top) + 36px) 16px calc(var(--safe-bottom) + 68px);max-width:480px;margin:0 auto;}
-a.nav-back{display:flex;align-items:center;gap:6px;margin-bottom:18px;text-decoration:none;color:var(--text3);font-size:0.75rem;font-weight:600;}
+.page{padding:calc(var(--safe-top) + 40px) 16px calc(var(--safe-bottom) + 72px);max-width:480px;margin:0 auto;}
+.nav-back{display:flex;align-items:center;gap:6px;margin-bottom:20px;text-decoration:none;color:var(--text3);font-size:0.75rem;font-weight:600;}
 .wordmark{font-size:1.35rem;font-weight:700;letter-spacing:-0.02em;}
 .wordmark span{color:var(--accent);}
-.wordmark-sub{font-size:0.625rem;color:var(--text3);letter-spacing:0.09em;text-transform:uppercase;margin-top:3px;}
-.outlet-toggle{display:flex;gap:0;background:var(--surface2);border-radius:8px;padding:3px;margin:14px 0 0;}
-.outlet-btn{flex:1;padding:7px;text-align:center;border-radius:6px;font-size:0.75rem;font-weight:700;color:var(--text3);cursor:pointer;transition:all 0.15s;user-select:none;}
-.outlet-btn.active{background:var(--accent);color:#fff;}
-.tabs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:14px -16px 0;padding:0 16px;}
+.wordmark-sub{font-size:0.688rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-top:3px;}
+
+/* TABS */
+.tabs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:18px -16px 0;padding:0 16px;}
 .tabs-wrap::-webkit-scrollbar{display:none;}
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--surface2);width:max-content;min-width:100%;}
-.tab{padding:8px 14px 10px;font-size:0.675rem;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap;flex-shrink:0;user-select:none;}
+.tab{padding:8px 12px 10px;font-size:0.675rem;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap;flex-shrink:0;user-select:none;}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
-.panel{display:none;padding-top:16px;}
+.panel{display:none;padding-top:18px;}
 .panel.active{display:block;}
-.stat-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
-.stat{font-size:0.625rem;font-weight:700;padding:3px 9px;border-radius:20px;}
-.stat-blue{background:rgba(40,80,160,0.15);color:#80aaff;border:1px solid rgba(60,120,220,0.3);}
-.stat-orange{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
-.stat-green{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);}
+
+/* SECTION LABELS */
+.section-label{font-size:0.563rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+
+/* SEARCH */
 .search-wrap{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--surface3);border-radius:10px;padding:10px 14px;margin-bottom:6px;}
 .search-icon{color:var(--text3);font-size:1rem;flex-shrink:0;}
 .search-input{background:none;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.938rem;width:100%;outline:none;}
 .search-input::placeholder{color:var(--text3);}
-.search-hint{font-size:0.625rem;color:var(--text3);margin-bottom:12px;padding-left:2px;}
+.search-hint{font-size:0.625rem;color:var(--text3);margin-bottom:14px;padding-left:2px;}
 .results-box{background:var(--surface);border:1px solid var(--surface2);border-radius:10px;overflow:hidden;display:none;}
 .result-row{padding:11px 14px;border-bottom:1px solid var(--surface2);cursor:pointer;}
 .result-row:last-child{border-bottom:none;}
@@ -53,595 +54,1312 @@ a.nav-back{display:flex;align-items:center;gap:6px;margin-bottom:18px;text-decor
 .result-tag{font-size:0.563rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);}
 .result-vendor{font-size:0.688rem;color:var(--text2);}
 .no-results{padding:16px 14px;font-size:0.813rem;color:var(--text3);text-align:center;}
+
+/* RECIPE DETAIL */
 .detail-card{background:var(--surface);border:1px solid var(--surface2);border-radius:10px;overflow:hidden;margin-top:10px;}
 .detail-header{padding:12px 14px;border-bottom:1px solid var(--surface2);}
-.detail-title{font-size:0.875rem;font-weight:700;line-height:1.3;}
+.detail-title{font-size:0.875rem;font-weight:700;color:var(--text);line-height:1.3;}
 .detail-sub{font-size:0.688rem;color:var(--text3);margin-top:3px;}
-.detail-ids{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
+.detail-ids{display:flex;gap:10px;margin-top:6px;}
 .id-chip{font-family:'JetBrains Mono',monospace;font-size:0.688rem;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);padding:2px 8px;border-radius:4px;}
 .detail-close{float:right;font-size:0.75rem;color:var(--text3);cursor:pointer;margin-top:2px;}
-.copy-row{padding:10px 14px;display:flex;gap:8px;}
-.vendor-block{margin-bottom:10px;}
-.vendor-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border:1px solid var(--surface2);border-radius:10px;cursor:pointer;user-select:none;}
-.vendor-header.open{border-radius:10px 10px 0 0;border-bottom:1px solid var(--surface3);}
-.vendor-name{font-size:0.813rem;font-weight:700;color:var(--text);}
-.vendor-meta{font-size:0.563rem;color:var(--text3);margin-top:1px;}
-.vendor-chevron{color:var(--text3);font-size:0.875rem;transition:transform 0.18s;flex-shrink:0;}
-.vendor-chevron.open{transform:rotate(180deg);}
-.vendor-body{display:none;background:var(--surface);border:1px solid var(--surface2);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;}
-.vendor-body.open{display:block;}
-.cat-header{padding:6px 14px;background:var(--surface2);border-bottom:1px solid var(--surface3);}
-.cat-name{font-size:0.5rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text3);}
-.item-row{display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--surface2);gap:8px;}
-.item-row:last-child{border-bottom:none;}
+.ing-row{display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--surface2);gap:8px;}
+.ing-row:last-child{border-bottom:none;}
+.ing-id{font-family:'JetBrains Mono',monospace;font-size:0.625rem;color:var(--text3);width:60px;flex-shrink:0;}
+.ing-name{font-size:0.75rem;color:var(--text);flex:1;}
+
+/* GROUP CARDS */
+.group-section{margin-bottom:18px;}
+.group-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface2);border-radius:8px 8px 0 0;}
+.group-title{font-size:0.625rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);}
+.group-count{font-size:0.563rem;color:var(--text3);}
+
+/* COUNT / ORDER ROWS */
+.item-row{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid var(--surface2);gap:8px;background:var(--surface);}
+.item-row:first-of-type{border-radius:0;}
+.item-row:last-child{border-bottom:none;border-radius:0 0 8px 8px;}
 .item-info{flex:1;min-width:0;}
-.item-name{font-size:0.813rem;font-weight:600;color:var(--text);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.item-d365{font-family:'JetBrains Mono',monospace;font-size:0.563rem;color:var(--text3);margin-top:1px;}
-.item-case{font-size:0.563rem;color:var(--text2);flex-shrink:0;}
-.num-input{background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.875rem;font-weight:600;text-align:center;padding:6px 4px;-moz-appearance:textfield;flex-shrink:0;}
-.num-input::-webkit-inner-spin-button,.num-input::-webkit-outer-spin-button{-webkit-appearance:none;}
-.num-input:focus{outline:none;border-color:var(--accent);}
-.num-input.has-value{border-color:var(--accent);color:var(--accent);}
-.par-input{width:44px;color:var(--text2);}
-.count-input{width:62px;}
-.order-input{width:52px;}
-.order-input.needs{color:var(--accent);border-color:var(--accent-border);}
-.order-input.zero{color:var(--text3);}
-.col-heads{display:flex;align-items:center;padding:3px 14px 5px;gap:8px;}
-.col-head{font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);text-align:center;flex-shrink:0;}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:0.813rem;font-weight:700;cursor:pointer;}
-.btn:active{opacity:0.75;}
+.item-name{font-size:0.813rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-d365{font-family:'JetBrains Mono',monospace;font-size:0.563rem;color:var(--text3);margin-top:2px;}
+.item-vendor{font-size:0.563rem;color:var(--text3);}
+.count-input{background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.813rem;text-align:center;padding:6px 4px;width:60px;flex-shrink:0;-moz-appearance:textfield;}
+.count-input::-webkit-inner-spin-button,.count-input::-webkit-outer-spin-button{-webkit-appearance:none;}
+.count-input:focus{outline:none;border-color:var(--accent);}
+.count-input.has-value{border-color:var(--accent);color:var(--accent);}
+.par-badge{font-size:0.563rem;color:var(--text3);text-align:center;width:36px;flex-shrink:0;}
+.suggest-badge{font-family:'JetBrains Mono',monospace;font-size:0.875rem;font-weight:600;text-align:center;width:44px;flex-shrink:0;}
+.suggest-ok{color:var(--text3);}
+.suggest-need{color:var(--accent);}
+.col-heads{display:flex;align-items:center;padding:4px 12px 6px;gap:8px;}
+.col-head{font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);text-align:center;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:0.813rem;font-weight:700;cursor:pointer;transition:opacity 0.15s;}
 .btn-primary{background:var(--accent);color:#fff;}
 .btn-secondary{background:var(--surface2);color:var(--text2);}
 .btn-ghost{background:transparent;border:1px solid var(--surface3);color:var(--text2);}
-.btn-full{width:100%;margin-top:10px;}
-.btn-row{display:flex;gap:8px;margin-top:10px;}
-.day-pills{display:flex;gap:3px;flex-shrink:0;}
-.day-pill{width:26px;height:22px;border-radius:4px;border:1.5px solid var(--surface3);background:var(--surface2);color:var(--text3);font-size:0.5rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;text-transform:uppercase;user-select:none;}
-.day-pill.on{background:var(--accent);border-color:var(--accent);color:#fff;}
-.loading{text-align:center;padding:32px 16px;color:var(--text3);font-size:0.813rem;}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--surface3);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;}
+.btn:active{opacity:0.75;}
+.btn-full{width:100%;margin-top:12px;}
+.btn-row{display:flex;gap:8px;margin-top:12px;}
+
+/* DATE NAV */
+.date-nav{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--surface2);border-radius:10px;padding:10px 14px;margin-bottom:14px;}
+.date-nav-btn{background:var(--surface2);border:none;color:var(--text2);font-size:1rem;width:32px;height:32px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.date-nav-center{text-align:center;}
+.date-label{font-size:0.875rem;font-weight:700;color:var(--text);}
+.date-sub{font-size:0.625rem;color:var(--text3);margin-top:2px;}
+
+/* FILTER PILLS */
+.filter-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;}
+.filter-row::-webkit-scrollbar{display:none;}
+.filter-pill{flex-shrink:0;padding:5px 12px;border-radius:20px;border:1.5px solid var(--surface3);background:var(--surface2);color:var(--text3);font-family:'DM Sans',sans-serif;font-size:0.688rem;font-weight:700;cursor:pointer;}
+.filter-pill.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* RECIPE SELECTOR */
+.recipe-selector{background:var(--surface);border:1px solid var(--surface2);border-radius:10px;margin-bottom:14px;overflow:hidden;}
+.recipe-selector-header{padding:12px 14px;border-bottom:1px solid var(--surface2);display:flex;align-items:center;justify-content:space-between;}
+.recipe-selector-title{font-size:0.813rem;font-weight:700;color:var(--text);}
+.recipe-selector-sub{font-size:0.625rem;color:var(--text3);margin-top:2px;}
+.recipe-list{max-height:220px;overflow-y:auto;}
+.recipe-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--surface2);cursor:pointer;}
+.recipe-item:last-child{border-bottom:none;}
+.recipe-item:active{background:var(--surface2);}
+.recipe-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--surface3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.75rem;}
+.recipe-check.checked{background:var(--accent);border-color:var(--accent);color:#fff;}
+.recipe-label{font-size:0.75rem;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.recipe-num{font-family:'JetBrains Mono',monospace;font-size:0.563rem;color:var(--text3);}
+
+/* STATUS PILLS */
+.status-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.status-pill{font-size:0.625rem;font-weight:700;padding:4px 10px;border-radius:20px;}
+.status-green{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);}
+.status-orange{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
+.status-red{background:var(--red-dim);color:#e07070;border:1px solid var(--red-border);}
+.status-blue{background:var(--blue-dim);color:#80aaff;border:1px solid var(--blue-border);}
+
+/* INVOICE CARDS */
+.inv-card{background:var(--surface);border:1px solid var(--surface2);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.inv-card-header{padding:12px 14px;border-bottom:1px solid var(--surface2);}
+.inv-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.inv-card-title{font-size:0.875rem;font-weight:700;color:var(--text);}
+.inv-card-date{font-size:0.625rem;color:var(--text3);margin-top:3px;}
+.inv-card-body{padding:12px 14px;}
+.inv-field{margin-bottom:10px;}
+.inv-field-label{font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px;}
+.inv-field input,.inv-field textarea{width:100%;background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.813rem;padding:8px 10px;outline:none;}
+.inv-field input:focus,.inv-field textarea:focus{border-color:var(--accent);}
+.inv-field textarea{resize:none;height:60px;}
+.inv-field-row{display:flex;gap:8px;}
+.inv-field-row .inv-field{flex:1;}
+
+/* TOAST */
+#toast{position:fixed;bottom:calc(var(--safe-bottom) + 78px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface3);color:var(--text);font-size:0.813rem;font-weight:600;padding:10px 18px;border-radius:24px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:999;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* LOADING */
+.loading{text-align:center;padding:28px 16px;color:var(--text3);font-size:0.813rem;}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--surface3);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin-bottom:8px;}
 @keyframes spin{to{transform:rotate(360deg);}}
+
+/* EMPTY STATE */
 .empty-state{text-align:center;padding:40px 16px;color:var(--text3);}
 .empty-icon{font-size:2rem;margin-bottom:8px;}
-.empty-msg{font-size:0.813rem;line-height:1.6;}
-#toast{position:fixed;bottom:calc(var(--safe-bottom)+20px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--surface3);color:var(--text);font-size:0.813rem;font-weight:600;padding:9px 18px;border-radius:24px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:999;white-space:nowrap;}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.empty-msg{font-size:0.813rem;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:800;display:none;align-items:flex-end;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border-radius:16px 16px 0 0;width:100%;max-width:480px;margin:0 auto;max-height:85vh;overflow-y:auto;padding:20px 16px calc(var(--safe-bottom) + 20px);}
+.modal-title{font-size:1rem;font-weight:700;margin-bottom:16px;}
+.modal-close{float:right;background:var(--surface2);border:none;color:var(--text2);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;}
+
+/* OUTLET TOGGLE */
+.outlet-toggle{display:flex;gap:0;margin-bottom:14px;border-radius:8px;overflow:hidden;border:1px solid var(--surface3);}
+.outlet-btn{flex:1;padding:9px 0;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;background:var(--surface2);color:var(--text3);border:none;cursor:pointer;transition:background 0.15s,color 0.15s;}
+.outlet-btn.active{background:var(--accent);color:#fff;}
+.outlet-btn:first-child{border-radius:7px 0 0 7px;}
+.outlet-btn:last-child{border-radius:0 7px 7px 0;}
+
+/* EDT group badge */
+.edt-group-badge{display:inline-block;font-size:0.5rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);margin-left:6px;vertical-align:middle;}
+
+/* DELIVERY CONFIRM */
+.confirm-row{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid var(--surface2);gap:8px;}
+.confirm-row:last-child{border-bottom:none;}
+.confirm-name{font-size:0.813rem;color:var(--text);flex:1;}
+.confirm-qty{font-family:'JetBrains Mono',monospace;font-size:0.688rem;color:var(--text2);width:36px;text-align:right;flex-shrink:0;}
+.confirm-check{width:24px;height:24px;border-radius:6px;border:1.5px solid var(--surface3);background:var(--surface2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.875rem;}
+.confirm-check.checked{background:var(--green);border-color:var(--green);color:#fff;}
 </style>
 </head>
 <body>
 <div class="page">
-  <a class="nav-back" href="index.html">&#8249; PiPa Hub</a>
-  <div class="wordmark">Kitchen <span>Tool</span></div>
-  <div class="wordmark-sub">EKP &middot; BOH Operations</div>
 
-  <div class="outlet-toggle">
-    <div class="outlet-btn active" id="ob-pipa"   onclick="setOutlet('pipa')">PiPa</div>
-    <div class="outlet-btn"        id="ob-pronto" onclick="setOutlet('pronto')">Pronto</div>
-  </div>
+  <a class="nav-back" href="index.html">‹ PiPa Hub</a>
+  <div class="wordmark">Kitchen <span>Tool</span></div>
+  <div class="wordmark-sub">EKP · BOH Operations</div>
 
   <div class="tabs-wrap">
     <div class="tabs">
       <div class="tab active" onclick="switchTab('lookup',this)">D365</div>
-      <div class="tab"        onclick="switchTab('count',this)">Count</div>
-      <div class="tab"        onclick="switchTab('orders',this)">Orders</div>
-      <div class="tab"        onclick="switchTab('edt',this)">EDT</div>
+      <div class="tab" onclick="switchTab('count',this)">Count</div>
+      <div class="tab" onclick="switchTab('edt',this)">EDT</div>
+      <div class="tab" onclick="switchTab('orders',this)">Orders</div>
+      <div class="tab" onclick="switchTab('invoices',this)">Invoices</div>
     </div>
   </div>
 
-  <!-- D365 LOOKUP -->
+  <!-- ══════════════════════════════════════════════════════════
+       TAB 1 — D365 LOOKUP
+  ═══════════════════════════════════════════════════════════ -->
   <div class="panel active" id="panel-lookup">
-    <div style="font-size:0.563rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Search D365 Products</div>
+    <div class="section-label">Search D365 Products</div>
     <div class="search-wrap">
-      <span class="search-icon">&#9906;</span>
-      <input class="search-input" id="lookupQ" type="search" placeholder="D365 #, name&#8230;" oninput="dLookup(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" id="lookupQ" type="search" placeholder="D365 #, Adaco ID, or name…"
+        oninput="dLookup(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
-    <div class="search-hint">Full catalog &mdash; not filtered by active recipes</div>
+    <div class="search-hint">e.g. "01137973" or "chicken breast" or "1137973"</div>
     <div class="results-box" id="lookupResults"></div>
     <div id="lookupDetail"></div>
   </div>
 
-  <!-- COUNT -->
+  <!-- ══════════════════════════════════════════════════════════
+       TAB 2 — COUNT
+  ═══════════════════════════════════════════════════════════ -->
   <div class="panel" id="panel-count">
-    <div class="stat-row" id="countStat"></div>
-    <div id="countBody"><div class="loading"><span class="spinner"></span>Loading&hellip;</div></div>
-    <button class="btn btn-primary btn-full" id="countSaveBtn" onclick="saveCount()" style="display:none;">&#9729; Save Count</button>
-  </div>
-
-  <!-- ORDERS -->
-  <div class="panel" id="panel-orders">
-    <div class="stat-row" id="orderStat"></div>
-    <div class="col-heads" id="orderColHeads" style="display:none;">
-      <div style="flex:1;"></div>
-      <div class="col-head" style="width:30px;">Unit</div>
-      <div class="col-head" style="width:44px;">Par</div>
-      <div class="col-head" style="width:52px;">Order</div>
+    <div class="date-nav">
+      <button class="date-nav-btn" onclick="shiftCountDate(-1)">‹</button>
+      <div class="date-nav-center">
+        <div class="date-label" id="countDateLabel">Today</div>
+        <div class="date-sub" id="countDateSub"></div>
+      </div>
+      <button class="date-nav-btn" onclick="shiftCountDate(1)">›</button>
     </div>
-    <div id="orderBody"><div class="loading"><span class="spinner"></span>Loading&hellip;</div></div>
-    <div class="btn-row" id="orderBtns" style="display:none;">
-      <button class="btn btn-primary" style="flex:1;" onclick="copyOrder()">&#128203; Copy Order</button>
-      <button class="btn btn-secondary" style="flex:1;" onclick="exportCSV()">&#8675; Export CSV</button>
-    </div>
-  </div>
 
-  <!-- EDT -->
-  <div class="panel" id="panel-edt">
-    <div class="stat-row" id="edtStat"></div>
-    <div id="edtLegend" style="display:none;">
-      <div style="display:flex;justify-content:flex-end;gap:3px;padding:0 14px 6px;">
-        <div style="width:26px;font-size:0.5rem;text-align:center;color:var(--text3);font-weight:700;">M</div>
-        <div style="width:26px;font-size:0.5rem;text-align:center;color:var(--text3);font-weight:700;">T</div>
-        <div style="width:26px;font-size:0.5rem;text-align:center;color:var(--text3);font-weight:700;">W</div>
-        <div style="width:26px;font-size:0.5rem;text-align:center;color:var(--text3);font-weight:700;">Th</div>
-        <div style="width:26px;font-size:0.5rem;text-align:center;color:var(--text3);font-weight:700;">F</div>
-        <div style="width:26px;font-size:0.5rem;text-align:center;color:var(--text3);font-weight:700;">Sa</div>
-        <div style="width:26px;font-size:0.5rem;text-align:center;color:var(--text3);font-weight:700;">Su</div>
+    <div id="countRecipeSelector">
+      <div class="section-label">Active Recipes</div>
+      <div id="countRecipeList" class="recipe-selector">
+        <div class="loading"><div class="spinner"></div><br>Loading recipes…</div>
       </div>
     </div>
-    <div id="edtBody"><div class="loading"><span class="spinner"></span>Loading&hellip;</div></div>
-    <button class="btn btn-primary btn-full" id="edtSaveBtn" onclick="saveEDT()" style="display:none;">&#9729; Save EDT Schedule</button>
+
+    <div id="countItemsWrap" style="display:none;">
+      <div class="section-label" id="countItemsLabel">Items to Count</div>
+      <div class="status-row" id="countStatus"></div>
+      <div id="countItems"></div>
+      <button class="btn btn-primary btn-full" onclick="saveCount()">☁ Save Count</button>
+      <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="showCountRecipes()">← Change Recipes</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TAB 3 — ORDERS
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-orders">
+    <div class="date-nav">
+      <button class="date-nav-btn" onclick="shiftOrderDate(-1)">‹</button>
+      <div class="date-nav-center">
+        <div class="date-label" id="orderDateLabel">Today</div>
+        <div class="date-sub" id="orderDateSub"></div>
+      </div>
+      <button class="date-nav-btn" onclick="shiftOrderDate(1)">›</button>
+    </div>
+
+    <div class="filter-row" id="orderVendorFilter"></div>
+
+    <div class="col-heads" style="padding-right:12px;">
+      <div style="flex:1;"></div>
+      <div class="col-head" style="width:60px;">On Hand</div>
+      <div class="col-head" style="width:36px;">Par</div>
+      <div class="col-head" style="width:44px;">Order</div>
+    </div>
+
+    <div id="orderItems">
+      <div class="loading"><div class="spinner"></div><br>Loading orders…</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" style="flex:1;" onclick="copyOrderText()">📋 Copy Order</button>
+      <button class="btn btn-secondary" style="flex:1;" onclick="exportOrderXLSX()">⬇ Export XLSX</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TAB 3 — EDT (outlet-scoped ordering)
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-edt">
+    <!-- Outlet toggle -->
+    <div class="outlet-toggle">
+      <button class="outlet-btn active" id="edt-ob-pipa" onclick="setEdtOutlet('pipa',this)">PiPa</button>
+      <button class="outlet-btn" id="edt-ob-pronto" onclick="setEdtOutlet('pronto',this)">Pronto</button>
+    </div>
+
+    <div class="date-nav" style="margin-bottom:14px;">
+      <button class="date-nav-btn" onclick="shiftEdtDate(-1)">‹</button>
+      <div class="date-nav-center">
+        <div class="date-label" id="edtDateLabel">Today</div>
+        <div class="date-sub" id="edtDateSub"></div>
+      </div>
+      <button class="date-nav-btn" onclick="shiftEdtDate(1)">›</button>
+    </div>
+
+    <div class="col-heads" style="padding-right:12px;">
+      <div style="flex:1;"></div>
+      <div class="col-head" style="width:60px;">On Hand</div>
+      <div class="col-head" style="width:36px;">Par</div>
+      <div class="col-head" style="width:44px;">Order</div>
+    </div>
+
+    <div id="edtItems">
+      <div class="loading"><div class="spinner"></div><br>Loading EDT…</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" style="flex:1;" onclick="copyEdtOrder()">📋 Copy Order</button>
+      <button class="btn btn-secondary" style="flex:1;" onclick="saveEdtOrders()">☁ Save</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TAB 5 — INVOICES
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-invoices">
+    <button class="btn btn-primary btn-full" onclick="openNewInvoice()" style="margin-bottom:14px;">+ New Delivery Log</button>
+    <div id="invoiceList">
+      <div class="loading"><div class="spinner"></div><br>Loading…</div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- NEW INVOICE MODAL -->
+<div class="modal-overlay" id="invModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('invModal')">✕</button>
+    <div class="modal-title" id="invModalTitle">New Delivery Log</div>
+    <div class="inv-field">
+      <div class="inv-field-label">Vendor</div>
+      <input id="invVendor" placeholder="e.g. Baldor, US Foods, Sysco…">
+    </div>
+    <div class="inv-field-row">
+      <div class="inv-field">
+        <div class="inv-field-label">Delivery Date</div>
+        <input id="invDate" type="date">
+      </div>
+      <div class="inv-field">
+        <div class="inv-field-label">PO #</div>
+        <input id="invPO" placeholder="POKP…">
+      </div>
+    </div>
+    <div class="inv-field-row">
+      <div class="inv-field">
+        <div class="inv-field-label">Invoice #</div>
+        <input id="invNum" placeholder="Invoice #">
+      </div>
+      <div class="inv-field">
+        <div class="inv-field-label">Amount ($)</div>
+        <input id="invAmt" type="number" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+    <div class="inv-field">
+      <div class="inv-field-label">Notes / Discrepancies</div>
+      <textarea id="invNotes" placeholder="Short / damaged items, temp issues…"></textarea>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveInvoice()">Save Delivery Log</button>
   </div>
 </div>
 
-<div id="toast"></div>
+<!-- DELIVERY ITEMS MODAL -->
+<div class="modal-overlay" id="delivModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('delivModal')">✕</button>
+    <div class="modal-title" id="delivModalTitle">Log Items</div>
+    <div id="delivItems"></div>
+    <button class="btn btn-primary btn-full" style="margin-top:12px;" onclick="confirmDelivery()">Confirm Receipt</button>
+  </div>
+</div>
 
 <script>
-const SB_URL='https://fhbusipvtxjnwidlgpaa.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
-const EDT_DAYS=['MON','TUE','WED','THU','FRI','SAT','SUN'];
+// ═══════════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════════
+const SB_URL = 'https://fhbusipvtxjnwidlgpaa.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
 
-function sbH(x){return Object.assign({'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},x||{});}
-async function sbGet(p){const r=await fetch(SB_URL+'/rest/v1/'+p,{headers:sbH()});if(!r.ok)throw new Error('SB '+r.status+' /'+p);return r.json();}
-async function sbPost(t,b){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:sbH({'Prefer':'return=representation'}),body:JSON.stringify(b)});if(!r.ok){const tx=await r.text();throw new Error('POST '+r.status+' '+tx);}return r.json();}
-async function sbUpsert(t,b,c){const r=await fetch(SB_URL+'/rest/v1/'+t+'?on_conflict='+c,{method:'POST',headers:sbH({'Prefer':'return=representation,resolution=merge-duplicates'}),body:JSON.stringify(b)});if(!r.ok){const tx=await r.text();throw new Error('UPSERT '+r.status+' '+tx);}return r.json();}
-async function sbDelete(p){await fetch(SB_URL+'/rest/v1/'+p,{method:'DELETE',headers:sbH()});}
-
-function debounce(fn,ms){let t;return function(){const a=arguments;clearTimeout(t);t=setTimeout(function(){fn.apply(null,a);},ms);};}
-function toast(msg,dur){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show');},dur||2200);}
-function pad8(id){return id?String(id).padStart(8,'0'):'';}
-function todayISO(){return new Date().toISOString().slice(0,10);}
-function weekStart(){const d=new Date(),day=d.getDay(),mon=new Date(d);mon.setDate(d.getDate()-(day===0?6:day-1));return mon.toISOString().slice(0,10);}
-function copyText(txt,msg){if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){toast(msg||'Copied');});}else{const el=document.createElement('textarea');el.value=txt;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast(msg||'Copied');}}
-
-// ── State ────────────────────────────────────────────────────────────
-let outlet='pipa';
-let activeTab='lookup';
-let activeRecipes={};   // outlet → Set<recipe_number>
-let orderItems={};      // outlet → [{vendor,category,d365_id,name,case_unit}]
-let edtItems={};        // outlet → [{vendor,d365_id,name,case_unit}]
-let countData={};       // d365_id → qty  (shared — same item same count regardless of outlet)
-let parData={};         // d365_id → par  (shared)
-let edtSched={};        // 'outlet|vendor|d365_id|DAY' → bool
-let loaded={};          // flags to avoid redundant fetches
-
-// ── Outlet / Tab ─────────────────────────────────────────────────────
-function setOutlet(o){
-  outlet=o;
-  document.getElementById('ob-pipa').classList.toggle('active',o==='pipa');
-  document.getElementById('ob-pronto').classList.toggle('active',o==='pronto');
-  renderActiveTab();
+function sbHeaders() {
+  return { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
 }
-function switchTab(id,el){
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+
+async function sbGet(path) {
+  const r = await fetch(SB_URL + '/rest/v1/' + path, { headers: sbHeaders() });
+  if (!r.ok) throw new Error('SB ' + r.status);
+  return r.json();
+}
+
+async function sbPost(table, body) {
+  const r = await fetch(SB_URL + '/rest/v1/' + table, {
+    method: 'POST',
+    headers: Object.assign({}, sbHeaders(), { 'Prefer': 'return=representation' }),
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error('SB POST ' + r.status);
+  return r.json();
+}
+
+async function sbUpsert(table, body, onConflict) {
+  const r = await fetch(SB_URL + '/rest/v1/' + table + '?on_conflict=' + onConflict, {
+    method: 'POST',
+    headers: Object.assign({}, sbHeaders(), { 'Prefer': 'return=representation,resolution=merge-duplicates' }),
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) { const t = await r.text(); throw new Error('SB UPSERT ' + r.status + ' ' + t); }
+  return r.json();
+}
+
+async function sbPatch(table, filter, body) {
+  const r = await fetch(SB_URL + '/rest/v1/' + table + '?' + filter, {
+    method: 'PATCH',
+    headers: Object.assign({}, sbHeaders(), { 'Prefer': 'return=representation' }),
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error('SB PATCH ' + r.status);
+  return r.json();
+}
+
+function debounce(fn, ms) {
+  let t; return function() { const a = arguments; clearTimeout(t); t = setTimeout(function(){ fn.apply(null,a); }, ms); };
+}
+
+function showToast(msg, dur) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, dur || 2200);
+}
+
+function pad365(id) {
+  if (!id) return '';
+  return String(id).padStart(8, '0');
+}
+
+function dateIso(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toISOString().slice(0, 10);
+}
+
+function dateFmt(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════════
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
   el.classList.add('active');
-  document.getElementById('panel-'+id).classList.add('active');
-  activeTab=id;
-  renderActiveTab();
-}
-function renderActiveTab(){
-  if(activeTab==='count')loadAndRenderCount();
-  else if(activeTab==='orders')loadAndRenderOrders();
-  else if(activeTab==='edt')loadAndRenderEDT();
+  document.getElementById('panel-' + id).classList.add('active');
+  if (id === 'count') initCount();
+  if (id === 'orders') initOrders();
+  if (id === 'edt') initEDT();
+  if (id === 'invoices') loadInvoices();
 }
 
-// ── Data loaders (lazy, cached per outlet per session) ────────────────
-async function ensureActiveRecipes(o){
-  if(loaded['rec_'+o])return;
-  const rows=await sbGet('kitchen_recipes?outlet=eq.'+o+'&select=recipe_number,active&limit=500');
-  activeRecipes[o]=new Set(rows.filter(function(r){return r.active;}).map(function(r){return r.recipe_number;}));
-  loaded['rec_'+o]=true;
-}
+// ═══════════════════════════════════════════════════════════════════
+// TAB 1 — D365 LOOKUP
+// ═══════════════════════════════════════════════════════════════════
+const dLookup = debounce(runLookup, 300);
 
-async function ensureOrderItems(o){
-  if(loaded['oi_'+o])return;
-  await ensureActiveRecipes(o);
-  const active=activeRecipes[o];
-  if(!active.size){orderItems[o]=[];loaded['oi_'+o]=true;return;}
-  // Step 1: get d365_ids that have at least one active recipe tag
-  const nums=Array.from(active).join(',');
-  const tags=await sbGet('kitchen_recipe_tags?outlet=eq.'+o+'&recipe_number=in.('+nums+')&select=d365_id&limit=2000');
-  const d365s=[...new Set(tags.map(function(t){return t.d365_id;}))];
-  if(!d365s.length){orderItems[o]=[];loaded['oi_'+o]=true;return;}
-  // Step 2: fetch full item details, preserving sort_order from seed
-  const items=await sbGet(
-    'kitchen_order_items?outlet=eq.'+o+'&d365_id=in.('+d365s.join(',')+')'
-    +'&active=eq.true&select=vendor,category,d365_id,name,case_unit,sort_order&order=sort_order.asc&limit=500'
-  );
-  orderItems[o]=items;
-  loaded['oi_'+o]=true;
-}
-
-async function ensureEDTItems(o){
-  if(loaded['edt_'+o])return;
-  const rows=await sbGet('kitchen_edt_items?outlet=eq.'+o+'&active=eq.true&select=vendor,d365_id,name,case_unit,sort_order&order=sort_order.asc&limit=200');
-  edtItems[o]=rows;
-  loaded['edt_'+o]=true;
-}
-
-async function ensureCounts(){
-  if(loaded['counts'])return;
-  const rows=await sbGet('kitchen_count?count_date=eq.'+todayISO()+'&select=d365_id,qty&limit=1000');
-  rows.forEach(function(c){countData[c.d365_id]=c.qty;});
-  loaded['counts']=true;
-}
-
-async function ensurePars(){
-  if(loaded['pars'])return;
-  const rows=await sbGet('kitchen_pars?select=d365_id,par&limit=1000');
-  rows.forEach(function(p){parData[p.d365_id]=p.par;});
-  loaded['pars']=true;
-}
-
-async function ensureEDTSchedule(o){
-  const k='sch_'+o;
-  if(loaded[k])return;
-  const ws=weekStart();
-  const rows=await sbGet('kitchen_edt_schedule?week_start=eq.'+ws+'&outlet=eq.'+o+'&select=vendor,d365_id,order_day&limit=1000');
-  rows.forEach(function(e){edtSched[o+'|'+e.vendor+'|'+e.d365_id+'|'+e.order_day]=true;});
-  loaded[k]=true;
-}
-
-// ── COUNT tab ─────────────────────────────────────────────────────────
-// Grouped: vendor block (collapsible) → category sub-header → items
-// Count is shared (d365 only key), so switching outlet shows same counts
-async function loadAndRenderCount(){
-  document.getElementById('countSaveBtn').style.display='none';
-  document.getElementById('countStat').innerHTML='';
-  document.getElementById('countBody').innerHTML='<div class="loading"><span class="spinner"></span>Loading&hellip;</div>';
-  try{
-    await Promise.all([ensureOrderItems(outlet),ensureCounts()]);
-    renderCount();
-  }catch(e){
-    document.getElementById('countBody').innerHTML='<div class="empty-state"><div class="empty-icon">&#9888;&#65039;</div><div class="empty-msg">'+e.message+'</div></div>';
-  }
-}
-
-function renderCount(){
-  const items=orderItems[outlet]||[];
-  if(!items.length){
-    document.getElementById('countBody').innerHTML='<div class="empty-state"><div class="empty-icon">&#128203;</div><div class="empty-msg">No active recipes for '+outlet.toUpperCase()+'.<br>Toggle recipes on in pipa-admin &rarr; Kitchen.</div></div>';
-    document.getElementById('countSaveBtn').style.display='none';
-    document.getElementById('countStat').innerHTML='';
-    return;
-  }
-  document.getElementById('countSaveBtn').style.display='';
-  // Group vendor → category → items
-  const byV={};
-  items.forEach(function(item){
-    if(!byV[item.vendor])byV[item.vendor]={};
-    const c=item.category||'Other';
-    if(!byV[item.vendor][c])byV[item.vendor][c]=[];
-    byV[item.vendor][c].push(item);
-  });
-  const entered=items.filter(function(i){return countData[i.d365_id]!==undefined;}).length;
-  document.getElementById('countStat').innerHTML=
-    '<span class="stat stat-blue">'+items.length+' items</span>'+
-    '<span class="stat stat-'+(entered===items.length?'green':'orange')+'">'+entered+' entered</span>'+
-    '<span class="stat stat-blue">'+todayISO()+'</span>';
-  let html='';
-  const vendors=Object.keys(byV);
-  vendors.forEach(function(vendor,vi){
-    const cats=byV[vendor];
-    const total=Object.values(cats).reduce(function(s,a){return s+a.length;},0);
-    const open=vi<2;
-    html+='<div class="vendor-block">'
-      +'<div class="vendor-header'+(open?' open':'')+'" onclick="toggleVendor(this)">'
-      +'<div><div class="vendor-name">'+vendor+'</div><div class="vendor-meta">'+total+' items</div></div>'
-      +'<span class="vendor-chevron'+(open?' open':'')+'">&#8964;</span></div>'
-      +'<div class="vendor-body'+(open?' open':'')+'">';
-    Object.keys(cats).forEach(function(cat){
-      html+='<div class="cat-header"><div class="cat-name">'+cat+'</div></div>';
-      cats[cat].forEach(function(item){
-        const val=countData[item.d365_id]!==undefined?countData[item.d365_id]:'';
-        html+='<div class="item-row">'
-          +'<div class="item-info"><div class="item-name">'+item.name+'</div><div class="item-d365">'+pad8(item.d365_id)+'</div></div>'
-          +'<div class="item-case">'+item.case_unit+'</div>'
-          +'<input class="num-input count-input'+(val!==''?' has-value':'')+'" type="number" min="0" step="any" inputmode="decimal" placeholder="&mdash;" value="'+(val!==''?val:'')+'" onchange="setCount(\''+item.d365_id+'\',this)" onclick="this.select()">'
-          +'</div>';
-      });
-    });
-    html+='</div></div>';
-  });
-  document.getElementById('countBody').innerHTML=html;
-}
-
-function toggleVendor(hdr){
-  const open=hdr.classList.toggle('open');
-  hdr.querySelector('.vendor-chevron').classList.toggle('open',open);
-  hdr.nextElementSibling.classList.toggle('open',open);
-}
-
-function setCount(d365,el){
-  const v=parseFloat(el.value);
-  if(!isNaN(v)&&v>=0){countData[d365]=v;el.classList.add('has-value');}
-  else{delete countData[d365];el.classList.remove('has-value');}
-  const items=orderItems[outlet]||[];
-  const entered=items.filter(function(i){return countData[i.d365_id]!==undefined;}).length;
-  document.getElementById('countStat').innerHTML=
-    '<span class="stat stat-blue">'+items.length+' items</span>'+
-    '<span class="stat stat-'+(entered===items.length?'green':'orange')+'">'+entered+' entered</span>'+
-    '<span class="stat stat-blue">'+todayISO()+'</span>';
-}
-
-async function saveCount(){
-  const today=todayISO();
-  const rows=Object.keys(countData).map(function(d){return{count_date:today,d365_id:d,qty:countData[d]};});
-  if(!rows.length){toast('No counts entered');return;}
-  const btn=document.getElementById('countSaveBtn');btn.textContent='Saving\u2026';
-  try{
-    await sbUpsert('kitchen_count',rows,'count_date,d365_id');
-    // mirror to inventory_trend for Trend tab in pipa-ops
-    const tr=rows.map(function(r){return{snap_date:r.count_date,d365:r.d365_id,item_name:'',category:'KITCHEN',count:r.qty};});
-    await sbUpsert('inventory_trend',tr,'snap_date,d365');
-    toast('Saved '+rows.length+' counts \u2713');
-  }catch(e){toast('Error: '+e.message);}
-  finally{btn.textContent='\u2601 Save Count';}
-}
-
-// ── ORDERS tab ────────────────────────────────────────────────────────
-// Same item list as Count, grouped by vendor only.
-// Par is editable (saves to kitchen_pars), order qty pre-filled = max(0, par-count).
-async function loadAndRenderOrders(){
-  document.getElementById('orderBtns').style.display='none';
-  document.getElementById('orderColHeads').style.display='none';
-  document.getElementById('orderStat').innerHTML='';
-  document.getElementById('orderBody').innerHTML='<div class="loading"><span class="spinner"></span>Loading&hellip;</div>';
-  try{
-    await Promise.all([ensureOrderItems(outlet),ensureCounts(),ensurePars()]);
-    renderOrders();
-  }catch(e){
-    document.getElementById('orderBody').innerHTML='<div class="empty-state"><div class="empty-icon">&#9888;&#65039;</div><div class="empty-msg">'+e.message+'</div></div>';
-  }
-}
-
-function renderOrders(){
-  const items=orderItems[outlet]||[];
-  if(!items.length){
-    document.getElementById('orderBody').innerHTML='<div class="empty-state"><div class="empty-icon">&#128230;</div><div class="empty-msg">No active recipes for '+outlet.toUpperCase()+'.<br>Toggle recipes on in pipa-admin &rarr; Kitchen.</div></div>';
-    document.getElementById('orderBtns').style.display='none';
-    document.getElementById('orderColHeads').style.display='none';
-    document.getElementById('orderStat').innerHTML='';
-    return;
-  }
-  document.getElementById('orderBtns').style.display='';
-  document.getElementById('orderColHeads').style.display='';
-  const byV={};
-  items.forEach(function(item){if(!byV[item.vendor])byV[item.vendor]=[];byV[item.vendor].push(item);});
-  const toOrder=items.filter(function(i){
-    const par=parData[i.d365_id],cnt=countData[i.d365_id];
-    return par!==undefined&&cnt!==undefined&&Math.max(0,par-cnt)>0;
-  }).length;
-  document.getElementById('orderStat').innerHTML=
-    '<span class="stat stat-blue">'+items.length+' items</span>'+
-    '<span class="stat stat-'+(toOrder>0?'orange':'green')+'">'+toOrder+' to order</span>';
-  let html='';
-  Object.keys(byV).forEach(function(vendor,vi){
-    const vitems=byV[vendor];
-    const open=vi<2;
-    html+='<div class="vendor-block">'
-      +'<div class="vendor-header'+(open?' open':'')+'" onclick="toggleVendor(this)">'
-      +'<div><div class="vendor-name">'+vendor+'</div><div class="vendor-meta">'+vitems.length+' items</div></div>'
-      +'<span class="vendor-chevron'+(open?' open':'')+'">&#8964;</span></div>'
-      +'<div class="vendor-body'+(open?' open':'')+'">';
-    vitems.forEach(function(item){
-      const cnt=countData[item.d365_id]!==undefined?countData[item.d365_id]:null;
-      const par=parData[item.d365_id]!==undefined?parData[item.d365_id]:null;
-      const sug=par!==null&&cnt!==null?Math.max(0,par-cnt):null;
-      const needs=sug!==null&&sug>0;
-      html+='<div class="item-row">'
-        +'<div class="item-info"><div class="item-name">'+item.name+'</div>'
-        +'<div class="item-d365">'+pad8(item.d365_id)+(cnt!==null?' &middot; on hand: '+cnt:'')+'</div></div>'
-        +'<div class="item-case">'+item.case_unit+'</div>'
-        +'<input class="num-input par-input" type="number" min="0" step="any" inputmode="decimal" placeholder="par" value="'+(par!==null?par:'')+'" id="par_'+item.d365_id+'" onchange="setPar(\''+item.d365_id+'\',this)" onclick="this.select()">'
-        +'<input class="num-input order-input '+(needs?'needs':'zero')+'" type="number" min="0" step="any" inputmode="decimal" placeholder="&mdash;" value="'+(sug!==null?sug:'')+'" id="ord_'+item.d365_id+'" onchange="setOrdQty(\''+item.d365_id+'\',this)" onclick="this.select()">'
-        +'</div>';
-    });
-    html+='</div></div>';
-  });
-  document.getElementById('orderBody').innerHTML=html;
-}
-
-function setPar(d365,el){
-  const v=parseFloat(el.value);
-  if(!isNaN(v)&&v>=0){
-    parData[d365]=v;
-    const cnt=countData[d365]!==undefined?countData[d365]:null;
-    if(cnt!==null){
-      const sug=Math.max(0,v-cnt);
-      const ordEl=document.getElementById('ord_'+d365);
-      if(ordEl){ordEl.value=sug;ordEl.className='num-input order-input '+(sug>0?'needs':'zero');}
+async function runLookup(val) {
+  const res = document.getElementById('lookupResults');
+  val = (val || '').trim();
+  if (val.length < 2) { res.style.display = 'none'; res.innerHTML = ''; return; }
+  res.style.display = 'block';
+  res.innerHTML = '<div class="no-results">Searching…</div>';
+  try {
+    const stripped = val.replace(/^0+/, '') || '0';
+    let q;
+    if (/^\d+$/.test(stripped)) {
+      q = 'kitchen_products?or=(d365_id.eq.' + encodeURIComponent(val) + ',d365_id.eq.' + encodeURIComponent(stripped) + ',adaco_id.eq.' + encodeURIComponent(val) + ',adaco_id.eq.' + encodeURIComponent(stripped) + ')&select=d365_id,adaco_id,name,vendor_name,macrofamily,purchase_unit,packaging_unit&limit=40&order=name';
+    } else {
+      q = 'kitchen_products?name=ilike.' + encodeURIComponent('*' + val + '*') + '&select=d365_id,adaco_id,name,vendor_name,macrofamily,purchase_unit,packaging_unit&limit=40&order=name';
     }
-    clearTimeout(el._t);
-    el._t=setTimeout(function(){sbUpsert('kitchen_pars',[{d365_id:d365,par:v}],'d365_id').catch(function(){});},1200);
+    const data = await sbGet(q);
+    if (!data.length) { res.innerHTML = '<div class="no-results">No results for "' + val + '"</div>'; return; }
+    res.innerHTML = data.map(function(r) {
+      return '<div class="result-row" onclick="showLookupDetail(' + JSON.stringify(r).replace(/"/g,'&quot;') + ')">' +
+        '<div class="result-name">' + r.name + '</div>' +
+        '<div class="result-meta">' +
+        '<span class="result-id">' + pad365(r.d365_id) + '</span>' +
+        (r.adaco_id ? '<span class="result-id" style="color:var(--text2);">Adaco ' + r.adaco_id + '</span>' : '') +
+        (r.macrofamily ? '<span class="result-tag">' + r.macrofamily + '</span>' : '') +
+        (r.vendor_name ? '<span class="result-vendor">' + r.vendor_name + '</span>' : '') +
+        '</div></div>';
+    }).join('');
+  } catch(e) {
+    res.innerHTML = '<div class="no-results">Error: ' + e.message + '</div>';
   }
 }
 
-function setOrdQty(d365,el){
-  const v=parseFloat(el.value);
-  el.className='num-input order-input '+(!isNaN(v)&&v>0?'needs':'zero');
+function showLookupDetail(item) {
+  document.getElementById('lookupResults').style.display = 'none';
+  document.getElementById('lookupQ').value = '';
+  const d = document.getElementById('lookupDetail');
+  d.innerHTML = '<div class="detail-card">' +
+    '<div class="detail-header">' +
+    '<span class="detail-close" onclick="document.getElementById(\'lookupDetail\').innerHTML=\'\'">✕</span>' +
+    '<div class="detail-title">' + item.name + '</div>' +
+    '<div class="detail-sub">' + (item.vendor_name || 'No vendor') + (item.macrofamily ? ' · ' + item.macrofamily : '') + '</div>' +
+    '<div class="detail-ids">' +
+    '<span class="id-chip">D365 ' + pad365(item.d365_id) + '</span>' +
+    (item.adaco_id ? '<span class="id-chip" style="background:var(--surface2);border-color:var(--surface3);color:var(--text2);">Adaco ' + item.adaco_id + '</span>' : '') +
+    '</div>' +
+    '<div style="margin-top:8px;font-size:0.688rem;color:var(--text3);">' +
+    (item.purchase_unit ? 'Order unit: ' + item.purchase_unit : '') +
+    (item.packaging_unit ? ' · Pack: ' + item.packaging_unit : '') +
+    '</div>' +
+    '</div>' +
+    '<div style="padding:10px 14px;display:flex;gap:8px;">' +
+    '<button class="btn btn-secondary" style="flex:1;font-size:0.75rem;" onclick="copyText(\'' + pad365(item.d365_id) + '\',\'D365 # copied\')">Copy D365 #</button>' +
+    (item.adaco_id ? '<button class="btn btn-ghost" style="flex:1;font-size:0.75rem;" onclick="copyText(\'' + item.adaco_id + '\',\'Adaco ID copied\')">Copy Adaco ID</button>' : '') +
+    '</div>' +
+    '</div>';
+  loadRecipesForItem(item.d365_id, d);
 }
 
-function getOrdQty(d365){
-  const el=document.getElementById('ord_'+d365);
-  if(!el)return null;
-  const v=parseFloat(el.value);
-  return(!isNaN(v)&&v>=0)?v:null;
+async function loadRecipesForItem(d365Id, container) {
+  try {
+    const stripped = String(d365Id).replace(/^0+/, '') || '0';
+    const items = await sbGet('ks_recipe_items?or=(d365_id.eq.' + encodeURIComponent(d365Id) + ',d365_id.eq.' + encodeURIComponent(stripped) + ')&select=recipe_number&limit=50');
+    if (!items.length) return;
+    const nums = items.map(function(i){ return i.recipe_number; });
+    const recipes = await sbGet('ks_recipes?recipe_number=in.(' + nums.join(',') + ')&select=recipe_number,name,outlet,active&order=name');
+    const html = '<div style="background:var(--surface);border:1px solid var(--surface2);border-radius:10px;margin-top:10px;">' +
+      '<div style="padding:10px 14px;border-bottom:1px solid var(--surface2);font-size:0.563rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">Used in ' + recipes.length + ' recipe(s)</div>' +
+      recipes.map(function(r){
+        return '<div style="padding:9px 14px;border-bottom:1px solid var(--surface2);"><div style="font-size:0.75rem;color:var(--text);">' + r.name + '</div>' +
+          '<div style="font-size:0.563rem;color:var(--text3);margin-top:2px;">' + r.recipe_number + ' · ' + r.outlet + (r.active ? '' : ' · inactive') + '</div></div>';
+      }).join('') + '</div>';
+    container.insertAdjacentHTML('beforeend', html);
+  } catch(e) {}
 }
 
-function copyOrder(){
-  const items=orderItems[outlet]||[];
-  const byV={};
-  items.forEach(function(item){
-    const qty=getOrdQty(item.d365_id);
-    if(qty===null||qty<=0)return;
-    if(!byV[item.vendor])byV[item.vendor]=[];
-    byV[item.vendor].push(qty+' '+item.case_unit+' \u2014 '+item.name+' ('+pad8(item.d365_id)+')');
-  });
-  const vks=Object.keys(byV);
-  if(!vks.length){toast('Nothing to order');return;}
-  let txt='EATALY KOP \u00b7 '+outlet.toUpperCase()+' KITCHEN ORDER \u00b7 '+todayISO()+'\n\n';
-  vks.forEach(function(v){txt+=v+'\n';byV[v].forEach(function(l){txt+='  '+l+'\n';});txt+='\n';});
-  if(navigator.share){navigator.share({text:txt}).catch(function(){});}
-  else{copyText(txt,'Order copied \u2713');}
+function copyText(txt, msg) {
+  if (navigator.clipboard) { navigator.clipboard.writeText(txt).then(function(){ showToast(msg || 'Copied'); }); }
+  else { const el = document.createElement('textarea'); el.value = txt; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); showToast(msg || 'Copied'); }
 }
 
-function exportCSV(){
-  const items=orderItems[outlet]||[];
-  let csv='VENDOR,D365 ID,ITEM NAME,UNIT,CATEGORY,PAR,ON HAND,ORDER QTY\n';
-  items.forEach(function(item){
-    const par=parData[item.d365_id]!==undefined?parData[item.d365_id]:'';
-    const cnt=countData[item.d365_id]!==undefined?countData[item.d365_id]:'';
-    const qty=getOrdQty(item.d365_id)!==null?getOrdQty(item.d365_id):'';
-    csv+='"'+item.vendor+'","'+pad8(item.d365_id)+'","'+item.name+'","'+item.case_unit+'","'+(item.category||'')+'","'+par+'","'+cnt+'","'+qty+'"\n';
-  });
-  const b=new Blob([csv],{type:'text/csv'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download='EKP_Kitchen_'+outlet.toUpperCase()+'_'+todayISO()+'.csv';a.click();
-  toast('CSV exported \u2713');
+// ═══════════════════════════════════════════════════════════════════
+// TAB 2 — COUNT
+// ═══════════════════════════════════════════════════════════════════
+let countOffset = 0;
+let allRecipes = null; // {recipe_number, name, outlet}[]
+let activeCountRecipes = {}; // recipe_number → true
+let countData = {}; // d365_id → qty (number)
+let countItems = []; // [{d365_id, name, vendor_name, purchase_unit}] deduplicated
+
+function updateCountDateUI() {
+  document.getElementById('countDateLabel').textContent =
+    countOffset === 0 ? 'Today' : countOffset === -1 ? 'Yesterday' : dateFmt(countOffset);
+  document.getElementById('countDateSub').textContent = dateFmt(countOffset);
 }
 
-// ── EDT tab ───────────────────────────────────────────────────────────
-// outlet+vendor = siloed silo. PiPa:EDT-CK != Pronto:EDT-CK.
-// Day pills saved weekly to kitchen_edt_schedule.
-async function loadAndRenderEDT(){
-  document.getElementById('edtSaveBtn').style.display='none';
-  document.getElementById('edtLegend').style.display='none';
-  document.getElementById('edtStat').innerHTML='';
-  document.getElementById('edtBody').innerHTML='<div class="loading"><span class="spinner"></span>Loading&hellip;</div>';
-  try{
-    await Promise.all([ensureEDTItems(outlet),ensureEDTSchedule(outlet)]);
-    renderEDT();
-  }catch(e){
-    document.getElementById('edtBody').innerHTML='<div class="empty-state"><div class="empty-icon">&#9888;&#65039;</div><div class="empty-msg">'+e.message+'</div></div>';
+function shiftCountDate(dir) { countOffset += dir; updateCountDateUI(); }
+
+async function initCount() {
+  updateCountDateUI();
+  if (allRecipes) { renderCountRecipes(); return; }
+  document.getElementById('countRecipeList').innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading recipes…</div>';
+  try {
+    allRecipes = await sbGet('ks_recipes?select=recipe_number,name,outlet,active&order=name&active=eq.true');
+    renderCountRecipes();
+  } catch(e) {
+    document.getElementById('countRecipeList').innerHTML = '<div class="no-results">Error: ' + e.message + '</div>';
   }
 }
 
-function renderEDT(){
-  const items=edtItems[outlet]||[];
-  if(!items.length){
-    document.getElementById('edtBody').innerHTML='<div class="empty-state"><div class="empty-icon">&#128197;</div><div class="empty-msg">No active EDT items for '+outlet.toUpperCase()+'.<br>Toggle items on in pipa-admin &rarr; Kitchen.</div></div>';
-    document.getElementById('edtSaveBtn').style.display='none';
-    document.getElementById('edtLegend').style.display='none';
-    document.getElementById('edtStat').innerHTML='';
+function renderCountRecipes() {
+  const groups = {};
+  allRecipes.forEach(function(r) {
+    if (!groups[r.outlet]) groups[r.outlet] = [];
+    groups[r.outlet].push(r);
+  });
+  let html = '';
+  Object.keys(groups).sort().forEach(function(outlet) {
+    html += '<div class="group-header"><span class="group-title">' + outlet + '</span><span class="group-count">' + groups[outlet].length + '</span></div>';
+    groups[outlet].forEach(function(r) {
+      const checked = !!activeCountRecipes[r.recipe_number];
+      html += '<div class="recipe-item" onclick="toggleCountRecipe(\'' + r.recipe_number + '\')" id="cr_' + r.recipe_number + '">' +
+        '<div class="recipe-check' + (checked ? ' checked' : '') + '" id="crcheck_' + r.recipe_number + '">' + (checked ? '✓' : '') + '</div>' +
+        '<div style="flex:1;min-width:0;"><div class="recipe-label">' + r.name + '</div><div class="recipe-num">' + r.recipe_number + '</div></div>' +
+        '</div>';
+    });
+  });
+  document.getElementById('countRecipeList').innerHTML = '<div class="recipe-list">' + html + '</div>' +
+    '<div style="padding:12px 14px;border-top:1px solid var(--surface2);display:flex;gap:8px;">' +
+    '<button class="btn btn-secondary" style="flex:1;font-size:0.75rem;" onclick="selectAllCountRecipes()">Select All</button>' +
+    '<button class="btn btn-primary" style="flex:1;font-size:0.75rem;" onclick="buildCountItems()">Build Count List →</button>' +
+    '</div>';
+}
+
+function toggleCountRecipe(num) {
+  activeCountRecipes[num] = !activeCountRecipes[num];
+  const check = document.getElementById('crcheck_' + num);
+  if (check) { check.className = 'recipe-check' + (activeCountRecipes[num] ? ' checked' : ''); check.textContent = activeCountRecipes[num] ? '✓' : ''; }
+}
+
+function selectAllCountRecipes() {
+  allRecipes.forEach(function(r){ activeCountRecipes[r.recipe_number] = true; });
+  renderCountRecipes();
+}
+
+async function buildCountItems() {
+  const selected = Object.keys(activeCountRecipes).filter(function(k){ return activeCountRecipes[k]; });
+  if (!selected.length) { showToast('Select at least one recipe'); return; }
+  document.getElementById('countItemsWrap').innerHTML = '<div class="loading"><div class="spinner"></div><br>Building count list…</div>';
+  document.getElementById('countRecipeSelector').style.display = 'none';
+  document.getElementById('countItemsWrap').style.display = 'block';
+  try {
+    // Get all d365 items for selected recipes
+    const recipeItems = await sbGet('ks_recipe_items?recipe_number=in.(' + selected.join(',') + ')&select=d365_id&limit=2000');
+    const d365ids = [...new Set(recipeItems.map(function(i){ return i.d365_id; }))];
+    if (!d365ids.length) { document.getElementById('countItemsWrap').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">No items in selected recipes</div></div>'; return; }
+    // Fetch product details
+    const products = await sbGet('kitchen_products?d365_id=in.(' + d365ids.join(',') + ')&select=d365_id,name,vendor_name,purchase_unit&order=name&limit=500');
+    // Load existing counts for this date
+    const iso = dateIso(countOffset);
+    const existing = await sbGet('kitchen_count?count_date=eq.' + iso + '&d365_id=in.(' + d365ids.join(',') + ')&select=d365_id,qty&limit=500');
+    countData = {};
+    existing.forEach(function(e){ countData[e.d365_id] = e.qty; });
+    countItems = products;
+    renderCountItems();
+  } catch(e) {
+    document.getElementById('countItemsWrap').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-msg">Error: ' + e.message + '</div></div>';
+  }
+}
+
+function renderCountItems() {
+  const iso = dateIso(countOffset);
+  document.getElementById('countDateLabel').textContent = countOffset === 0 ? 'Today' : dateFmt(countOffset);
+  const entered = countItems.filter(function(p){ return countData[p.d365_id] !== undefined; }).length;
+  document.getElementById('countStatus').innerHTML =
+    '<span class="status-pill status-blue">' + countItems.length + ' items</span>' +
+    '<span class="status-pill status-' + (entered === countItems.length ? 'green' : 'orange') + '">' + entered + ' entered</span>' +
+    '<span class="status-pill status-blue">' + iso + '</span>';
+  // Group by vendor
+  const groups = {};
+  countItems.forEach(function(p) {
+    const v = p.vendor_name || 'No Vendor';
+    if (!groups[v]) groups[v] = [];
+    groups[v].push(p);
+  });
+  let html = '';
+  Object.keys(groups).sort().forEach(function(vendor) {
+    const items = groups[vendor];
+    html += '<div class="group-section"><div class="group-header"><span class="group-title">' + vendor + '</span><span class="group-count">' + items.length + '</span></div>';
+    items.forEach(function(p) {
+      const val = countData[p.d365_id] !== undefined ? countData[p.d365_id] : '';
+      const hasVal = val !== '';
+      html += '<div class="item-row">' +
+        '<div class="item-info"><div class="item-name">' + p.name + '</div><div class="item-d365">' + pad365(p.d365_id) + (p.purchase_unit ? ' · ' + p.purchase_unit : '') + '</div></div>' +
+        '<input class="count-input' + (hasVal ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal" placeholder="—" value="' + val + '"' +
+        ' onchange="setCountVal(\'' + p.d365_id + '\',this)" onclick="this.select()" id="ci_' + p.d365_id + '">' +
+        '</div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('countItems').innerHTML = html;
+  document.getElementById('countItemsLabel').textContent = 'Items to Count — ' + dateIso(countOffset);
+  // Rebuild wrap
+  const wrap = document.getElementById('countItemsWrap');
+  wrap.style.display = 'block';
+}
+
+function setCountVal(d365id, inputEl) {
+  const val = parseFloat(inputEl.value);
+  if (isNaN(val) || val < 0) { countData[d365id] = undefined; inputEl.classList.remove('has-value'); }
+  else { countData[d365id] = val; inputEl.classList.add('has-value'); }
+  // Update status
+  const entered = countItems.filter(function(p){ return countData[p.d365_id] !== undefined; }).length;
+  const iso = dateIso(countOffset);
+  document.getElementById('countStatus').innerHTML =
+    '<span class="status-pill status-blue">' + countItems.length + ' items</span>' +
+    '<span class="status-pill status-' + (entered === countItems.length ? 'green' : 'orange') + '">' + entered + ' entered</span>' +
+    '<span class="status-pill status-blue">' + iso + '</span>';
+}
+
+function showCountRecipes() {
+  document.getElementById('countRecipeSelector').style.display = 'block';
+  document.getElementById('countItemsWrap').style.display = 'none';
+}
+
+async function saveCount() {
+  const iso = dateIso(countOffset);
+  const rows = countItems
+    .filter(function(p){ return countData[p.d365_id] !== undefined; })
+    .map(function(p){ return { count_date: iso, d365_id: p.d365_id, item_name: p.name, qty: countData[p.d365_id] }; });
+  if (!rows.length) { showToast('No counts to save'); return; }
+  const btn = document.querySelector('#countItemsWrap .btn-primary');
+  if (btn) btn.textContent = 'Saving…';
+  try {
+    await sbUpsert('kitchen_count', rows, 'count_date,d365_id');
+    // Also mirror to inventory_trend for Trend tab
+    const trendRows = rows.map(function(r){ return { snap_date: iso, d365: r.d365_id, item_name: r.item_name, category: 'KITCHEN', count: r.qty }; });
+    await sbUpsert('inventory_trend', trendRows, 'snap_date,d365');
+    showToast('Saved ' + rows.length + ' counts ✓');
+  } catch(e) {
+    showToast('Error: ' + e.message);
+  } finally {
+    if (btn) btn.textContent = '☁ Save Count';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB 3 — ORDERS (par vs count, suggest, XLSX export)
+// ═══════════════════════════════════════════════════════════════════
+let orderOffset = 0;
+let orderPars = {};  // d365_id → {par, vendor, name, unit}
+let orderCounts = {}; // d365_id → qty
+let orderItems = []; // [{d365_id, name, vendor_name, purchase_unit, par}]
+let orderVendorFilter = 'ALL';
+let edtOrderItems = { pipa: [], pronto: [] }; // EDT items for each outlet
+
+function updateOrderDateUI() {
+  const lbl = orderOffset === 0 ? 'Today' : orderOffset === -1 ? 'Yesterday' : dateFmt(orderOffset);
+  document.getElementById('orderDateLabel').textContent = lbl;
+  document.getElementById('orderDateSub').textContent = dateFmt(orderOffset);
+}
+
+function shiftOrderDate(dir) { orderOffset += dir; updateOrderDateUI(); loadOrderCounts(); }
+
+async function initOrders() {
+  updateOrderDateUI();
+  await loadOrderData();
+}
+
+async function loadOrderData() {
+  document.getElementById('orderItems').innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading…</div>';
+  try {
+    // Load par overrides from Supabase
+    const overrides = await sbGet('kitchen_pars?select=d365_id,par,vendor_name,notes&limit=1000');
+    overrides.forEach(function(o){ orderPars[o.d365_id] = o; });
+    // Load all kitchen products that have pars set
+    if (overrides.length) {
+      const d365ids = overrides.map(function(o){ return o.d365_id; });
+      const products = await sbGet('kitchen_products?d365_id=in.(' + d365ids.join(',') + ')&select=d365_id,name,vendor_name,purchase_unit&order=name&limit=500');
+      orderItems = products.map(function(p){
+        const par = orderPars[p.d365_id] || {};
+        return { d365_id: p.d365_id, name: p.name, vendor_name: par.vendor_name || p.vendor_name, purchase_unit: p.purchase_unit, par: par.par || null };
+      });
+    }
+    // Load EDT items for both outlets
+    await Promise.all([
+      ensureEdtProducts('pipa').then(function(){ edtOrderItems.pipa = edtProducts.pipa || []; }),
+      ensureEdtProducts('pronto').then(function(){ edtOrderItems.pronto = edtProducts.pronto || []; })
+    ]);
+    // Load EDT saved orders for this date
+    const iso = dateIso(orderOffset);
+    try {
+      const savedEdt = await sbGet('kitchen_edt_orders?order_date=eq.' + iso + '&select=d365_id,outlet,qty&limit=500');
+      savedEdt.forEach(function(r){
+        if (r.outlet === edtOutlet) edtOrders[r.d365_id] = r.qty;
+        // Also seed edtCounts from edtPars if needed
+      });
+    } catch(e2) {}
+    await loadOrderCounts();
+  } catch(e) {
+    document.getElementById('orderItems').innerHTML = '<div class="no-results">Error: ' + e.message + '</div>';
+  }
+}
+
+async function loadOrderCounts() {
+  const iso = dateIso(orderOffset);
+  try {
+    const counts = await sbGet('kitchen_count?count_date=eq.' + iso + '&select=d365_id,qty&limit=500');
+    orderCounts = {};
+    counts.forEach(function(c){ orderCounts[c.d365_id] = c.qty; });
+    renderOrders();
+  } catch(e) {
+    renderOrders();
+  }
+}
+
+function renderOrders() {
+  if (!orderItems.length && !edtOrderItems.pipa.length && !edtOrderItems.pronto.length) {
+    document.getElementById('orderItems').innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-msg">No items with pars set.<br>Set pars via "Edit Par" on each item.</div></div>';
+    buildVendorFilter([]);
     return;
   }
-  document.getElementById('edtSaveBtn').style.display='';
-  document.getElementById('edtLegend').style.display='';
-  const byV={};
-  items.forEach(function(item){if(!byV[item.vendor])byV[item.vendor]=[];byV[item.vendor].push(item);});
-  const slots=Object.keys(edtSched).filter(function(k){return k.startsWith(outlet+'|')&&edtSched[k];}).length;
-  document.getElementById('edtStat').innerHTML=
-    '<span class="stat stat-blue">'+items.length+' items</span>'+
-    '<span class="stat stat-orange">'+slots+' day-slots</span>'+
-    '<span class="stat stat-blue">wk '+weekStart()+'</span>';
-  let html='';
-  Object.keys(byV).forEach(function(vendor){
-    const vitems=byV[vendor];
-    html+='<div class="vendor-block">'
-      +'<div class="vendor-header open" onclick="toggleVendor(this)">'
-      +'<div><div class="vendor-name">'+vendor+'</div><div class="vendor-meta" style="color:var(--accent);">'+outlet.toUpperCase()+'</div></div>'
-      +'<span class="vendor-chevron open">&#8964;</span></div>'
-      +'<div class="vendor-body open">';
-    vitems.forEach(function(item){
-      html+='<div class="item-row">'
-        +'<div class="item-info"><div class="item-name">'+item.name+'</div><div class="item-d365">'+pad8(item.d365_id)+' &middot; '+item.case_unit+'</div></div>'
-        +'<div class="day-pills">';
-      EDT_DAYS.forEach(function(day){
-        const key=outlet+'|'+item.vendor+'|'+item.d365_id+'|'+day;
-        html+='<div class="day-pill'+(edtSched[key]?' on':'')+'" onclick="toggleDay(this,\''+key+'\')">'+day[0]+'</div>';
-      });
-      html+='</div></div>';
+  // Build vendor list (regular vendors + EDT groups)
+  const vendors = [...new Set(orderItems.map(function(i){ return i.vendor_name || 'No Vendor'; }))].sort();
+  const edtGroups = [];
+  if (edtOrderItems.pipa.length) edtGroups.push('EDT - CK - PiPa');
+  if (edtOrderItems.pronto.length) edtGroups.push('EDT - CK - Pronto');
+  buildVendorFilter(vendors.concat(edtGroups));
+
+  let html = '';
+
+  // Render EDT PiPa group
+  if (orderVendorFilter === 'ALL' || orderVendorFilter === 'EDT - CK - PiPa') {
+    if (edtOrderItems.pipa.length) {
+      html += renderEdtOrderGroup(edtOrderItems.pipa, 'pipa', 'EDT - CK - PiPa');
+    }
+  }
+  // Render EDT Pronto group
+  if (orderVendorFilter === 'ALL' || orderVendorFilter === 'EDT - CK - Pronto') {
+    if (edtOrderItems.pronto.length) {
+      html += renderEdtOrderGroup(edtOrderItems.pronto, 'pronto', 'EDT - CK - Pronto');
+    }
+  }
+
+  // Render regular vendors
+  const filtered = orderVendorFilter === 'ALL' ? orderItems :
+    (edtGroups.includes(orderVendorFilter) ? [] :
+      orderItems.filter(function(i){ return (i.vendor_name || 'No Vendor') === orderVendorFilter; }));
+  const groups = {};
+  filtered.forEach(function(p){
+    const v = p.vendor_name || 'No Vendor';
+    if (!groups[v]) groups[v] = [];
+    groups[v].push(p);
+  });
+  Object.keys(groups).sort().forEach(function(vendor) {
+    const items = groups[vendor];
+    html += '<div class="group-section"><div class="group-header"><span class="group-title">' + vendor + '</span><span class="group-count">' + items.length + ' items</span></div>';
+    items.forEach(function(p) {
+      const onHand = orderCounts[p.d365_id] !== undefined ? orderCounts[p.d365_id] : '';
+      const par = p.par !== null && p.par !== undefined ? p.par : null;
+      const suggest = (par !== null && onHand !== '') ? Math.max(0, par - onHand) : null;
+      const hasCount = onHand !== '';
+      const needsOrder = suggest !== null && suggest > 0;
+      html += '<div class="item-row">' +
+        '<div class="item-info">' +
+          '<div class="item-name">' + p.name + '</div>' +
+          '<div class="item-d365">' + pad365(p.d365_id) + (p.purchase_unit ? ' · ' + p.purchase_unit : '') + '</div>' +
+        '</div>' +
+        '<input class="count-input' + (hasCount ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal" placeholder="—" value="' + onHand + '"' +
+          ' onchange="setOrderCount(\'' + p.d365_id + '\',this)" onclick="this.select()" style="width:60px;">' +
+        '<div class="par-badge">' + (par !== null ? par : '—') + '</div>' +
+        '<div class="suggest-badge ' + (needsOrder ? 'suggest-need' : 'suggest-ok') + '">' + (suggest !== null ? suggest : '—') + '</div>' +
+        '</div>';
     });
-    html+='</div></div>';
+    html += '</div>';
   });
-  document.getElementById('edtBody').innerHTML=html;
+
+  document.getElementById('orderItems').innerHTML = html || '<div class="empty-state"><div class="empty-icon">✓</div><div class="empty-msg">Nothing to order for this vendor</div></div>';
 }
 
-function toggleDay(el,key){
-  edtSched[key]=!edtSched[key];
-  el.classList.toggle('on',!!edtSched[key]);
-  const slots=Object.keys(edtSched).filter(function(k){return k.startsWith(outlet+'|')&&edtSched[k];}).length;
-  const statEl=document.getElementById('edtStat');
-  statEl.innerHTML=statEl.innerHTML.replace(/<span class="stat stat-orange">.*?<\/span>/,'<span class="stat stat-orange">'+slots+' day-slots</span>');
-}
-
-async function saveEDT(){
-  const ws=weekStart();
-  const rows=Object.keys(edtSched).filter(function(k){return edtSched[k]&&k.startsWith(outlet+'|');}).map(function(k){
-    const p=k.split('|'); // [outlet, vendor, d365_id, day]
-    return{week_start:ws,outlet:p[0],vendor:p[1],d365_id:p[2],order_day:p[3]};
+function renderEdtOrderGroup(items, outlet, groupLabel) {
+  let html = '<div class="group-section"><div class="group-header"><span class="group-title">' + groupLabel + '</span><span class="group-count">' + items.length + ' items</span></div>';
+  items.forEach(function(p) {
+    const onHand = edtCounts[p.d365_id] !== undefined ? edtCounts[p.d365_id] : '';
+    const par = edtPars[p.d365_id] !== undefined ? edtPars[p.d365_id] : null;
+    const saved = (edtOrders && outlet === edtOutlet && edtOrders[p.d365_id] !== undefined) ? edtOrders[p.d365_id] : '';
+    const suggest = (par !== null && onHand !== '') ? Math.max(0, par - onHand) : null;
+    const hasCount = onHand !== '';
+    const hasOrder = saved !== '' && saved > 0;
+    const shortName = p.name.replace(/^EDT\s*-\s*CK\s*-\s*[^-]+-\s*/i, '').replace(/^EDT\s*-\s*[^-]+-\s*/i, '');
+    html += '<div class="item-row">' +
+      '<div class="item-info">' +
+        '<div class="item-name">' + shortName + '</div>' +
+        '<div class="item-d365">' + pad365(p.d365_id) + (p.purchase_unit ? ' · ' + p.purchase_unit : '') + '</div>' +
+      '</div>' +
+      '<input class="count-input' + (hasCount ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal" placeholder="—" value="' + onHand + '"' +
+        ' onchange="setEdtCountFromOrders(\'' + p.d365_id + '\',this)" onclick="this.select()" style="width:60px;">' +
+      '<div class="par-badge">' + (par !== null ? par : '—') + '</div>' +
+      '<input class="count-input' + (hasOrder ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal" placeholder="—" value="' + saved + '"' +
+        ' onchange="setEdtOrderFromOrders(\'' + p.d365_id + '\',\'' + outlet + '\',this)" onclick="this.select()" style="width:44px;">' +
+      '</div>';
   });
-  const btn=document.getElementById('edtSaveBtn');btn.textContent='Saving\u2026';
-  try{
-    await sbDelete('kitchen_edt_schedule?week_start=eq.'+ws+'&outlet=eq.'+outlet);
-    if(rows.length)await sbPost('kitchen_edt_schedule',rows);
-    toast('EDT saved ('+rows.length+' day-slots) \u2713');
-  }catch(e){toast('Error: '+e.message);}
-  finally{btn.textContent='\u2601 Save EDT Schedule';}
+  html += '</div>';
+  return html;
 }
 
-// ── D365 LOOKUP ───────────────────────────────────────────────────────
-const dLookup=debounce(runLookup,300);
-async function runLookup(val){
-  const res=document.getElementById('lookupResults');
-  val=(val||'').trim();
-  if(val.length<2){res.style.display='none';res.innerHTML='';return;}
-  res.style.display='block';res.innerHTML='<div class="no-results"><span class="spinner"></span>Searching\u2026</div>';
-  try{
-    const s=val.replace(/^0+/,'')||'0';
-    let q=/^\d+$/.test(s)
-      ?'kitchen_products?or=(d365_id.eq.'+encodeURIComponent(val)+',d365_id.eq.'+encodeURIComponent(s)+',adaco_id.eq.'+encodeURIComponent(val)+',adaco_id.eq.'+encodeURIComponent(s)+')&select=d365_id,adaco_id,name,vendor_name,macrofamily,purchase_unit&limit=40&order=name'
-      :'kitchen_products?name=ilike.'+encodeURIComponent('*'+val+'*')+'&select=d365_id,adaco_id,name,vendor_name,macrofamily,purchase_unit&limit=40&order=name';
-    const data=await sbGet(q);
-    if(!data.length){res.innerHTML='<div class="no-results">No results for &ldquo;'+val+'&rdquo;</div>';return;}
-    res.innerHTML=data.map(function(r){
-      const safe=JSON.stringify(r).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      return'<div class="result-row" onclick="showDetail(\''+safe+'\')">'
-        +'<div class="result-name">'+r.name+'</div>'
-        +'<div class="result-meta">'
-        +'<span class="result-id">'+pad8(r.d365_id)+'</span>'
-        +(r.adaco_id?'<span class="result-id" style="color:var(--text2);">Adaco '+r.adaco_id+'</span>':'')
-        +(r.macrofamily?'<span class="result-tag">'+r.macrofamily+'</span>':'')
-        +(r.vendor_name?'<span class="result-vendor">'+r.vendor_name+'</span>':'')
-        +'</div></div>';
-    }).join('');
-  }catch(e){res.innerHTML='<div class="no-results">Error: '+e.message+'</div>';}
+function setEdtCountFromOrders(d365id, inputEl) {
+  const val = parseFloat(inputEl.value);
+  if (!isNaN(val) && val >= 0) { edtCounts[d365id] = val; inputEl.classList.add('has-value'); }
+  else { delete edtCounts[d365id]; inputEl.classList.remove('has-value'); }
 }
 
-function showDetail(itemStr){
-  const item=JSON.parse(itemStr);
-  document.getElementById('lookupResults').style.display='none';
-  document.getElementById('lookupQ').value='';
-  document.getElementById('lookupDetail').innerHTML=
-    '<div class="detail-card">'
-    +'<div class="detail-header">'
-    +'<span class="detail-close" onclick="document.getElementById(\'lookupDetail\').innerHTML=\'\'">&#10005;</span>'
-    +'<div class="detail-title">'+item.name+'</div>'
-    +'<div class="detail-sub">'+(item.vendor_name||'No vendor')+(item.macrofamily?' &middot; '+item.macrofamily:'')+'</div>'
-    +'<div class="detail-ids"><span class="id-chip">D365 '+pad8(item.d365_id)+'</span>'
-    +(item.adaco_id?'<span class="id-chip" style="background:var(--surface2);border-color:var(--surface3);color:var(--text2);">Adaco '+item.adaco_id+'</span>':'')
-    +'</div>'
-    +(item.purchase_unit?'<div style="margin-top:6px;font-size:0.688rem;color:var(--text3);">Order unit: '+item.purchase_unit+'</div>':'')
-    +'</div>'
-    +'<div class="copy-row">'
-    +'<button class="btn btn-secondary" style="flex:1;font-size:0.75rem;" onclick="copyText(\''+pad8(item.d365_id)+'\',\'D365 # copied\')">Copy D365 #</button>'
-    +(item.adaco_id?'<button class="btn btn-ghost" style="flex:1;font-size:0.75rem;" onclick="copyText(\''+item.adaco_id+'\',\'Adaco ID copied\')">Copy Adaco ID</button>':'')
-    +'</div></div>';
+function setEdtOrderFromOrders(d365id, outlet, inputEl) {
+  const val = parseFloat(inputEl.value);
+  if (!isNaN(val) && val >= 0) { edtOrders[d365id] = val; inputEl.classList.add('has-value'); }
+  else { delete edtOrders[d365id]; inputEl.classList.remove('has-value'); }
+  // Persist immediately
+  clearTimeout(inputEl._t);
+  inputEl._t = setTimeout(function(){
+    if (!isNaN(val) && val >= 0) {
+      sbUpsert('kitchen_edt_orders', [{ order_date: dateIso(orderOffset), d365_id: d365id, outlet: outlet, qty: val }], 'order_date,d365_id,outlet').catch(function(){});
+    }
+  }, 1500);
 }
 
-// Pre-fetch counts and pars on load for instant first render
-Promise.all([ensureCounts(),ensurePars()]).catch(function(){});
+function buildVendorFilter(vendors) {
+  let html = '<div class="filter-pill' + (orderVendorFilter === 'ALL' ? ' active' : '') + '" onclick="setOrderVendor(\'ALL\')">All</div>';
+  vendors.forEach(function(v){
+    html += '<div class="filter-pill' + (orderVendorFilter === v ? ' active' : '') + '" onclick="setOrderVendor(\'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+  });
+  document.getElementById('orderVendorFilter').innerHTML = html;
+}
+
+function setOrderVendor(v) { orderVendorFilter = v; renderOrders(); }
+
+function setOrderCount(d365id, inputEl) {
+  const val = parseFloat(inputEl.value);
+  if (!isNaN(val) && val >= 0) {
+    orderCounts[d365id] = val;
+    inputEl.classList.add('has-value');
+    // Update suggest badge inline
+    const row = inputEl.closest('.item-row');
+    if (row) {
+      const p = orderItems.find(function(i){ return i.d365_id === d365id; });
+      if (p && p.par !== null) {
+        const suggest = Math.max(0, p.par - val);
+        const badge = row.querySelector('.suggest-badge');
+        if (badge) { badge.textContent = suggest; badge.className = 'suggest-badge ' + (suggest > 0 ? 'suggest-need' : 'suggest-ok'); }
+      }
+    }
+  } else {
+    delete orderCounts[d365id];
+    inputEl.classList.remove('has-value');
+  }
+  // Persist to Supabase
+  clearTimeout(inputEl._saveT);
+  inputEl._saveT = setTimeout(function(){
+    if (!isNaN(val) && val >= 0) {
+      sbUpsert('kitchen_count', [{ count_date: dateIso(orderOffset), d365_id: d365id, item_name: (orderItems.find(function(i){ return i.d365_id===d365id; })||{}).name||'', qty: val }], 'count_date,d365_id').catch(function(){});
+    }
+  }, 1500);
+}
+
+function copyOrderText() {
+  const lines = orderItems
+    .filter(function(p){ return p.par !== null && orderCounts[p.d365_id] !== undefined && Math.max(0, p.par - orderCounts[p.d365_id]) > 0; })
+    .map(function(p){ return Math.max(0, p.par - orderCounts[p.d365_id]) + ' × ' + p.name + ' (' + pad365(p.d365_id) + ')'; });
+  if (!lines.length) { showToast('No items to order'); return; }
+  const text = 'EATALY KOP KITCHEN ORDER — ' + dateIso(orderOffset) + '\n\n' + lines.join('\n');
+  if (navigator.share) {
+    navigator.share({ text: text }).catch(function(){});
+  } else {
+    copyText(text, 'Order copied (' + lines.length + ' items)');
+  }
+}
+
+function exportOrderXLSX() {
+  // Client-side XLSX (ODS-compatible XML) — no CDN
+  const iso = dateIso(orderOffset);
+  const rows = orderItems.map(function(p){
+    const onHand = orderCounts[p.d365_id] !== undefined ? orderCounts[p.d365_id] : '';
+    const suggest = (p.par !== null && onHand !== '') ? Math.max(0, p.par - onHand) : '';
+    return [p.vendor_name||'', pad365(p.d365_id), p.name, p.purchase_unit||'', p.par!==null?p.par:'', onHand, suggest];
+  });
+  const header = ['VENDOR','D365 ID','ITEM NAME','UNIT','PAR','ON HAND','ORDER QTY'];
+  // Build CSV for simplicity (opens in Excel)
+  let csv = header.join(',') + '\n';
+  rows.forEach(function(r){
+    csv += r.map(function(c){ return '"' + String(c).replace(/"/g,'""') + '"'; }).join(',') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'EKP_Kitchen_Order_' + iso + '.csv';
+  a.click();
+  showToast('Order exported ✓');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB 3 — EDT (outlet-scoped ordering, no schedule)
+// ═══════════════════════════════════════════════════════════════════
+let edtOutlet = 'pipa';  // 'pipa' | 'pronto'
+let edtOffset = 0;
+let edtProducts = { pipa: null, pronto: null }; // cached product lists
+let edtCounts = {};   // d365_id → on-hand qty (shared)
+let edtPars = {};     // d365_id → par
+let edtOrders = {};   // d365_id → order qty for current outlet/date
+
+function edtDateIso(off) { return dateIso(off !== undefined ? off : edtOffset); }
+
+function updateEdtDateUI() {
+  const lbl = edtOffset === 0 ? 'Today' : edtOffset === -1 ? 'Yesterday' : dateFmt(edtOffset);
+  document.getElementById('edtDateLabel').textContent = lbl;
+  document.getElementById('edtDateSub').textContent = dateFmt(edtOffset);
+}
+
+function shiftEdtDate(dir) { edtOffset += dir; updateEdtDateUI(); loadEdtOrders(); }
+
+function setEdtOutlet(o, btn) {
+  edtOutlet = o;
+  document.querySelectorAll('.outlet-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderEdtItems();
+  loadEdtOrders();
+}
+
+async function initEDT() {
+  updateEdtDateUI();
+  // Load products for both outlets if not cached
+  await Promise.all([
+    ensureEdtProducts('pipa'),
+    ensureEdtProducts('pronto')
+  ]);
+  await loadEdtCounts();
+  await loadEdtOrders();
+}
+
+async function ensureEdtProducts(outlet) {
+  if (edtProducts[outlet]) return;
+  // EDT CK items: name starts with "EDT - CK" or contains "EDT" and macrofamily CK
+  // Filter by outlet keyword in name: PIPA / PiPa or PRONTO
+  const kw = outlet === 'pipa' ? 'PIPA' : 'PRONTO';
+  try {
+    const rows = await sbGet('kitchen_products?name=ilike.*EDT*' + kw + '*&macrofamily=eq.CK&select=d365_id,name,vendor_name,purchase_unit&order=name&limit=500');
+    // Also try without outlet keyword — some items may just say "EDT - CK"
+    // We'll show all CK EDT items and let user select outlet
+    if (!rows.length) {
+      // Fallback: all CK EDT items split by outlet pill in name
+      const all = await sbGet('kitchen_products?name=ilike.*EDT*&macrofamily=eq.CK&select=d365_id,name,vendor_name,purchase_unit&order=name&limit=500');
+      edtProducts[outlet] = all;
+    } else {
+      edtProducts[outlet] = rows;
+    }
+  } catch(e) {
+    edtProducts[outlet] = [];
+  }
+}
+
+async function loadEdtCounts() {
+  const iso = edtDateIso();
+  try {
+    // Reuse kitchen_count table for on-hand
+    const all = edtProducts.pipa.concat(edtProducts.pronto || []);
+    const ids = [...new Set(all.map(function(p){ return p.d365_id; }))];
+    if (!ids.length) return;
+    const counts = await sbGet('kitchen_count?count_date=eq.' + iso + '&d365_id=in.(' + ids.join(',') + ')&select=d365_id,qty&limit=500');
+    counts.forEach(function(c){ edtCounts[c.d365_id] = c.qty; });
+    // Also load pars
+    const pars = await sbGet('kitchen_pars?d365_id=in.(' + ids.join(',') + ')&select=d365_id,par&limit=500');
+    pars.forEach(function(p){ edtPars[p.d365_id] = p.par; });
+  } catch(e) {}
+}
+
+async function loadEdtOrders() {
+  const iso = edtDateIso();
+  edtOrders = {};
+  try {
+    const rows = await sbGet('kitchen_edt_orders?order_date=eq.' + iso + '&outlet=eq.' + edtOutlet + '&select=d365_id,qty&limit=500');
+    rows.forEach(function(r){ edtOrders[r.d365_id] = r.qty; });
+  } catch(e) {
+    // Table may not exist yet — silent fail, orders just won't pre-fill
+  }
+  renderEdtItems();
+}
+
+function renderEdtItems() {
+  const items = edtProducts[edtOutlet] || [];
+  if (!items.length) {
+    document.getElementById('edtItems').innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-msg">No EDT - CK items found for ' + (edtOutlet === 'pipa' ? 'PiPa' : 'Pronto') + '.<br>Items need "EDT" and "' + (edtOutlet === 'pipa' ? 'PIPA' : 'PRONTO') + '" in name with macrofamily CK.</div></div>';
+    return;
+  }
+
+  // Group by a sub-label extracted from name
+  // e.g. "EDT - CK - PIPA - Chicken Breast" → vendor group "CK - PIPA"
+  // Use vendor_name if set, otherwise parse from name
+  const groups = {};
+  items.forEach(function(p) {
+    // Parse category from name: "EDT - [CAT] - [ITEM]" or just use vendor_name
+    let grp = p.vendor_name || 'EDT';
+    // Try to extract the part after "EDT - CK - " prefix
+    const m = p.name.match(/^EDT\s*-\s*CK\s*-\s*([^-]+)\s*-/i);
+    if (m) grp = m[1].trim();
+    else { const m2 = p.name.match(/^EDT\s*-\s*([^-]+)\s*-/i); if (m2) grp = m2[1].trim(); }
+    if (!groups[grp]) groups[grp] = [];
+    groups[grp].push(p);
+  });
+
+  const outletLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
+  let html = '';
+  Object.keys(groups).sort().forEach(function(grpName) {
+    const grpItems = groups[grpName];
+    html += '<div class="group-section">' +
+      '<div class="group-header"><span class="group-title">EDT · ' + outletLabel + '<span class="edt-group-badge">' + grpName + '</span></span><span class="group-count">' + grpItems.length + '</span></div>';
+    grpItems.forEach(function(p) {
+      const onHand = edtCounts[p.d365_id] !== undefined ? edtCounts[p.d365_id] : '';
+      const par = edtPars[p.d365_id] !== undefined ? edtPars[p.d365_id] : null;
+      const ordQty = edtOrders[p.d365_id] !== undefined ? edtOrders[p.d365_id] : '';
+      const hasCount = onHand !== '';
+      const suggest = (par !== null && hasCount) ? Math.max(0, par - onHand) : null;
+      const hasOrder = ordQty !== '' && ordQty > 0;
+      html += '<div class="item-row">' +
+        '<div class="item-info">' +
+          '<div class="item-name">' + p.name.replace(/^EDT\s*-\s*CK\s*-\s*[^-]+-\s*/i, '').replace(/^EDT\s*-\s*[^-]+-\s*/i, '') + '</div>' +
+          '<div class="item-d365">' + pad365(p.d365_id) + (p.purchase_unit ? ' · ' + p.purchase_unit : '') + '</div>' +
+        '</div>' +
+        '<input class="count-input' + (hasCount ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal" placeholder="—" value="' + onHand + '"' +
+          ' onchange="setEdtCount(\'' + p.d365_id + '\',this)" onclick="this.select()" style="width:60px;" id="edt_oh_' + p.d365_id + '">' +
+        '<div class="par-badge">' + (par !== null ? par : '—') + '</div>' +
+        '<input class="count-input' + (hasOrder ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal" placeholder="—" value="' + ordQty + '"' +
+          ' onchange="setEdtOrder(\'' + p.d365_id + '\',this)" onclick="this.select()" style="width:44px;" id="edt_ord_' + p.d365_id + '">' +
+        '</div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('edtItems').innerHTML = html;
+}
+
+function setEdtCount(d365id, inputEl) {
+  const val = parseFloat(inputEl.value);
+  if (!isNaN(val) && val >= 0) {
+    edtCounts[d365id] = val;
+    inputEl.classList.add('has-value');
+    // Update suggested order inline (par - on hand)
+    const par = edtPars[d365id];
+    if (par !== null && par !== undefined) {
+      const ordEl = document.getElementById('edt_ord_' + d365id);
+      if (ordEl && ordEl.value === '') {
+        const sug = Math.max(0, par - val);
+        if (sug > 0) { ordEl.value = sug; ordEl.classList.add('has-value'); edtOrders[d365id] = sug; }
+      }
+    }
+  } else {
+    delete edtCounts[d365id];
+    inputEl.classList.remove('has-value');
+  }
+  clearTimeout(inputEl._t);
+  inputEl._t = setTimeout(function(){
+    if (!isNaN(val) && val >= 0) {
+      const items = edtProducts[edtOutlet] || [];
+      const p = items.find(function(i){ return i.d365_id === d365id; });
+      sbUpsert('kitchen_count', [{ count_date: edtDateIso(), d365_id: d365id, item_name: p ? p.name : '', qty: val }], 'count_date,d365_id').catch(function(){});
+    }
+  }, 1500);
+}
+
+function setEdtOrder(d365id, inputEl) {
+  const val = parseFloat(inputEl.value);
+  if (!isNaN(val) && val >= 0) {
+    edtOrders[d365id] = val;
+    inputEl.classList.add('has-value');
+  } else {
+    delete edtOrders[d365id];
+    inputEl.classList.remove('has-value');
+  }
+}
+
+async function saveEdtOrders() {
+  const iso = edtDateIso();
+  const rows = Object.keys(edtOrders)
+    .filter(function(d){ return edtOrders[d] > 0; })
+    .map(function(d){ return { order_date: iso, d365_id: d, outlet: edtOutlet, qty: edtOrders[d] }; });
+  if (!rows.length) { showToast('No EDT quantities to save'); return; }
+  try {
+    await sbUpsert('kitchen_edt_orders', rows, 'order_date,d365_id,outlet');
+    showToast('EDT saved (' + rows.length + ' items) ✓');
+  } catch(e) {
+    showToast('Error: ' + e.message);
+  }
+}
+
+function copyEdtOrder() {
+  const items = edtProducts[edtOutlet] || [];
+  const outletLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
+  const lines = [];
+  items.forEach(function(p){
+    const qty = edtOrders[p.d365_id];
+    if (qty && qty > 0) {
+      const shortName = p.name.replace(/^EDT\s*-\s*CK\s*-\s*[^-]+-\s*/i, '').replace(/^EDT\s*-\s*[^-]+-\s*/i, '');
+      lines.push(qty + (p.purchase_unit ? ' ' + p.purchase_unit : '') + ' — ' + shortName + ' (' + pad365(p.d365_id) + ')');
+    }
+  });
+  if (!lines.length) { showToast('No items to order'); return; }
+  const text = 'EATALY KOP · EDT · ' + outletLabel.toUpperCase() + ' ORDER · ' + edtDateIso() + '\n\n' + lines.join('\n');
+  if (navigator.share) { navigator.share({ text: text }).catch(function(){}); }
+  else { copyText(text, 'EDT order copied (' + lines.length + ' items)'); }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB 5 — INVOICES
+// ═══════════════════════════════════════════════════════════════════
+let invoices = [];
+let activeInvoiceId = null;
+
+async function loadInvoices() {
+  document.getElementById('invoiceList').innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading…</div>';
+  try {
+    invoices = await sbGet('kitchen_invoices?select=*&order=delivery_date.desc&limit=100');
+    renderInvoices();
+  } catch(e) {
+    document.getElementById('invoiceList').innerHTML = '<div class="no-results">Error: ' + e.message + '</div>';
+  }
+}
+
+function renderInvoices() {
+  if (!invoices.length) {
+    document.getElementById('invoiceList').innerHTML = '<div class="empty-state"><div class="empty-icon">🧾</div><div class="empty-msg">No delivery logs yet.<br>Tap "+ New Delivery Log" to start.</div></div>';
+    return;
+  }
+  document.getElementById('invoiceList').innerHTML = invoices.map(function(inv) {
+    return '<div class="inv-card">' +
+      '<div class="inv-card-header">' +
+        '<div class="inv-card-top">' +
+          '<div><div class="inv-card-title">' + inv.vendor + '</div><div class="inv-card-date">' + inv.delivery_date + (inv.po_number ? ' · PO ' + inv.po_number : '') + (inv.invoice_number ? ' · Inv ' + inv.invoice_number : '') + '</div></div>' +
+          (inv.amount ? '<div style="font-family:JetBrains Mono,monospace;font-size:0.875rem;font-weight:600;color:var(--accent);flex-shrink:0;">$' + Number(inv.amount).toFixed(2) + '</div>' : '') +
+        '</div>' +
+        (inv.notes ? '<div style="font-size:0.688rem;color:var(--text3);margin-top:6px;">' + inv.notes + '</div>' : '') +
+      '</div>' +
+      '<div style="padding:10px 14px;display:flex;gap:8px;">' +
+        '<button class="btn btn-secondary" style="flex:1;font-size:0.75rem;" onclick="openDelivItems(' + inv.id + ')">📦 Log Items</button>' +
+        '<button class="btn btn-ghost" style="font-size:0.75rem;" onclick="deleteInvoice(' + inv.id + ')">🗑</button>' +
+      '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function openNewInvoice() {
+  activeInvoiceId = null;
+  document.getElementById('invModalTitle').textContent = 'New Delivery Log';
+  document.getElementById('invVendor').value = '';
+  document.getElementById('invDate').value = dateIso(0);
+  document.getElementById('invPO').value = '';
+  document.getElementById('invNum').value = '';
+  document.getElementById('invAmt').value = '';
+  document.getElementById('invNotes').value = '';
+  openModal('invModal');
+}
+
+async function saveInvoice() {
+  const vendor = document.getElementById('invVendor').value.trim();
+  if (!vendor) { showToast('Vendor is required'); return; }
+  const body = {
+    vendor: vendor,
+    delivery_date: document.getElementById('invDate').value || dateIso(0),
+    po_number: document.getElementById('invPO').value.trim() || null,
+    invoice_number: document.getElementById('invNum').value.trim() || null,
+    amount: parseFloat(document.getElementById('invAmt').value) || null,
+    notes: document.getElementById('invNotes').value.trim() || null
+  };
+  try {
+    await sbPost('kitchen_invoices', body);
+    closeModal('invModal');
+    showToast('Delivery log saved ✓');
+    loadInvoices();
+  } catch(e) {
+    showToast('Error: ' + e.message);
+  }
+}
+
+async function deleteInvoice(id) {
+  if (!confirm('Delete this delivery log?')) return;
+  try {
+    await fetch(SB_URL + '/rest/v1/kitchen_invoices?id=eq.' + id, { method: 'DELETE', headers: sbHeaders() });
+    showToast('Deleted');
+    loadInvoices();
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+async function openDelivItems(invoiceId) {
+  activeInvoiceId = invoiceId;
+  const inv = invoices.find(function(i){ return i.id === invoiceId; });
+  document.getElementById('delivModalTitle').textContent = 'Items — ' + (inv ? inv.vendor : '');
+  document.getElementById('delivItems').innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading…</div>';
+  openModal('delivModal');
+  try {
+    const items = await sbGet('kitchen_delivery_items?invoice_id=eq.' + invoiceId + '&select=*&order=item_name');
+    renderDelivItems(items);
+  } catch(e) {
+    document.getElementById('delivItems').innerHTML = '<div class="no-results">Error: ' + e.message + '</div>';
+  }
+}
+
+function renderDelivItems(items) {
+  const inv = invoices.find(function(i){ return i.id === activeInvoiceId; });
+  let html = '<div style="background:var(--surface);border:1px solid var(--surface2);border-radius:10px;overflow:hidden;margin-bottom:10px;">';
+  if (items.length) {
+    items.forEach(function(item) {
+      html += '<div class="confirm-row">' +
+        '<div class="confirm-name"><div style="font-size:0.813rem;">' + item.item_name + '</div><div style="font-size:0.563rem;font-family:JetBrains Mono,monospace;color:var(--text3);">' + pad365(item.d365_id) + '</div></div>' +
+        '<div class="confirm-qty">' + item.qty_received + ' ' + (item.unit||'') + '</div>' +
+        '<div class="confirm-check' + (item.confirmed ? ' checked' : '') + '" onclick="toggleConfirm(' + item.id + ',this)">' + (item.confirmed ? '✓' : '') + '</div>' +
+        '</div>';
+    });
+  } else {
+    html += '<div class="no-results">No items logged yet</div>';
+  }
+  html += '</div>';
+  // Add item form
+  html += '<div style="background:var(--surface);border:1px solid var(--surface2);border-radius:10px;padding:12px 14px;">' +
+    '<div style="font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:8px;">Add Item</div>' +
+    '<div style="display:flex;gap:6px;margin-bottom:6px;"><input id="diD365" placeholder="D365 #" style="width:90px;background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:JetBrains Mono,monospace;font-size:0.75rem;padding:7px 8px;" inputmode="numeric">' +
+    '<input id="diName" placeholder="Item name" style="flex:1;background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:DM Sans,sans-serif;font-size:0.75rem;padding:7px 8px;"></div>' +
+    '<div style="display:flex;gap:6px;">' +
+    '<input id="diQty" placeholder="Qty" type="number" style="width:70px;background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:JetBrains Mono,monospace;font-size:0.75rem;padding:7px 8px;" inputmode="decimal">' +
+    '<input id="diUnit" placeholder="Unit (case, lb…)" style="flex:1;background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:DM Sans,sans-serif;font-size:0.75rem;padding:7px 8px;">' +
+    '<button class="btn btn-primary" style="font-size:0.75rem;padding:7px 12px;" onclick="addDelivItem()">Add</button>' +
+    '</div></div>';
+  document.getElementById('delivItems').innerHTML = html;
+}
+
+async function addDelivItem() {
+  const d365 = document.getElementById('diD365').value.trim();
+  const name = document.getElementById('diName').value.trim();
+  const qty = parseFloat(document.getElementById('diQty').value);
+  const unit = document.getElementById('diUnit').value.trim();
+  if (!name || isNaN(qty)) { showToast('Name and qty required'); return; }
+  try {
+    await sbPost('kitchen_delivery_items', [{
+      invoice_id: activeInvoiceId,
+      d365_id: d365 || null,
+      item_name: name,
+      qty_received: qty,
+      unit: unit || null,
+      confirmed: false
+    }]);
+    const items = await sbGet('kitchen_delivery_items?invoice_id=eq.' + activeInvoiceId + '&select=*&order=item_name');
+    renderDelivItems(items);
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+async function toggleConfirm(itemId, el) {
+  const nowConfirmed = !el.classList.contains('checked');
+  el.classList.toggle('checked', nowConfirmed);
+  el.textContent = nowConfirmed ? '✓' : '';
+  try {
+    await sbPatch('kitchen_delivery_items', 'id=eq.' + itemId, { confirmed: nowConfirmed });
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+async function confirmDelivery() {
+  const items = await sbGet('kitchen_delivery_items?invoice_id=eq.' + activeInvoiceId + '&select=*');
+  const confirmed = items.filter(function(i){ return i.confirmed; });
+  if (!confirmed.length) { showToast('No items checked yet'); return; }
+  // Mirror confirmed items to inventory_trend and kitchen_count
+  const iso = (invoices.find(function(i){ return i.id === activeInvoiceId; }) || {}).delivery_date || dateIso(0);
+  const trendRows = confirmed.filter(function(i){ return i.d365_id; }).map(function(i){
+    return { snap_date: iso, d365: i.d365_id, item_name: i.item_name, category: 'KITCHEN_RECEIVE', count: i.qty_received };
+  });
+  if (trendRows.length) {
+    try { await sbUpsert('inventory_trend', trendRows, 'snap_date,d365'); } catch(e){}
+  }
+  showToast('Receipt confirmed — ' + confirmed.length + ' items ✓');
+  closeModal('delivModal');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  updateCountDateUI();
+  updateOrderDateUI();
+  // Set today's date in invoice modal
+  document.getElementById('invDate').value = dateIso(0);
+});
 </script>
 </body>
 </html>
