@@ -805,10 +805,6 @@ function renderEDT() {
     html += '</div></div>'; // .group-body .group-section
   });
 
-  // Full-outlet export button
-  html += '<button class="btn btn-secondary btn-full" onclick="exportAll()">'
-         +'⬇ Excel All '+outLabel+' EDT ('+Object.keys(edtGroupMap).length+' files)</button>';
-
   document.getElementById('edtBody').innerHTML = html;
 }
 
@@ -1298,8 +1294,6 @@ function renderOrders() {
   });
 
   // Export all vendors with orders
-  html += '<button class="btn btn-secondary btn-full" style="margin-top:4px;" onclick="exportAllOrdVendors()">⬇ Excel All ' + outLabel + ' Orders</button>';
-
   document.getElementById('ordBody').innerHTML = html;
 }
 
