@@ -498,6 +498,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 </div>
 
 <script>
+if (!sessionStorage.getItem('pipa_hub_auth')) { location.replace('index.html?next=' + encodeURIComponent(location.pathname.split('/').pop())); }
 // ═══════════════════════════════════════════════════════════════════════════
 // CONFIG — matches pipa-ops / pipa-count / pipa-bar pattern
 // localStorage = fast working store   |   Supabase = sync/persist layer

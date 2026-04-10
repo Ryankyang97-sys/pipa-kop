@@ -633,6 +633,7 @@ html, body {
 <div class="toast" id="toast"></div>
 
 <script>
+if (!sessionStorage.getItem('pipa_hub_auth')) { location.replace('index.html?next=' + encodeURIComponent(location.pathname.split('/').pop())); }
 // SUPABASE
 const SUPA_URL = 'https://fhbusipvtxjnwidlgpaa.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
