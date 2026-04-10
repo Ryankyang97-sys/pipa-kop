@@ -759,7 +759,7 @@ function renderEDT() {
         +'<span class="group-title">'+vendorShort+'</span>'
         +'<div class="group-actions">'
           +'<span class="group-count">'+grpItems.length+'</span>'
-          +'<button class="group-export-btn" onclick="exportGroup('+JSON.stringify(slug)+')">⬇ Excel</button>'
+          +'<button class="group-export-btn" data-slug="'+slug.replace(/"/g,'&quot;')+'" onclick="exportGroup(this.dataset.slug)">⬇ Excel</button>'
           +'<button class="group-chevron-btn" onclick="toggleOrdGroup(this.closest(\'.group-header\'))">⌄</button>'
         +'</div>'
       +'</div>'
@@ -807,7 +807,7 @@ function renderEDT() {
 
   // Full-outlet export button
   html += '<button class="btn btn-secondary btn-full" onclick="exportAll()">'
-         +'⬇ Excel All '+outLabel+' EDT</button>';
+         +'⬇ Excel All '+outLabel+' EDT ('+Object.keys(edtGroupMap).length+' files)</button>';
 
   document.getElementById('edtBody').innerHTML = html;
 }
@@ -839,8 +839,19 @@ function setOH(d365id, itemName, el) {
 
 function setPar(d365id, el) {
   const v = parseFloat(el.value);
-  if (!isNaN(v) && v >= 0) { edtPars[d365id] = v; el.classList.add('has-par'); }
-  else { edtPars[d365id] = null; el.classList.remove('has-par'); }
+  if (!isNaN(v) && v >= 0) {
+    edtPars[d365id] = v; el.classList.add('has-par');
+    // Auto-suggest order if on-hand is already entered and order field is blank
+    const oh = edtOnHand[d365id];
+    if (oh !== undefined) {
+      const sid   = 'edt_' + d365id.replace(/\D/g,'');
+      const ordEl = document.getElementById('ord_' + sid);
+      if (ordEl && (ordEl.value === '' || ordEl.value === '0')) {
+        const sug = Math.max(0, v - oh);
+        if (sug > 0) { ordEl.value = sug; ordEl.classList.add('has-value'); edtOrdQtys[edtOutlet][d365id] = sug; }
+      }
+    }
+  } else { edtPars[d365id] = null; el.classList.remove('has-par'); }
   clearTimeout(el._t);
   el._t = setTimeout(function(){
     const v2 = parseFloat(el.value);
@@ -870,41 +881,31 @@ function setEdtOutlet(o, btn) {
 }
 
 // ─── EXPORT ENGINE ────────────────────────────────────────────────────
-// Supports CSV and XLSX (vanilla — no CDN).
-// XLSX is a zip of XML; we build a minimal one using the MSO SpreadsheetML format.
 
-// ── Shared row builders ───────────────────────────────────────────────
+// ── Row builders — only items with qty > 0 ───────────────────────────
 
 function edtBuildRows(items, outlet) {
   const orders = edtOrdQtys[outlet || edtOutlet];
-  const rows = [['D365 ID','ITEM','QTY','UNIT']];
+  const rows = [['D365 ID','QTY','UNIT']];
   items.forEach(function(item){
     const qty = orders[item.d365_id];
-    rows.push([pad8(item.d365_id), item.display_name, qty > 0 ? qty : '', item.unit || 'ea']);
+    if (qty > 0) rows.push([pad8(item.d365_id), qty, item.unit || 'ea']);
   });
   return rows;
 }
 
 function ordBuildRows(items, outlet) {
   const orders = ordQtys[outlet || ordOutlet];
-  const rows = [['D365 ID','ITEM','QTY','UNIT']];
+  const rows = [['D365 ID','QTY','UNIT']];
   items.forEach(function(item){
     const qty = orders[item.d365_id];
-    rows.push([pad8(item.d365_id), item.name, qty > 0 ? qty : '', item.unit || 'ea']);
+    if (qty > 0) rows.push([pad8(item.d365_id), qty, item.unit || 'ea']);
   });
   return rows;
 }
 
-function ordBuildRowsWithOrders(items, outlet) {
-  // Only rows with qty > 0
-  const orders = ordQtys[outlet || ordOutlet];
-  const rows = [['D365 ID','ITEM','QTY','UNIT']];
-  items.forEach(function(item){
-    const qty = orders[item.d365_id];
-    if (qty > 0) rows.push([pad8(item.d365_id), item.name, qty, item.unit || 'ea']);
-  });
-  return rows;
-}
+// ordBuildRowsWithOrders is identical now — keep as alias for clarity
+function ordBuildRowsWithOrders(items, outlet) { return ordBuildRows(items, outlet); }
 
 // ── CSV ───────────────────────────────────────────────────────────────
 
@@ -975,14 +976,27 @@ function exportGroup(slug) {
   const vendor   = slug.split('||')[1] || slug;
   const vLabel   = vendor.replace(/^EDT\s*-\s*/i,'');
   const outLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  downloadXlsx(edtBuildRows(items), xlsxName(outLabel, 'EDT.' + vLabel));
+  const rows = edtBuildRows(items);
+  if (rows.length <= 1) { toast('No items to order in this group'); return; }
+  downloadXlsx(rows, xlsxName(outLabel, 'EDT.' + vLabel));
 }
 
 function exportAll() {
-  const items = edtItems[edtOutlet] || [];
-  if (!items.length) { toast('No items loaded'); return; }
   const outLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  downloadXlsx(edtBuildRows(items), xlsxName(outLabel, 'EDT.All'));
+  // Only groups with at least one qty > 0
+  const slugs = Object.keys(edtGroupMap).filter(function(slug){
+    return edtBuildRows(edtGroupMap[slug]).length > 1;
+  });
+  if (!slugs.length) { toast('No EDT items to order'); return; }
+  slugs.forEach(function(slug, i){
+    setTimeout(function(){
+      const items = edtGroupMap[slug];
+      const vendor = slug.split('||')[1] || slug;
+      const vLabel = vendor.replace(/^EDT\s*-\s*/i,'');
+      downloadXlsx(edtBuildRows(items), xlsxName(outLabel, 'EDT.' + vLabel));
+    }, i * 500);
+  });
+  toast('Exporting ' + slugs.length + ' file(s)…');
 }
 
 function exportOrdGroup(slug) {
@@ -990,26 +1004,23 @@ function exportOrdGroup(slug) {
   if (!items || !items.length) { toast('Group not found'); return; }
   const vendor   = slug.split('||')[1] || slug;
   const outLabel = ordOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  downloadXlsx(ordBuildRows(items), xlsxName(outLabel, vendor));
+  const rows = ordBuildRows(items);
+  if (rows.length <= 1) { toast('No items to order for ' + vendor); return; }
+  downloadXlsx(rows, xlsxName(outLabel, vendor));
 }
 
 function exportAllOrdVendors() {
-  const orders   = ordQtys[ordOutlet];
   const outLabel = ordOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  const slugs    = Object.keys(ordGroupMap).filter(function(slug){
-    return slug.startsWith(ordOutlet+'||') &&
-      ordGroupMap[slug].some(function(item){ return orders[item.d365_id] > 0; });
+  const slugs = Object.keys(ordGroupMap).filter(function(slug){
+    return slug.startsWith(ordOutlet+'||') && ordBuildRows(ordGroupMap[slug]).length > 1;
   });
-  if (!slugs.length) { toast('No vendors with orders to export'); return; }
+  if (!slugs.length) { toast('No orders to export'); return; }
   let count = 0;
   slugs.forEach(function(slug, i){
     setTimeout(function(){
       const vendor = slug.split('||')[1];
-      const rows   = ordBuildRowsWithOrders(ordGroupMap[slug]);
-      if (rows.length > 1) {
-        downloadXlsx(rows, xlsxName(outLabel, vendor));
-        count++;
-      }
+      const rows   = ordBuildRows(ordGroupMap[slug]);
+      if (rows.length > 1) { downloadXlsx(rows, xlsxName(outLabel, vendor)); count++; }
       if (i === slugs.length - 1) toast('Exported ' + count + ' vendor file(s) ✓');
     }, i * 500);
   });
@@ -1147,7 +1158,7 @@ function renderOrders() {
         +'</div>'
         +'<div class="group-actions">'
           +'<span class="group-count">'+allVendorItems.length+'</span>'
-          +'<button class="group-export-btn" onclick="exportOrdGroup('+JSON.stringify(slug)+')">⬇ Excel</button>'
+          +'<button class="group-export-btn" data-slug="'+slug.replace(/"/g,'&quot;')+'" onclick="exportOrdGroup(this.dataset.slug)">⬇ Excel</button>'
           +'<button class="group-chevron-btn" onclick="toggleOrdGroup(this.closest(\'.group-header\'))">⌄</button>'
         +'</div>'
       +'</div>'
@@ -1229,8 +1240,19 @@ function setOrdOH(d365id, itemName, el) {
 
 function setOrdPar(d365id, el) {
   const v = parseFloat(el.value);
-  if (!isNaN(v) && v >= 0) { ordPars[d365id] = v; el.classList.add('has-par'); }
-  else { ordPars[d365id] = null; el.classList.remove('has-par'); }
+  if (!isNaN(v) && v >= 0) {
+    ordPars[d365id] = v; el.classList.add('has-par');
+    // Auto-suggest order if on-hand is already entered and order field is blank
+    const oh = ordOnHand[d365id];
+    if (oh !== undefined) {
+      const sid   = 'ord_' + d365id.replace(/\D/g,'');
+      const ordEl = document.getElementById('ord_' + sid);
+      if (ordEl && (ordEl.value === '' || ordEl.value === '0')) {
+        const sug = Math.max(0, v - oh);
+        if (sug > 0) { ordEl.value = sug; ordEl.classList.add('has-value'); ordQtys[ordOutlet][d365id] = sug; }
+      }
+    }
+  } else { ordPars[d365id] = null; el.classList.remove('has-par'); }
   clearTimeout(el._t);
   el._t = setTimeout(function(){
     const v2 = parseFloat(el.value);
