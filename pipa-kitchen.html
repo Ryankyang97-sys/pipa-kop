@@ -698,13 +698,15 @@ function renderEDT() {
     const vendorShort = vendor.replace(/^EDT\s*-\s*/i,'');
 
     html += '<div class="group-section">'
-      +'<div class="group-header">'
+      +'<div class="group-header collapsed" onclick="toggleOrdGroup(this)">'
         +'<span class="group-title">'+vendorShort+'</span>'
         +'<div class="group-actions">'
           +'<span class="group-count">'+grpItems.length+'</span>'
-          +'<button class="group-export-btn" onclick="exportGroup('+JSON.stringify(slug)+')">⬇ CSV</button>'
+          +'<button class="group-export-btn" onclick="event.stopPropagation();exportGroup('+JSON.stringify(slug)+')">⬇ CSV</button>'
         +'</div>'
+        +'<span class="group-chevron">⌄</span>'
       +'</div>'
+      +'<div class="group-body">'
       // column labels
       +'<div class="col-heads">'
         +'<div style="flex:1;"></div>'
@@ -743,7 +745,7 @@ function renderEDT() {
         +'</div>';
     });
 
-    html += '</div>'; // .group-section
+    html += '</div></div>'; // .group-body .group-section
   });
 
   // Full-outlet export button
