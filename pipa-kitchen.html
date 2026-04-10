@@ -43,28 +43,55 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 
 /* LOOKUP */
 .section-label{font-size:0.563rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
-.search-wrap{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--surface3);border-radius:10px;padding:10px 14px;margin-bottom:6px;}
+.search-wrap{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--surface3);border-radius:10px;padding:10px 14px;margin-bottom:8px;}
 .search-icon{color:var(--text3);font-size:1rem;flex-shrink:0;}
 .search-input{background:none;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.938rem;width:100%;outline:none;}
 .search-input::placeholder{color:var(--text3);}
-.search-hint{font-size:0.625rem;color:var(--text3);margin-bottom:14px;padding-left:2px;}
+.search-clear{background:none;border:none;color:var(--text3);font-size:1rem;cursor:pointer;padding:0;flex-shrink:0;display:none;}
+.search-clear.show{display:block;}
+
+/* Filter row */
+.filter-scroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px;padding-bottom:2px;}
+.filter-scroll::-webkit-scrollbar{display:none;}
+.filter-chip{flex-shrink:0;padding:5px 11px;border-radius:20px;border:1.5px solid var(--surface3);background:var(--surface2);color:var(--text3);font-family:'DM Sans',sans-serif;font-size:0.675rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:border-color 0.12s,color 0.12s,background 0.12s;}
+.filter-chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+.filter-divider{width:1px;background:var(--surface3);flex-shrink:0;margin:0 2px;align-self:stretch;}
+
+/* Results */
 .results-box{background:var(--surface);border:1px solid var(--surface2);border-radius:10px;overflow:hidden;display:none;}
 .result-row{padding:11px 14px;border-bottom:1px solid var(--surface2);cursor:pointer;}
 .result-row:last-child{border-bottom:none;}
 .result-row:active{background:var(--surface2);}
-.result-name{font-size:0.813rem;font-weight:600;color:var(--text);margin-bottom:3px;}
-.result-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.result-id{font-family:'JetBrains Mono',monospace;font-size:0.688rem;color:var(--accent);}
-.result-tag{font-size:0.563rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);}
-.result-vendor{font-size:0.688rem;color:var(--text2);}
-.no-results{padding:16px 14px;font-size:0.813rem;color:var(--text3);text-align:center;}
+.result-name{font-size:0.875rem;font-weight:600;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.result-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.result-d365{font-family:'JetBrains Mono',monospace;font-size:0.613rem;color:#A8A09A;}
+.result-adaco{font-family:'JetBrains Mono',monospace;font-size:0.613rem;color:var(--text3);}
+.result-tag{font-size:0.563rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);}
+.result-vendor{font-size:0.625rem;color:var(--text3);}
+.result-unit{font-family:'JetBrains Mono',monospace;font-size:0.563rem;font-weight:700;color:var(--accent);background:var(--accent-dim);border:1px solid var(--accent-border);padding:1px 5px;border-radius:3px;}
+.result-outlet{font-size:0.563rem;font-weight:700;padding:2px 6px;border-radius:4px;border:1px solid;}
+.result-outlet.pipa{color:#B87333;border-color:rgba(184,115,51,0.4);background:rgba(184,115,51,0.1);}
+.result-outlet.pronto{color:#7ab3e0;border-color:rgba(122,179,224,0.4);background:rgba(122,179,224,0.08);}
+.no-results{padding:20px 14px;font-size:0.813rem;color:var(--text3);text-align:center;}
+
+/* Detail card */
 .detail-card{background:var(--surface);border:1px solid var(--surface2);border-radius:10px;overflow:hidden;margin-top:10px;}
-.detail-header{padding:12px 14px;border-bottom:1px solid var(--surface2);}
-.detail-title{font-size:0.875rem;font-weight:700;color:var(--text);line-height:1.3;}
-.detail-sub{font-size:0.688rem;color:var(--text3);margin-top:3px;}
-.detail-ids{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;}
-.id-chip{font-family:'JetBrains Mono',monospace;font-size:0.688rem;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);padding:2px 8px;border-radius:4px;}
-.detail-close{float:right;font-size:0.75rem;color:var(--text3);cursor:pointer;margin-top:2px;}
+.detail-header{padding:14px 14px 12px;border-bottom:1px solid var(--surface2);}
+.detail-title{font-size:0.938rem;font-weight:700;color:var(--text);line-height:1.35;padding-right:24px;}
+.detail-sub{font-size:0.688rem;color:var(--text3);margin-top:4px;}
+.detail-ids{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.id-chip{font-family:'JetBrains Mono',monospace;font-size:0.688rem;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);padding:3px 9px;border-radius:5px;}
+.detail-close{position:absolute;right:14px;top:14px;background:var(--surface2);border:none;color:var(--text2);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:0.875rem;display:flex;align-items:center;justify-content:center;}
+.detail-section{padding:10px 14px;border-bottom:1px solid var(--surface2);}
+.detail-section-label{font-size:0.525rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.detail-unit-row{display:flex;gap:8px;flex-wrap:wrap;}
+.detail-unit-chip{font-family:'JetBrains Mono',monospace;font-size:0.688rem;color:var(--text2);background:var(--surface2);border:1px solid var(--surface3);padding:3px 9px;border-radius:5px;}
+.detail-outlets{display:flex;gap:6px;margin-top:2px;}
+.detail-btn-row{display:flex;gap:8px;padding:10px 14px;}
+.detail-recipe-row{padding:9px 14px;border-bottom:1px solid var(--surface2);}
+.detail-recipe-row:last-child{border-bottom:none;}
+.detail-recipe-name{font-size:0.788rem;color:var(--text);}
+.detail-recipe-meta{font-size:0.563rem;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace;}
 
 /* OUTLET TOGGLE */
 .outlet-toggle{display:flex;gap:8px;margin-bottom:14px;}
@@ -73,17 +100,22 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 
 /* ORDER GROUPS */
 .group-section{margin-bottom:20px;}
-.group-header{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 12px;background:var(--surface2);border-radius:8px 8px 0 0;}
+.group-header{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 12px;background:var(--surface2);border-radius:8px 8px 0 0;cursor:pointer;user-select:none;}
+.group-header.collapsed{border-radius:8px;}
 .group-header-left{flex:1;min-width:0;}
-.group-title{font-size:0.688rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);}
-.group-meta-row{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
-.group-cutoff{font-size:0.588rem;font-weight:600;color:var(--text2);}
-.group-lead{font-size:0.563rem;color:var(--text3);}
-.group-email{font-size:0.563rem;color:#7ab3e0;font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
+.group-title{font-size:1rem;font-weight:700;letter-spacing:-0.01em;color:var(--text);}
+.group-meta-row{display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap;}
+.group-cutoff{font-size:0.688rem;font-weight:600;color:var(--text2);}
+.group-lead{font-size:0.638rem;color:var(--text3);}
+.group-email{font-size:0.638rem;color:#7ab3e0;font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
 .group-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px;}
 .group-count{font-size:0.625rem;color:var(--text3);}
 .group-export-btn{background:var(--surface3);border:none;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.625rem;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;}
 .group-export-btn:active{opacity:0.7;}
+.group-chevron{font-size:0.875rem;color:var(--text3);transition:transform 0.2s;flex-shrink:0;align-self:center;margin-left:6px;}
+.group-chevron.open{transform:rotate(180deg);}
+.group-body{display:none;}
+.group-body.open{display:block;}
 
 /* Category sub-header within a vendor group */
 .cat-header{padding:5px 12px;background:var(--surface);border-bottom:1px solid var(--surface2);border-left:1px solid var(--surface2);border-right:1px solid var(--surface2);}
@@ -169,14 +201,34 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 
   <!-- TAB: D365 LOOKUP -->
   <div class="panel active" id="panel-lookup">
-    <div class="section-label">Search D365 Products</div>
+
+    <!-- Search bar -->
     <div class="search-wrap">
       <span class="search-icon">⌕</span>
       <input class="search-input" id="lookupQ" type="search"
-        placeholder="D365 #, Adaco ID, or name…"
-        oninput="dLookup(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+        placeholder="Search by name, D365 #, or Adaco ID…"
+        oninput="onLookupInput(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="search-clear" id="lookupClear" onclick="clearLookup()">✕</button>
     </div>
-    <div class="search-hint">e.g. "01137973" or "chicken breast"</div>
+
+    <!-- Filter chips: search mode + department -->
+    <div class="filter-scroll">
+      <div class="filter-chip active" id="fmode-name"   onclick="setLookupMode('name',this)">Name</div>
+      <div class="filter-chip"        id="fmode-d365"   onclick="setLookupMode('d365',this)">D365 #</div>
+      <div class="filter-chip"        id="fmode-adaco"  onclick="setLookupMode('adaco',this)">Adaco ID</div>
+      <div class="filter-divider"></div>
+      <div class="filter-chip" id="fdept-CK"  onclick="toggleDept('CK',this)">Kitchen</div>
+      <div class="filter-chip" id="fdept-P1"  onclick="toggleDept('P1',this)">Pronto</div>
+      <div class="filter-chip" id="fdept-P3"  onclick="toggleDept('P3',this)">Pizza</div>
+      <div class="filter-chip" id="fdept-BA"  onclick="toggleDept('BA',this)">Bakery</div>
+      <div class="filter-chip" id="fdept-PA"  onclick="toggleDept('PA',this)">Pastry</div>
+      <div class="filter-chip" id="fdept-FA"  onclick="toggleDept('FA',this)">Fresh Pasta</div>
+      <div class="filter-chip" id="fdept-OF"  onclick="toggleDept('OF',this)">Produce</div>
+      <div class="filter-chip" id="fdept-FG"  onclick="toggleDept('FG',this)">Cheese &amp; Dairy</div>
+      <div class="filter-chip" id="fdept-GS"  onclick="toggleDept('GS',this)">Grocery</div>
+      <div class="filter-chip" id="fdept-RS"  onclick="toggleDept('RS',this)">Restaurant</div>
+    </div>
+
     <div class="results-box" id="lookupResults"></div>
     <div id="lookupDetail"></div>
   </div>
@@ -283,67 +335,250 @@ function switchTab(id, el) {
 }
 
 // ─── D365 LOOKUP ────────────────────────────────────────────────────
-const dLookup = debounce(runLookup, 300);
-async function runLookup(val) {
+// Filters out [DNU] items always.
+// Search modes: name (ilike), d365 (exact/stripped), adaco (exact/stripped)
+// Dept filter: macrofamily pills — AND'd with search
+
+let lookupMode   = 'name';       // 'name' | 'd365' | 'adaco'
+let lookupDepts  = new Set();    // active macrofamily filters
+let lookupVal    = '';
+
+// Index of EDT/Order item d365_ids for membership chips
+// Populated lazily after EDT/Orders load
+function edtIds(outlet) {
+  const items = edtItems[outlet] || [];
+  return new Set(items.map(function(i){ return i.d365_id; }));
+}
+function ordIds(outlet) {
+  const items = ordItems[outlet] || [];
+  return new Set(items.map(function(i){ return i.d365_id; }));
+}
+
+const dLookup = debounce(runLookup, 280);
+
+function onLookupInput(val) {
+  lookupVal = val;
+  const clr = document.getElementById('lookupClear');
+  if (clr) clr.classList.toggle('show', val.length > 0);
+  dLookup(val);
+}
+
+function clearLookup() {
+  const q = document.getElementById('lookupQ');
+  if (q) { q.value = ''; q.focus(); }
+  lookupVal = '';
+  const clr = document.getElementById('lookupClear');
+  if (clr) clr.classList.remove('show');
   const res = document.getElementById('lookupResults');
-  val = (val||'').trim();
-  if (val.length < 2) { res.style.display='none'; res.innerHTML=''; return; }
+  if (res) { res.style.display = 'none'; res.innerHTML = ''; }
+}
+
+function setLookupMode(mode, el) {
+  lookupMode = mode;
+  document.querySelectorAll('[id^="fmode-"]').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
+  // Update placeholder
+  const q = document.getElementById('lookupQ');
+  if (q) q.placeholder = mode === 'd365' ? 'e.g. 01137973' : mode === 'adaco' ? 'e.g. 2065477' : 'e.g. chicken breast';
+  if (lookupVal.length >= 2) dLookup(lookupVal);
+}
+
+function toggleDept(mf, el) {
+  if (lookupDepts.has(mf)) { lookupDepts.delete(mf); el.classList.remove('active'); }
+  else { lookupDepts.add(mf); el.classList.add('active'); }
+  if (lookupVal.length >= 2) dLookup(lookupVal);
+  else if (lookupDepts.size > 0) dLookup('');  // dept-only browse
+}
+
+async function runLookup(val) {
+  val = (val || '').trim();
+  const res = document.getElementById('lookupResults');
+
+  // Need either a search term or a dept filter
+  if (val.length < 2 && lookupDepts.size === 0) {
+    res.style.display = 'none'; res.innerHTML = ''; return;
+  }
+
   res.style.display = 'block';
   res.innerHTML = '<div class="no-results">Searching…</div>';
+
   try {
-    const s = val.replace(/^0+/,'') || '0';
-    const q = /^\d+$/.test(s)
-      ? 'kitchen_products?or=(d365_id.eq.'+encodeURIComponent(val)+',d365_id.eq.'+encodeURIComponent(s)+',adaco_id.eq.'+encodeURIComponent(val)+',adaco_id.eq.'+encodeURIComponent(s)+')&select=d365_id,adaco_id,name,vendor_name,macrofamily,purchase_unit,packaging_unit&limit=40&order=name'
-      : 'kitchen_products?name=ilike.'+encodeURIComponent('*'+val+'*')+'&select=d365_id,adaco_id,name,vendor_name,macrofamily,purchase_unit,packaging_unit&limit=40&order=name';
+    // Build filter parts
+    const filters = [];
+
+    // DNU exclusion — always
+    filters.push('name=not.ilike.%5BDNU%5D%25');  // URL-encoded [DNU]%
+
+    // Search term
+    if (val.length >= 2) {
+      const s = val.replace(/^0+/, '') || '0';
+      if (lookupMode === 'd365') {
+        filters.push('or=(d365_id.eq.'+encodeURIComponent(val)+',d365_id.eq.'+encodeURIComponent(s)+')');
+      } else if (lookupMode === 'adaco') {
+        filters.push('or=(adaco_id.eq.'+encodeURIComponent(val)+',adaco_id.eq.'+encodeURIComponent(s)+')');
+      } else {
+        filters.push('name=ilike.'+encodeURIComponent('*'+val+'*'));
+      }
+    }
+
+    // Department filter
+    if (lookupDepts.size > 0) {
+      const depts = [...lookupDepts];
+      filters.push('macrofamily=in.('+depts.map(encodeURIComponent).join(',')+')');
+    }
+
+    const q = 'kitchen_products?'
+      + filters.join('&')
+      + '&select=d365_id,adaco_id,name,vendor_name,macrofamily,purchase_unit,packaging_unit'
+      + '&order=name&limit=50';
+
     const data = await sbGet(q);
-    if (!data.length) { res.innerHTML = '<div class="no-results">No results for "'+val+'"</div>'; return; }
-    res.innerHTML = data.map(function(r){
+
+    if (!data.length) {
+      res.innerHTML = '<div class="no-results">No results' + (val ? ' for "'+val+'"' : '') + '</div>';
+      return;
+    }
+
+    // Build outlet membership sets
+    const pipaEdt  = edtIds('pipa'),  prontoEdt  = edtIds('pronto');
+    const pipaOrd  = ordIds('pipa'),  prontoOrd  = ordIds('pronto');
+
+    const mfLabels = {
+      CK:'Kitchen',P1:'Pronto',P3:'Pizza',BA:'Bakery',PA:'Pastry',
+      FA:'Fresh Pasta',OF:'Produce',FG:'Cheese & Dairy',GS:'Grocery',
+      RS:'Restaurant',SM:'Salumeria',VI:'Wine',LV:'Spirits'
+    };
+
+    res.innerHTML = data.map(function(r) {
+      const sid = r.d365_id;
+      const inPipa   = pipaEdt.has(sid) || pipaOrd.has(sid);
+      const inPronto = prontoEdt.has(sid) || prontoOrd.has(sid);
+      const mfLabel  = mfLabels[r.macrofamily] || r.macrofamily || '';
+
       return '<div class="result-row" onclick="showDetail('+JSON.stringify(r).replace(/"/g,'&quot;')+')">'
         +'<div class="result-name">'+r.name+'</div>'
         +'<div class="result-meta">'
-        +'<span class="result-id">'+pad8(r.d365_id)+'</span>'
-        +(r.adaco_id ? '<span class="result-id" style="color:var(--text2);">Adaco '+r.adaco_id+'</span>' : '')
-        +(r.macrofamily ? '<span class="result-tag">'+r.macrofamily+'</span>' : '')
-        +(r.vendor_name ? '<span class="result-vendor">'+r.vendor_name+'</span>' : '')
-        +'</div></div>';
+          +'<span class="result-d365">'+pad8(r.d365_id)+'</span>'
+          +(r.adaco_id ? '<span class="result-adaco">Adaco '+r.adaco_id+'</span>' : '')
+          +(r.purchase_unit ? '<span class="result-unit">'+r.purchase_unit+'</span>' : '')
+          +(mfLabel ? '<span class="result-tag">'+mfLabel+'</span>' : '')
+          +(r.vendor_name ? '<span class="result-vendor">'+r.vendor_name+'</span>' : '')
+          +(inPipa   ? '<span class="result-outlet pipa">PiPa</span>'   : '')
+          +(inPronto ? '<span class="result-outlet pronto">Pronto</span>' : '')
+        +'</div>'
+        +'</div>';
     }).join('');
-  } catch(e) { res.innerHTML = '<div class="no-results">Error: '+e.message+'</div>'; }
+
+  } catch(e) {
+    res.innerHTML = '<div class="no-results">Error: '+e.message+'</div>';
+  }
 }
+
 function showDetail(item) {
   document.getElementById('lookupResults').style.display = 'none';
-  document.getElementById('lookupQ').value = '';
   const d = document.getElementById('lookupDetail');
-  d.innerHTML = '<div class="detail-card"><div class="detail-header">'
-    +'<span class="detail-close" onclick="document.getElementById(\'lookupDetail\').innerHTML=\'\'">✕</span>'
-    +'<div class="detail-title">'+item.name+'</div>'
-    +'<div class="detail-sub">'+(item.vendor_name||'No vendor')+(item.macrofamily?' · '+item.macrofamily:'')+'</div>'
-    +'<div class="detail-ids"><span class="id-chip">D365 '+pad8(item.d365_id)+'</span>'
-    +(item.adaco_id ? '<span class="id-chip" style="background:var(--surface2);border-color:var(--surface3);color:var(--text2);">Adaco '+item.adaco_id+'</span>' : '')
+
+  const pipaEdt  = edtIds('pipa'),  prontoEdt  = edtIds('pronto');
+  const pipaOrd  = ordIds('pipa'),  prontoOrd  = ordIds('pronto');
+  const inPipa   = pipaEdt.has(item.d365_id) || pipaOrd.has(item.d365_id);
+  const inPronto = prontoEdt.has(item.d365_id) || prontoOrd.has(item.d365_id);
+
+  const mfLabels = {
+    CK:'Kitchen',P1:'Pronto',P3:'Pizza',BA:'Bakery',PA:'Pastry',
+    FA:'Fresh Pasta',OF:'Produce',FG:'Cheese & Dairy',GS:'Grocery',
+    RS:'Restaurant',SM:'Salumeria',VI:'Wine',LV:'Spirits'
+  };
+
+  const currentPar = edtPars[item.d365_id] !== undefined ? edtPars[item.d365_id]
+    : ordPars[item.d365_id] !== undefined ? ordPars[item.d365_id] : '';
+
+  d.innerHTML =
+    '<div class="detail-card" style="position:relative;">'
+
+    // Header
+    +'<div class="detail-header">'
+      +'<button class="detail-close" onclick="document.getElementById(\'lookupDetail\').innerHTML=\'\'">✕</button>'
+      +'<div class="detail-title">'+item.name+'</div>'
+      +'<div class="detail-sub">'+(item.vendor_name||'No vendor')+(item.macrofamily?' · '+(mfLabels[item.macrofamily]||item.macrofamily):'')+'</div>'
+      +'<div class="detail-ids">'
+        +'<span class="id-chip">D365 '+pad8(item.d365_id)+'</span>'
+        +(item.adaco_id ? '<span class="id-chip" style="background:var(--surface2);border-color:var(--surface3);color:var(--text2);">Adaco '+item.adaco_id+'</span>' : '')
+      +'</div>'
     +'</div>'
-    +'<div style="margin-top:8px;font-size:0.688rem;color:var(--text3);">'
-    +(item.purchase_unit?'Order unit: '+item.purchase_unit:'')+(item.packaging_unit?' · Pack: '+item.packaging_unit:'')
-    +'</div></div>'
-    +'<div style="padding:10px 14px;display:flex;gap:8px;">'
-    +'<button class="btn btn-secondary" style="flex:1;font-size:0.75rem;" onclick="copyText(\''+pad8(item.d365_id)+'\',\'D365 # copied\')">Copy D365 #</button>'
-    +(item.adaco_id ? '<button class="btn" style="flex:1;font-size:0.75rem;background:var(--surface2);color:var(--text2);" onclick="copyText(\''+item.adaco_id+'\',\'Adaco ID copied\')">Copy Adaco ID</button>' : '')
-    +'</div></div>';
-  loadItemRecipes(item.d365_id, d);
+
+    // Units + outlet membership
+    +'<div class="detail-section">'
+      +'<div class="detail-unit-row">'
+        +(item.purchase_unit ? '<span class="detail-unit-chip">Order: '+item.purchase_unit+'</span>' : '')
+        +(item.packaging_unit ? '<span class="detail-unit-chip">Pack: '+item.packaging_unit+'</span>' : '')
+      +'</div>'
+      +((inPipa||inPronto) ? '<div class="detail-outlets" style="margin-top:8px;">'
+        +(inPipa   ? '<span class="result-outlet pipa" style="font-size:0.625rem;padding:3px 8px;">PiPa</span>' : '')
+        +(inPronto ? '<span class="result-outlet pronto" style="font-size:0.625rem;padding:3px 8px;">Pronto</span>' : '')
+      +'</div>' : '')
+    +'</div>'
+
+    // Quick par set
+    +'<div class="detail-section" style="display:flex;align-items:center;gap:10px;">'
+      +'<div style="flex:1;">'
+        +'<div class="detail-section-label">Par</div>'
+        +'<div style="font-size:0.688rem;color:var(--text3);">Shared across EDT & Orders</div>'
+      +'</div>'
+      +'<input class="par-input has-par" type="number" min="0" step="any" inputmode="decimal"'
+        +' placeholder="—" value="'+currentPar+'" style="width:56px;font-size:0.95rem;"'
+        +' id="detail-par-input"'
+        +' onchange="setDetailPar(\''+item.d365_id+'\',this)" onclick="this.select()">'
+    +'</div>'
+
+    // Copy buttons
+    +'<div class="detail-btn-row">'
+      +'<button class="btn btn-secondary" style="flex:1;font-size:0.775rem;" onclick="copyText(\''+pad8(item.d365_id)+'\',\'D365 # copied\')">Copy D365 #</button>'
+      +(item.adaco_id ? '<button class="btn btn-secondary" style="flex:1;font-size:0.775rem;" onclick="copyText(\''+item.adaco_id+'\',\'Adaco ID copied\')">Copy Adaco</button>' : '')
+    +'</div>'
+    +'</div>'
+
+    // Recipe list appended by loadItemRecipes
+    +'<div id="detailRecipes"></div>';
+
+  loadItemRecipes(item.d365_id);
 }
-async function loadItemRecipes(d365Id, container) {
+
+function setDetailPar(d365id, el) {
+  const v = parseFloat(el.value);
+  if (!isNaN(v) && v >= 0) {
+    edtPars[d365id] = v; ordPars[d365id] = v;
+    el.classList.add('has-par');
+  } else {
+    edtPars[d365id] = null; ordPars[d365id] = null;
+    el.classList.remove('has-par');
+  }
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){
+    const v2 = parseFloat(el.value);
+    if (!isNaN(v2) && v2 >= 0)
+      sbUpsert('kitchen_pars',[{d365_id:d365id,par:v2}],'d365_id').catch(function(){});
+  }, 1500);
+}
+
+async function loadItemRecipes(d365Id) {
+  const container = document.getElementById('detailRecipes');
+  if (!container) return;
   try {
     const s = String(d365Id).replace(/^0+/,'') || '0';
     const items = await sbGet('ks_recipe_items?or=(d365_id.eq.'+encodeURIComponent(d365Id)+',d365_id.eq.'+encodeURIComponent(s)+')&select=recipe_number&limit=50');
     if (!items.length) return;
     const nums = items.map(function(i){ return i.recipe_number; });
     const recipes = await sbGet('ks_recipes?recipe_number=in.('+nums.join(',')+')&select=recipe_number,name,outlet,active&order=name');
-    container.insertAdjacentHTML('beforeend',
-      '<div style="background:var(--surface);border:1px solid var(--surface2);border-radius:10px;margin-top:10px;">'
-      +'<div style="padding:10px 14px;border-bottom:1px solid var(--surface2);font-size:0.563rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">Used in '+recipes.length+' recipe(s)</div>'
+    container.innerHTML =
+      '<div class="detail-card" style="margin-top:8px;">'
+      +'<div style="padding:9px 14px;border-bottom:1px solid var(--surface2);font-size:0.525rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text3);">Used in '+recipes.length+' recipe(s)</div>'
       +recipes.map(function(r){
-        return '<div style="padding:9px 14px;border-bottom:1px solid var(--surface2);">'
-          +'<div style="font-size:0.75rem;color:var(--text);">'+r.name+'</div>'
-          +'<div style="font-size:0.563rem;color:var(--text3);margin-top:2px;">'+r.recipe_number+' · '+r.outlet+(r.active?'':' · inactive')+'</div></div>';
-      }).join('')+'</div>');
+        return '<div class="detail-recipe-row">'
+          +'<div class="detail-recipe-name">'+r.name+'</div>'
+          +'<div class="detail-recipe-meta">'+r.recipe_number+' · '+r.outlet+(r.active?'':' · inactive')+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>';
   } catch(e) {}
 }
 
@@ -740,7 +975,7 @@ function renderOrders() {
 
     html +=
       '<div class="group-section">'
-      +'<div class="group-header">'
+      +'<div class="group-header collapsed" onclick="toggleOrdGroup(this)">'
         +'<div class="group-header-left">'
           +'<div class="group-title">'+vendor+'</div>'
           +'<div class="group-meta-row">'
@@ -751,9 +986,11 @@ function renderOrders() {
         +'</div>'
         +'<div class="group-actions">'
           +'<span class="group-count">'+allVendorItems.length+'</span>'
-          +'<button class="group-export-btn" onclick="exportOrdGroup('+JSON.stringify(slug)+')">⬇ CSV</button>'
+          +'<button class="group-export-btn" onclick="event.stopPropagation();exportOrdGroup('+JSON.stringify(slug)+')">⬇ CSV</button>'
         +'</div>'
+        +'<span class="group-chevron">⌄</span>'
       +'</div>'
+      +'<div class="group-body">'
       // Column headers
       +'<div class="col-heads">'
         +'<div style="flex:1;"></div>'
@@ -796,7 +1033,7 @@ function renderOrders() {
       });
     });
 
-    html += '</div>'; // .group-section
+    html += '</div></div>'; // .group-body .group-section
   });
 
   document.getElementById('ordBody').innerHTML = html;
@@ -848,6 +1085,17 @@ function setOrdQty(d365id, el) {
     if (!isNaN(v2) && v2 >= 0)
       sbUpsert('kitchen_orders',[{order_date:dateIso(),d365_id:d365id,outlet:ordOutlet,qty:v2}],'order_date,d365_id,outlet').catch(function(){});
   }, 1500);
+}
+
+// ── Toggle collapse ───────────────────────────────────────────────
+
+function toggleOrdGroup(headerEl) {
+  const body = headerEl.nextElementSibling;
+  const chevron = headerEl.querySelector('.group-chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+  headerEl.classList.toggle('collapsed', isOpen);
 }
 
 // ── Outlet toggle ─────────────────────────────────────────────────
