@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Kitchen">
 <title>Kitchen — EKP</title>
 <style>
@@ -17,7 +17,20 @@
   --green:#2D7A4F;--green-dim:rgba(45,122,79,0.12);--green-border:rgba(45,122,79,0.3);
   --blue-dim:rgba(40,80,160,0.15);--blue-border:rgba(60,120,220,0.35);
   --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+  --d365-id:#A8A09A;
 }
+html.light{
+  --bg:#F5F2EE;--surface:#FFFFFF;--surface2:#EDEBE7;--surface3:#DDD9D3;
+  --text:#1A1714;--text2:#6B635A;--text3:#9C9288;
+  --accent:#B85C00;--accent-dim:rgba(184,92,0,0.1);--accent-border:rgba(184,92,0,0.3);
+  --green:#2D7A4F;--green-dim:rgba(45,122,79,0.1);--green-border:rgba(45,122,79,0.25);
+  --blue-dim:rgba(40,80,160,0.08);--blue-border:rgba(60,120,220,0.25);
+  --d365-id:#7A7268;
+}
+
+/* Theme toggle */
+.theme-toggle{background:none;border:none;cursor:pointer;font-size:1rem;padding:2px;line-height:1;filter:grayscale(1);opacity:0.45;transition:opacity 0.15s;}
+.theme-toggle:active{opacity:0.7;}
 html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100%;-webkit-text-size-adjust:none;}
 .page{padding:calc(var(--safe-top) + 40px) 16px calc(var(--safe-bottom) + 24px);max-width:480px;margin:0 auto;}
 
@@ -64,7 +77,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .result-row:active{background:var(--surface2);}
 .result-name{font-size:0.875rem;font-weight:600;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .result-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-.result-d365{font-family:'JetBrains Mono',monospace;font-size:0.613rem;color:#A8A09A;}
+.result-d365{font-family:'JetBrains Mono',monospace;font-size:0.613rem;color:var(--d365-id);}
 .result-adaco{font-family:'JetBrains Mono',monospace;font-size:0.613rem;color:var(--text3);}
 .result-tag{font-size:0.563rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);}
 .result-vendor{font-size:0.625rem;color:var(--text3);}
@@ -99,22 +112,23 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .outlet-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
 
 /* ORDER GROUPS */
-.group-section{margin-bottom:20px;}
-.group-header{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 12px;background:var(--surface2);border-radius:8px 8px 0 0;cursor:pointer;user-select:none;}
-.group-header.collapsed{border-radius:8px;}
+.group-section{margin-bottom:14px;}
+.group-header{display:flex;justify-content:space-between;align-items:center;padding:16px 14px;background:var(--surface2);border-radius:10px;cursor:pointer;user-select:none;}
+.group-header.collapsed{border-radius:10px;}
+.group-header:not(.collapsed){border-radius:10px 10px 0 0;}
 .group-header-left{flex:1;min-width:0;}
 .group-title{font-size:1rem;font-weight:700;letter-spacing:-0.01em;color:var(--text);}
-.group-meta-row{display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap;}
+.group-meta-row{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
 .group-cutoff{font-size:0.688rem;font-weight:600;color:var(--text2);}
 .group-lead{font-size:0.638rem;color:var(--text3);}
 .group-email{font-size:0.638rem;color:#7ab3e0;font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
-.group-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px;}
-.group-count{font-size:0.625rem;color:var(--text3);}
-.group-export-btn{background:var(--surface3);border:none;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.625rem;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;}
-.group-export-btn:active{opacity:0.7;}
-.group-chevron{font-size:0.875rem;color:var(--text3);transition:transform 0.2s;flex-shrink:0;align-self:center;margin-left:6px;}
+.group-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;}
+.group-count{font-size:0.688rem;color:var(--text3);}
+.group-export-btn{background:transparent;border:1.5px solid var(--surface3);color:var(--text3);font-family:'DM Sans',sans-serif;font-size:0.625rem;font-weight:700;padding:5px 10px;border-radius:6px;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;}
+.group-export-btn:active{background:var(--surface3);}
+.group-chevron{font-size:1rem;color:var(--text3);transition:transform 0.2s;flex-shrink:0;margin-left:4px;line-height:1;}
 .group-chevron.open{transform:rotate(180deg);}
-.group-body{display:none;}
+.group-body{display:none;border:1px solid var(--surface2);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;}
 .group-body.open{display:block;}
 
 /* Category sub-header within a vendor group */
@@ -122,17 +136,17 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .cat-label{font-size:0.538rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text3);}
 
 /* Col headers — inside each group */
-.col-heads{display:flex;align-items:center;padding:4px 12px 5px;gap:4px;background:var(--surface);border-left:1px solid var(--surface2);border-right:1px solid var(--surface2);}
+.col-heads{display:flex;align-items:center;padding:4px 14px 5px;gap:4px;background:var(--surface);border-bottom:1px solid var(--surface2);}
 .col-head{font-size:0.563rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--text2);text-align:center;flex-shrink:0;}
 
 /* Item rows */
-.item-row{display:flex;align-items:center;padding:11px 12px;border-bottom:1px solid var(--surface2);gap:6px;background:var(--surface);}
-.item-row:last-child{border-bottom:none;border-radius:0 0 8px 8px;}
+.item-row{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--surface2);gap:6px;background:var(--surface);}
+.item-row:last-child{border-bottom:none;}
 .item-info{flex:1;min-width:0;}
 .item-name{font-size:0.875rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .item-meta{display:flex;gap:6px;align-items:center;margin-top:3px;}
 /* D365 ID — bright enough to read at a glance */
-.item-d365{font-family:'JetBrains Mono',monospace;font-size:0.625rem;color:#A8A09A;letter-spacing:0.02em;}
+.item-d365{font-family:'JetBrains Mono',monospace;font-size:0.625rem;color:var(--d365-id);letter-spacing:0.02em;}
 .item-unit{font-family:'JetBrains Mono',monospace;font-size:0.6rem;font-weight:700;color:var(--accent);background:var(--accent-dim);border:1px solid var(--accent-border);padding:2px 6px;border-radius:3px;}
 
 /* Number input — on hand / order qty: tall enough for easy thumb tap */
@@ -177,8 +191,13 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 <div class="page">
 
   <a class="nav-back" href="index.html">‹ PiPa Hub</a>
-  <div class="wordmark">Kitchen <span>Tool</span></div>
-  <div class="wordmark-sub">EKP · BOH Operations</div>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+    <div>
+      <div class="wordmark">Kitchen <span>Tool</span></div>
+      <div class="wordmark-sub">EKP · BOH Operations</div>
+    </div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">☀️</button>
+  </div>
 
   <!-- SHARED DATE NAV -->
   <div class="date-nav-global">
@@ -1131,8 +1150,25 @@ function exportOrdGroup(slug) {
   downloadCsv(ordCsvRows(items), outLabel+'_'+vSlug+'_'+dateIso()+'.csv');
 }
 
+// ─── THEME ───────────────────────────────────────────────────────────
+function applyTheme(mode) {
+  const isLight = mode === 'light';
+  document.documentElement.classList.toggle('light', isLight);
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.textContent = isLight ? '🌙' : '☀️';
+}
+function toggleTheme() {
+  const isLight = document.documentElement.classList.contains('light');
+  const next = isLight ? 'dark' : 'light';
+  localStorage.setItem('kp-theme', next);
+  applyTheme(next);
+}
+
 // ─── INIT ────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', updateDateUI);
+document.addEventListener('DOMContentLoaded', function() {
+  updateDateUI();
+  applyTheme(localStorage.getItem('kp-theme') || 'dark');
+});
 </script>
 </body>
 </html>
