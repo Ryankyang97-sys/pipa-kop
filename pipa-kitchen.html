@@ -38,7 +38,9 @@ html.light .group-header:not(.collapsed){border-bottom:none;}
 html.light .group-body{border-color:var(--surface3);}
 html.light .detail-card{border-color:var(--surface3);box-shadow:0 2px 8px rgba(0,0,0,0.07);}
 html.light .num-input,
-html.light .par-input{background:#EDE7DC;border-color:var(--surface3);color:var(--text);}
+html.light .par-input{color:var(--text2);}
+html.light .par-input.has-par{color:var(--text);}
+html.light .par-input:focus{background:var(--surface2);border-color:var(--surface3);}
 html.light .num-input.has-value{border-color:var(--accent);color:var(--accent);}
 html.light .filter-chip{border-color:var(--surface3);background:var(--surface);color:var(--text2);}
 html.light .filter-chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
@@ -50,7 +52,8 @@ html.light .status-pill.status-orange{background:var(--accent-dim);color:var(--a
 html.light .cat-header{background:var(--surface2);border-bottom-color:var(--surface3);}
 html.light .col-heads{background:var(--surface2);border-bottom-color:var(--surface3);}
 html.light .item-row{background:var(--surface);border-bottom-color:var(--surface3);}
-html.light .group-export-btn{border-color:var(--surface3);color:var(--text3);}
+html.light .group-export-btn{background:transparent;border-color:var(--surface3);color:var(--text3);}
+html.light .group-export-btn:active{background:var(--surface2);}
 html.light #toast{background:var(--text);color:var(--surface);}
 
 /* Theme toggle */
@@ -148,11 +151,12 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .group-lead{font-size:0.638rem;color:var(--text3);}
 .group-email{font-size:0.638rem;color:#7ab3e0;font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
 .group-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;}
-.group-count{font-size:0.688rem;color:var(--text3);}
-.group-export-btn{background:transparent;border:1.5px solid var(--surface3);color:var(--text3);font-family:'DM Sans',sans-serif;font-size:0.625rem;font-weight:700;padding:5px 10px;border-radius:6px;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;}
+.group-count{font-size:0.688rem;color:var(--text3);line-height:1;}
+.group-export-btn{background:transparent;border:1.5px solid var(--surface3);color:var(--text3);font-family:'DM Sans',sans-serif;font-size:0.625rem;font-weight:700;padding:6px 10px;border-radius:6px;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;line-height:1;vertical-align:middle;}
 .group-export-btn:active{background:var(--surface3);}
-.group-chevron{font-size:1rem;color:var(--text3);transition:transform 0.2s;flex-shrink:0;margin-left:4px;line-height:1;}
-.group-chevron.open{transform:rotate(180deg);}
+.group-chevron-btn{background:none;border:none;cursor:pointer;font-size:0.875rem;color:var(--text3);flex-shrink:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:transform 0.2s;padding:0;line-height:1;}
+.group-chevron-btn.open{transform:rotate(180deg);}
+.group-chevron-btn:active{background:var(--surface3);}
 .group-body{display:none;border:1px solid var(--surface2);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;}
 .group-body.open{display:block;}
 
@@ -202,6 +206,13 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 /* Toast */
 #toast{position:fixed;bottom:calc(var(--safe-bottom) + 24px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface3);color:var(--text);font-size:0.813rem;font-weight:600;padding:10px 18px;border-radius:24px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:999;white-space:nowrap;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:900;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border-radius:16px 16px 0 0;width:100%;max-width:480px;padding:20px 16px calc(var(--safe-bottom) + 20px);}
+.modal-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:14px;}
+html.light .modal{border-top:1.5px solid var(--surface3);}
 
 /* Loading / empty */
 .loading{text-align:center;padding:32px 16px;color:var(--text3);font-size:0.813rem;}
@@ -331,6 +342,17 @@ let dateOffset = 0;
 function dateIso() {
   const d = new Date(); d.setDate(d.getDate() + dateOffset);
   return d.toISOString().slice(0, 10);
+}
+function dateMMDD() {
+  const d = new Date(); d.setDate(d.getDate() + dateOffset);
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return mm + '-' + dd;
+}
+function xlsxName(outlet, vendor) {
+  // Format: PiPa.VENDOR NAME.MM-DD.xlsx
+  const v = (vendor || '').replace(/[/\\:*?"<>|]/g,'').trim();
+  return outlet + '.' + v + '.' + dateMMDD() + '.xlsx';
 }
 function dateFmt() {
   const d = new Date(); d.setDate(d.getDate() + dateOffset);
@@ -742,13 +764,13 @@ function renderEDT() {
     const vendorShort = vendor.replace(/^EDT\s*-\s*/i,'');
 
     html += '<div class="group-section">'
-      +'<div class="group-header collapsed" onclick="toggleOrdGroup(this)">'
+      +'<div class="group-header collapsed">'
         +'<span class="group-title">'+vendorShort+'</span>'
         +'<div class="group-actions">'
           +'<span class="group-count">'+grpItems.length+'</span>'
-          +'<button class="group-export-btn" onclick="event.stopPropagation();exportGroup('+JSON.stringify(slug)+')">⬇ CSV</button>'
+          +'<button class="group-export-btn" onclick="exportGroup('+JSON.stringify(slug)+')">⬇ Excel</button>'
+          +'<button class="group-chevron-btn" onclick="toggleOrdGroup(this.closest(\'.group-header\'))">⌄</button>'
         +'</div>'
-        +'<span class="group-chevron">⌄</span>'
       +'</div>'
       +'<div class="group-body">'
       // column labels
@@ -794,7 +816,7 @@ function renderEDT() {
 
   // Full-outlet export button
   html += '<button class="btn btn-secondary btn-full" onclick="exportAll()">'
-         +'⬇ Export All '+outLabel+' EDT</button>';
+         +'⬇ Excel All '+outLabel+' EDT</button>';
 
   document.getElementById('edtBody').innerHTML = html;
 }
@@ -856,46 +878,293 @@ function setEdtOutlet(o, btn) {
   loadEdtData();
 }
 
-// ─── CSV export ──────────────────────────────────────────────────────
-function csvRows(items) {
-  const orders = edtOrdQtys[edtOutlet];
-  const rows   = [['D365 ID','QTY','UNIT']];
+// ─── EXPORT ENGINE ────────────────────────────────────────────────────
+// Supports CSV and XLSX (vanilla — no CDN).
+// XLSX is a zip of XML; we build a minimal one using the MSO SpreadsheetML format.
+
+// ── Shared row builders ───────────────────────────────────────────────
+
+function edtBuildRows(items, outlet) {
+  const orders = edtOrdQtys[outlet || edtOutlet];
+  const rows = [['D365 ID','ITEM','QTY','UNIT']];
   items.forEach(function(item){
     const qty = orders[item.d365_id];
-    if (!qty || Number(qty) <= 0) return;
-    rows.push([pad8(item.d365_id), qty, item.unit || 'ea']);
+    rows.push([pad8(item.d365_id), item.display_name, qty > 0 ? qty : '', item.unit || 'ea']);
   });
   return rows;
 }
 
-function downloadCsv(rows, filename) {
-  if (rows.length <= 1) { toast('No items with qty > 0 to export'); return; }
-  const csv = rows.map(function(r){
+function ordBuildRows(items, outlet) {
+  const orders = ordQtys[outlet || ordOutlet];
+  const rows = [['D365 ID','ITEM','QTY','UNIT']];
+  items.forEach(function(item){
+    const qty = orders[item.d365_id];
+    rows.push([pad8(item.d365_id), item.name, qty > 0 ? qty : '', item.unit || 'ea']);
+  });
+  return rows;
+}
+
+function ordBuildRowsWithOrders(items, outlet) {
+  // Only rows with qty > 0
+  const orders = ordQtys[outlet || ordOutlet];
+  const rows = [['D365 ID','ITEM','QTY','UNIT']];
+  items.forEach(function(item){
+    const qty = orders[item.d365_id];
+    if (qty > 0) rows.push([pad8(item.d365_id), item.name, qty, item.unit || 'ea']);
+  });
+  return rows;
+}
+
+// ── CSV ───────────────────────────────────────────────────────────────
+
+function rowsToCsv(rows) {
+  return rows.map(function(r){
     return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(',');
   }).join('\n');
-  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
+}
+
+function downloadCsv(rows, filename) {
+  if (rows.length <= 1) { toast('No items to export'); return; }
+  triggerDownload(new Blob([rowsToCsv(rows)],{type:'text/csv;charset=utf-8;'}), filename);
+  toast('CSV: ' + filename);
+}
+
+// ── XLSX (vanilla SpreadsheetML — no CDN needed) ──────────────────────
+
+function rowsToXlsx(rows) {
+  // Minimal XLSX = zipped SpreadsheetML. We build the zip structure manually.
+  // Characters that need XML escaping
+  function esc(v) {
+    return String(v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+  }
+
+  // Build worksheet XML
+  const wsXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    +'<sheetData>'
+    + rows.map(function(row, ri){
+        return '<row r="'+(ri+1)+'">'
+          + row.map(function(cell, ci){
+              const col = String.fromCharCode(65+ci);
+              const ref = col+(ri+1);
+              const v = cell === '' ? '' : cell;
+              const isNum = typeof v === 'number' || (typeof v === 'string' && v !== '' && !isNaN(Number(v)) && v.trim() !== '');
+              if (isNum && v !== '') return '<c r="'+ref+'"><v>'+esc(v)+'</v></c>';
+              return '<c r="'+ref+'" t="inlineStr"><is><t>'+esc(v)+'</t></is></c>';
+            }).join('')
+          +'</row>';
+      }).join('')
+    +'</sheetData></worksheet>';
+
+  const wbXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+    +' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+    +'<sheets><sheet name="Order" sheetId="1" r:id="rId1"/></sheets></workbook>';
+
+  const relsXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+    +'</Relationships>';
+
+  const contentXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    +'<Default Extension="xml" ContentType="application/xml"/>'
+    +'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+    +'<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+    +'</Types>';
+
+  // Minimal zip builder (stored, no compression — sufficient for xlsx)
+  function toBytes(str) {
+    const bytes = [];
+    for (let i = 0; i < str.length; i++) {
+      const c = str.charCodeAt(i);
+      if (c < 128) { bytes.push(c); }
+      else if (c < 2048) { bytes.push(0xC0|(c>>6), 0x80|(c&63)); }
+      else { bytes.push(0xE0|(c>>12), 0x80|((c>>6)&63), 0x80|(c&63)); }
+    }
+    return new Uint8Array(bytes);
+  }
+
+  function crc32(data) {
+    let crc = 0xFFFFFFFF;
+    const table = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let j = 0; j < 8; j++) c = (c&1) ? (0xEDB88320^(c>>>1)) : (c>>>1);
+      table[i] = c;
+    }
+    for (let i = 0; i < data.length; i++) crc = table[(crc^data[i])&255]^(crc>>>8);
+    return (crc^0xFFFFFFFF) >>> 0;
+  }
+
+  function u16(n) { return [n&255,(n>>8)&255]; }
+  function u32(n) { return [n&255,(n>>8)&255,(n>>16)&255,(n>>24)&255]; }
+
+  function zipEntry(name, content) {
+    const nameBytes = toBytes(name);
+    const data = toBytes(content);
+    const crc = crc32(data);
+    const local = [0x50,0x4B,0x03,0x04, 20,0, 0,0, 0,0, 0,0, 0,0,
+      ...u32(crc), ...u32(data.length), ...u32(data.length),
+      ...u16(nameBytes.length), 0,0, ...nameBytes, ...data];
+    const central = [0x50,0x4B,0x01,0x02, 20,0, 20,0, 0,0, 0,0, 0,0,
+      ...u32(crc), ...u32(data.length), ...u32(data.length),
+      ...u16(nameBytes.length), 0,0, 0,0, 0,0, 0,0, 0,0,0,0, 0,0,0,0,
+      ...nameBytes];
+    return { local, central, nameLen: nameBytes.length, size: data.length };
+  }
+
+  const files = [
+    ['[Content_Types].xml',      contentXml],
+    ['_rels/.rels',              '<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+    ['xl/workbook.xml',          wbXml],
+    ['xl/_rels/workbook.xml.rels', relsXml],
+    ['xl/worksheets/sheet1.xml', wsXml]
+  ];
+
+  const entries = files.map(function(f){ return zipEntry(f[0], f[1]); });
+
+  let offset = 0;
+  const localParts = [];
+  const offsets = [];
+  entries.forEach(function(e){
+    offsets.push(offset);
+    localParts.push(e.local);
+    offset += e.local.length;
+  });
+
+  const centralDir = [];
+  entries.forEach(function(e, i){
+    const c = e.central.slice();
+    // Patch relative offset into central dir (bytes 42-45)
+    const off = u32(offsets[i]);
+    c[42]=off[0];c[43]=off[1];c[44]=off[2];c[45]=off[3];
+    centralDir.push(...c);
+  });
+
+  const centralStart = offset;
+  const centralLen = centralDir.length;
+  const eocd = [0x50,0x4B,0x05,0x06, 0,0, 0,0,
+    ...u16(entries.length), ...u16(entries.length),
+    ...u32(centralLen), ...u32(centralStart), 0,0];
+
+  const allBytes = [];
+  localParts.forEach(function(p){ allBytes.push(...p); });
+  allBytes.push(...centralDir, ...eocd);
+
+  return new Uint8Array(allBytes);
+}
+
+function downloadXlsx(rows, filename) {
+  if (rows.length <= 1) { toast('No items to export'); return; }
+  const bytes = rowsToXlsx(rows);
+  triggerDownload(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}), filename);
+  toast('XLSX: ' + filename);
+}
+
+// ── Shared trigger ────────────────────────────────────────────────────
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-  toast('Exported ' + (rows.length-1) + ' item(s) ✓');
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
 }
+
+// ── Export name prompt modal ──────────────────────────────────────────
+
+let _exportPendingCb = null;
+
+function promptExport(defaultName, cb) {
+  _exportPendingCb = cb;
+  document.getElementById('exportNameInput').value = defaultName.replace(/\.[^.]+$/,'');
+  document.getElementById('exportExt').textContent = defaultName.replace(/.*(\.[^.]+)$/,'$1');
+  document.getElementById('exportModal').classList.add('show');
+  setTimeout(function(){ document.getElementById('exportNameInput').select(); }, 80);
+}
+
+function confirmExport() {
+  const modal = document.getElementById('exportModal');
+  const name  = (document.getElementById('exportNameInput').value.trim() || 'export')
+                + document.getElementById('exportExt').textContent;
+  modal.classList.remove('show');
+  if (_exportPendingCb) { _exportPendingCb(name); _exportPendingCb = null; }
+}
+
+function cancelExport() {
+  document.getElementById('exportModal').classList.remove('show');
+  _exportPendingCb = null;
+}
+
+// ── EDT exports ───────────────────────────────────────────────────────
 
 function exportGroup(slug) {
   const items = edtGroupMap[slug];
   if (!items || !items.length) { toast('Group not found'); return; }
   const vendor   = slug.split('||')[1] || slug;
-  const vSlug    = vendor.replace(/[^a-z0-9]/gi,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+  const vLabel   = vendor.replace(/^EDT\s*-\s*/i,'');
   const outLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  downloadCsv(csvRows(items), 'EDT_'+outLabel+'_'+vSlug+'_'+dateIso()+'.csv');
+  promptExport(xlsxName(outLabel, 'EDT.' + vLabel), function(name){
+    const rows = edtBuildRows(items);
+    name.endsWith('.csv') ? downloadCsv(rows, name) : downloadXlsx(rows, name);
+  });
 }
 
 function exportAll() {
   const items = edtItems[edtOutlet] || [];
   if (!items.length) { toast('No items loaded'); return; }
   const outLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  downloadCsv(csvRows(items), 'EDT_'+outLabel+'_'+dateIso()+'.csv');
+  promptExport(xlsxName(outLabel, 'EDT.All'), function(name){
+    const rows = edtBuildRows(items);
+    name.endsWith('.csv') ? downloadCsv(rows, name) : downloadXlsx(rows, name);
+  });
+}
+
+// ── Orders exports ────────────────────────────────────────────────────
+
+function exportOrdGroup(slug) {
+  const items = ordGroupMap[slug];
+  if (!items || !items.length) { toast('Group not found'); return; }
+  const vendor   = slug.split('||')[1] || slug;
+  const outLabel = ordOutlet === 'pipa' ? 'PiPa' : 'Pronto';
+  promptExport(xlsxName(outLabel, vendor), function(name){
+    const rows = ordBuildRows(items);
+    name.endsWith('.csv') ? downloadCsv(rows, name) : downloadXlsx(rows, name);
+  });
+}
+
+// Export all vendors that have at least one order qty > 0 — one file per vendor in sequence
+function exportAllOrdVendors() {
+  const orders   = ordQtys[ordOutlet];
+  const outLabel = ordOutlet === 'pipa' ? 'PiPa' : 'Pronto';
+  const slugs    = Object.keys(ordGroupMap).filter(function(slug){
+    return slug.startsWith(ordOutlet+'||') &&
+      ordGroupMap[slug].some(function(item){ return orders[item.d365_id] > 0; });
+  });
+
+  if (!slugs.length) { toast('No vendors with orders to export'); return; }
+
+  promptExport(xlsxName(outLabel, 'Orders.All'), function(name){
+    const useXlsx = !name.endsWith('.csv');
+    const ext     = useXlsx ? '.xlsx' : '.csv';
+    let count = 0;
+    slugs.forEach(function(slug, i){
+      setTimeout(function(){
+        const vendor   = slug.split('||')[1];
+        const filename = xlsxName(outLabel, vendor).replace(/\.xlsx$/, ext);
+        const rows     = ordBuildRowsWithOrders(ordGroupMap[slug]);
+        if (rows.length > 1) {
+          useXlsx ? downloadXlsx(rows, filename) : downloadCsv(rows, filename);
+          count++;
+        }
+        if (i === slugs.length-1) toast('Exported ' + count + ' vendor file(s) ✓');
+      }, i * 400);
+    });
+  });
 }
 
 // ─── ORDERS TAB ─────────────────────────────────────────────────────
@@ -1021,7 +1290,7 @@ function renderOrders() {
 
     html +=
       '<div class="group-section">'
-      +'<div class="group-header collapsed" onclick="toggleOrdGroup(this)">'
+      +'<div class="group-header collapsed">'
         +'<div class="group-header-left">'
           +'<div class="group-title">'+vendor+'</div>'
           +'<div class="group-meta-row">'
@@ -1032,9 +1301,9 @@ function renderOrders() {
         +'</div>'
         +'<div class="group-actions">'
           +'<span class="group-count">'+allVendorItems.length+'</span>'
-          +'<button class="group-export-btn" onclick="event.stopPropagation();exportOrdGroup('+JSON.stringify(slug)+')">⬇ CSV</button>'
+          +'<button class="group-export-btn" onclick="exportOrdGroup('+JSON.stringify(slug)+')">⬇ Excel</button>'
+          +'<button class="group-chevron-btn" onclick="toggleOrdGroup(this.closest(\'.group-header\'))">⌄</button>'
         +'</div>'
-        +'<span class="group-chevron">⌄</span>'
       +'</div>'
       +'<div class="group-body">'
       // Column headers
@@ -1081,6 +1350,9 @@ function renderOrders() {
 
     html += '</div></div>'; // .group-body .group-section
   });
+
+  // Export all vendors with orders
+  html += '<button class="btn btn-secondary btn-full" style="margin-top:4px;" onclick="exportAllOrdVendors()">⬇ Excel All ' + outLabel + ' Orders</button>';
 
   document.getElementById('ordBody').innerHTML = html;
 }
@@ -1137,10 +1409,10 @@ function setOrdQty(d365id, el) {
 
 function toggleOrdGroup(headerEl) {
   const body = headerEl.nextElementSibling;
-  const chevron = headerEl.querySelector('.group-chevron');
+  const chevron = headerEl.querySelector('.group-chevron-btn');
   const isOpen = body.classList.contains('open');
   body.classList.toggle('open', !isOpen);
-  chevron.classList.toggle('open', !isOpen);
+  if (chevron) chevron.classList.toggle('open', !isOpen);
   headerEl.classList.toggle('collapsed', isOpen);
 }
 
@@ -1154,26 +1426,6 @@ function setOrdOutlet(o, btn) {
 }
 
 // ── CSV export ────────────────────────────────────────────────────
-
-function ordCsvRows(items) {
-  const orders = ordQtys[ordOutlet];
-  const rows   = [['D365 ID','QTY','UNIT']];
-  items.forEach(function(item){
-    const qty = orders[item.d365_id];
-    if (!qty || Number(qty) <= 0) return;
-    rows.push([pad8(item.d365_id), qty, item.unit || 'ea']);
-  });
-  return rows;
-}
-
-function exportOrdGroup(slug) {
-  const items = ordGroupMap[slug];
-  if (!items || !items.length) { toast('Group not found'); return; }
-  const vendor   = slug.split('||')[1] || slug;
-  const vSlug    = vendor.replace(/[^a-z0-9]/gi,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
-  const outLabel = ordOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  downloadCsv(ordCsvRows(items), outLabel+'_'+vSlug+'_'+dateIso()+'.csv');
-}
 
 // ─── THEME ───────────────────────────────────────────────────────────
 function applyTheme(mode) {
@@ -1195,5 +1447,21 @@ document.addEventListener('DOMContentLoaded', function() {
   applyTheme(localStorage.getItem('kp-theme') || 'dark');
 });
 </script>
+<!-- EXPORT NAME MODAL -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <div class="modal-title">Name your export</div>
+    <div style="display:flex;align-items:center;gap:0;margin-bottom:16px;">
+      <input id="exportNameInput" style="flex:1;background:var(--surface2);border:1px solid var(--surface3);border-radius:7px 0 0 7px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.875rem;padding:10px 12px;outline:none;min-width:0;" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')confirmExport()">
+      <span id="exportExt" style="background:var(--surface3);border:1px solid var(--surface3);border-left:none;border-radius:0 7px 7px 0;color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:0.75rem;padding:10px 10px;white-space:nowrap;">.xlsx</span>
+    </div>
+    <div style="font-size:0.638rem;color:var(--text3);margin-bottom:16px;">Change extension to <strong>.csv</strong> for plain CSV format</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-secondary" style="flex:1;" onclick="cancelExport()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="confirmExport()">Download</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
