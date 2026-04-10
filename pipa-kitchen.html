@@ -881,12 +881,20 @@ function setEdtOutlet(o, btn) {
 // ── Row builders — only items with qty > 0, Dynamics format ──────────
 // Returns [{item, qty, unit}] — item is stripped (no leading zeros) to match D365
 
+// Format D365 ID for Dynamics import:
+// 6-digit IDs → pad to 8 (e.g. 693172 → 00693172)
+// 7-digit IDs → leave as-is (e.g. 2057747 → 2057747)
+function dynId(id) {
+  const s = String(Number(id)); // strip leading zeros first
+  return s.length <= 6 ? s.padStart(8, '0') : s;
+}
+
 function edtBuildOrderRows(items, outlet) {
   const orders = edtOrdQtys[outlet || edtOutlet];
   const out = [];
   items.forEach(function(item){
     const qty = orders[item.d365_id];
-    if (qty > 0) out.push({ item: String(Number(item.d365_id)), qty: qty, unit: item.unit || 'ea' });
+    if (qty > 0) out.push({ item: dynId(item.d365_id), qty: qty, unit: item.unit || 'ea' });
   });
   return out;
 }
@@ -896,7 +904,7 @@ function ordBuildOrderRows(items, outlet) {
   const out = [];
   items.forEach(function(item){
     const qty = orders[item.d365_id];
-    if (qty > 0) out.push({ item: String(Number(item.d365_id)), qty: qty, unit: item.unit || 'ea' });
+    if (qty > 0) out.push({ item: dynId(item.d365_id), qty: qty, unit: item.unit || 'ea' });
   });
   return out;
 }
