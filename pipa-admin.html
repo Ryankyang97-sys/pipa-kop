@@ -1456,11 +1456,12 @@ function renderAdmin() {
   var el = document.getElementById('view-admin');
 
   var sections = [
-    { key:'products', label:'Products', icon:'📦' },
-    { key:'recipes', label:'Recipes', icon:'📋' },
-    { key:'btg', label:'BTG Wines', icon:'🍷' },
-    { key:'checklist', label:'Checklists', icon:'✅' },
-    { key:'pin', label:'Manager PIN', icon:'🔐' },
+    { key:'products',    label:'Products',    icon:'📦' },
+    { key:'recipes',     label:'Recipes',     icon:'📋' },
+    { key:'orderitems',  label:'Order Items', icon:'🛒' },
+    { key:'btg',         label:'BTG Wines',   icon:'🍷' },
+    { key:'checklist',   label:'Checklists',  icon:'✅' },
+    { key:'pin',         label:'Manager PIN', icon:'🔐' },
   ];
 
   // Build tabs using DOM to avoid quote issues
@@ -1481,6 +1482,7 @@ function renderAdmin() {
   var bodyEl = document.createElement('div');
   if (adminSection === 'products') renderAdminProducts(bodyEl);
   else if (adminSection === 'recipes') renderAdminRecipes(bodyEl);
+  else if (adminSection === 'orderitems') renderAdminOrderItems(bodyEl);
   else if (adminSection === 'btg') renderAdminBTG(bodyEl);
   else if (adminSection === 'checklist') renderAdminChecklist(bodyEl);
   else if (adminSection === 'pin') renderAdminPIN(bodyEl);
@@ -1882,6 +1884,499 @@ function escHtml(s) {
 }
 
 // ── ADMIN: RECIPE CONTROL ────────────────────────────────────────────────────
+// ── ADMIN: ORDER ITEMS ──────────────────────────────────────────────────────
+// Manages kitchen_order_items — the live source for pipa-kitchen vendor order guides.
+// Each row = one item on one outlet's order guide (pipa or pronto).
+// Fields: outlet, vendor, vendor_cutoff, vendor_email, vendor_lead, vendor_sort,
+//         category, d365_id, name, unit, sort_order, active, activation_tag
+// activation_tag = free-text label (e.g. "Mother's Day 2026") — used for bulk toggle.
+
+var ordItemsCache    = null;   // flat array of all rows
+var ordItemsOutlet   = 'pipa'; // current outlet filter
+var ordItemsFilter   = 'all';  // 'all' | 'active' | 'inactive' | 'activation'
+var ordItemsSearch   = '';
+var ordItemsBodyEl   = null;   // reference to section body for re-renders
+var ordItemsAddMode  = false;  // showing add form?
+var ordItemsEditId   = null;   // id of row being edited (null = new)
+
+function renderAdminOrderItems(el) {
+  ordItemsBodyEl = el;
+  el.innerHTML = '';
+
+  // ── Note ──
+  var note = document.createElement('div');
+  note.style.cssText = 'font-size:0.688rem;color:var(--text3);margin-bottom:12px;line-height:1.6;';
+  note.innerHTML = 'Manage the vendor order guides shown in <strong style="color:var(--text2);">pipa-kitchen → Orders</strong>. '
+    + 'Toggle items active/inactive, add activation items, or bulk-toggle by tag. '
+    + 'Changes apply immediately — reload pipa-kitchen to see them.';
+  el.appendChild(note);
+
+  // ── Outlet toggle ──
+  var outRow = document.createElement('div');
+  outRow.style.cssText = 'display:flex;gap:6px;margin-bottom:10px;';
+  ['pipa','pronto'].forEach(function(o) {
+    var b = document.createElement('button');
+    b.textContent = o === 'pipa' ? '🍕 PiPa' : '🥐 Pronto';
+    b.style.cssText = 'flex:1;padding:8px;border-radius:10px;border:1.5px solid;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;'
+      + (ordItemsOutlet === o ? 'background:var(--accent);border-color:var(--accent);color:#fff;' : 'background:var(--surface2);border-color:var(--surface3);color:var(--text2);');
+    b.onclick = function() { ordItemsOutlet = o; ordItemsCache = null; renderAdminOrderItems(el); };
+    outRow.appendChild(b);
+  });
+  el.appendChild(outRow);
+
+  // ── Filter pills ──
+  var filterRow = document.createElement('div');
+  filterRow.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;';
+  [['all','All'],['active','✓ Active'],['inactive','✗ Inactive'],['activation','🌱 Activation']].forEach(function(f) {
+    var c = document.createElement('button');
+    c.textContent = f[1];
+    c.style.cssText = 'padding:5px 12px;border-radius:20px;border:1px solid;font-size:0.688rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;'
+      + (ordItemsFilter === f[0] ? 'background:var(--accent);border-color:var(--accent);color:#fff;' : 'background:var(--surface2);border-color:var(--surface3);color:var(--text2);');
+    c.onclick = function() { ordItemsFilter = f[0]; renderAdminOrderItems(el); };
+    filterRow.appendChild(c);
+  });
+  el.appendChild(filterRow);
+
+  // ── Search ──
+  var sw = document.createElement('div');
+  sw.style.cssText = 'position:relative;margin-bottom:10px;';
+  var si = document.createElement('input');
+  si.type = 'search'; si.placeholder = 'Name, D365#, vendor, or tag…';
+  si.value = ordItemsSearch; si.autocomplete = 'off';
+  si.style.cssText = 'width:100%;background:var(--surface);border:1.5px solid var(--surface3);border-radius:12px;padding:10px 14px 10px 36px;color:var(--text);font-size:0.875rem;font-family:\'DM Sans\',sans-serif;outline:none;-webkit-appearance:none;';
+  si.addEventListener('focus', function(){ this.style.borderColor='var(--accent)'; });
+  si.addEventListener('blur',  function(){ this.style.borderColor='var(--surface3)'; });
+  si.oninput = function(){ ordItemsSearch = this.value; _renderOrdItemsList(el); };
+  var sico = document.createElement('span');
+  sico.textContent = '🔍'; sico.style.cssText = 'position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:0.813rem;pointer-events:none;';
+  sw.appendChild(sico); sw.appendChild(si);
+  el.appendChild(sw);
+
+  // ── + Add Item button ──
+  var addBtn = document.createElement('button');
+  addBtn.textContent = '+ Add Item to Order Guide';
+  addBtn.style.cssText = 'width:100%;padding:10px;border-radius:10px;border:1.5px dashed var(--surface3);background:transparent;color:var(--accent);font-size:0.813rem;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-bottom:14px;';
+  addBtn.onclick = function() { _showOrdItemForm(el, null); };
+  el.appendChild(addBtn);
+
+  // ── List container ──
+  var listEl = document.createElement('div');
+  listEl.id = 'oi-list';
+  el.appendChild(listEl);
+
+  // Load data
+  if (ordItemsCache) {
+    _renderOrdItemsList(el);
+  } else {
+    listEl.innerHTML = '<div style="color:var(--text3);font-size:0.813rem;padding:20px 0;text-align:center;">Loading…</div>';
+    _loadOrdItems(el);
+  }
+}
+
+async function _loadOrdItems(el) {
+  try {
+    var url = SUPA_URL + '/rest/v1/kitchen_order_items?outlet=eq.' + ordItemsOutlet
+      + '&select=id,outlet,vendor,vendor_cutoff,vendor_email,vendor_lead,vendor_sort,category,d365_id,name,unit,sort_order,active,activation_tag'
+      + '&order=vendor_sort.asc,sort_order.asc,name.asc&limit=1000';
+    var r = await fetch(url, { headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY } });
+    ordItemsCache = await r.json();
+    if (!Array.isArray(ordItemsCache)) { ordItemsCache = []; }
+    _renderOrdItemsList(el);
+  } catch(e) {
+    var li = document.getElementById('oi-list');
+    if (li) li.innerHTML = '<div style="color:var(--red-bright);font-size:0.813rem;padding:12px;">Error loading order items: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+function _renderOrdItemsList(el) {
+  var li = document.getElementById('oi-list');
+  if (!li) return;
+  if (!ordItemsCache) { li.innerHTML = '<div style="color:var(--text3);font-size:0.813rem;padding:20px 0;text-align:center;">Loading…</div>'; return; }
+
+  var rows = ordItemsCache;
+
+  // Filter
+  if (ordItemsFilter === 'active')     rows = rows.filter(function(r){ return r.active !== false; });
+  if (ordItemsFilter === 'inactive')   rows = rows.filter(function(r){ return r.active === false; });
+  if (ordItemsFilter === 'activation') rows = rows.filter(function(r){ return r.activation_tag && r.activation_tag.trim(); });
+
+  // Search
+  var q = (ordItemsSearch || '').trim().toLowerCase();
+  if (q) {
+    rows = rows.filter(function(r){
+      return (r.name||'').toLowerCase().includes(q)
+          || (r.d365_id||'').includes(q)
+          || (r.vendor||'').toLowerCase().includes(q)
+          || (r.activation_tag||'').toLowerCase().includes(q)
+          || (r.category||'').toLowerCase().includes(q);
+    });
+  }
+
+  if (!rows.length) {
+    li.innerHTML = '<div style="color:var(--text3);font-size:0.813rem;padding:20px 0;text-align:center;">No items match.</div>';
+    return;
+  }
+
+  // Group by vendor
+  var vendors = [], vmap = {};
+  rows.forEach(function(row){
+    if (!vmap[row.vendor]) { vmap[row.vendor] = []; vendors.push(row.vendor); }
+    vmap[row.vendor].push(row);
+  });
+
+  li.innerHTML = '';
+
+  // Bulk activation-tag toggle header (only when filtering by activation)
+  if (ordItemsFilter === 'activation' && rows.length) {
+    var tags = [...new Set(rows.map(function(r){ return r.activation_tag; }).filter(Boolean))];
+    if (tags.length) {
+      var bulkWrap = document.createElement('div');
+      bulkWrap.style.cssText = 'background:var(--surface);border-radius:10px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--surface3);';
+      var bulkTitle = document.createElement('div');
+      bulkTitle.style.cssText = 'font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:8px;';
+      bulkTitle.textContent = 'Bulk Toggle by Activation Tag';
+      bulkWrap.appendChild(bulkTitle);
+      tags.forEach(function(tag){
+        var tagRow = document.createElement('div');
+        tagRow.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px;';
+        var tagLabel = document.createElement('div');
+        tagLabel.style.cssText = 'flex:1;font-size:0.813rem;font-weight:600;color:var(--text);';
+        tagLabel.textContent = tag;
+        var tagCount = document.createElement('div');
+        tagCount.style.cssText = 'font-size:0.625rem;color:var(--text3);';
+        var tagItems = rows.filter(function(r){ return r.activation_tag === tag; });
+        var anyActive = tagItems.some(function(r){ return r.active !== false; });
+        tagCount.textContent = tagItems.length + ' items';
+        var onBtn = document.createElement('button');
+        onBtn.textContent = '✓ All On';
+        onBtn.style.cssText = 'padding:5px 10px;border-radius:8px;border:1px solid var(--green);background:var(--green-dim);color:var(--green-bright);font-size:0.688rem;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+        onBtn.onclick = function(){ _bulkToggleTag(tag, true, el); };
+        var offBtn = document.createElement('button');
+        offBtn.textContent = '✗ All Off';
+        offBtn.style.cssText = 'padding:5px 10px;border-radius:8px;border:1px solid var(--red);background:var(--red-dim);color:var(--red-bright);font-size:0.688rem;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+        offBtn.onclick = function(){ _bulkToggleTag(tag, false, el); };
+        tagRow.appendChild(tagLabel);
+        tagRow.appendChild(tagCount);
+        tagRow.appendChild(onBtn);
+        tagRow.appendChild(offBtn);
+        bulkWrap.appendChild(tagRow);
+      });
+      li.appendChild(bulkWrap);
+    }
+  }
+
+  // Count label
+  var countEl = document.createElement('div');
+  countEl.style.cssText = 'font-size:0.563rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;';
+  countEl.textContent = rows.length + ' item' + (rows.length !== 1 ? 's' : '');
+  li.appendChild(countEl);
+
+  vendors.forEach(function(vendor){
+    var vrows = vmap[vendor];
+
+    // Vendor header
+    var vhdr = document.createElement('div');
+    vhdr.style.cssText = 'font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);padding:12px 0 5px;';
+    vhdr.textContent = vendor + ' (' + vrows.length + ')';
+    li.appendChild(vhdr);
+
+    var group = document.createElement('div');
+    group.style.cssText = 'background:var(--surface);border-radius:12px;overflow:hidden;border:1px solid var(--surface3);margin-bottom:10px;';
+
+    vrows.forEach(function(row, idx){
+      var isActive = row.active !== false;
+      var rowEl = document.createElement('div');
+      rowEl.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;'
+        + (idx < vrows.length - 1 ? 'border-bottom:1px solid var(--surface2);' : '')
+        + (!isActive ? 'opacity:0.4;' : '');
+
+      // Info
+      var info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0;';
+      info.innerHTML = '<div style="font-size:0.813rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
+        + escHtml(row.name) + '</div>'
+        + '<div style="font-size:0.563rem;color:var(--text3);font-family:\'JetBrains Mono\',monospace;margin-top:2px;">'
+        + escHtml(row.d365_id||'—') + ' · ' + escHtml(row.category||'—') + ' · ' + escHtml(row.unit||'ea')
+        + (row.activation_tag ? ' <span style="color:var(--accent);font-size:0.5rem;">🌱 ' + escHtml(row.activation_tag) + '</span>' : '')
+        + '</div>';
+
+      // Edit button
+      var editBtn = document.createElement('button');
+      editBtn.textContent = '✏️';
+      editBtn.title = 'Edit';
+      editBtn.style.cssText = 'flex-shrink:0;background:var(--surface2);border:1px solid var(--surface3);border-radius:8px;padding:5px 8px;cursor:pointer;font-size:0.75rem;';
+      editBtn.onclick = (function(r){ return function(){ _showOrdItemForm(ordItemsBodyEl, r); }; })(row);
+
+      // Toggle checkbox
+      var cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.checked = isActive;
+      cb.style.cssText = 'width:20px;height:20px;cursor:pointer;flex-shrink:0;accent-color:var(--accent);';
+      cb.addEventListener('change', (function(rowData, rowEl2){
+        return function(){
+          var nowActive = this.checked;
+          rowEl2.style.opacity = nowActive ? '1' : '0.4';
+          // Update cache immediately
+          rowData.active = nowActive;
+          _patchOrdItem(rowData.id, { active: nowActive }, escHtml(rowData.name));
+        };
+      })(row, rowEl));
+
+      rowEl.appendChild(info);
+      rowEl.appendChild(editBtn);
+      rowEl.appendChild(cb);
+      group.appendChild(rowEl);
+    });
+
+    li.appendChild(group);
+  });
+}
+
+async function _patchOrdItem(id, body, label) {
+  try {
+    var r = await fetch(SUPA_URL + '/rest/v1/kitchen_order_items?id=eq.' + id, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) { toast('Save failed (' + r.status + ')', true); return; }
+    toast((body.active !== undefined ? (body.active ? '✓ On: ' : '✗ Off: ') : '✓ Saved: ') + label);
+  } catch(e) { toast('Error: ' + e.message, true); }
+}
+
+async function _bulkToggleTag(tag, active, el) {
+  var tagItems = (ordItemsCache||[]).filter(function(r){ return r.activation_tag === tag && r.outlet === ordItemsOutlet; });
+  if (!tagItems.length) { toast('No items for tag'); return; }
+  var ids = tagItems.map(function(r){ return r.id; });
+  // Patch in one request using IN filter
+  try {
+    var r = await fetch(SUPA_URL + '/rest/v1/kitchen_order_items?id=in.(' + ids.join(',') + ')', {
+      method: 'PATCH',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ active: active })
+    });
+    if (!r.ok) { toast('Bulk update failed (' + r.status + ')', true); return; }
+    // Update cache
+    tagItems.forEach(function(row){ row.active = active; });
+    toast((active ? '✓ All on: ' : '✗ All off: ') + tag + ' (' + tagItems.length + ' items)');
+    _renderOrdItemsList(el);
+  } catch(e) { toast('Error: ' + e.message, true); }
+}
+
+// ── Add / Edit form ──────────────────────────────────────────────────────────
+function _showOrdItemForm(el, row) {
+  // Remove any existing form
+  var existing = document.getElementById('oi-form-wrap');
+  if (existing) { existing.remove(); if (!row && ordItemsEditId === null) return; }
+  ordItemsEditId = row ? row.id : null;
+
+  var isNew = !row;
+  var wrap = document.createElement('div');
+  wrap.id = 'oi-form-wrap';
+  wrap.style.cssText = 'background:var(--surface2);border-radius:14px;padding:16px;margin-bottom:14px;border:1px solid var(--accent);';
+
+  var title = document.createElement('div');
+  title.style.cssText = 'font-size:0.688rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin-bottom:12px;';
+  title.textContent = isNew ? '+ New Order Guide Item' : '✏️ Edit Item';
+  wrap.appendChild(title);
+
+  // Field builder helper
+  function field(labelText, id, value, placeholder, type) {
+    var g = document.createElement('div');
+    g.style.cssText = 'margin-bottom:10px;';
+    var l = document.createElement('label');
+    l.style.cssText = 'font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);display:block;margin-bottom:4px;';
+    l.textContent = labelText;
+    var i = document.createElement('input');
+    i.type = type || 'text'; i.id = 'oif-' + id; i.value = value || '';
+    i.placeholder = placeholder || '';
+    i.autocomplete = 'off';
+    i.style.cssText = 'width:100%;background:var(--surface);border:1.5px solid var(--surface3);border-radius:10px;padding:9px 12px;color:var(--text);font-size:0.875rem;font-family:\'DM Sans\',sans-serif;outline:none;-webkit-appearance:none;';
+    i.addEventListener('focus', function(){ this.style.borderColor='var(--accent)'; });
+    i.addEventListener('blur',  function(){ this.style.borderColor='var(--surface3)'; });
+    g.appendChild(l); g.appendChild(i);
+    return g;
+  }
+
+  function selectField(labelText, id, value, options) {
+    var g = document.createElement('div');
+    g.style.cssText = 'margin-bottom:10px;';
+    var l = document.createElement('label');
+    l.style.cssText = 'font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);display:block;margin-bottom:4px;';
+    l.textContent = labelText;
+    var s = document.createElement('select');
+    s.id = 'oif-' + id;
+    s.style.cssText = 'width:100%;background:var(--surface);border:1.5px solid var(--surface3);border-radius:10px;padding:9px 12px;color:var(--text);font-size:0.875rem;font-family:\'DM Sans\',sans-serif;outline:none;-webkit-appearance:none;';
+    options.forEach(function(o){
+      var opt = document.createElement('option');
+      opt.value = o[0]; opt.textContent = o[1];
+      if (o[0] === value) opt.selected = true;
+      s.appendChild(opt);
+    });
+    g.appendChild(l); g.appendChild(s);
+    return g;
+  }
+
+  // Two-column layout for compact fields
+  function row2(a, b) {
+    var r = document.createElement('div');
+    r.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;';
+    r.appendChild(a); r.appendChild(b);
+    return r;
+  }
+
+  wrap.appendChild(row2(
+    field('D365 #', 'd365', row ? row.d365_id : '', '00102457'),
+    field('Item Name', 'name', row ? row.name : '', 'LOBSTER, LIVE CHIX…')
+  ));
+  wrap.appendChild(row2(
+    selectField('Outlet', 'outlet', row ? row.outlet : ordItemsOutlet, [['pipa','PiPa'],['pronto','Pronto']]),
+    selectField('Unit', 'unit', row ? (row.unit||'ea') : 'ea', [['ea','ea'],['lb','lb'],['oz','oz'],['cs','cs'],['kg','kg'],['each','each']])
+  ));
+  wrap.appendChild(field('Vendor', 'vendor', row ? row.vendor : '', 'BALDOR'));
+  wrap.appendChild(row2(
+    field('Category', 'category', row ? row.category : '', 'Produce'),
+    field('Sort Order', 'sort_order', row ? row.sort_order : '', '100', 'number')
+  ));
+  wrap.appendChild(row2(
+    field('Vendor Sort', 'vendor_sort', row ? row.vendor_sort : '', '1', 'number'),
+    field('Cutoff Time', 'vendor_cutoff', row ? (row.vendor_cutoff||'') : '', '⏰ 10:00 PM')
+  ));
+  wrap.appendChild(row2(
+    field('Vendor Email', 'vendor_email', row ? (row.vendor_email||'') : '', 'orders@baldor.com'),
+    field('Lead Days', 'vendor_lead', row ? (row.vendor_lead||'') : '', 'Lead: 5 days')
+  ));
+  wrap.appendChild(field('Activation Tag', 'activation_tag', row ? (row.activation_tag||'') : '', 'e.g. Mother\'s Day 2026 — leave blank for regular item'));
+
+  // Active toggle row
+  var activeRow = document.createElement('div');
+  activeRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;';
+  var activeLabel = document.createElement('div');
+  activeLabel.style.cssText = 'font-size:0.813rem;font-weight:600;color:var(--text);';
+  activeLabel.textContent = 'Active on order guide';
+  var activeCb = document.createElement('input');
+  activeCb.type = 'checkbox'; activeCb.id = 'oif-active';
+  activeCb.checked = row ? row.active !== false : true;
+  activeCb.style.cssText = 'width:22px;height:22px;cursor:pointer;accent-color:var(--accent);';
+  activeRow.appendChild(activeLabel); activeRow.appendChild(activeCb);
+  wrap.appendChild(activeRow);
+
+  // Buttons
+  var btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:8px;';
+
+  var saveBtn = document.createElement('button');
+  saveBtn.textContent = isNew ? 'Add to Order Guide' : 'Save Changes';
+  saveBtn.style.cssText = 'flex:1;padding:11px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:0.813rem;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+  saveBtn.onclick = function(){ _saveOrdItem(isNew, row, el); };
+
+  var cancelBtn = document.createElement('button');
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.style.cssText = 'flex:1;padding:11px;border-radius:10px;border:1px solid var(--surface3);background:var(--surface2);color:var(--text2);font-size:0.813rem;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+  cancelBtn.onclick = function(){ wrap.remove(); };
+
+  if (!isNew) {
+    var delBtn = document.createElement('button');
+    delBtn.textContent = '🗑';
+    delBtn.title = 'Delete';
+    delBtn.style.cssText = 'padding:11px 14px;border-radius:10px;border:1px solid var(--red);background:var(--red-dim);color:var(--red-bright);font-size:0.813rem;cursor:pointer;';
+    delBtn.onclick = function(){ _deleteOrdItem(row, wrap, el); };
+    btnRow.appendChild(delBtn);
+  }
+
+  btnRow.appendChild(cancelBtn);
+  btnRow.appendChild(saveBtn);
+  wrap.appendChild(btnRow);
+
+  // Insert form before the list
+  var listEl = document.getElementById('oi-list');
+  if (listEl) { el.insertBefore(wrap, listEl); }
+  else { el.appendChild(wrap); }
+  document.getElementById('oif-d365').focus();
+}
+
+function _readOrdItemForm() {
+  function v(id){ var el = document.getElementById('oif-'+id); return el ? (el.value||'').trim() : ''; }
+  function n(id){ var val = v(id); return val === '' ? null : Number(val); }
+  var cb = document.getElementById('oif-active');
+  return {
+    outlet:          v('outlet') || ordItemsOutlet,
+    d365_id:         v('d365'),
+    name:            v('name'),
+    vendor:          v('vendor'),
+    category:        v('category'),
+    unit:            v('unit') || 'ea',
+    sort_order:      n('sort_order'),
+    vendor_sort:     n('vendor_sort'),
+    vendor_cutoff:   v('vendor_cutoff') || null,
+    vendor_email:    v('vendor_email') || null,
+    vendor_lead:     v('vendor_lead') || null,
+    activation_tag:  v('activation_tag') || null,
+    active:          cb ? cb.checked : true
+  };
+}
+
+async function _saveOrdItem(isNew, existing, el) {
+  var body = _readOrdItemForm();
+  if (!body.name)    { toast('Name is required', true); return; }
+  if (!body.d365_id) { toast('D365 # is required', true); return; }
+  if (!body.vendor)  { toast('Vendor is required', true); return; }
+
+  var saveBtn = document.querySelector('#oi-form-wrap button:last-child');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
+
+  try {
+    if (isNew) {
+      var r = await fetch(SUPA_URL + '/rest/v1/kitchen_order_items', {
+        method: 'POST',
+        headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        body: JSON.stringify(body)
+      });
+      var data = await r.json();
+      if (!r.ok) { toast('Error: ' + (data.message||r.status), true); if (saveBtn) { saveBtn.disabled=false; saveBtn.textContent='Add to Order Guide'; } return; }
+      var newRow = Array.isArray(data) ? data[0] : data;
+      if (ordItemsCache) ordItemsCache.push(newRow);
+      toast('✓ Added: ' + body.name);
+    } else {
+      var r2 = await fetch(SUPA_URL + '/rest/v1/kitchen_order_items?id=eq.' + existing.id, {
+        method: 'PATCH',
+        headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify(body)
+      });
+      if (!r2.ok) { toast('Save failed (' + r2.status + ')', true); if (saveBtn) { saveBtn.disabled=false; saveBtn.textContent='Save Changes'; } return; }
+      if (ordItemsCache) {
+        var idx = ordItemsCache.findIndex(function(c){ return c.id === existing.id; });
+        if (idx >= 0) { ordItemsCache[idx] = Object.assign({}, existing, body, { id: existing.id }); }
+      }
+      toast('✓ Saved: ' + body.name);
+    }
+    var form = document.getElementById('oi-form-wrap');
+    if (form) form.remove();
+    _renderOrdItemsList(el);
+  } catch(e) {
+    toast('Error: ' + e.message, true);
+    if (saveBtn) { saveBtn.disabled=false; saveBtn.textContent = isNew ? 'Add to Order Guide' : 'Save Changes'; }
+  }
+}
+
+async function _deleteOrdItem(row, formEl, el) {
+  if (!confirm('Delete "' + row.name + '" from the order guide?\nThis cannot be undone.')) return;
+  try {
+    var r = await fetch(SUPA_URL + '/rest/v1/kitchen_order_items?id=eq.' + row.id, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    if (!r.ok) { toast('Delete failed (' + r.status + ')', true); return; }
+    if (ordItemsCache) {
+      var idx = ordItemsCache.findIndex(function(c){ return c.id === row.id; });
+      if (idx >= 0) ordItemsCache.splice(idx, 1);
+    }
+    formEl.remove();
+    toast('🗑 Deleted: ' + row.name);
+    _renderOrdItemsList(el);
+  } catch(e) { toast('Error: ' + e.message, true); }
+}
+
+// ── ADMIN: RECIPES ──────────────────────────────────────────────────────────
 function renderAdminRecipes(el) {
   el.innerHTML = '';
 
@@ -1896,7 +2391,7 @@ function renderAdminRecipes(el) {
   loadingEl.textContent = 'Loading...';
   el.appendChild(loadingEl);
 
-  fetch(SUPA_URL + '/rest/v1/ks_recipes?select=recipe_number,name,outlet,active&order=name.asc&limit=500', {
+  fetch(SUPA_URL + '/rest/v1/ks_recipes?select=recipe_number,name,outlet,active,activation_tag&order=name.asc&limit=500', {
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
   })
   .then(function(r) { return r.json(); })
@@ -1978,7 +2473,7 @@ function renderAdminRecipes(el) {
           '<div style="font-size:0.813rem;font-weight:600;color:var(--text);line-height:1.3;">' +
             displayName + '</div>' +
           '<div style="font-size:0.625rem;color:var(--text3);font-family:monospace;margin-top:2px;">' +
-            recipe.recipe_number + ' &middot; ' + recipe.outlet + '</div>';
+            recipe.recipe_number + ' &middot; ' + recipe.outlet + (recipe.activation_tag ? ' &middot; <span style="color:var(--accent);">tag: ' + recipe.activation_tag + '</span>' : '') + '</div>';
 
         var cb = document.createElement('input');
         cb.type = 'checkbox';
@@ -2007,7 +2502,45 @@ function renderAdminRecipes(el) {
           };
         })(recipe.recipe_number, displayName, row));
 
+
+        // Activation tag edit button
+        var tagBtn = document.createElement('button');
+        tagBtn.textContent = recipe.activation_tag ? 'tag' : 'Tag';
+        tagBtn.title = recipe.activation_tag ? 'Tag: ' + recipe.activation_tag + ' - tap to edit' : 'Assign activation tag';
+        tagBtn.style.cssText = 'flex-shrink:0;padding:4px 9px;border-radius:7px;border:1px solid;'
+          + 'font-size:0.625rem;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-right:6px;'
+          + (recipe.activation_tag
+            ? 'background:var(--accent-dim);border-color:var(--accent);color:var(--accent);'
+            : 'background:var(--surface2);border-color:var(--surface3);color:var(--text3);');
+        tagBtn.addEventListener('click', (function(recNum, rowData, tBtn, infoEl) {
+          return function() {
+            var newTag = prompt('Activation tag for recipe ' + recNum + ':\n(e.g. "Mother\'s Day 2026") -- leave blank to clear:', rowData.activation_tag || '');
+            if (newTag === null) return;
+            newTag = newTag.trim();
+            fetch(SUPA_URL + '/rest/v1/ks_recipes?recipe_number=eq.' + recNum, {
+              method: 'PATCH',
+              headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY,
+                'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+              body: JSON.stringify({ activation_tag: newTag || null })
+            })
+            .then(function(res) {
+              if (!res.ok) { toast('Save failed (' + res.status + ')', true); return; }
+              rowData.activation_tag = newTag || null;
+              tBtn.textContent = rowData.activation_tag ? 'tag' : 'Tag';
+              tBtn.title = rowData.activation_tag ? 'Tag: ' + rowData.activation_tag + ' - tap to edit' : 'Assign activation tag';
+              tBtn.style.background = rowData.activation_tag ? 'var(--accent-dim)' : 'var(--surface2)';
+              tBtn.style.borderColor = rowData.activation_tag ? 'var(--accent)' : 'var(--surface3)';
+              tBtn.style.color = rowData.activation_tag ? 'var(--accent)' : 'var(--text3)';
+              var metaDiv = infoEl.querySelector('div:last-child');
+              if (metaDiv) metaDiv.innerHTML = recNum + ' &middot; ' + rowData.outlet
+                + (rowData.activation_tag ? ' &middot; <span style="color:var(--accent);">tag: ' + rowData.activation_tag + '</span>' : '');
+              toast((rowData.activation_tag ? 'Tagged: ' : 'Tag cleared: ') + recNum);
+            })
+            .catch(function(e) { toast('Error: ' + e.message, true); });
+          };
+        })(recipe.recipe_number, recipe, tagBtn, info));
         row.appendChild(info);
+        row.appendChild(tagBtn);
         row.appendChild(cb);
         el.appendChild(row);
       });

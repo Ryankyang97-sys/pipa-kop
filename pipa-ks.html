@@ -262,10 +262,14 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 
   <!-- ══ ACTIVATIONS ══════════════════════════════════════════════════════ -->
   <div class="panel" id="panel-activations">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
       <div class="section-label" style="margin:0;">Active Launches</div>
-      <button class="btn btn-primary btn-sm" onclick="showNewActivation()">+ New</button>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-secondary btn-sm" onclick="seedActivations()" id="seedBtn" title="Seed Mother's Day + Rome activations">🌱 Seed</button>
+        <button class="btn btn-primary btn-sm" onclick="showNewActivation()">+ New</button>
+      </div>
     </div>
+    <div style="font-size:0.625rem;color:var(--text3);margin-bottom:14px;">Tap <strong style="color:var(--text2);">🌱 Seed</strong> to add Mother's Day &amp; Rome activations with all items pre-loaded.</div>
     <div id="activationsList"></div>
   </div>
 
@@ -684,6 +688,99 @@ async function loadActivations() {
   }
 }
 
+// ── ACTIVATION SEEDS ────────────────────────────────────────────────────────
+// Pre-populated item lists extracted from corporate recipe reports (Apr 2026).
+// All items start as 'pending' — tap the status button on each to update.
+const ACTIVATION_SEEDS = [
+  {
+    name: "Mother's Day 2026",
+    launch_date: "2026-05-11",
+    department: "RS — Restaurant",
+    items: [
+      // ─ RS - ANTIPASTI - INSALATA CON CARCIOFI (2059843) ─
+      { d365_id: "00101907", adaco_id: "—", name: "ARTICHOKES, BABY",                          macrofamily: "OF", recipe: "2059843", status: "pending" },
+      { d365_id: "01115861", adaco_id: "—", name: "PIMENTE POWDER, D'ESPELETTE",               macrofamily: "MP", recipe: "2059843", status: "pending" },
+      { d365_id: "00102218", adaco_id: "—", name: "RADICCHIO CASTELFRANCO",                    macrofamily: "OF", recipe: "2059843", status: "pending" },
+      // ─ RS - PASTA FRESCA - SPAGHETTI ALL'ASTICE [HALF LOBSTER] (2065618) ─
+      { d365_id: "00102457", adaco_id: "—", name: "LOBSTER, LIVE CHIX (1LB) WILD",             macrofamily: "RS", recipe: "2065618", status: "pending" },
+      { d365_id: "01123330", adaco_id: "—", name: "LOBSTER, BODIES",                           macrofamily: "RS", recipe: "2065618", status: "pending" },
+      { d365_id: "01123450", adaco_id: "—", name: "BRANDY, BLANSAC",                           macrofamily: "MP", recipe: "2065618", status: "pending" },
+      // ─ RS - BRUNCH - BENEDICTINE CON ASTICE (2065620) ─
+      { d365_id: "01136567", adaco_id: "—", name: "LOBSTER, MEAT COOKED C/K WILD FZ",          macrofamily: "RS", recipe: "2065620", status: "pending" },
+      { d365_id: "00102246", adaco_id: "—", name: "SPINACH, BABY",                             macrofamily: "OF", recipe: "2065620", status: "pending" },
+      { d365_id: "01169364", adaco_id: "—", name: "SEA SALT FLAKES",                           macrofamily: "MP", recipe: "2065620|2065623", status: "pending" },
+      // ─ RS - ANTIPASTI - RICCIOLA CRUDO (2065623) ─
+      { d365_id: "00102570", adaco_id: "—", name: "AMBERJACK (HAMACHI) FILET WILD FZ JAPAN",   macrofamily: "RS", recipe: "2065623", status: "pending" },
+      { d365_id: "01158637", adaco_id: "—", name: "ALMONDS SLICED NATURAL [CAPITOL FOOD]",     macrofamily: "MP", recipe: "2065623", status: "pending" },
+      { d365_id: "01144065", adaco_id: "—", name: "ORANGES, VALENCIA",                         macrofamily: "OF", recipe: "2065623", status: "pending" },
+      { d365_id: "00102181", adaco_id: "—", name: "PEPPERS, RED FRESNO",                       macrofamily: "OF", recipe: "2065623", status: "pending" },
+    ]
+  },
+  {
+    name: "Rome Menu 2026",
+    launch_date: "2026-04-28",
+    department: "RS — Restaurant",
+    items: [
+      // ─ ENA - RESTAURANTS - ANTIPASTI - BURRATA CAPRESE (2055234) ─
+      { d365_id: "00102287", adaco_id: "—", name: "TOMATOES, HEIRLOOM",                        macrofamily: "OF", recipe: "2055234", status: "pending" },
+      { d365_id: "01103204", adaco_id: "—", name: "MOZZARELLA, CURD TOSCANO",                  macrofamily: "FG", recipe: "2055234", status: "pending" },
+      // ─ RS - SECONDI - GRAN MILANESE DI POLLO 2.0 (2059189) ─
+      { d365_id: "01137973", adaco_id: "—", name: "CHICKEN, BREAST BONELESS SKINLESS ABF [FREEBIRD]", macrofamily: "CK", recipe: "2059189", status: "pending" },
+      // ─ RS - ANTIPASTI - BRUSCHETTA ROMANA (2059265) ─
+      { d365_id: "00506096", adaco_id: "—", name: "RICOTTA, FRESH HAND DIPPED (CALABRO)",      macrofamily: "FG", recipe: "2059265", status: "pending" },
+      // ─ RS - PANE - FOCACCINA ARRABBIATA (2065443) ─
+      { d365_id: "01100705", adaco_id: "—", name: "MALT, DIASTATIC POWDER",                    macrofamily: "MP", recipe: "2065443", status: "pending" },
+      { d365_id: "01134315", adaco_id: "—", name: "OLIVE OIL, 100% ITALIAN 5L (OLITALIA)",     macrofamily: "MP", recipe: "2065443", status: "pending" },
+      // ─ RS - PASTA FRESCA - CARBONARA DI ASPARAGI [MEZZI PACCHERI] (2065455) ─
+      { d365_id: "01162107", adaco_id: "—", name: "PECORINO ROMANO [GRANAROLO]",               macrofamily: "FG", recipe: "2065455", status: "pending" },
+      { d365_id: "01140357", adaco_id: "—", name: "GUANCIALE, SALUMIFICIO SAN CARLO",          macrofamily: "CK", recipe: "2065455", status: "pending" },
+      // ─ RS - INSALATE - INSALATA TRICOLORE (2065457) ─
+      { d365_id: "01109681", adaco_id: "—", name: "ARTICHOKES, ROMAN WITH STEMS (SOLEGGIATI)", macrofamily: "OF", recipe: "2065457", status: "pending" },
+      { d365_id: "00102216", adaco_id: "—", name: "RADICCHIO",                                 macrofamily: "OF", recipe: "2065457", status: "pending" },
+      { d365_id: "01100202", adaco_id: "—", name: "ENDIVE, BELGIAN",                           macrofamily: "OF", recipe: "2065457", status: "pending" },
+      // ─ RS - SECONDI - TAGLIATA DI MANZO 3.0 [STRIP] (2065463) ─
+      { d365_id: "01157614", adaco_id: "—", name: "BEEF, CHOICE 0X1 STRIPLOIN [DOUBLE R RANCH]",macrofamily: "CK", recipe: "2065463", status: "pending" },
+      // ─ RS - PASTA FRESCA - RAVIOLI DI PISELLI 3.0 (2065464) ─
+      { d365_id: "00102273", adaco_id: "—", name: "MICRO PEAS, TENDRILS",                      macrofamily: "OF", recipe: "2065464", status: "pending" },
+    ]
+  }
+];
+
+async function seedActivations() {
+  const btn = document.getElementById('seedBtn');
+  // Check if either activation already exists by name
+  const existing = activations.map(function(a) { return a.name; });
+  const toSeed = ACTIVATION_SEEDS.filter(function(s) { return !existing.includes(s.name); });
+  if (!toSeed.length) {
+    showToast('Both activations already exist ✓');
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = '⏳ Seeding…';
+  let seeded = 0;
+  for (let i = 0; i < toSeed.length; i++) {
+    const seed = toSeed[i];
+    try {
+      const rows = await sbPost('ks_activations', {
+        name: seed.name,
+        launch_date: seed.launch_date,
+        department: seed.department,
+        items: seed.items
+      });
+      activations.unshift(rows[0]);
+      seeded++;
+    } catch(e) {
+      showToast('Error seeding ' + seed.name);
+    }
+  }
+  btn.disabled = false;
+  btn.textContent = '🌱 Seed';
+  if (seeded) {
+    showToast('✓ Seeded ' + seeded + ' activation' + (seeded !== 1 ? 's' : ''));
+    renderActivations();
+  }
+}
+
 function daysUntil(dateStr) {
   if (!dateStr) return null;
   const launch = new Date(dateStr + 'T12:00:00');
@@ -718,15 +815,42 @@ function renderActivations() {
     const items = act.items || [];
     const escalate = items.filter(function(i) { return i.status === 'price' || i.status === 'release'; });
     let itemsHtml = '';
+    // group items by recipe for visual sectioning
+    const byRecipe = {};
+    const noRecipe = [];
+    for (let ii = 0; ii < items.length; ii++) {
+      const item = items[ii];
+      const recipes = item.recipe ? item.recipe.split('|') : [];
+      if (recipes.length) {
+        const key = recipes[0];
+        if (!byRecipe[key]) byRecipe[key] = [];
+        byRecipe[key].push({ item: item, ii: ii });
+      } else {
+        noRecipe.push({ item: item, ii: ii });
+      }
+    }
     if (items.length) {
-      for (let ii = 0; ii < items.length; ii++) {
-        const item = items[ii];
-        itemsHtml += '<div class="checklist-item">';
-        itemsHtml += '<button class="status-btn ' + statusBtnClass(item.status) + '" onclick="openStatusPicker(' + ai + ',' + ii + ')">' + statusIcon(item.status) + '</button>';
-        itemsHtml += '<div class="item-info"><div class="item-name">' + item.name + '</div>';
-        itemsHtml += '<div class="item-ids">D365: ' + (item.d365_id || item.d365 || '—') + ' &nbsp;|&nbsp; Adaco: ' + (item.adaco_id || item.adaco || '—') + '</div>';
-        itemsHtml += '<div class="item-status-label ' + statusClass(item.status) + '">' + statusLabel(item.status) + '</div></div>';
-        itemsHtml += '<span class="item-remove" onclick="removeItem(' + ai + ',' + ii + ')">✕</span></div>';
+      // Render grouped by recipe
+      const allGroups = Object.keys(byRecipe).map(function(k) { return { key: k, entries: byRecipe[k] }; });
+      if (noRecipe.length) allGroups.push({ key: null, entries: noRecipe });
+      for (let gi = 0; gi < allGroups.length; gi++) {
+        const group = allGroups[gi];
+        if (group.key) {
+          itemsHtml += '<div style="font-size:0.5rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);padding:10px 0 4px;border-top:1px solid var(--surface2);margin-top:' + (gi === 0 ? '0' : '4px') + ';">Recipe #' + group.key + '</div>';
+        }
+        for (let ei = 0; ei < group.entries.length; ei++) {
+          const item = group.entries[ei].item;
+          const ii   = group.entries[ei].ii;
+          itemsHtml += '<div class="checklist-item">';
+          itemsHtml += '<button class="status-btn ' + statusBtnClass(item.status) + '" onclick="openStatusPicker(' + ai + ',' + ii + ')">' + statusIcon(item.status) + '</button>';
+          itemsHtml += '<div class="item-info"><div class="item-name">' + item.name + '</div>';
+          itemsHtml += '<div class="item-ids">D365: ' + (item.d365_id || item.d365 || '—') + ' &nbsp;|&nbsp; Adaco: ' + (item.adaco_id || item.adaco || '—') + '</div>';
+          itemsHtml += '<div style="display:flex;gap:6px;align-items:center;margin-top:3px;">';
+          itemsHtml += '<span class="item-status-label ' + statusClass(item.status) + '">' + statusLabel(item.status) + '</span>';
+          if (item.macrofamily) itemsHtml += '<span style="font-size:0.5rem;font-weight:700;color:var(--text3);text-transform:uppercase;">' + (MF_LABELS[item.macrofamily] || item.macrofamily) + '</span>';
+          itemsHtml += '</div></div>';
+          itemsHtml += '<span class="item-remove" onclick="removeItem(' + ai + ',' + ii + ')">✕</span></div>';
+        }
       }
     } else {
       itemsHtml = '<div style="font-size:0.75rem;color:var(--text3);padding:12px 0;">No items added yet.</div>';
