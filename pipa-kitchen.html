@@ -34,10 +34,9 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .date-sub{font-size:0.625rem;color:var(--text3);margin-top:1px;}
 
 /* TABS */
-.tabs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:14px -16px 0;padding:0 16px;}
-.tabs-wrap::-webkit-scrollbar{display:none;}
-.tabs{display:flex;gap:2px;border-bottom:1px solid var(--surface2);width:max-content;min-width:100%;}
-.tab{padding:8px 14px 10px;font-size:0.675rem;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap;flex-shrink:0;user-select:none;}
+.tabs-wrap{margin:14px -16px 0;padding:0 16px;}
+.tabs{display:flex;border-bottom:1px solid var(--surface2);}
+.tab{flex:1;text-align:center;padding:8px 4px 10px;font-size:0.675rem;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:0.05em;text-transform:uppercase;user-select:none;}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .panel{display:none;padding-top:18px;}
 .panel.active{display:block;}
@@ -68,43 +67,53 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .detail-close{float:right;font-size:0.75rem;color:var(--text3);cursor:pointer;margin-top:2px;}
 
 /* OUTLET TOGGLE */
-.outlet-toggle{display:flex;margin-bottom:14px;border-radius:8px;overflow:hidden;border:1px solid var(--surface3);}
-.outlet-btn{flex:1;padding:9px 0;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;background:var(--surface2);color:var(--text3);border:none;cursor:pointer;transition:background 0.15s,color 0.15s;}
-.outlet-btn.active{background:var(--accent);color:#fff;}
+.outlet-toggle{display:flex;gap:8px;margin-bottom:14px;}
+.outlet-btn{flex:1;padding:10px 0;font-family:'DM Sans',sans-serif;font-size:0.813rem;font-weight:700;background:transparent;color:var(--text2);border:1.5px solid var(--surface3);border-radius:8px;cursor:pointer;transition:border-color 0.15s,color 0.15s,background 0.15s;}
+.outlet-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
 
 /* ORDER GROUPS */
 .group-section{margin-bottom:20px;}
-.group-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface2);border-radius:8px 8px 0 0;}
-.group-title{font-size:0.625rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);}
-.group-actions{display:flex;align-items:center;gap:6px;}
-.group-count{font-size:0.563rem;color:var(--text3);}
-.group-export-btn{background:var(--surface3);border:none;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.563rem;font-weight:700;padding:4px 9px;border-radius:4px;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;}
+.group-header{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 12px;background:var(--surface2);border-radius:8px 8px 0 0;}
+.group-header-left{flex:1;min-width:0;}
+.group-title{font-size:0.688rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);}
+.group-meta-row{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
+.group-cutoff{font-size:0.588rem;font-weight:600;color:var(--text2);}
+.group-lead{font-size:0.563rem;color:var(--text3);}
+.group-email{font-size:0.563rem;color:#7ab3e0;font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
+.group-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px;}
+.group-count{font-size:0.625rem;color:var(--text3);}
+.group-export-btn{background:var(--surface3);border:none;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.625rem;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;}
 .group-export-btn:active{opacity:0.7;}
 
+/* Category sub-header within a vendor group */
+.cat-header{padding:5px 12px;background:var(--surface);border-bottom:1px solid var(--surface2);border-left:1px solid var(--surface2);border-right:1px solid var(--surface2);}
+.cat-label{font-size:0.538rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text3);}
+
 /* Col headers — inside each group */
-.col-heads{display:flex;align-items:center;padding:3px 12px 4px;gap:4px;background:var(--surface);border-left:1px solid var(--surface2);border-right:1px solid var(--surface2);}
-.col-head{font-size:0.475rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);text-align:center;flex-shrink:0;}
+.col-heads{display:flex;align-items:center;padding:4px 12px 5px;gap:4px;background:var(--surface);border-left:1px solid var(--surface2);border-right:1px solid var(--surface2);}
+.col-head{font-size:0.563rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--text2);text-align:center;flex-shrink:0;}
 
 /* Item rows */
-.item-row{display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid var(--surface2);gap:4px;background:var(--surface);}
+.item-row{display:flex;align-items:center;padding:11px 12px;border-bottom:1px solid var(--surface2);gap:6px;background:var(--surface);}
 .item-row:last-child{border-bottom:none;border-radius:0 0 8px 8px;}
 .item-info{flex:1;min-width:0;}
-.item-name{font-size:0.788rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.item-meta{display:flex;gap:5px;align-items:center;margin-top:2px;}
-.item-d365{font-family:'JetBrains Mono',monospace;font-size:0.525rem;color:var(--text3);}
-.item-unit{font-family:'JetBrains Mono',monospace;font-size:0.513rem;font-weight:700;color:var(--accent);background:var(--accent-dim);border:1px solid var(--accent-border);padding:1px 5px;border-radius:3px;}
+.item-name{font-size:0.875rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-meta{display:flex;gap:6px;align-items:center;margin-top:3px;}
+/* D365 ID — bright enough to read at a glance */
+.item-d365{font-family:'JetBrains Mono',monospace;font-size:0.625rem;color:#A8A09A;letter-spacing:0.02em;}
+.item-unit{font-family:'JetBrains Mono',monospace;font-size:0.6rem;font-weight:700;color:var(--accent);background:var(--accent-dim);border:1px solid var(--accent-border);padding:2px 6px;border-radius:3px;}
 
-/* Number input — on hand / order qty */
-.num-input{background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.775rem;text-align:center;padding:5px 2px;flex-shrink:0;-moz-appearance:textfield;width:44px;}
+/* Number input — on hand / order qty: tall enough for easy thumb tap */
+.num-input{background:var(--surface2);border:1px solid var(--surface3);border-radius:7px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.9rem;text-align:center;padding:8px 2px;flex-shrink:0;-moz-appearance:textfield;width:48px;min-height:40px;}
 .num-input::-webkit-inner-spin-button,.num-input::-webkit-outer-spin-button{-webkit-appearance:none;}
 .num-input:focus{outline:none;border-color:var(--accent);}
 .num-input.has-value{border-color:var(--accent);color:var(--accent);}
 
-/* Par input — same width, slightly muted until filled */
-.par-input{background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:0.775rem;text-align:center;padding:5px 2px;flex-shrink:0;-moz-appearance:textfield;width:36px;}
+/* Par input — ghost style, reads as plain text until focused */
+.par-input{background:transparent;border:1px solid transparent;border-radius:7px;color:var(--text2);font-family:'JetBrains Mono',monospace;font-size:0.9rem;text-align:center;padding:8px 2px;flex-shrink:0;-moz-appearance:textfield;width:40px;min-height:40px;cursor:text;}
 .par-input::-webkit-inner-spin-button,.par-input::-webkit-outer-spin-button{-webkit-appearance:none;}
-.par-input:focus{outline:none;border-color:var(--text2);}
-.par-input.has-par{color:var(--text);border-color:var(--surface3);}
+.par-input:focus{outline:none;background:var(--surface2);border-color:var(--surface3);}
+.par-input.has-par{color:var(--text);}
 
 /* Buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:0.813rem;font-weight:700;cursor:pointer;transition:opacity 0.15s;}
@@ -115,7 +124,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 
 /* Status pills */
 .status-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
-.status-pill{font-size:0.625rem;font-weight:700;padding:4px 10px;border-radius:20px;}
+.status-pill{font-size:0.688rem;font-weight:700;padding:5px 11px;border-radius:20px;}
 .status-orange{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
 .status-blue{background:var(--blue-dim);color:#80aaff;border:1px solid var(--blue-border);}
 
@@ -184,11 +193,15 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     </div>
   </div>
 
-  <!-- TAB: ORDERS (stub) -->
+  <!-- TAB: ORDERS -->
   <div class="panel" id="panel-orders">
-    <div class="empty-state">
-      <div class="empty-icon">🏗</div>
-      <div class="empty-msg">Vendor orders coming soon.</div>
+    <div class="outlet-toggle">
+      <button class="outlet-btn active" id="ord-ob-pipa" onclick="setOrdOutlet('pipa',this)">PiPa</button>
+      <button class="outlet-btn" id="ord-ob-pronto" onclick="setOrdOutlet('pronto',this)">Pronto</button>
+    </div>
+    <div class="status-row" id="ordStatus"></div>
+    <div id="ordBody">
+      <div class="loading"><div class="spinner"></div><br>Loading orders…</div>
     </div>
   </div>
 
@@ -235,6 +248,7 @@ function updateDateUI() {
 function shiftDate(dir) {
   dateOffset += dir; updateDateUI();
   if (activeTab === 'edt') loadEdtData();
+  if (activeTab === 'orders') loadOrdData();
 }
 
 // ─── UTILS ──────────────────────────────────────────────────────────
@@ -265,6 +279,7 @@ function switchTab(id, el) {
   document.getElementById('panel-' + id).classList.add('active');
   activeTab = id;
   if (id === 'edt') initEDT();
+  if (id === 'orders') initOrders();
 }
 
 // ─── D365 LOOKUP ────────────────────────────────────────────────────
@@ -458,9 +473,9 @@ function renderEDT() {
       // column labels
       +'<div class="col-heads">'
         +'<div style="flex:1;"></div>'
-        +'<div class="col-head" style="width:44px;">On Hand</div>'
-        +'<div class="col-head" style="width:36px;">Par</div>'
-        +'<div class="col-head" style="width:44px;">Order</div>'
+        +'<div class="col-head" style="width:48px;">On Hand</div>'
+        +'<div class="col-head" style="width:40px;">Par</div>'
+        +'<div class="col-head" style="width:48px;">Order</div>'
       +'</div>';
 
     grpItems.forEach(function(item){
@@ -600,6 +615,270 @@ function exportAll() {
   if (!items.length) { toast('No items loaded'); return; }
   const outLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
   downloadCsv(csvRows(items), 'EDT_'+outLabel+'_'+dateIso()+'.csv');
+}
+
+// ─── ORDERS TAB ─────────────────────────────────────────────────────
+// Sources:
+//   kitchen_order_items  → item list (outlet,vendor,vendor_cutoff,vendor_email,vendor_lead,category,d365_id,name,unit)
+//   kitchen_pars         → editable pars (d365_id, par)  — shared with EDT
+//   kitchen_orders       → order quantities (order_date, d365_id, outlet, qty)
+//   kitchen_count        → on-hand (count_date, d365_id, qty) — shared with EDT
+
+let ordOutlet   = 'pipa';
+let ordItems    = { pipa: null, pronto: null };
+let ordPars     = {};                        // d365_id → par (shared with EDT pars)
+let ordOnHand   = {};                        // d365_id → qty
+let ordQtys     = { pipa: {}, pronto: {} }; // d365_id → order qty per outlet
+let ordGroupMap = {};                        // slug → item[] for CSV export
+
+async function initOrders() {
+  if (!ordItems.pipa || !ordItems.pronto) {
+    showOrdSpinner();
+    try {
+      const [pipaRows, prontoRows] = await Promise.all([
+        sbGet('kitchen_order_items?outlet=eq.pipa&active=eq.true&select=vendor,vendor_cutoff,vendor_email,vendor_lead,vendor_sort,category,d365_id,name,unit,sort_order&order=vendor_sort,sort_order'),
+        sbGet('kitchen_order_items?outlet=eq.pronto&active=eq.true&select=vendor,vendor_cutoff,vendor_email,vendor_lead,vendor_sort,category,d365_id,name,unit,sort_order&order=vendor_sort,sort_order')
+      ]);
+      ordItems.pipa   = pipaRows;
+      ordItems.pronto = prontoRows;
+    } catch(e) {
+      document.getElementById('ordBody').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">⚠️</div>'
+        +'<div class="empty-msg">Error loading order items:<br>'+e.message+'<br><br>'
+        +'Run kitchen_order_items_seed.sql in Supabase.</div></div>';
+      return;
+    }
+  }
+  await loadOrdData();
+}
+
+async function loadOrdData() {
+  showOrdSpinner();
+  const iso    = dateIso();
+  const allIds = [...new Set(
+    (ordItems.pipa||[]).concat(ordItems.pronto||[]).map(function(i){ return i.d365_id; })
+  )];
+
+  await Promise.all([
+    // Pars (shared pool with EDT)
+    allIds.length
+      ? sbGet('kitchen_pars?d365_id=in.('+allIds.join(',')+')'+'&select=d365_id,par&limit=1000')
+          .then(function(r){ ordPars={}; r.forEach(function(p){ ordPars[p.d365_id]=p.par; }); })
+          .catch(function(){})
+      : Promise.resolve(),
+
+    // Saved order qtys for today
+    sbGet('kitchen_orders?order_date=eq.'+iso+'&select=d365_id,outlet,qty&limit=2000')
+      .then(function(r){
+        ordQtys = { pipa:{}, pronto:{} };
+        r.forEach(function(row){
+          if (ordQtys[row.outlet]) ordQtys[row.outlet][row.d365_id] = row.qty;
+        });
+      })
+      .catch(function(){ ordQtys = { pipa:{}, pronto:{} }; }),
+
+    // On-hand counts
+    allIds.length
+      ? sbGet('kitchen_count?count_date=eq.'+iso+'&d365_id=in.('+allIds.join(',')+')'+'&select=d365_id,qty&limit=1000')
+          .then(function(r){ ordOnHand={}; r.forEach(function(c){ ordOnHand[c.d365_id]=c.qty; }); })
+          .catch(function(){})
+      : Promise.resolve()
+  ]);
+
+  renderOrders();
+}
+
+function showOrdSpinner() {
+  document.getElementById('ordStatus').innerHTML = '';
+  document.getElementById('ordBody').innerHTML =
+    '<div class="loading"><div class="spinner"></div><br>Loading…</div>';
+}
+
+function renderOrders() {
+  const items    = ordItems[ordOutlet] || [];
+  const orders   = ordQtys[ordOutlet];
+  const iso      = dateIso();
+  const outLabel = ordOutlet === 'pipa' ? 'PiPa' : 'Pronto';
+
+  const withOrder = items.filter(function(i){ return orders[i.d365_id] > 0; }).length;
+  document.getElementById('ordStatus').innerHTML =
+    '<span class="status-pill status-blue">'+items.length+' items · '+outLabel+'</span>'
+    +(withOrder ? '<span class="status-pill status-orange">'+withOrder+' ordered</span>' : '')
+    +'<span class="status-pill status-blue">'+iso+'</span>';
+
+  if (!items.length) {
+    document.getElementById('ordBody').innerHTML =
+      '<div class="empty-state"><div class="empty-icon">📦</div>'
+      +'<div class="empty-msg">No items for '+outLabel+'.<br>'
+      +'Seed kitchen_order_items in Supabase.</div></div>';
+    return;
+  }
+
+  // Build vendor groups preserving sort order
+  const vendors = [], vendorMap = {};
+  items.forEach(function(item){
+    if (!vendorMap[item.vendor]) {
+      vendorMap[item.vendor] = { meta: item, cats: {}, catOrder: [] };
+      vendors.push(item.vendor);
+    }
+    const g = vendorMap[item.vendor];
+    if (!g.cats[item.category]) { g.cats[item.category] = []; g.catOrder.push(item.category); }
+    g.cats[item.category].push(item);
+  });
+
+  ordGroupMap = {};
+  let html = '';
+
+  vendors.forEach(function(vendor){
+    const g       = vendorMap[vendor];
+    const meta    = g.meta;
+    const slug    = ordOutlet + '||' + vendor;
+    const allVendorItems = items.filter(function(i){ return i.vendor === vendor; });
+    ordGroupMap[slug] = allVendorItems;
+
+    const vSlugFile = vendor.replace(/[^a-z0-9]/gi,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+
+    html +=
+      '<div class="group-section">'
+      +'<div class="group-header">'
+        +'<div class="group-header-left">'
+          +'<div class="group-title">'+vendor+'</div>'
+          +'<div class="group-meta-row">'
+            +(meta.vendor_cutoff ? '<span class="group-cutoff">⏰ '+meta.vendor_cutoff+'</span>' : '')
+            +(meta.vendor_lead   ? '<span class="group-lead">'+meta.vendor_lead+'</span>' : '')
+          +'</div>'
+          +(meta.vendor_email ? '<div style="margin-top:3px;"><span class="group-email">'+meta.vendor_email+'</span></div>' : '')
+        +'</div>'
+        +'<div class="group-actions">'
+          +'<span class="group-count">'+allVendorItems.length+'</span>'
+          +'<button class="group-export-btn" onclick="exportOrdGroup('+JSON.stringify(slug)+')">⬇ CSV</button>'
+        +'</div>'
+      +'</div>'
+      // Column headers
+      +'<div class="col-heads">'
+        +'<div style="flex:1;"></div>'
+        +'<div class="col-head" style="width:48px;">On Hand</div>'
+        +'<div class="col-head" style="width:40px;">Par</div>'
+        +'<div class="col-head" style="width:48px;">Order</div>'
+      +'</div>';
+
+    // Categories within vendor
+    g.catOrder.forEach(function(cat){
+      const catItems = g.cats[cat];
+      html += '<div class="cat-header"><span class="cat-label">'+cat+'</span></div>';
+
+      catItems.forEach(function(item){
+        const oh  = ordOnHand[item.d365_id] !== undefined ? ordOnHand[item.d365_id] : '';
+        const par = ordPars[item.d365_id]   !== undefined ? ordPars[item.d365_id]   : '';
+        const ord = orders[item.d365_id]    !== undefined ? orders[item.d365_id]    : '';
+        const sid = 'ord_' + item.d365_id.replace(/\D/g,'');
+        const sname = item.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
+        html +=
+          '<div class="item-row">'
+          +'<div class="item-info">'
+            +'<div class="item-name">'+item.name+'</div>'
+            +'<div class="item-meta">'
+              +'<span class="item-d365">'+pad8(item.d365_id)+'</span>'
+              +'<span class="item-unit">'+(item.unit||'ea')+'</span>'
+            +'</div>'
+          +'</div>'
+          +'<input class="num-input'+(oh!==''?' has-value':'')+'" type="number" min="0" step="any" inputmode="decimal"'
+            +' placeholder="—" value="'+oh+'" id="oh_'+sid+'"'
+            +' onchange="setOrdOH(\''+item.d365_id+'\',\''+sname+'\',this)" onclick="this.select()">'
+          +'<input class="par-input'+(par!==''&&par!==null?' has-par':'')+'" type="number" min="0" step="any" inputmode="decimal"'
+            +' placeholder="—" value="'+(par!==''&&par!==null?par:'')+'" id="par_'+sid+'"'
+            +' onchange="setOrdPar(\''+item.d365_id+'\',this)" onclick="this.select()">'
+          +'<input class="num-input'+(ord!==''&&Number(ord)>0?' has-value':'')+'" type="number" min="0" step="any" inputmode="decimal"'
+            +' placeholder="—" value="'+ord+'" id="ord_'+sid+'"'
+            +' onchange="setOrdQty(\''+item.d365_id+'\',this)" onclick="this.select()">'
+          +'</div>';
+      });
+    });
+
+    html += '</div>'; // .group-section
+  });
+
+  document.getElementById('ordBody').innerHTML = html;
+}
+
+// ── Input handlers ────────────────────────────────────────────────
+
+function setOrdOH(d365id, itemName, el) {
+  const v = parseFloat(el.value);
+  if (!isNaN(v) && v >= 0) {
+    ordOnHand[d365id] = v; el.classList.add('has-value');
+    const par = ordPars[d365id];
+    if (par !== undefined && par !== null && par !== '') {
+      const sid = 'ord_' + d365id.replace(/\D/g,'');
+      const ordEl = document.getElementById('ord_' + sid);
+      if (ordEl && (ordEl.value === '' || ordEl.value === '0')) {
+        const sug = Math.max(0, Number(par) - v);
+        if (sug > 0) { ordEl.value = sug; ordEl.classList.add('has-value'); ordQtys[ordOutlet][d365id] = sug; }
+      }
+    }
+  } else { delete ordOnHand[d365id]; el.classList.remove('has-value'); }
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){
+    const v2 = parseFloat(el.value);
+    if (!isNaN(v2) && v2 >= 0)
+      sbUpsert('kitchen_count',[{count_date:dateIso(),d365_id:d365id,item_name:itemName,qty:v2}],'count_date,d365_id').catch(function(){});
+  }, 1500);
+}
+
+function setOrdPar(d365id, el) {
+  const v = parseFloat(el.value);
+  if (!isNaN(v) && v >= 0) { ordPars[d365id] = v; el.classList.add('has-par'); }
+  else { ordPars[d365id] = null; el.classList.remove('has-par'); }
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){
+    const v2 = parseFloat(el.value);
+    if (!isNaN(v2) && v2 >= 0)
+      sbUpsert('kitchen_pars',[{d365_id:d365id,par:v2}],'d365_id').catch(function(){});
+  }, 1500);
+}
+
+function setOrdQty(d365id, el) {
+  const v = parseFloat(el.value);
+  if (!isNaN(v) && v >= 0) { ordQtys[ordOutlet][d365id] = v; el.classList.add('has-value'); }
+  else { delete ordQtys[ordOutlet][d365id]; el.classList.remove('has-value'); }
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){
+    const v2 = parseFloat(el.value);
+    if (!isNaN(v2) && v2 >= 0)
+      sbUpsert('kitchen_orders',[{order_date:dateIso(),d365_id:d365id,outlet:ordOutlet,qty:v2}],'order_date,d365_id,outlet').catch(function(){});
+  }, 1500);
+}
+
+// ── Outlet toggle ─────────────────────────────────────────────────
+
+function setOrdOutlet(o, btn) {
+  ordOutlet = o;
+  document.querySelectorAll('#panel-orders .outlet-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  loadOrdData();
+}
+
+// ── CSV export ────────────────────────────────────────────────────
+
+function ordCsvRows(items) {
+  const orders = ordQtys[ordOutlet];
+  const rows   = [['D365 ID','QTY','UNIT']];
+  items.forEach(function(item){
+    const qty = orders[item.d365_id];
+    if (!qty || Number(qty) <= 0) return;
+    rows.push([pad8(item.d365_id), qty, item.unit || 'ea']);
+  });
+  return rows;
+}
+
+function exportOrdGroup(slug) {
+  const items = ordGroupMap[slug];
+  if (!items || !items.length) { toast('Group not found'); return; }
+  const vendor   = slug.split('||')[1] || slug;
+  const vSlug    = vendor.replace(/[^a-z0-9]/gi,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+  const outLabel = ordOutlet === 'pipa' ? 'PiPa' : 'Pronto';
+  downloadCsv(ordCsvRows(items), outLabel+'_'+vSlug+'_'+dateIso()+'.csv');
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────
