@@ -345,7 +345,7 @@ function dateMMDD() {
 function xlsxName(outlet, vendor) {
   // Format: PiPa.VENDOR NAME.MM-DD.xlsx
   const v = (vendor || '').replace(/[/\\:*?"<>|]/g,'').trim();
-  return outlet + '.' + v + '.' + dateMMDD() + '.xls';
+  return outlet + '.' + v + '.' + dateMMDD() + '.xlsx';
 }
 function dateFmt() {
   const d = new Date(); d.setDate(d.getDate() + dateOffset);
@@ -882,78 +882,175 @@ function setEdtOutlet(o, btn) {
 
 // ─── EXPORT ENGINE ────────────────────────────────────────────────────
 
-// ── Row builders — only items with qty > 0 ───────────────────────────
+// ── Row builders — only items with qty > 0, Dynamics format ──────────
+// Returns [{item, qty, unit}] — item is stripped (no leading zeros) to match D365
 
-function edtBuildRows(items, outlet) {
+function edtBuildOrderRows(items, outlet) {
   const orders = edtOrdQtys[outlet || edtOutlet];
-  const rows = [['D365 ID','QTY','UNIT']];
+  const out = [];
   items.forEach(function(item){
     const qty = orders[item.d365_id];
-    if (qty > 0) rows.push([pad8(item.d365_id), qty, item.unit || 'ea']);
+    if (qty > 0) out.push({ item: String(Number(item.d365_id)), qty: qty, unit: item.unit || 'ea' });
   });
-  return rows;
+  return out;
 }
 
-function ordBuildRows(items, outlet) {
+function ordBuildOrderRows(items, outlet) {
   const orders = ordQtys[outlet || ordOutlet];
-  const rows = [['D365 ID','QTY','UNIT']];
+  const out = [];
   items.forEach(function(item){
     const qty = orders[item.d365_id];
-    if (qty > 0) rows.push([pad8(item.d365_id), qty, item.unit || 'ea']);
+    if (qty > 0) out.push({ item: String(Number(item.d365_id)), qty: qty, unit: item.unit || 'ea' });
   });
-  return rows;
+  return out;
 }
 
-// ordBuildRowsWithOrders is identical now — keep as alias for clarity
-function ordBuildRowsWithOrders(items, outlet) { return ordBuildRows(items, outlet); }
+function hasOrders(rows) { return rows.length > 0; }
 
-// ── CSV ───────────────────────────────────────────────────────────────
+// ── XLSX builder — proper Office Open XML zip, one sheet per vendor ───
 
-function rowsToCsv(rows) {
-  return rows.map(function(r){
-    return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(',');
-  }).join('\n');
-}
+function buildXlsx(vendorSheets) {
+  // vendorSheets: [{name, rows: [{item, qty, unit}]}]
 
-function downloadCsv(rows, filename) {
-  if (rows.length <= 1) { toast('No items to export'); return; }
-  triggerDownload(new Blob([rowsToCsv(rows)],{type:'text/csv;charset=utf-8;'}), filename);
-  toast('CSV: ' + filename);
-}
-
-// ── Excel export (SpreadsheetML XML — single file, opens in Excel/Numbers/Sheets) ──
-// Excel 2003 XML format: single XML file, no zip needed, universally supported.
-
-function rowsToExcelXml(rows) {
-  function esc(v) {
-    return String(v === null || v === undefined ? '' : v)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;');
+  function enc(s) { return new TextEncoder().encode(s); }
+  function u16(n) { return new Uint8Array([n&255,(n>>8)&255]); }
+  function u32(n) { n=n>>>0; return new Uint8Array([n&255,(n>>8)&255,(n>>16)&255,(n>>24)&255]); }
+  function cat() {
+    const arrays = Array.from(arguments);
+    const out = new Uint8Array(arrays.reduce(function(s,a){ return s+a.length; },0));
+    let off = 0;
+    arrays.forEach(function(a){ out.set(a,off); off+=a.length; });
+    return out;
   }
-  return '<?xml version="1.0" encoding="UTF-8"?>'
-    +'<?mso-application progid="Excel.Sheet"?>'
-    +'<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"'
-    +' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
-    +'<Styles><Style ss:ID="h"><Font ss:Bold="1"/></Style></Styles>'
-    +'<Worksheet ss:Name="Order"><Table>'
-    + rows.map(function(row, ri){
-        return '<Row>' + row.map(function(cell){
-          const v = (cell === null || cell === undefined) ? '' : cell;
-          const isNum = v !== '' && !isNaN(Number(v));
-          const style = ri === 0 ? ' ss:StyleID="h"' : '';
-          if (isNum && v !== '') return '<Cell'+style+'><Data ss:Type="Number">'+esc(v)+'</Data></Cell>';
-          return '<Cell'+style+'><Data ss:Type="String">'+esc(v)+'</Data></Cell>';
-        }).join('') + '</Row>';
-      }).join('')
-    +'</Table></Worksheet></Workbook>';
+  function crc32(data) {
+    const t = new Uint32Array(256);
+    for (let i=0;i<256;i++){ let c=i; for(let j=0;j<8;j++) c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1); t[i]=c>>>0; }
+    let c=0xFFFFFFFF;
+    for (let i=0;i<data.length;i++) c=(t[(c^data[i])&255]^(c>>>8))>>>0;
+    return (c^0xFFFFFFFF)>>>0;
+  }
+  function esc(v) {
+    return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Build shared strings
+  const ss=[], ssMap=new Map();
+  function si(v){ const s=String(v??''); if(!ssMap.has(s)){ssMap.set(s,ss.length);ss.push(s);} return ssMap.get(s); }
+  ['item','case qty','case unit'].forEach(si);
+
+  // Build sheet XMLs
+  const sheetXmls = vendorSheets.map(function(vs){
+    let xml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'
+      +'<row r="1"><c r="A1" t="s"><v>'+si('item')+'</v></c>'
+      +'<c r="B1" t="s"><v>'+si('case qty')+'</v></c>'
+      +'<c r="C1" t="s"><v>'+si('case unit')+'</v></c></row>';
+    vs.rows.forEach(function(row,i){
+      const r=i+2;
+      xml+='<row r="'+r+'">'
+        +'<c r="A'+r+'" t="s"><v>'+si(row.item)+'</v></c>'
+        +'<c r="B'+r+'"><v>'+row.qty+'</v></c>'
+        +'<c r="C'+r+'" t="s"><v>'+si(row.unit)+'</v></c>'
+        +'</row>';
+    });
+    xml+='</sheetData></worksheet>';
+    return xml;
+  });
+
+  const ssXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+    +' count="'+ss.length+'" uniqueCount="'+ss.length+'">'
+    +ss.map(function(s){ return '<si><t>'+esc(s)+'</t></si>'; }).join('')+'</sst>';
+
+  const wbXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+    +' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'
+    +vendorSheets.map(function(vs,i){
+      return '<sheet name="'+esc(vs.name.slice(0,31))+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>';
+    }).join('')+'</sheets></workbook>';
+
+  const wbRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +vendorSheets.map(function(vs,i){
+      return '<Relationship Id="rId'+(i+1)+'"'
+        +' Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"'
+        +' Target="worksheets/sheet'+(i+1)+'.xml"/>';
+    }).join('')
+    +'<Relationship Id="rId'+(vendorSheets.length+1)+'"'
+    +' Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings"'
+    +' Target="sharedStrings.xml"/></Relationships>';
+
+  const rootRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1"'
+    +' Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"'
+    +' Target="xl/workbook.xml"/></Relationships>';
+
+  const ctXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    +'<Default Extension="xml" ContentType="application/xml"/>'
+    +'<Override PartName="/xl/workbook.xml"'
+    +' ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+    +'<Override PartName="/xl/sharedStrings.xml"'
+    +' ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>'
+    +vendorSheets.map(function(vs,i){
+      return '<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml"'
+        +' ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';
+    }).join('')+'</Types>';
+
+  const files = [
+    { name:'[Content_Types].xml',        data:ctXml },
+    { name:'_rels/.rels',                data:rootRels },
+    { name:'xl/workbook.xml',            data:wbXml },
+    { name:'xl/_rels/workbook.xml.rels', data:wbRels },
+    { name:'xl/sharedStrings.xml',       data:ssXml }
+  ].concat(sheetXmls.map(function(xml,i){
+    return { name:'xl/worksheets/sheet'+(i+1)+'.xml', data:xml };
+  }));
+
+  // Build zip
+  const locals=[], centrals=[];
+  let offset=0;
+  files.forEach(function(f){
+    const nameB=enc(f.name), dataB=enc(f.data);
+    const crc=crc32(dataB), size=dataB.length, nl=nameB.length;
+    const local=cat(
+      new Uint8Array([0x50,0x4B,0x03,0x04]),
+      u16(20),u16(0),u16(0),u16(0),u16(0),
+      u32(crc),u32(size),u32(size),u16(nl),u16(0),
+      nameB,dataB
+    );
+    const central=cat(
+      new Uint8Array([0x50,0x4B,0x01,0x02]),
+      u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),
+      u32(crc),u32(size),u32(size),
+      u16(nl),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset),
+      nameB
+    );
+    locals.push(local); centrals.push(central);
+    offset+=local.length;
+  });
+  const cd=cat.apply(null,centrals);
+  const eocd=cat(
+    new Uint8Array([0x50,0x4B,0x05,0x06]),
+    u16(0),u16(0),u16(files.length),u16(files.length),
+    u32(cd.length),u32(offset),u16(0)
+  );
+  return cat.apply(null,locals.concat([cd,eocd]));
 }
 
-function downloadXlsx(rows, filename) {
-  if (rows.length <= 1) { toast('No items to export'); return; }
-  const xlsFile = filename.replace(/\.xlsx?$/i, '.xls');
-  const blob = new Blob([rowsToExcelXml(rows)], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-  triggerDownload(blob, xlsFile);
-  toast('Exported: ' + xlsFile);
+// ── Download helpers ──────────────────────────────────────────────────
+
+function downloadXlsx(vendorSheets, filename) {
+  const active = vendorSheets.filter(function(vs){ return vs.rows.length > 0; });
+  if (!active.length) { toast('No items to export'); return; }
+  const bytes = buildXlsx(active);
+  triggerDownload(
+    new Blob([bytes], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+    filename
+  );
+  toast('Exported: ' + filename);
 }
 
 // ── Shared trigger ────────────────────────────────────────────────────
@@ -976,27 +1073,22 @@ function exportGroup(slug) {
   const vendor   = slug.split('||')[1] || slug;
   const vLabel   = vendor.replace(/^EDT\s*-\s*/i,'');
   const outLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  const rows = edtBuildRows(items);
-  if (rows.length <= 1) { toast('No items to order in this group'); return; }
-  downloadXlsx(rows, xlsxName(outLabel, 'EDT.' + vLabel));
+  const rows = edtBuildOrderRows(items);
+  if (!hasOrders(rows)) { toast('No items to order in this group'); return; }
+  downloadXlsx([{ name: vLabel, rows: rows }], xlsxName(outLabel, 'EDT.' + vLabel));
 }
 
 function exportAll() {
   const outLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  // Only groups with at least one qty > 0
-  const slugs = Object.keys(edtGroupMap).filter(function(slug){
-    return edtBuildRows(edtGroupMap[slug]).length > 1;
+  const sheets = [];
+  Object.keys(edtGroupMap).forEach(function(slug){
+    const vendor = slug.split('||')[1] || slug;
+    const vLabel = vendor.replace(/^EDT\s*-\s*/i,'');
+    const rows   = edtBuildOrderRows(edtGroupMap[slug]);
+    if (hasOrders(rows)) sheets.push({ name: vLabel, rows: rows });
   });
-  if (!slugs.length) { toast('No EDT items to order'); return; }
-  slugs.forEach(function(slug, i){
-    setTimeout(function(){
-      const items = edtGroupMap[slug];
-      const vendor = slug.split('||')[1] || slug;
-      const vLabel = vendor.replace(/^EDT\s*-\s*/i,'');
-      downloadXlsx(edtBuildRows(items), xlsxName(outLabel, 'EDT.' + vLabel));
-    }, i * 500);
-  });
-  toast('Exporting ' + slugs.length + ' file(s)…');
+  if (!sheets.length) { toast('No EDT items to order'); return; }
+  downloadXlsx(sheets, xlsxName(outLabel, 'EDT'));
 }
 
 function exportOrdGroup(slug) {
@@ -1004,26 +1096,23 @@ function exportOrdGroup(slug) {
   if (!items || !items.length) { toast('Group not found'); return; }
   const vendor   = slug.split('||')[1] || slug;
   const outLabel = ordOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  const rows = ordBuildRows(items);
-  if (rows.length <= 1) { toast('No items to order for ' + vendor); return; }
-  downloadXlsx(rows, xlsxName(outLabel, vendor));
+  const rows = ordBuildOrderRows(items);
+  if (!hasOrders(rows)) { toast('No items to order for ' + vendor); return; }
+  downloadXlsx([{ name: vendor.slice(0,31), rows: rows }], xlsxName(outLabel, vendor));
 }
 
 function exportAllOrdVendors() {
   const outLabel = ordOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  const slugs = Object.keys(ordGroupMap).filter(function(slug){
-    return slug.startsWith(ordOutlet+'||') && ordBuildRows(ordGroupMap[slug]).length > 1;
-  });
-  if (!slugs.length) { toast('No orders to export'); return; }
-  let count = 0;
-  slugs.forEach(function(slug, i){
-    setTimeout(function(){
-      const vendor = slug.split('||')[1];
-      const rows   = ordBuildRows(ordGroupMap[slug]);
-      if (rows.length > 1) { downloadXlsx(rows, xlsxName(outLabel, vendor)); count++; }
-      if (i === slugs.length - 1) toast('Exported ' + count + ' vendor file(s) ✓');
-    }, i * 500);
-  });
+  const sheets = [];
+  Object.keys(ordGroupMap)
+    .filter(function(slug){ return slug.startsWith(ordOutlet+'||'); })
+    .forEach(function(slug){
+      const vendor = slug.split('||')[1] || slug;
+      const rows   = ordBuildOrderRows(ordGroupMap[slug]);
+      if (hasOrders(rows)) sheets.push({ name: vendor.slice(0,31), rows: rows });
+    });
+  if (!sheets.length) { toast('No orders to export'); return; }
+  downloadXlsx(sheets, xlsxName(outLabel, 'Orders'));
 }
 
 // ─── ORDERS TAB ─────────────────────────────────────────────────────
