@@ -569,7 +569,7 @@ function switchTab(id, el) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// D365 LOOKUP
+// D365 LOOKUP — queries kitchen_products (full 9k catalog, all vendors)
 // ═══════════════════════════════════════════════════════════════════════════
 const debouncedLookup = debounce(runSearch, 300);
 
@@ -583,17 +583,32 @@ async function runSearch(val) {
   const stripped = val.replace(/^0+/, '') || '0';
   let query;
   if (/^\d+$/.test(stripped)) {
-    query = 'ks_products?or=(d365_id.ilike.*' + val + '*,adaco_id.ilike.*stripped*,name.ilike.*' + encodeURIComponent(val) + '*)&order=name&limit=30'.replace('stripped', stripped);
-    query = 'ks_products?or=(d365_id.ilike.*' + encodeURIComponent(val) + '*,adaco_id.ilike.*' + encodeURIComponent(stripped) + '*,name.ilike.*' + encodeURIComponent(val) + '*)&order=name&limit=30';
+    query = 'kitchen_products?or=(d365_id.eq.' + encodeURIComponent(val) + ',d365_id.eq.' + encodeURIComponent(stripped) + ',adaco_id.eq.' + encodeURIComponent(val) + ',adaco_id.eq.' + encodeURIComponent(stripped) + ')&select=d365_id,adaco_id,name,vendor_name,macrofamily,purchase_unit,packaging_unit,no_vendor_flag,overrides&limit=40';
   } else {
-    query = 'ks_products?name=ilike.*' + encodeURIComponent(val) + '*&order=name&limit=30';
+    query = 'kitchen_products?name=ilike.*' + encodeURIComponent(val) + '*&select=d365_id,adaco_id,name,vendor_name,macrofamily,purchase_unit,packaging_unit,no_vendor_flag,overrides&order=name.asc&limit=40';
   }
 
   try {
     const rows = await sbFetch(query);
     if (!rows.length) { el.innerHTML = '<div class="no-results">No results for "' + val + '"</div>'; return; }
     el.innerHTML = rows.map(function(r) {
-      return '<div class="result-item" onclick="copyD365Id(\'' + r.d365_id + '\')"><div class="result-name">' + r.name + '</div><div class="result-meta"><span class="result-id">D365: ' + r.d365_id + '</span><span class="result-adaco">Adaco: ' + r.adaco_id + '</span><span class="result-mf">' + (MF_LABELS[r.macrofamily] || r.macrofamily) + '</span></div></div>';
+      const ov = r.overrides || {};
+      const dispName = ov.name || r.name;
+      const dispVendor = ov.vendor_name || r.vendor_name || '';
+      const dispPU = ov.purchase_unit || r.purchase_unit || '—';
+      const dispPkg = ov.packaging_unit || r.packaging_unit || '';
+      const noVendor = r.no_vendor_flag && !ov.vendor_id;
+      const mfLabel = MF_LABELS[r.macrofamily] || r.macrofamily || '—';
+      return '<div class="result-item" onclick="copyD365Id(\'' + r.d365_id + '\')">' +
+        '<div class="result-name">' + dispName + (noVendor ? ' <span style="color:var(--yellow-bright);font-size:0.625rem;">⚠ no vendor</span>' : '') + '</div>' +
+        '<div class="result-meta">' +
+          '<span class="result-id">D365: ' + r.d365_id + '</span>' +
+          (r.adaco_id ? '<span class="result-adaco">Adaco: ' + r.adaco_id + '</span>' : '') +
+          '<span class="result-mf">' + mfLabel + '</span>' +
+          (dispVendor ? '<span class="result-adaco" style="color:var(--text2);">' + dispVendor + '</span>' : '') +
+          (dispPU !== '—' ? '<span class="result-adaco">' + dispPU + (dispPkg ? ' · ' + dispPkg : '') + '</span>' : '') +
+        '</div>' +
+      '</div>';
     }).join('');
   } catch(e) {
     el.innerHTML = '<div class="no-results">Error loading results</div>';
@@ -783,18 +798,19 @@ async function runAddSearch(val) {
   const stripped = val.replace(/^0+/, '') || '0';
   let query;
   if (/^\d+$/.test(stripped)) {
-    query = 'ks_products?or=(d365_id.ilike.*' + encodeURIComponent(val) + '*,adaco_id.ilike.*' + encodeURIComponent(stripped) + '*)&order=name&limit=20';
+    query = 'kitchen_products?or=(d365_id.eq.' + encodeURIComponent(val) + ',d365_id.eq.' + encodeURIComponent(stripped) + ',adaco_id.eq.' + encodeURIComponent(val) + ',adaco_id.eq.' + encodeURIComponent(stripped) + ')&select=d365_id,adaco_id,name,macrofamily,overrides&limit=20';
   } else {
-    query = 'ks_products?name=ilike.*' + encodeURIComponent(val) + '*&order=name&limit=20';
+    query = 'kitchen_products?name=ilike.*' + encodeURIComponent(val) + '*&select=d365_id,adaco_id,name,macrofamily,overrides&order=name.asc&limit=20';
   }
   try {
     const rows = await sbFetch(query);
     if (!rows.length) { el.innerHTML = '<div class="no-results">No results</div>'; return; }
     el.innerHTML = rows.map(function(r) {
-      const safeName = r.name.replace(/'/g,"'");
-      return '<div class="result-item" onclick="addItemFromSearch(\'' + r.d365_id + '\',\'' + r.adaco_id + '\',\'' + safeName + '\',\'' + r.macrofamily + '\')">' +
-        '<div class="result-name">' + r.name + '</div>' +
-        '<div class="result-meta"><span class="result-id">D365: ' + r.d365_id + '</span><span class="result-adaco">Adaco: ' + r.adaco_id + '</span><span class="result-mf">' + (MF_LABELS[r.macrofamily] || r.macrofamily) + '</span></div></div>';
+      const ov = r.overrides || {};
+      const dispName = (ov.name || r.name).replace(/'/g,"'");
+      return '<div class="result-item" onclick="addItemFromSearch(\'' + r.d365_id + '\',\'' + (r.adaco_id||'') + '\',\'' + dispName + '\',\'' + r.macrofamily + '\')">' +
+        '<div class="result-name">' + (ov.name || r.name) + '</div>' +
+        '<div class="result-meta"><span class="result-id">D365: ' + r.d365_id + '</span>' + (r.adaco_id ? '<span class="result-adaco">Adaco: ' + r.adaco_id + '</span>' : '') + '<span class="result-mf">' + (MF_LABELS[r.macrofamily] || r.macrofamily || '—') + '</span></div></div>';
     }).join('');
   } catch(e) { el.innerHTML = '<div class="no-results">Error</div>'; }
 }

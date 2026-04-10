@@ -1454,6 +1454,7 @@ function renderAdmin() {
   var el = document.getElementById('view-admin');
 
   var sections = [
+    { key:'products', label:'Products', icon:'📦' },
     { key:'btg', label:'BTG Wines', icon:'🍷' },
     { key:'checklist', label:'Checklists', icon:'✅' },
     { key:'pin', label:'Manager PIN', icon:'🔐' },
@@ -1475,13 +1476,406 @@ function renderAdmin() {
   el.appendChild(tabRow);
 
   var bodyEl = document.createElement('div');
-  if (adminSection === 'btg') renderAdminBTG(bodyEl);
+  if (adminSection === 'products') renderAdminProducts(bodyEl);
+  else if (adminSection === 'btg') renderAdminBTG(bodyEl);
   else if (adminSection === 'checklist') renderAdminChecklist(bodyEl);
   else if (adminSection === 'pin') renderAdminPIN(bodyEl);
   el.appendChild(bodyEl);
 }
 
 
+
+// ── ADMIN: PRODUCTS ─────────────────────────────────────────────────────────
+var prodSearch = '';
+var prodFilter = 'all'; // 'all' | 'no_vendor' | 'edited'
+var prodDebounceTimer = null;
+var prodVendors = []; // cached vendor list
+var prodExpandedId = null;
+
+async function loadProdVendors() {
+  if (prodVendors.length) return;
+  try {
+    var r = await fetch(SUPA_URL + '/rest/v1/ks_vendors?select=vendor_id,vendor_name&order=vendor_name.asc&limit=2000', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    prodVendors = await r.json();
+  } catch(e) { prodVendors = []; }
+}
+
+function renderAdminProducts(el) {
+  el.innerHTML = '';
+
+  // ── filter row ──
+  var filterRow = document.createElement('div');
+  filterRow.style.cssText = 'display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;';
+  [['all','All'], ['no_vendor','⚠️ No Vendor'], ['edited','✏️ Edited']].forEach(function(f) {
+    var c = document.createElement('button');
+    c.textContent = f[1];
+    c.style.cssText = 'padding:5px 12px;border-radius:20px;border:1px solid;font-size:0.688rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;' +
+      (prodFilter === f[0] ? 'background:var(--accent);border-color:var(--accent);color:#fff;' : 'background:var(--surface2);border-color:var(--surface3);color:var(--text2);');
+    c.onclick = function() { prodFilter = f[0]; renderAdminProducts(el); };
+    filterRow.appendChild(c);
+  });
+  el.appendChild(filterRow);
+
+  // ── search ──
+  var sw = document.createElement('div');
+  sw.style.cssText = 'position:relative;margin-bottom:12px;';
+  var si = document.createElement('input');
+  si.type = 'search';
+  si.placeholder = 'D365#, Adaco#, or product name…';
+  si.value = prodSearch;
+  si.autocomplete = 'off';
+  si.style.cssText = 'width:100%;background:var(--surface);border:1.5px solid var(--surface3);border-radius:12px;padding:11px 14px 11px 38px;color:var(--text);font-size:0.875rem;font-family:\'DM Sans\',sans-serif;outline:none;-webkit-appearance:none;';
+  si.addEventListener('focus', function() { this.style.borderColor = 'var(--accent)'; });
+  si.addEventListener('blur', function() { this.style.borderColor = 'var(--surface3)'; });
+  si.oninput = function() {
+    prodSearch = this.value;
+    clearTimeout(prodDebounceTimer);
+    prodDebounceTimer = setTimeout(function() { runProdSearch(el); }, 300);
+  };
+  var sicon = document.createElement('span');
+  sicon.textContent = '🔍';
+  sicon.style.cssText = 'position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:0.875rem;pointer-events:none;';
+  sw.appendChild(sicon);
+  sw.appendChild(si);
+  el.appendChild(sw);
+
+  var resultsEl = document.createElement('div');
+  resultsEl.id = 'prod-results';
+  el.appendChild(resultsEl);
+
+  // auto-trigger if filter active or search present
+  runProdSearch(el);
+}
+
+async function runProdSearch(containerEl) {
+  var resultsEl = document.getElementById('prod-results');
+  if (!resultsEl) return;
+  resultsEl.innerHTML = '<div style="color:var(--text3);font-size:0.813rem;padding:20px 0 10px;">Searching…</div>';
+
+  await loadProdVendors();
+
+  var q = (prodSearch || '').trim();
+  var params = [];
+
+  // Build query
+  if (prodFilter === 'no_vendor') {
+    params.push('no_vendor_flag=eq.true');
+  } else if (prodFilter === 'edited') {
+    params.push('overrides=neq.{}');
+  }
+
+  if (q) {
+    var stripped = q.replace(/^0+/, '') || '0';
+    if (/^\d+$/.test(q)) {
+      params.push('or=(d365_id.eq.' + encodeURIComponent(q) + ',d365_id.eq.' + encodeURIComponent(stripped) + ',adaco_id.eq.' + encodeURIComponent(q) + ',adaco_id.eq.' + encodeURIComponent(stripped) + ')');
+    } else {
+      params.push('name=ilike.*' + encodeURIComponent(q) + '*');
+    }
+  } else if (!prodFilter || prodFilter === 'all') {
+    // No query, no filter — show nothing until user types
+    resultsEl.innerHTML = '<div style="color:var(--text3);font-size:0.813rem;padding:20px 0 10px;text-align:center;">Search by name, D365#, or Adaco# — or pick a filter above.</div>';
+    return;
+  }
+
+  params.push('select=d365_id,adaco_id,name,vendor_id,vendor_name,macrofamily,family,purchase_unit,packaging_unit,brand,no_vendor_flag,overrides,updated_at');
+  params.push('limit=40');
+  if (!q) params.push('order=name.asc');
+
+  try {
+    var r = await fetch(SUPA_URL + '/rest/v1/kitchen_products?' + params.join('&'), {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    var rows = await r.json();
+    renderProdResults(resultsEl, rows);
+  } catch(e) {
+    resultsEl.innerHTML = '<div style="color:var(--red-bright);font-size:0.813rem;padding:12px 0;">Error fetching products.</div>';
+  }
+}
+
+function renderProdResults(el, rows) {
+  el.innerHTML = '';
+  if (!rows || rows.length === 0) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:0.813rem;padding:20px 0;text-align:center;">No results.</div>';
+    return;
+  }
+  var countEl = document.createElement('div');
+  countEl.style.cssText = 'font-size:0.563rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;';
+  countEl.textContent = rows.length + (rows.length === 40 ? '+ results (refine search)' : ' result' + (rows.length !== 1 ? 's' : ''));
+  el.appendChild(countEl);
+
+  var list = document.createElement('div');
+  list.style.cssText = 'background:var(--surface);border-radius:14px;overflow:hidden;border:1px solid var(--surface3);';
+
+  rows.forEach(function(p, idx) {
+    var ov = p.overrides || {};
+    var dispName = ov.name || p.name;
+    var dispVendor = ov.vendor_name || p.vendor_name || '';
+    var dispPU = ov.purchase_unit || p.purchase_unit || '—';
+    var dispPkg = ov.packaging_unit || p.packaging_unit || '—';
+    var isEdited = Object.keys(ov).length > 0;
+    var noVendor = p.no_vendor_flag && !ov.vendor_id;
+
+    var card = document.createElement('div');
+    card.style.cssText = 'border-bottom:1px solid var(--surface2);' + (idx === rows.length - 1 ? 'border-bottom:none;' : '');
+
+    // Header row
+    var header = document.createElement('div');
+    header.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;';
+    header.onclick = function() { toggleProdCard(p.d365_id, card, p); };
+
+    var badge = document.createElement('div');
+    badge.style.cssText = 'flex-shrink:0;width:8px;height:8px;border-radius:50%;background:' + (noVendor ? 'var(--yellow-bright)' : isEdited ? 'var(--accent)' : 'var(--surface3)') + ';';
+
+    var info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0;';
+    info.innerHTML = '<div style="font-size:0.813rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escHtml(dispName) + '</div>' +
+      '<div style="font-size:0.625rem;color:var(--text3);margin-top:2px;font-family:\'JetBrains Mono\',monospace;">' +
+        'D365: ' + escHtml(p.d365_id) +
+        (p.adaco_id ? ' · Adaco: ' + escHtml(p.adaco_id) : '') +
+        ' · ' + escHtml(p.macrofamily || '—') +
+      '</div>' +
+      '<div style="font-size:0.625rem;color:var(--text2);margin-top:1px;">' +
+        (dispVendor ? escHtml(dispVendor) : '<span style="color:var(--yellow-bright);">⚠ No vendor</span>') +
+        ' · ' + escHtml(dispPU) + ' · ' + escHtml(dispPkg) +
+        (isEdited ? ' <span style="color:var(--accent);font-weight:700;">✏</span>' : '') +
+      '</div>';
+
+    var chevron = document.createElement('span');
+    chevron.id = 'chevron-' + p.d365_id;
+    chevron.style.cssText = 'color:var(--text3);font-size:0.75rem;flex-shrink:0;transition:transform 0.15s;';
+    chevron.textContent = '›';
+
+    header.appendChild(badge);
+    header.appendChild(info);
+    header.appendChild(chevron);
+    card.appendChild(header);
+
+    // Edit form placeholder
+    var formWrap = document.createElement('div');
+    formWrap.id = 'prod-form-' + p.d365_id;
+    formWrap.style.display = 'none';
+    card.appendChild(formWrap);
+
+    list.appendChild(card);
+  });
+
+  el.appendChild(list);
+}
+
+function toggleProdCard(d365id, card, p) {
+  var formWrap = document.getElementById('prod-form-' + d365id);
+  var chevron = document.getElementById('chevron-' + d365id);
+  if (!formWrap) return;
+  var isOpen = formWrap.style.display !== 'none';
+  if (isOpen) {
+    formWrap.style.display = 'none';
+    if (chevron) chevron.style.transform = '';
+    return;
+  }
+  formWrap.style.display = 'block';
+  if (chevron) chevron.style.transform = 'rotate(90deg)';
+  buildProdEditForm(formWrap, p);
+}
+
+function buildProdEditForm(wrap, p) {
+  wrap.innerHTML = '';
+  var ov = p.overrides || {};
+
+  var form = document.createElement('div');
+  form.style.cssText = 'padding:0 14px 14px;border-top:1px solid var(--surface2);';
+
+  var label = function(txt) {
+    var l = document.createElement('div');
+    l.style.cssText = 'font-size:0.563rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px;margin-top:10px;';
+    l.textContent = txt;
+    return l;
+  };
+
+  var inp = function(id, val, placeholder) {
+    var i = document.createElement('input');
+    i.type = 'text';
+    i.id = id;
+    i.value = val || '';
+    i.placeholder = placeholder || '';
+    i.autocomplete = 'off';
+    i.style.cssText = 'width:100%;background:var(--bg);border:1px solid var(--surface3);border-radius:8px;padding:9px 12px;color:var(--text);font-size:0.813rem;font-family:\'DM Sans\',sans-serif;outline:none;';
+    i.addEventListener('focus', function() { this.style.borderColor='var(--accent)'; });
+    i.addEventListener('blur', function() { this.style.borderColor='var(--surface3)'; });
+    return i;
+  };
+
+  // Source values row
+  var srcEl = document.createElement('div');
+  srcEl.style.cssText = 'background:var(--bg);border-radius:8px;padding:8px 12px;font-size:0.625rem;color:var(--text3);line-height:1.7;margin-top:10px;';
+  srcEl.innerHTML = '<strong style="color:var(--text2);">Source data</strong><br>' +
+    'D365: <span style="color:var(--text2);">' + escHtml(p.d365_id) + '</span><br>' +
+    'Adaco: <span style="color:var(--text2);">' + escHtml(p.adaco_id || '—') + '</span><br>' +
+    'Name: <span style="color:var(--text2);">' + escHtml(p.name) + '</span><br>' +
+    'Vendor: <span style="color:var(--text2);">' + escHtml(p.vendor_name || 'none') + '</span><br>' +
+    'MF: <span style="color:var(--text2);">' + escHtml(p.macrofamily || '—') + '</span> · ' +
+    'PU: <span style="color:var(--text2);">' + escHtml(p.purchase_unit || '—') + '</span> · ' +
+    'Pkg: <span style="color:var(--text2);">' + escHtml(p.packaging_unit || '—') + '</span>';
+  form.appendChild(srcEl);
+
+  // Name override
+  form.appendChild(label('Name Override'));
+  form.appendChild(inp('pe-name-' + p.d365_id, ov.name, p.name));
+
+  // Vendor select
+  form.appendChild(label('Vendor Override'));
+  var vsel = document.createElement('select');
+  vsel.id = 'pe-vendor-' + p.d365_id;
+  vsel.style.cssText = 'width:100%;background:var(--bg);border:1px solid var(--surface3);border-radius:8px;padding:9px 12px;color:var(--text);font-size:0.813rem;font-family:\'DM Sans\',sans-serif;outline:none;';
+  var blankOpt = document.createElement('option');
+  blankOpt.value = '';
+  blankOpt.textContent = ov.vendor_id ? '' : '— keep source vendor —';
+  vsel.appendChild(blankOpt);
+  prodVendors.forEach(function(v) {
+    var opt = document.createElement('option');
+    opt.value = v.vendor_id;
+    opt.textContent = v.vendor_name + ' (' + v.vendor_id + ')';
+    if ((ov.vendor_id || p.vendor_id) === v.vendor_id) opt.selected = true;
+    vsel.appendChild(opt);
+  });
+  form.appendChild(vsel);
+
+  // Purchase unit
+  form.appendChild(label('Purchase Unit Override'));
+  var puRow = document.createElement('div');
+  puRow.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2px;';
+  ['ea','lb','kg','CA12','CA6','CA4','CA2','CA1','CA1EA','1EA','GR'].forEach(function(u) {
+    var btn = document.createElement('button');
+    btn.textContent = u;
+    var cur = ov.purchase_unit || p.purchase_unit;
+    btn.style.cssText = 'padding:5px 10px;border-radius:6px;border:1px solid;font-size:0.688rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;' +
+      (cur === u ? 'background:var(--accent);border-color:var(--accent);color:#fff;' : 'background:var(--surface2);border-color:var(--surface3);color:var(--text2);');
+    btn.onclick = function() {
+      var puInp = document.getElementById('pe-pu-' + p.d365_id);
+      if (puInp) puInp.value = u;
+      puRow.querySelectorAll('button').forEach(function(b) {
+        b.style.background = 'var(--surface2)'; b.style.borderColor = 'var(--surface3)'; b.style.color = 'var(--text2)';
+      });
+      btn.style.background = 'var(--accent)'; btn.style.borderColor = 'var(--accent)'; btn.style.color = '#fff';
+    };
+    puRow.appendChild(btn);
+  });
+  form.appendChild(puRow);
+  var puInp = inp('pe-pu-' + p.d365_id, ov.purchase_unit || p.purchase_unit, 'e.g. ea, lb, CA12');
+  form.appendChild(puInp);
+
+  // Packaging unit
+  form.appendChild(label('Packaging Unit Override'));
+  form.appendChild(inp('pe-pkg-' + p.d365_id, ov.packaging_unit || p.packaging_unit, 'e.g. CA12, 1EA'));
+
+  // Notes
+  form.appendChild(label('Notes'));
+  var noteTa = document.createElement('textarea');
+  noteTa.id = 'pe-notes-' + p.d365_id;
+  noteTa.value = ov.notes || '';
+  noteTa.placeholder = 'Corrections, flags, context…';
+  noteTa.rows = 2;
+  noteTa.style.cssText = 'width:100%;background:var(--bg);border:1px solid var(--surface3);border-radius:8px;padding:9px 12px;color:var(--text);font-size:0.813rem;font-family:\'DM Sans\',sans-serif;outline:none;resize:none;';
+  noteTa.addEventListener('focus', function() { this.style.borderColor='var(--accent)'; });
+  noteTa.addEventListener('blur', function() { this.style.borderColor='var(--surface3)'; });
+  form.appendChild(noteTa);
+
+  // Buttons
+  var btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:8px;margin-top:12px;';
+
+  var saveBtn = document.createElement('button');
+  saveBtn.textContent = 'Save Override';
+  saveBtn.style.cssText = 'flex:1;padding:10px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:0.813rem;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+  saveBtn.onclick = function() { saveProdOverride(p.d365_id, p); };
+
+  var clearBtn = document.createElement('button');
+  clearBtn.textContent = 'Clear Edits';
+  clearBtn.style.cssText = 'padding:10px 16px;border-radius:10px;border:1px solid var(--surface3);background:var(--surface2);color:var(--text2);font-size:0.813rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+  clearBtn.onclick = function() { clearProdOverride(p.d365_id); };
+
+  btnRow.appendChild(saveBtn);
+  btnRow.appendChild(clearBtn);
+  form.appendChild(btnRow);
+
+  // Show if has overrides
+  if (Object.keys(ov).length > 0) {
+    var editedNote = document.createElement('div');
+    editedNote.style.cssText = 'font-size:0.625rem;color:var(--accent);margin-top:8px;';
+    editedNote.textContent = '✏ Has active overrides · last updated ' + (p.updated_at ? p.updated_at.slice(0,10) : '—');
+    form.appendChild(editedNote);
+  }
+
+  wrap.appendChild(form);
+}
+
+async function saveProdOverride(d365id, p) {
+  var nameVal = (document.getElementById('pe-name-' + d365id) || {}).value || '';
+  var vendorId = (document.getElementById('pe-vendor-' + d365id) || {}).value || '';
+  var pu = (document.getElementById('pe-pu-' + d365id) || {}).value || '';
+  var pkg = (document.getElementById('pe-pkg-' + d365id) || {}).value || '';
+  var notes = (document.getElementById('pe-notes-' + d365id) || {}).value || '';
+
+  // Find vendor name from selection
+  var vname = '';
+  if (vendorId) {
+    var vm = prodVendors.find(function(v) { return v.vendor_id === vendorId; });
+    vname = vm ? vm.vendor_name : '';
+  }
+
+  var overrides = {};
+  if (nameVal && nameVal !== p.name) overrides.name = nameVal;
+  if (vendorId && vendorId !== p.vendor_id) { overrides.vendor_id = vendorId; overrides.vendor_name = vname; }
+  if (pu && pu !== p.purchase_unit) overrides.purchase_unit = pu;
+  if (pkg && pkg !== p.packaging_unit) overrides.packaging_unit = pkg;
+  if (notes) overrides.notes = notes;
+
+  // If vendor assigned, clear no_vendor_flag
+  var noVendorFlag = p.no_vendor_flag;
+  if (overrides.vendor_id) noVendorFlag = false;
+
+  try {
+    var r = await fetch(SUPA_URL + '/rest/v1/kitchen_products?d365_id=eq.' + encodeURIComponent(d365id), {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY,
+        'Content-Type': 'application/json', 'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ overrides: overrides, no_vendor_flag: noVendorFlag, updated_at: new Date().toISOString() })
+    });
+    if (r.ok) {
+      toast('Saved');
+      // Update local p so re-render reflects change
+      p.overrides = overrides;
+      p.no_vendor_flag = noVendorFlag;
+    } else {
+      toast('Save failed');
+    }
+  } catch(e) {
+    toast('Error saving');
+  }
+}
+
+async function clearProdOverride(d365id) {
+  try {
+    var r = await fetch(SUPA_URL + '/rest/v1/kitchen_products?d365_id=eq.' + encodeURIComponent(d365id), {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY,
+        'Content-Type': 'application/json', 'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ overrides: {}, updated_at: new Date().toISOString() })
+    });
+    if (r.ok) { toast('Overrides cleared'); runProdSearch(document.getElementById('view-admin')); }
+    else { toast('Clear failed'); }
+  } catch(e) { toast('Error'); }
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 function renderAdminBTG(el) {
   el.innerHTML = '';
