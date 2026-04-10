@@ -20,13 +20,38 @@
   --d365-id:#A8A09A;
 }
 html.light{
-  --bg:#F5F2EE;--surface:#FFFFFF;--surface2:#EDEBE7;--surface3:#DDD9D3;
-  --text:#1A1714;--text2:#6B635A;--text3:#9C9288;
-  --accent:#B85C00;--accent-dim:rgba(184,92,0,0.1);--accent-border:rgba(184,92,0,0.3);
-  --green:#2D7A4F;--green-dim:rgba(45,122,79,0.1);--green-border:rgba(45,122,79,0.25);
-  --blue-dim:rgba(40,80,160,0.08);--blue-border:rgba(60,120,220,0.25);
-  --d365-id:#7A7268;
+  --bg:#E8E2D8;--surface:#FAF7F3;--surface2:#EDE7DC;--surface3:#CFC8BC;
+  --text:#1C1713;--text2:#5C5248;--text3:#8A8078;
+  --accent:#B85C00;--accent-dim:rgba(184,92,0,0.12);--accent-border:rgba(184,92,0,0.4);
+  --green:#2D7A4F;--green-dim:rgba(45,122,79,0.1);--green-border:rgba(45,122,79,0.3);
+  --blue-dim:rgba(40,80,160,0.08);--blue-border:rgba(60,120,220,0.3);
+  --d365-id:#6B6158;
 }
+
+/* Light mode component overrides — explicit borders for definition */
+html.light .date-nav-global{border-color:var(--surface3);}
+html.light .search-wrap{border-color:var(--surface3);box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+html.light .results-box{border-color:var(--surface3);box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+html.light .result-row:active{background:var(--surface2);}
+html.light .group-header{border:1.5px solid var(--surface3);}
+html.light .group-header:not(.collapsed){border-bottom:none;}
+html.light .group-body{border-color:var(--surface3);}
+html.light .detail-card{border-color:var(--surface3);box-shadow:0 2px 8px rgba(0,0,0,0.07);}
+html.light .num-input,
+html.light .par-input{background:#EDE7DC;border-color:var(--surface3);color:var(--text);}
+html.light .num-input.has-value{border-color:var(--accent);color:var(--accent);}
+html.light .filter-chip{border-color:var(--surface3);background:var(--surface);color:var(--text2);}
+html.light .filter-chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+html.light .tabs{border-bottom-color:var(--surface3);}
+html.light .outlet-btn{border-color:var(--surface3);color:var(--text2);}
+html.light .outlet-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+html.light .status-pill.status-blue{background:rgba(40,80,160,0.08);color:#3A5FA8;border-color:rgba(60,120,220,0.3);}
+html.light .status-pill.status-orange{background:var(--accent-dim);color:var(--accent);border-color:var(--accent-border);}
+html.light .cat-header{background:var(--surface2);border-bottom-color:var(--surface3);}
+html.light .col-heads{background:var(--surface2);border-bottom-color:var(--surface3);}
+html.light .item-row{background:var(--surface);border-bottom-color:var(--surface3);}
+html.light .group-export-btn{border-color:var(--surface3);color:var(--text3);}
+html.light #toast{background:var(--text);color:var(--surface);}
 
 /* Theme toggle */
 .theme-toggle{background:none;border:none;cursor:pointer;font-size:1rem;padding:2px;line-height:1;filter:grayscale(1);opacity:0.45;transition:opacity 0.15s;}
