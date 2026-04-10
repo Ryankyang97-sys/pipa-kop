@@ -21,13 +21,12 @@
 html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100%;-webkit-text-size-adjust:none;}
 .page{padding:calc(var(--safe-top) + 40px) 16px calc(var(--safe-bottom) + 24px);max-width:480px;margin:0 auto;}
 
-/* NAV */
 .nav-back{display:flex;align-items:center;gap:6px;margin-bottom:16px;text-decoration:none;color:var(--text3);font-size:0.75rem;font-weight:600;}
 .wordmark{font-size:1.35rem;font-weight:700;letter-spacing:-0.02em;}
 .wordmark span{color:var(--accent);}
 .wordmark-sub{font-size:0.688rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-top:3px;}
 
-/* SHARED DATE NAV — above tabs */
+/* DATE NAV */
 .date-nav-global{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--surface2);border-radius:10px;padding:8px 12px;margin-top:16px;}
 .date-nav-btn{background:var(--surface2);border:none;color:var(--text2);font-size:1.1rem;width:32px;height:32px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .date-nav-center{text-align:center;flex:1;}
@@ -43,10 +42,8 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .panel{display:none;padding-top:18px;}
 .panel.active{display:block;}
 
-/* SECTION LABEL */
+/* LOOKUP */
 .section-label{font-size:0.563rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
-
-/* SEARCH */
 .search-wrap{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--surface3);border-radius:10px;padding:10px 14px;margin-bottom:6px;}
 .search-icon{color:var(--text3);font-size:1rem;flex-shrink:0;}
 .search-input{background:none;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.938rem;width:100%;outline:none;}
@@ -62,13 +59,11 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .result-tag{font-size:0.563rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);}
 .result-vendor{font-size:0.688rem;color:var(--text2);}
 .no-results{padding:16px 14px;font-size:0.813rem;color:var(--text3);text-align:center;}
-
-/* LOOKUP DETAIL */
 .detail-card{background:var(--surface);border:1px solid var(--surface2);border-radius:10px;overflow:hidden;margin-top:10px;}
 .detail-header{padding:12px 14px;border-bottom:1px solid var(--surface2);}
 .detail-title{font-size:0.875rem;font-weight:700;color:var(--text);line-height:1.3;}
 .detail-sub{font-size:0.688rem;color:var(--text3);margin-top:3px;}
-.detail-ids{display:flex;gap:10px;margin-top:6px;}
+.detail-ids{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;}
 .id-chip{font-family:'JetBrains Mono',monospace;font-size:0.688rem;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);padding:2px 8px;border-radius:4px;}
 .detail-close{float:right;font-size:0.75rem;color:var(--text3);cursor:pointer;margin-top:2px;}
 
@@ -77,51 +72,58 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
 .outlet-btn{flex:1;padding:9px 0;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;background:var(--surface2);color:var(--text3);border:none;cursor:pointer;transition:background 0.15s,color 0.15s;}
 .outlet-btn.active{background:var(--accent);color:#fff;}
 
-/* ORDER TABLE */
+/* ORDER GROUPS */
 .group-section{margin-bottom:20px;}
 .group-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface2);border-radius:8px 8px 0 0;}
 .group-title{font-size:0.625rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);}
-.group-meta{display:flex;align-items:center;gap:8px;}
+.group-actions{display:flex;align-items:center;gap:6px;}
 .group-count{font-size:0.563rem;color:var(--text3);}
-.group-export{background:var(--surface3);border:none;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.563rem;font-weight:700;padding:3px 8px;border-radius:4px;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;}
-.group-export:active{opacity:0.7;}
+.group-export-btn{background:var(--surface3);border:none;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.563rem;font-weight:700;padding:4px 9px;border-radius:4px;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;}
+.group-export-btn:active{opacity:0.7;}
 
-.col-heads{display:flex;align-items:center;padding:4px 12px 6px;gap:8px;background:var(--surface);border-left:1px solid var(--surface2);border-right:1px solid var(--surface2);}
-.col-head{font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);text-align:center;}
+/* Col headers — inside each group */
+.col-heads{display:flex;align-items:center;padding:3px 12px 4px;gap:4px;background:var(--surface);border-left:1px solid var(--surface2);border-right:1px solid var(--surface2);}
+.col-head{font-size:0.475rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);text-align:center;flex-shrink:0;}
 
-.item-row{display:flex;align-items:center;padding:9px 12px;border-bottom:1px solid var(--surface2);gap:8px;background:var(--surface);}
+/* Item rows */
+.item-row{display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid var(--surface2);gap:4px;background:var(--surface);}
 .item-row:last-child{border-bottom:none;border-radius:0 0 8px 8px;}
 .item-info{flex:1;min-width:0;}
-.item-name{font-size:0.813rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.item-d365{font-family:'JetBrains Mono',monospace;font-size:0.563rem;color:var(--text3);margin-top:2px;}
+.item-name{font-size:0.788rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-meta{display:flex;gap:5px;align-items:center;margin-top:2px;}
+.item-d365{font-family:'JetBrains Mono',monospace;font-size:0.525rem;color:var(--text3);}
+.item-unit{font-family:'JetBrains Mono',monospace;font-size:0.513rem;font-weight:700;color:var(--accent);background:var(--accent-dim);border:1px solid var(--accent-border);padding:1px 5px;border-radius:3px;}
 
-.num-input{background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.813rem;text-align:center;padding:6px 4px;flex-shrink:0;-moz-appearance:textfield;}
+/* Number input — on hand / order qty */
+.num-input{background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.775rem;text-align:center;padding:5px 2px;flex-shrink:0;-moz-appearance:textfield;width:44px;}
 .num-input::-webkit-inner-spin-button,.num-input::-webkit-outer-spin-button{-webkit-appearance:none;}
 .num-input:focus{outline:none;border-color:var(--accent);}
 .num-input.has-value{border-color:var(--accent);color:var(--accent);}
-.par-badge{font-size:0.563rem;color:var(--text3);text-align:center;width:32px;flex-shrink:0;}
 
-/* BUTTONS */
+/* Par input — same width, slightly muted until filled */
+.par-input{background:var(--surface2);border:1px solid var(--surface3);border-radius:6px;color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:0.775rem;text-align:center;padding:5px 2px;flex-shrink:0;-moz-appearance:textfield;width:36px;}
+.par-input::-webkit-inner-spin-button,.par-input::-webkit-outer-spin-button{-webkit-appearance:none;}
+.par-input:focus{outline:none;border-color:var(--text2);}
+.par-input.has-par{color:var(--text);border-color:var(--surface3);}
+
+/* Buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:0.813rem;font-weight:700;cursor:pointer;transition:opacity 0.15s;}
 .btn-primary{background:var(--accent);color:#fff;}
 .btn-secondary{background:var(--surface2);color:var(--text2);}
-.btn-ghost{background:transparent;border:1px solid var(--surface3);color:var(--text2);}
 .btn:active{opacity:0.75;}
 .btn-full{width:100%;margin-top:12px;}
-.btn-row{display:flex;gap:8px;margin-top:14px;}
 
-/* STATUS PILLS */
+/* Status pills */
 .status-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
 .status-pill{font-size:0.625rem;font-weight:700;padding:4px 10px;border-radius:20px;}
-.status-green{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);}
 .status-orange{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);}
 .status-blue{background:var(--blue-dim);color:#80aaff;border:1px solid var(--blue-border);}
 
-/* TOAST */
+/* Toast */
 #toast{position:fixed;bottom:calc(var(--safe-bottom) + 24px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface3);color:var(--text);font-size:0.813rem;font-weight:600;padding:10px 18px;border-radius:24px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:999;white-space:nowrap;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* LOADING / EMPTY */
+/* Loading / empty */
 .loading{text-align:center;padding:32px 16px;color:var(--text3);font-size:0.813rem;}
 .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--surface3);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin-bottom:8px;}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -137,7 +139,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
   <div class="wordmark">Kitchen <span>Tool</span></div>
   <div class="wordmark-sub">EKP · BOH Operations</div>
 
-  <!-- ── SHARED DATE NAV ─────────────────────────────────────── -->
+  <!-- SHARED DATE NAV -->
   <div class="date-nav-global">
     <button class="date-nav-btn" onclick="shiftDate(-1)">‹</button>
     <div class="date-nav-center">
@@ -147,7 +149,7 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     <button class="date-nav-btn" onclick="shiftDate(1)">›</button>
   </div>
 
-  <!-- ── TABS ───────────────────────────────────────────────── -->
+  <!-- TABS -->
   <div class="tabs-wrap">
     <div class="tabs">
       <div class="tab active" onclick="switchTab('lookup',this)">D365</div>
@@ -156,14 +158,13 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════════════
-       TAB — D365 LOOKUP
-  ═══════════════════════════════════════════════════════════ -->
+  <!-- TAB: D365 LOOKUP -->
   <div class="panel active" id="panel-lookup">
     <div class="section-label">Search D365 Products</div>
     <div class="search-wrap">
       <span class="search-icon">⌕</span>
-      <input class="search-input" id="lookupQ" type="search" placeholder="D365 #, Adaco ID, or name…"
+      <input class="search-input" id="lookupQ" type="search"
+        placeholder="D365 #, Adaco ID, or name…"
         oninput="dLookup(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
     <div class="search-hint">e.g. "01137973" or "chicken breast"</div>
@@ -171,538 +172,438 @@ html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text
     <div id="lookupDetail"></div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════════════
-       TAB — EDT
-  ═══════════════════════════════════════════════════════════ -->
+  <!-- TAB: EDT -->
   <div class="panel" id="panel-edt">
-
-    <!-- Outlet toggle -->
     <div class="outlet-toggle">
       <button class="outlet-btn active" id="edt-ob-pipa" onclick="setEdtOutlet('pipa',this)">PiPa</button>
       <button class="outlet-btn" id="edt-ob-pronto" onclick="setEdtOutlet('pronto',this)">Pronto</button>
     </div>
-
-    <!-- Status -->
     <div class="status-row" id="edtStatus"></div>
-
-    <!-- Column headers + item list -->
-    <div id="edtColHeads" style="display:none;" class="col-heads">
-      <div style="flex:1;"></div>
-      <div class="col-head" style="width:52px;">On Hand</div>
-      <div class="col-head" style="width:32px;">Par</div>
-      <div class="col-head" style="width:52px;">Order</div>
-    </div>
-
     <div id="edtBody">
       <div class="loading"><div class="spinner"></div><br>Loading EDT…</div>
     </div>
-
   </div>
 
-  <!-- ══════════════════════════════════════════════════════════
-       TAB — ORDERS (stub — vendors coming next)
-  ═══════════════════════════════════════════════════════════ -->
+  <!-- TAB: ORDERS (stub) -->
   <div class="panel" id="panel-orders">
     <div class="empty-state">
       <div class="empty-icon">🏗</div>
-      <div class="empty-msg">Vendor orders coming soon.<br>Use EDT tab for EDT items.</div>
+      <div class="empty-msg">Vendor orders coming soon.</div>
     </div>
   </div>
 
-</div><!-- /page -->
-
+</div>
 <div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════════════════
+// ─── CONFIG ────────────────────────────────────────────────────────
 const SB_URL = 'https://fhbusipvtxjnwidlgpaa.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
 
-function sbHeaders() {
+function sbH() {
   return { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
 }
 async function sbGet(path) {
-  const r = await fetch(SB_URL + '/rest/v1/' + path, { headers: sbHeaders() });
+  const r = await fetch(SB_URL + '/rest/v1/' + path, { headers: sbH() });
   if (!r.ok) throw new Error('SB ' + r.status + ' ' + path.split('?')[0]);
   return r.json();
 }
-async function sbUpsert(table, body, onConflict) {
-  const r = await fetch(SB_URL + '/rest/v1/' + table + '?on_conflict=' + onConflict, {
+async function sbUpsert(table, rows, conflict) {
+  const r = await fetch(SB_URL + '/rest/v1/' + table + '?on_conflict=' + conflict, {
     method: 'POST',
-    headers: Object.assign({}, sbHeaders(), { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
-    body: JSON.stringify(body)
+    headers: Object.assign({}, sbH(), { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+    body: JSON.stringify(rows)
   });
-  if (!r.ok) throw new Error('SB upsert ' + r.status);
+  if (!r.ok) { const t = await r.text(); throw new Error('upsert ' + r.status + ': ' + t.slice(0,80)); }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// SHARED DATE STATE
-// ═══════════════════════════════════════════════════════════════════
-let dateOffset = 0; // days from today
-
-function dateIso(off) {
-  const d = new Date();
-  d.setDate(d.getDate() + (off !== undefined ? off : dateOffset));
+// ─── SHARED DATE ────────────────────────────────────────────────────
+let dateOffset = 0;
+function dateIso() {
+  const d = new Date(); d.setDate(d.getDate() + dateOffset);
   return d.toISOString().slice(0, 10);
 }
-function dateFmt(off) {
-  const d = new Date();
-  d.setDate(d.getDate() + (off !== undefined ? off : dateOffset));
-  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+function dateFmt() {
+  const d = new Date(); d.setDate(d.getDate() + dateOffset);
+  return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
 }
 function updateDateUI() {
-  const lbl = dateOffset === 0 ? 'Today' : dateOffset === -1 ? 'Yesterday' : dateFmt();
-  document.getElementById('globalDateLabel').textContent = lbl;
+  document.getElementById('globalDateLabel').textContent =
+    dateOffset === 0 ? 'Today' : dateOffset === -1 ? 'Yesterday' : dateFmt();
   document.getElementById('globalDateSub').textContent = dateFmt();
 }
 function shiftDate(dir) {
-  dateOffset += dir;
-  updateDateUI();
-  // Reload whichever ordering tab is active
-  if (activeTab === 'edt') loadEdtOrders();
+  dateOffset += dir; updateDateUI();
+  if (activeTab === 'edt') loadEdtData();
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// UTILITIES
-// ═══════════════════════════════════════════════════════════════════
-function debounce(fn, ms) { let t; return function() { const a = arguments; clearTimeout(t); t = setTimeout(function() { fn.apply(null, a); }, ms); }; }
-function showToast(msg, dur) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(function() { el.classList.remove('show'); }, dur || 2400); }
-function pad365(id) { return id ? String(id).padStart(8, '0') : ''; }
+// ─── UTILS ──────────────────────────────────────────────────────────
+function debounce(fn, ms) {
+  let t; return function() { const a = arguments; clearTimeout(t); t = setTimeout(function(){ fn.apply(null,a); }, ms); };
+}
+function toast(msg, dur) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, dur || 2400);
+}
+function pad8(id) { return id ? String(id).padStart(8,'0') : ''; }
 function copyText(txt, msg) {
-  if (navigator.clipboard) { navigator.clipboard.writeText(txt).then(function() { showToast(msg || 'Copied'); }); }
-  else { const el = document.createElement('textarea'); el.value = txt; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); showToast(msg || 'Copied'); }
+  if (navigator.clipboard) { navigator.clipboard.writeText(txt).then(function(){ toast(msg||'Copied'); }); }
+  else {
+    const el = document.createElement('textarea'); el.value = txt;
+    document.body.appendChild(el); el.select(); document.execCommand('copy');
+    document.body.removeChild(el); toast(msg||'Copied');
+  }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// TAB SWITCHING
-// ═══════════════════════════════════════════════════════════════════
+// ─── TAB SWITCH ─────────────────────────────────────────────────────
 let activeTab = 'lookup';
-
 function switchTab(id, el) {
-  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
-  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
   el.classList.add('active');
   document.getElementById('panel-' + id).classList.add('active');
   activeTab = id;
   if (id === 'edt') initEDT();
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// TAB — D365 LOOKUP
-// ═══════════════════════════════════════════════════════════════════
+// ─── D365 LOOKUP ────────────────────────────────────────────────────
 const dLookup = debounce(runLookup, 300);
-
 async function runLookup(val) {
   const res = document.getElementById('lookupResults');
-  val = (val || '').trim();
-  if (val.length < 2) { res.style.display = 'none'; res.innerHTML = ''; return; }
+  val = (val||'').trim();
+  if (val.length < 2) { res.style.display='none'; res.innerHTML=''; return; }
   res.style.display = 'block';
   res.innerHTML = '<div class="no-results">Searching…</div>';
   try {
-    const stripped = val.replace(/^0+/, '') || '0';
-    let q;
-    if (/^\d+$/.test(stripped)) {
-      q = 'kitchen_products?or=(d365_id.eq.' + encodeURIComponent(val) + ',d365_id.eq.' + encodeURIComponent(stripped) + ',adaco_id.eq.' + encodeURIComponent(val) + ',adaco_id.eq.' + encodeURIComponent(stripped) + ')&select=d365_id,adaco_id,name,vendor_name,macrofamily,purchase_unit,packaging_unit&limit=40&order=name';
-    } else {
-      q = 'kitchen_products?name=ilike.' + encodeURIComponent('*' + val + '*') + '&select=d365_id,adaco_id,name,vendor_name,macrofamily,purchase_unit,packaging_unit&limit=40&order=name';
-    }
+    const s = val.replace(/^0+/,'') || '0';
+    const q = /^\d+$/.test(s)
+      ? 'kitchen_products?or=(d365_id.eq.'+encodeURIComponent(val)+',d365_id.eq.'+encodeURIComponent(s)+',adaco_id.eq.'+encodeURIComponent(val)+',adaco_id.eq.'+encodeURIComponent(s)+')&select=d365_id,adaco_id,name,vendor_name,macrofamily,purchase_unit,packaging_unit&limit=40&order=name'
+      : 'kitchen_products?name=ilike.'+encodeURIComponent('*'+val+'*')+'&select=d365_id,adaco_id,name,vendor_name,macrofamily,purchase_unit,packaging_unit&limit=40&order=name';
     const data = await sbGet(q);
-    if (!data.length) { res.innerHTML = '<div class="no-results">No results for "' + val + '"</div>'; return; }
-    res.innerHTML = data.map(function(r) {
-      return '<div class="result-row" onclick="showLookupDetail(' + JSON.stringify(r).replace(/"/g, '&quot;') + ')">' +
-        '<div class="result-name">' + r.name + '</div>' +
-        '<div class="result-meta">' +
-        '<span class="result-id">' + pad365(r.d365_id) + '</span>' +
-        (r.adaco_id ? '<span class="result-id" style="color:var(--text2);">Adaco ' + r.adaco_id + '</span>' : '') +
-        (r.macrofamily ? '<span class="result-tag">' + r.macrofamily + '</span>' : '') +
-        (r.vendor_name ? '<span class="result-vendor">' + r.vendor_name + '</span>' : '') +
-        '</div></div>';
+    if (!data.length) { res.innerHTML = '<div class="no-results">No results for "'+val+'"</div>'; return; }
+    res.innerHTML = data.map(function(r){
+      return '<div class="result-row" onclick="showDetail('+JSON.stringify(r).replace(/"/g,'&quot;')+')">'
+        +'<div class="result-name">'+r.name+'</div>'
+        +'<div class="result-meta">'
+        +'<span class="result-id">'+pad8(r.d365_id)+'</span>'
+        +(r.adaco_id ? '<span class="result-id" style="color:var(--text2);">Adaco '+r.adaco_id+'</span>' : '')
+        +(r.macrofamily ? '<span class="result-tag">'+r.macrofamily+'</span>' : '')
+        +(r.vendor_name ? '<span class="result-vendor">'+r.vendor_name+'</span>' : '')
+        +'</div></div>';
     }).join('');
-  } catch(e) {
-    res.innerHTML = '<div class="no-results">Error: ' + e.message + '</div>';
-  }
+  } catch(e) { res.innerHTML = '<div class="no-results">Error: '+e.message+'</div>'; }
 }
-
-function showLookupDetail(item) {
+function showDetail(item) {
   document.getElementById('lookupResults').style.display = 'none';
   document.getElementById('lookupQ').value = '';
   const d = document.getElementById('lookupDetail');
-  d.innerHTML = '<div class="detail-card">' +
-    '<div class="detail-header">' +
-    '<span class="detail-close" onclick="document.getElementById(\'lookupDetail\').innerHTML=\'\'">✕</span>' +
-    '<div class="detail-title">' + item.name + '</div>' +
-    '<div class="detail-sub">' + (item.vendor_name || 'No vendor') + (item.macrofamily ? ' · ' + item.macrofamily : '') + '</div>' +
-    '<div class="detail-ids">' +
-    '<span class="id-chip">D365 ' + pad365(item.d365_id) + '</span>' +
-    (item.adaco_id ? '<span class="id-chip" style="background:var(--surface2);border-color:var(--surface3);color:var(--text2);">Adaco ' + item.adaco_id + '</span>' : '') +
-    '</div>' +
-    '<div style="margin-top:8px;font-size:0.688rem;color:var(--text3);">' +
-    (item.purchase_unit ? 'Order unit: ' + item.purchase_unit : '') +
-    (item.packaging_unit ? ' · Pack: ' + item.packaging_unit : '') +
-    '</div></div>' +
-    '<div style="padding:10px 14px;display:flex;gap:8px;">' +
-    '<button class="btn btn-secondary" style="flex:1;font-size:0.75rem;" onclick="copyText(\'' + pad365(item.d365_id) + '\',\'D365 # copied\')">Copy D365 #</button>' +
-    (item.adaco_id ? '<button class="btn btn-ghost" style="flex:1;font-size:0.75rem;" onclick="copyText(\'' + item.adaco_id + '\',\'Adaco ID copied\')">Copy Adaco ID</button>' : '') +
-    '</div></div>';
-  loadRecipesForItem(item.d365_id, d);
+  d.innerHTML = '<div class="detail-card"><div class="detail-header">'
+    +'<span class="detail-close" onclick="document.getElementById(\'lookupDetail\').innerHTML=\'\'">✕</span>'
+    +'<div class="detail-title">'+item.name+'</div>'
+    +'<div class="detail-sub">'+(item.vendor_name||'No vendor')+(item.macrofamily?' · '+item.macrofamily:'')+'</div>'
+    +'<div class="detail-ids"><span class="id-chip">D365 '+pad8(item.d365_id)+'</span>'
+    +(item.adaco_id ? '<span class="id-chip" style="background:var(--surface2);border-color:var(--surface3);color:var(--text2);">Adaco '+item.adaco_id+'</span>' : '')
+    +'</div>'
+    +'<div style="margin-top:8px;font-size:0.688rem;color:var(--text3);">'
+    +(item.purchase_unit?'Order unit: '+item.purchase_unit:'')+(item.packaging_unit?' · Pack: '+item.packaging_unit:'')
+    +'</div></div>'
+    +'<div style="padding:10px 14px;display:flex;gap:8px;">'
+    +'<button class="btn btn-secondary" style="flex:1;font-size:0.75rem;" onclick="copyText(\''+pad8(item.d365_id)+'\',\'D365 # copied\')">Copy D365 #</button>'
+    +(item.adaco_id ? '<button class="btn" style="flex:1;font-size:0.75rem;background:var(--surface2);color:var(--text2);" onclick="copyText(\''+item.adaco_id+'\',\'Adaco ID copied\')">Copy Adaco ID</button>' : '')
+    +'</div></div>';
+  loadItemRecipes(item.d365_id, d);
 }
-
-async function loadRecipesForItem(d365Id, container) {
+async function loadItemRecipes(d365Id, container) {
   try {
-    const stripped = String(d365Id).replace(/^0+/, '') || '0';
-    const items = await sbGet('ks_recipe_items?or=(d365_id.eq.' + encodeURIComponent(d365Id) + ',d365_id.eq.' + encodeURIComponent(stripped) + ')&select=recipe_number&limit=50');
+    const s = String(d365Id).replace(/^0+/,'') || '0';
+    const items = await sbGet('ks_recipe_items?or=(d365_id.eq.'+encodeURIComponent(d365Id)+',d365_id.eq.'+encodeURIComponent(s)+')&select=recipe_number&limit=50');
     if (!items.length) return;
-    const nums = items.map(function(i) { return i.recipe_number; });
-    const recipes = await sbGet('ks_recipes?recipe_number=in.(' + nums.join(',') + ')&select=recipe_number,name,outlet,active&order=name');
-    const html = '<div style="background:var(--surface);border:1px solid var(--surface2);border-radius:10px;margin-top:10px;">' +
-      '<div style="padding:10px 14px;border-bottom:1px solid var(--surface2);font-size:0.563rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">Used in ' + recipes.length + ' recipe(s)</div>' +
-      recipes.map(function(r) {
-        return '<div style="padding:9px 14px;border-bottom:1px solid var(--surface2);">' +
-          '<div style="font-size:0.75rem;color:var(--text);">' + r.name + '</div>' +
-          '<div style="font-size:0.563rem;color:var(--text3);margin-top:2px;">' + r.recipe_number + ' · ' + r.outlet + (r.active ? '' : ' · inactive') + '</div></div>';
-      }).join('') + '</div>';
-    container.insertAdjacentHTML('beforeend', html);
+    const nums = items.map(function(i){ return i.recipe_number; });
+    const recipes = await sbGet('ks_recipes?recipe_number=in.('+nums.join(',')+')&select=recipe_number,name,outlet,active&order=name');
+    container.insertAdjacentHTML('beforeend',
+      '<div style="background:var(--surface);border:1px solid var(--surface2);border-radius:10px;margin-top:10px;">'
+      +'<div style="padding:10px 14px;border-bottom:1px solid var(--surface2);font-size:0.563rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">Used in '+recipes.length+' recipe(s)</div>'
+      +recipes.map(function(r){
+        return '<div style="padding:9px 14px;border-bottom:1px solid var(--surface2);">'
+          +'<div style="font-size:0.75rem;color:var(--text);">'+r.name+'</div>'
+          +'<div style="font-size:0.563rem;color:var(--text3);margin-top:2px;">'+r.recipe_number+' · '+r.outlet+(r.active?'':' · inactive')+'</div></div>';
+      }).join('')+'</div>');
   } catch(e) {}
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// TAB — EDT  (outlet-scoped ordering + per-outlet CSV export)
-// ═══════════════════════════════════════════════════════════════════
-let edtOutlet = 'pipa';
-let edtProducts = { pipa: null, pronto: null }; // cached product lists per outlet
-let edtOnHand  = {};   // d365_id → on-hand qty  (shared across outlets)
-let edtPars    = {};   // d365_id → par           (shared across outlets)
-let edtOrders  = { pipa: {}, pronto: {} }; // d365_id → order qty, per outlet
-let edtInited  = false;
+// ─── EDT TAB ────────────────────────────────────────────────────────
+// Data sources:
+//   kitchen_edt_items  → item list (outlet, edt_vendor, d365_id, display_name, unit)
+//   kitchen_pars       → editable pars (d365_id, par)
+//   kitchen_edt_orders → order quantities (order_date, d365_id, outlet, qty)
+//   kitchen_count      → on-hand (count_date, d365_id, qty)
 
-// --- Init & load --------------------------------------------------
+let edtOutlet    = 'pipa';
+let edtItems     = { pipa: null, pronto: null };   // loaded once, cached
+let edtPars      = {};                              // d365_id → number
+let edtOnHand    = {};                              // d365_id → number
+let edtOrdQtys   = { pipa: {}, pronto: {} };       // d365_id → number, per outlet
+let edtGroupMap  = {};                              // slug → item[]  (for export)
 
 async function initEDT() {
-  if (!edtInited) {
-    edtInited = true;
-    updateEdtStatus('loading');
+  // Load item lists for both outlets once
+  if (!edtItems.pipa || !edtItems.pronto) {
+    showEdtSpinner();
     try {
-      await Promise.all([ensureEdtProducts('pipa'), ensureEdtProducts('pronto')]);
-      await loadEdtMeta();   // pars
-      await loadEdtOrders(); // saved order qtys + on-hand for today
+      const [pipaRows, prontoRows] = await Promise.all([
+        sbGet('kitchen_edt_items?outlet=eq.pipa&active=eq.true&select=edt_vendor,d365_id,display_name,unit,sort_order&order=edt_vendor,sort_order'),
+        sbGet('kitchen_edt_items?outlet=eq.pronto&active=eq.true&select=edt_vendor,d365_id,display_name,unit,sort_order&order=edt_vendor,sort_order')
+      ]);
+      edtItems.pipa   = pipaRows;
+      edtItems.pronto = prontoRows;
     } catch(e) {
-      document.getElementById('edtBody').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-msg">Error loading EDT:<br>' + e.message + '</div></div>';
+      document.getElementById('edtBody').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">⚠️</div>'
+        +'<div class="empty-msg">Error loading EDT items:<br>'+e.message+'<br><br>'
+        +'Run kitchen_edt_items_seed.sql in Supabase.</div></div>';
+      return;
     }
-  } else {
-    renderEdtItems();
   }
+  await loadEdtData();
 }
 
-// Fetch EDT CK items for one outlet. Outlets are distinguished by the
-// presence of "PIPA" or "PRONTO" in the product name (case-insensitive).
-// Falls back to ALL CK EDT items if the outlet keyword returns nothing.
-async function ensureEdtProducts(outlet) {
-  if (edtProducts[outlet] !== null) return;
-  const kw = outlet === 'pipa' ? 'PIPA' : 'PRONTO';
-  let rows = await sbGet(
-    'kitchen_products?name=ilike.*EDT*' + kw + '*&macrofamily=eq.CK' +
-    '&select=d365_id,name,purchase_unit&order=name&limit=500'
-  );
-  if (!rows.length) {
-    // No outlet-specific items — share all CK EDT items between outlets
-    rows = await sbGet(
-      'kitchen_products?name=ilike.*EDT*&macrofamily=eq.CK' +
-      '&select=d365_id,name,purchase_unit&order=name&limit=500'
-    );
-  }
-  edtProducts[outlet] = rows;
-}
-
-// Load pars for all EDT items (both outlets combined)
-async function loadEdtMeta() {
-  const allItems = (edtProducts.pipa || []).concat(edtProducts.pronto || []);
-  if (!allItems.length) return;
-  const ids = [...new Set(allItems.map(function(p) { return p.d365_id; }))];
-  try {
-    const pars = await sbGet('kitchen_pars?d365_id=in.(' + ids.join(',') + ')&select=d365_id,par&limit=500');
-    pars.forEach(function(p) { edtPars[p.d365_id] = p.par; });
-  } catch(e) {}
-}
-
-// Load saved order quantities + on-hand counts for the shared date
-async function loadEdtOrders() {
+async function loadEdtData() {
+  showEdtSpinner();
   const iso = dateIso();
-  updateEdtStatus('loading');
+  const allIds = [...new Set(
+    (edtItems.pipa||[]).concat(edtItems.pronto||[]).map(function(i){ return i.d365_id; })
+  )];
 
-  // Reset orders for fresh load
-  edtOrders = { pipa: {}, pronto: {} };
-  edtOnHand = {};
+  await Promise.all([
+    // Pars
+    allIds.length
+      ? sbGet('kitchen_pars?d365_id=in.('+allIds.join(',')+')'+'&select=d365_id,par&limit=500')
+          .then(function(r){ edtPars={}; r.forEach(function(p){ edtPars[p.d365_id]=p.par; }); })
+          .catch(function(){})
+      : Promise.resolve(),
 
-  // Load saved EDT order qtys
-  try {
-    const rows = await sbGet(
-      'kitchen_edt_orders?order_date=eq.' + iso + '&select=d365_id,outlet,qty&limit=1000'
-    );
-    rows.forEach(function(r) {
-      if (edtOrders[r.outlet]) edtOrders[r.outlet][r.d365_id] = r.qty;
-    });
-  } catch(e) {
-    // Table may not exist yet — silent fail
-  }
+    // Saved EDT order qtys for this date (both outlets)
+    sbGet('kitchen_edt_orders?order_date=eq.'+iso+'&select=d365_id,outlet,qty&limit=1000')
+      .then(function(r){
+        edtOrdQtys = { pipa:{}, pronto:{} };
+        r.forEach(function(row){
+          if (edtOrdQtys[row.outlet]) edtOrdQtys[row.outlet][row.d365_id] = row.qty;
+        });
+      })
+      .catch(function(){ edtOrdQtys = { pipa:{}, pronto:{} }; }),
 
-  // Load on-hand counts for this date
-  const allItems = (edtProducts.pipa || []).concat(edtProducts.pronto || []);
-  const ids = [...new Set(allItems.map(function(p) { return p.d365_id; }))];
-  if (ids.length) {
-    try {
-      const counts = await sbGet(
-        'kitchen_count?count_date=eq.' + iso + '&d365_id=in.(' + ids.join(',') + ')&select=d365_id,qty&limit=500'
-      );
-      counts.forEach(function(c) { edtOnHand[c.d365_id] = c.qty; });
-    } catch(e) {}
-  }
+    // On-hand counts for this date
+    allIds.length
+      ? sbGet('kitchen_count?count_date=eq.'+iso+'&d365_id=in.('+allIds.join(',')+')'+'&select=d365_id,qty&limit=500')
+          .then(function(r){ edtOnHand={}; r.forEach(function(c){ edtOnHand[c.d365_id]=c.qty; }); })
+          .catch(function(){})
+      : Promise.resolve()
+  ]);
 
-  renderEdtItems();
+  renderEDT();
 }
 
-// --- Render -------------------------------------------------------
-
-function updateEdtStatus(state) {
-  if (state === 'loading') {
-    document.getElementById('edtStatus').innerHTML = '';
-    document.getElementById('edtColHeads').style.display = 'none';
-    document.getElementById('edtBody').innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading…</div>';
-  }
+function showEdtSpinner() {
+  document.getElementById('edtStatus').innerHTML = '';
+  document.getElementById('edtBody').innerHTML =
+    '<div class="loading"><div class="spinner"></div><br>Loading…</div>';
 }
 
-function renderEdtItems() {
-  const items = edtProducts[edtOutlet] || [];
-  const outletLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  const orders = edtOrders[edtOutlet];
-  const iso = dateIso();
+function renderEDT() {
+  const items     = edtItems[edtOutlet] || [];
+  const orders    = edtOrdQtys[edtOutlet];
+  const iso       = dateIso();
+  const outLabel  = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
+  const withOrder = items.filter(function(i){ return orders[i.d365_id] > 0; }).length;
 
-  // Status pills
-  const withOrder = items.filter(function(p) { return orders[p.d365_id] > 0; }).length;
   document.getElementById('edtStatus').innerHTML =
-    '<span class="status-pill status-blue">' + items.length + ' items · ' + outletLabel + '</span>' +
-    (withOrder ? '<span class="status-pill status-orange">' + withOrder + ' ordered</span>' : '') +
-    '<span class="status-pill status-blue">' + iso + '</span>';
+    '<span class="status-pill status-blue">'+items.length+' items · '+outLabel+'</span>'
+    +(withOrder ? '<span class="status-pill status-orange">'+withOrder+' ordered</span>' : '')
+    +'<span class="status-pill status-blue">'+iso+'</span>';
 
   if (!items.length) {
-    document.getElementById('edtColHeads').style.display = 'none';
     document.getElementById('edtBody').innerHTML =
-      '<div class="empty-state"><div class="empty-icon">📦</div>' +
-      '<div class="empty-msg">No EDT · CK items found for ' + outletLabel + '.<br>' +
-      'Items need "EDT" + "' + (edtOutlet === 'pipa' ? 'PIPA' : 'PRONTO') + '" in name,<br>macrofamily = CK.</div></div>';
+      '<div class="empty-state"><div class="empty-icon">📦</div>'
+      +'<div class="empty-msg">No EDT items for '+outLabel+'.<br>'
+      +'Seed kitchen_edt_items in Supabase.</div></div>';
     return;
   }
 
-  document.getElementById('edtColHeads').style.display = 'flex';
-
-  // Group by sub-category parsed from the name
-  // Pattern: "EDT - CK - [GROUP] - Item description"
-  // Display name = everything after "EDT - CK - [GROUP] - "
-  const groups = {};
-  items.forEach(function(p) {
-    const parsed = parseEdtName(p.name);
-    if (!groups[parsed.group]) groups[parsed.group] = [];
-    groups[parsed.group].push({ product: p, shortName: parsed.shortName });
+  // Build ordered vendor groups
+  const groups = {}, groupOrder = [];
+  items.forEach(function(item){
+    if (!groups[item.edt_vendor]){ groups[item.edt_vendor]=[]; groupOrder.push(item.edt_vendor); }
+    groups[item.edt_vendor].push(item);
   });
+
+  // Rebuild export map
+  edtGroupMap = {};
 
   let html = '';
-  Object.keys(groups).sort().forEach(function(grpName) {
-    const grpItems = groups[grpName];
-    const grpKey = edtOutlet + '_' + grpName.replace(/\s+/g, '_');
-    html +=
-      '<div class="group-section">' +
-        '<div class="group-header">' +
-          '<span class="group-title">EDT · ' + outletLabel + ' · ' + grpName + '</span>' +
-          '<div class="group-meta">' +
-            '<span class="group-count">' + grpItems.length + '</span>' +
-            '<button class="group-export" onclick="exportEdtGroup(\'' + grpKey + '\')">⬇ CSV</button>' +
-          '</div>' +
-        '</div>';
+  groupOrder.forEach(function(vendor){
+    const grpItems = groups[vendor];
+    const slug     = edtOutlet + '||' + vendor;
+    edtGroupMap[slug] = grpItems;
+    const vendorShort = vendor.replace(/^EDT\s*-\s*/i,'');
 
-    grpItems.forEach(function(entry) {
-      const p = entry.product;
-      const onHand = edtOnHand[p.d365_id] !== undefined ? edtOnHand[p.d365_id] : '';
-      const par    = edtPars[p.d365_id]   !== undefined ? edtPars[p.d365_id]   : null;
-      const ordQty = orders[p.d365_id]    !== undefined ? orders[p.d365_id]     : '';
-      const hasOH  = onHand !== '';
-      const hasOrd = ordQty !== '' && Number(ordQty) > 0;
+    html += '<div class="group-section">'
+      +'<div class="group-header">'
+        +'<span class="group-title">'+vendorShort+'</span>'
+        +'<div class="group-actions">'
+          +'<span class="group-count">'+grpItems.length+'</span>'
+          +'<button class="group-export-btn" onclick="exportGroup('+JSON.stringify(slug)+')">⬇ CSV</button>'
+        +'</div>'
+      +'</div>'
+      // column labels
+      +'<div class="col-heads">'
+        +'<div style="flex:1;"></div>'
+        +'<div class="col-head" style="width:44px;">On Hand</div>'
+        +'<div class="col-head" style="width:36px;">Par</div>'
+        +'<div class="col-head" style="width:44px;">Order</div>'
+      +'</div>';
 
-      html +=
-        '<div class="item-row" data-grp="' + grpKey + '" data-d365="' + p.d365_id + '">' +
-          '<div class="item-info">' +
-            '<div class="item-name">' + entry.shortName + '</div>' +
-            '<div class="item-d365">' + pad365(p.d365_id) + (p.purchase_unit ? ' · ' + p.purchase_unit : '') + '</div>' +
-          '</div>' +
-          '<input class="num-input' + (hasOH ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal"' +
-            ' placeholder="—" value="' + onHand + '" style="width:52px;"' +
-            ' onchange="setEdtOnHand(\'' + p.d365_id + '\',\'' + (p.name || '').replace(/'/g, '') + '\',this)"' +
-            ' onclick="this.select()" id="edt_oh_' + p.d365_id + '">' +
-          '<div class="par-badge">' + (par !== null ? par : '—') + '</div>' +
-          '<input class="num-input' + (hasOrd ? ' has-value' : '') + '" type="number" min="0" step="any" inputmode="decimal"' +
-            ' placeholder="—" value="' + ordQty + '" style="width:52px;"' +
-            ' onchange="setEdtOrder(\'' + p.d365_id + '\',this)"' +
-            ' onclick="this.select()" id="edt_ord_' + p.d365_id + '">' +
-        '</div>';
+    grpItems.forEach(function(item){
+      const oh    = edtOnHand[item.d365_id]  !== undefined ? edtOnHand[item.d365_id]  : '';
+      const par   = edtPars[item.d365_id]    !== undefined ? edtPars[item.d365_id]    : '';
+      const ord   = orders[item.d365_id]     !== undefined ? orders[item.d365_id]     : '';
+      const sid   = 'edt_' + item.d365_id.replace(/\D/g,'');
+      const sname = item.display_name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
+      html += '<div class="item-row">'
+        +'<div class="item-info">'
+          +'<div class="item-name">'+item.display_name+'</div>'
+          +'<div class="item-meta">'
+            +'<span class="item-d365">'+pad8(item.d365_id)+'</span>'
+            +'<span class="item-unit">'+(item.unit||'ea')+'</span>'
+          +'</div>'
+        +'</div>'
+        // On Hand
+        +'<input class="num-input'+(oh!==''?' has-value':'')+'" type="number" min="0" step="any" inputmode="decimal"'
+          +' placeholder="—" value="'+oh+'" id="oh_'+sid+'"'
+          +' onchange="setOH(\''+item.d365_id+'\',\''+sname+'\',this)" onclick="this.select()">'
+        // Par (editable)
+        +'<input class="par-input'+(par!==''&&par!==null?' has-par':'')+'" type="number" min="0" step="any" inputmode="decimal"'
+          +' placeholder="—" value="'+(par!==''&&par!==null?par:'')+'" id="par_'+sid+'"'
+          +' onchange="setPar(\''+item.d365_id+'\',this)" onclick="this.select()">'
+        // Order qty
+        +'<input class="num-input'+(ord!==''&&Number(ord)>0?' has-value':'')+'" type="number" min="0" step="any" inputmode="decimal"'
+          +' placeholder="—" value="'+ord+'" id="ord_'+sid+'"'
+          +' onchange="setOrd(\''+item.d365_id+'\',this)" onclick="this.select()">'
+        +'</div>';
     });
 
-    html += '</div>';
+    html += '</div>'; // .group-section
   });
 
-  // Per-outlet full CSV export button at bottom
-  html +=
-    '<button class="btn btn-secondary btn-full" style="margin-top:4px;" onclick="exportEdtAll()">' +
-    '⬇ Export All ' + outletLabel + ' EDT</button>';
+  // Full-outlet export button
+  html += '<button class="btn btn-secondary btn-full" onclick="exportAll()">'
+         +'⬇ Export All '+outLabel+' EDT</button>';
 
   document.getElementById('edtBody').innerHTML = html;
-
-  // Store group→items mapping for export
-  buildEdtGroupMap(groups);
 }
 
-// --- Name parsing -------------------------------------------------
+// ─── Input handlers ─────────────────────────────────────────────────
 
-function parseEdtName(name) {
-  // "EDT - CK - PIPA - Chicken Breast Diced" → group="PIPA", shortName="Chicken Breast Diced"
-  // "EDT - CK - PRONTO - Pasta" → group="PRONTO", shortName="Pasta"
-  // "EDT - CK - Chicken" → group="CK", shortName="Chicken"
-  // Fallback: group="EDT", shortName=name
-  const m = name.match(/^EDT\s*-\s*CK\s*-\s*([A-Z0-9]+)\s*-\s*(.+)$/i);
-  if (m) return { group: m[1].trim().toUpperCase(), shortName: m[2].trim() };
-  const m2 = name.match(/^EDT\s*-\s*([A-Z0-9]+)\s*-\s*(.+)$/i);
-  if (m2) return { group: m2[1].trim().toUpperCase(), shortName: m2[2].trim() };
-  return { group: 'EDT', shortName: name };
-}
-
-// --- Group map for export -----------------------------------------
-
-let edtGroupMap = {}; // grpKey → [{d365_id, shortName, purchase_unit}]
-
-function buildEdtGroupMap(groups) {
-  edtGroupMap = {};
-  const outlet = edtOutlet;
-  Object.keys(groups).forEach(function(grpName) {
-    const grpKey = outlet + '_' + grpName.replace(/\s+/g, '_');
-    edtGroupMap[grpKey] = groups[grpName].map(function(e) {
-      return { d365_id: e.product.d365_id, shortName: e.shortName, purchase_unit: e.product.purchase_unit || '' };
-    });
-  });
-}
-
-// --- Input handlers -----------------------------------------------
-
-function setEdtOnHand(d365id, itemName, inputEl) {
-  const val = parseFloat(inputEl.value);
-  if (!isNaN(val) && val >= 0) {
-    edtOnHand[d365id] = val;
-    inputEl.classList.add('has-value');
-    // Auto-suggest order qty = max(0, par - on hand) if order field is empty
+function setOH(d365id, itemName, el) {
+  const v = parseFloat(el.value);
+  if (!isNaN(v) && v >= 0) {
+    edtOnHand[d365id] = v; el.classList.add('has-value');
+    // Auto-suggest order = max(0, par − onhand) when order is blank
     const par = edtPars[d365id];
-    if (par !== null && par !== undefined) {
-      const ordEl = document.getElementById('edt_ord_' + d365id);
+    if (par !== undefined && par !== null && par !== '') {
+      const sid  = 'edt_' + d365id.replace(/\D/g,'');
+      const ordEl = document.getElementById('ord_' + sid);
       if (ordEl && (ordEl.value === '' || ordEl.value === '0')) {
-        const sug = Math.max(0, par - val);
-        if (sug > 0) {
-          ordEl.value = sug;
-          ordEl.classList.add('has-value');
-          edtOrders[edtOutlet][d365id] = sug;
-        }
+        const sug = Math.max(0, Number(par) - v);
+        if (sug > 0) { ordEl.value = sug; ordEl.classList.add('has-value'); edtOrdQtys[edtOutlet][d365id] = sug; }
       }
     }
-  } else {
-    delete edtOnHand[d365id];
-    inputEl.classList.remove('has-value');
-  }
-  // Debounced save to kitchen_count
-  clearTimeout(inputEl._t);
-  inputEl._t = setTimeout(function() {
-    const v = parseFloat(inputEl.value);
-    if (!isNaN(v) && v >= 0) {
-      sbUpsert('kitchen_count', [{ count_date: dateIso(), d365_id: d365id, item_name: itemName, qty: v }], 'count_date,d365_id').catch(function() {});
-    }
+  } else { delete edtOnHand[d365id]; el.classList.remove('has-value'); }
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){
+    const v2 = parseFloat(el.value);
+    if (!isNaN(v2) && v2 >= 0)
+      sbUpsert('kitchen_count',[{count_date:dateIso(),d365_id:d365id,item_name:itemName,qty:v2}],'count_date,d365_id').catch(function(){});
   }, 1500);
 }
 
-function setEdtOrder(d365id, inputEl) {
-  const val = parseFloat(inputEl.value);
-  if (!isNaN(val) && val >= 0) {
-    edtOrders[edtOutlet][d365id] = val;
-    inputEl.classList.add('has-value');
-  } else {
-    delete edtOrders[edtOutlet][d365id];
-    inputEl.classList.remove('has-value');
-  }
-  // Debounced save to kitchen_edt_orders
-  clearTimeout(inputEl._t);
-  inputEl._t = setTimeout(function() {
-    const v = parseFloat(inputEl.value);
-    if (!isNaN(v) && v >= 0) {
-      sbUpsert('kitchen_edt_orders', [{ order_date: dateIso(), d365_id: d365id, outlet: edtOutlet, qty: v }], 'order_date,d365_id,outlet').catch(function() {});
-    }
+function setPar(d365id, el) {
+  const v = parseFloat(el.value);
+  if (!isNaN(v) && v >= 0) { edtPars[d365id] = v; el.classList.add('has-par'); }
+  else { edtPars[d365id] = null; el.classList.remove('has-par'); }
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){
+    const v2 = parseFloat(el.value);
+    if (!isNaN(v2) && v2 >= 0)
+      sbUpsert('kitchen_pars',[{d365_id:d365id,par:v2}],'d365_id').catch(function(){});
   }, 1500);
 }
 
-// --- Outlet switching ---------------------------------------------
+function setOrd(d365id, el) {
+  const v = parseFloat(el.value);
+  if (!isNaN(v) && v >= 0) { edtOrdQtys[edtOutlet][d365id] = v; el.classList.add('has-value'); }
+  else { delete edtOrdQtys[edtOutlet][d365id]; el.classList.remove('has-value'); }
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){
+    const v2 = parseFloat(el.value);
+    if (!isNaN(v2) && v2 >= 0)
+      sbUpsert('kitchen_edt_orders',[{order_date:dateIso(),d365_id:d365id,outlet:edtOutlet,qty:v2}],'order_date,d365_id,outlet').catch(function(){});
+  }, 1500);
+}
 
+// ─── Outlet toggle ───────────────────────────────────────────────────
 function setEdtOutlet(o, btn) {
   edtOutlet = o;
-  document.querySelectorAll('.outlet-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelectorAll('.outlet-btn').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
-  renderEdtItems();
+  loadEdtData();
 }
 
-// --- CSV export ---------------------------------------------------
-
-// Build CSV rows: D365 ID, Qty, Unit — only items with qty > 0
-function buildEdtCsvRows(items) {
-  const orders = edtOrders[edtOutlet];
-  const rows = [['D365 ID', 'QTY', 'UNIT']];
-  items.forEach(function(entry) {
-    const qty = orders[entry.d365_id];
+// ─── CSV export ──────────────────────────────────────────────────────
+function csvRows(items) {
+  const orders = edtOrdQtys[edtOutlet];
+  const rows   = [['D365 ID','QTY','UNIT']];
+  items.forEach(function(item){
+    const qty = orders[item.d365_id];
     if (!qty || Number(qty) <= 0) return;
-    rows.push([pad365(entry.d365_id), qty, entry.purchase_unit]);
+    rows.push([pad8(item.d365_id), qty, item.unit || 'ea']);
   });
   return rows;
 }
 
 function downloadCsv(rows, filename) {
-  if (rows.length <= 1) { showToast('No items with qty > 0'); return; }
-  const csv = rows.map(function(r) {
-    return r.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
+  if (rows.length <= 1) { toast('No items with qty > 0 to export'); return; }
+  const csv = rows.map(function(r){
+    return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(',');
   }).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  showToast('Exported ' + (rows.length - 1) + ' item(s) ✓');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  toast('Exported ' + (rows.length-1) + ' item(s) ✓');
 }
 
-// Export a single group
-function exportEdtGroup(grpKey) {
-  const items = edtGroupMap[grpKey];
-  if (!items) { showToast('Group not found'); return; }
-  const outletLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  const grpLabel = grpKey.replace(edtOutlet + '_', '').replace(/_/g, '-');
-  const filename = 'EDT_' + outletLabel + '_' + grpLabel + '_' + dateIso() + '.csv';
-  downloadCsv(buildEdtCsvRows(items), filename);
+function exportGroup(slug) {
+  const items = edtGroupMap[slug];
+  if (!items || !items.length) { toast('Group not found'); return; }
+  const vendor   = slug.split('||')[1] || slug;
+  const vSlug    = vendor.replace(/[^a-z0-9]/gi,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+  const outLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
+  downloadCsv(csvRows(items), 'EDT_'+outLabel+'_'+vSlug+'_'+dateIso()+'.csv');
 }
 
-// Export all groups for current outlet
-function exportEdtAll() {
-  const allItems = [];
-  Object.values(edtGroupMap).forEach(function(items) { items.forEach(function(i) { allItems.push(i); }); });
-  const outletLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
-  const filename = 'EDT_' + outletLabel + '_' + dateIso() + '.csv';
-  downloadCsv(buildEdtCsvRows(allItems), filename);
+function exportAll() {
+  const items = edtItems[edtOutlet] || [];
+  if (!items.length) { toast('No items loaded'); return; }
+  const outLabel = edtOutlet === 'pipa' ? 'PiPa' : 'Pronto';
+  downloadCsv(csvRows(items), 'EDT_'+outLabel+'_'+dateIso()+'.csv');
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', function() {
-  updateDateUI();
-});
+// ─── INIT ────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', updateDateUI);
 </script>
 </body>
 </html>
