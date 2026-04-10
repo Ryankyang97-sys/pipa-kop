@@ -345,7 +345,7 @@ function dateMMDD() {
 function xlsxName(outlet, vendor) {
   // Format: PiPa.VENDOR NAME.MM-DD.xlsx
   const v = (vendor || '').replace(/[/\\:*?"<>|]/g,'').trim();
-  return outlet + '.' + v + '.' + dateMMDD() + '.xlsx';
+  return outlet + '.' + v + '.' + dateMMDD() + '.xls';
 }
 function dateFmt() {
   const d = new Date(); d.setDate(d.getDate() + dateOffset);
@@ -920,140 +920,39 @@ function downloadCsv(rows, filename) {
   toast('CSV: ' + filename);
 }
 
-// ── XLSX (vanilla SpreadsheetML — no CDN needed) ──────────────────────
+// ── Excel export (SpreadsheetML XML — single file, opens in Excel/Numbers/Sheets) ──
+// Excel 2003 XML format: single XML file, no zip needed, universally supported.
 
-function rowsToXlsx(rows) {
-  // Minimal XLSX = zipped SpreadsheetML. We build the zip structure manually.
-  // Characters that need XML escaping
+function rowsToExcelXml(rows) {
   function esc(v) {
-    return String(v)
+    return String(v === null || v === undefined ? '' : v)
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+      .replace(/"/g,'&quot;');
   }
-
-  // Build worksheet XML
-  const wsXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-    +'<sheetData>'
+  return '<?xml version="1.0" encoding="UTF-8"?>'
+    +'<?mso-application progid="Excel.Sheet"?>'
+    +'<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"'
+    +' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
+    +'<Styles><Style ss:ID="h"><Font ss:Bold="1"/></Style></Styles>'
+    +'<Worksheet ss:Name="Order"><Table>'
     + rows.map(function(row, ri){
-        return '<row r="'+(ri+1)+'">'
-          + row.map(function(cell, ci){
-              const col = String.fromCharCode(65+ci);
-              const ref = col+(ri+1);
-              const v = cell === '' ? '' : cell;
-              const isNum = typeof v === 'number' || (typeof v === 'string' && v !== '' && !isNaN(Number(v)) && v.trim() !== '');
-              if (isNum && v !== '') return '<c r="'+ref+'"><v>'+esc(v)+'</v></c>';
-              return '<c r="'+ref+'" t="inlineStr"><is><t>'+esc(v)+'</t></is></c>';
-            }).join('')
-          +'</row>';
+        return '<Row>' + row.map(function(cell){
+          const v = (cell === null || cell === undefined) ? '' : cell;
+          const isNum = v !== '' && !isNaN(Number(v));
+          const style = ri === 0 ? ' ss:StyleID="h"' : '';
+          if (isNum && v !== '') return '<Cell'+style+'><Data ss:Type="Number">'+esc(v)+'</Data></Cell>';
+          return '<Cell'+style+'><Data ss:Type="String">'+esc(v)+'</Data></Cell>';
+        }).join('') + '</Row>';
       }).join('')
-    +'</sheetData></worksheet>';
-
-  const wbXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
-    +' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-    +'<sheets><sheet name="Order" sheetId="1" r:id="rId1"/></sheets></workbook>';
-
-  const relsXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
-    +'</Relationships>';
-
-  const contentXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
-    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
-    +'<Default Extension="xml" ContentType="application/xml"/>'
-    +'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
-    +'<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
-    +'</Types>';
-
-  // Minimal zip builder (stored, no compression — sufficient for xlsx)
-  function toBytes(str) {
-    const bytes = [];
-    for (let i = 0; i < str.length; i++) {
-      const c = str.charCodeAt(i);
-      if (c < 128) { bytes.push(c); }
-      else if (c < 2048) { bytes.push(0xC0|(c>>6), 0x80|(c&63)); }
-      else { bytes.push(0xE0|(c>>12), 0x80|((c>>6)&63), 0x80|(c&63)); }
-    }
-    return new Uint8Array(bytes);
-  }
-
-  function crc32(data) {
-    let crc = 0xFFFFFFFF;
-    const table = new Uint32Array(256);
-    for (let i = 0; i < 256; i++) {
-      let c = i;
-      for (let j = 0; j < 8; j++) c = (c&1) ? (0xEDB88320^(c>>>1)) : (c>>>1);
-      table[i] = c;
-    }
-    for (let i = 0; i < data.length; i++) crc = table[(crc^data[i])&255]^(crc>>>8);
-    return (crc^0xFFFFFFFF) >>> 0;
-  }
-
-  function u16(n) { return [n&255,(n>>8)&255]; }
-  function u32(n) { return [n&255,(n>>8)&255,(n>>16)&255,(n>>24)&255]; }
-
-  function zipEntry(name, content) {
-    const nameBytes = toBytes(name);
-    const data = toBytes(content);
-    const crc = crc32(data);
-    const local = [0x50,0x4B,0x03,0x04, 20,0, 0,0, 0,0, 0,0, 0,0,
-      ...u32(crc), ...u32(data.length), ...u32(data.length),
-      ...u16(nameBytes.length), 0,0, ...nameBytes, ...data];
-    const central = [0x50,0x4B,0x01,0x02, 20,0, 20,0, 0,0, 0,0, 0,0,
-      ...u32(crc), ...u32(data.length), ...u32(data.length),
-      ...u16(nameBytes.length), 0,0, 0,0, 0,0, 0,0, 0,0,0,0, 0,0,0,0,
-      ...nameBytes];
-    return { local, central, nameLen: nameBytes.length, size: data.length };
-  }
-
-  const files = [
-    ['[Content_Types].xml',      contentXml],
-    ['_rels/.rels',              '<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
-    ['xl/workbook.xml',          wbXml],
-    ['xl/_rels/workbook.xml.rels', relsXml],
-    ['xl/worksheets/sheet1.xml', wsXml]
-  ];
-
-  const entries = files.map(function(f){ return zipEntry(f[0], f[1]); });
-
-  let offset = 0;
-  const localParts = [];
-  const offsets = [];
-  entries.forEach(function(e){
-    offsets.push(offset);
-    localParts.push(e.local);
-    offset += e.local.length;
-  });
-
-  const centralDir = [];
-  entries.forEach(function(e, i){
-    const c = e.central.slice();
-    // Patch relative offset into central dir (bytes 42-45)
-    const off = u32(offsets[i]);
-    c[42]=off[0];c[43]=off[1];c[44]=off[2];c[45]=off[3];
-    centralDir.push(...c);
-  });
-
-  const centralStart = offset;
-  const centralLen = centralDir.length;
-  const eocd = [0x50,0x4B,0x05,0x06, 0,0, 0,0,
-    ...u16(entries.length), ...u16(entries.length),
-    ...u32(centralLen), ...u32(centralStart), 0,0];
-
-  const allBytes = [];
-  localParts.forEach(function(p){ allBytes.push(...p); });
-  allBytes.push(...centralDir, ...eocd);
-
-  return new Uint8Array(allBytes);
+    +'</Table></Worksheet></Workbook>';
 }
 
 function downloadXlsx(rows, filename) {
   if (rows.length <= 1) { toast('No items to export'); return; }
-  const bytes = rowsToXlsx(rows);
-  triggerDownload(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}), filename);
-  toast('XLSX: ' + filename);
+  const xlsFile = filename.replace(/\.xlsx?$/i, '.xls');
+  const blob = new Blob([rowsToExcelXml(rows)], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  triggerDownload(blob, xlsFile);
+  toast('Exported: ' + xlsFile);
 }
 
 // ── Shared trigger ────────────────────────────────────────────────────
