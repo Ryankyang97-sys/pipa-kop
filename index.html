@@ -478,11 +478,12 @@ document.getElementById('dateLine').textContent = new Date().toLocaleDateString(
   // No ?next= — normal hub view, nothing to do
   if (!nextPage) return;
 
+  // Normalize: strip .html suffix so both /pipa-ops and /pipa-ops.html work
+  var page = nextPage.replace(/\.html$/i, '');
+
   // Allowlist: only redirect to known protected pages
-  var allowedPages = [
-    'pipa-ops.html', 'pipa-admin.html', 'pipa-count.html', 'pipa-ks.html'
-  ];
-  if (!allowedPages.includes(nextPage)) {
+  var allowedPages = ['pipa-ops', 'pipa-admin', 'pipa-count', 'pipa-ks'];
+  if (!allowedPages.includes(page)) {
     window.history.replaceState({}, '', window.location.pathname);
     return;
   }
@@ -496,7 +497,7 @@ document.getElementById('dateLine').textContent = new Date().toLocaleDateString(
   var destLabel = document.getElementById('auth-dest-label');
 
   // Show destination name (e.g. "PiPa Ops")
-  destLabel.textContent = nextPage.replace('.html','').replace('pipa-','PiPa ');
+  destLabel.textContent = page.replace('pipa-','PiPa ');
   overlay.classList.add('active');
 
   var hubPin = null;
@@ -553,7 +554,7 @@ document.getElementById('dateLine').textContent = new Date().toLocaleDateString(
 
   function grantAccess() {
     sessionStorage.setItem('pipa_hub_auth', '1');
-    window.location.href = nextPage;
+    window.location.href = page + '.html';
   }
 
   btn.addEventListener('click', tryUnlock);
