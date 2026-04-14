@@ -893,6 +893,9 @@ function exportWeeklyReport() {
 
     var filename = 'Weekly_Report_' + weekStart + '.xlsx';
     downloadXlsx(wb, filename);
+  }).catch(function(err) {
+    toast('Error loading report data: ' + (err.message || err), true);
+    console.error('Export error:', err);
   });
 }
 
@@ -919,21 +922,25 @@ function exportPresentationPack() {
   // Sheet 2 — Back Bar
   var bbHeaders = ['D365', 'Item', 'Category', 'Vendor', 'Par'];
   var bbRows = [];
-  Object.values(ORDER_VENDORS).forEach(function(v) {
-    v.items.filter(function(i){ return i.cat === 'BACK BAR'; }).forEach(function(item) {
-      bbRows.push([item.d365, item.name, item.cat, v.name, item.par || '']);
+  if (typeof ORDER_VENDORS !== 'undefined') {
+    Object.values(ORDER_VENDORS).forEach(function(v) {
+      v.items.filter(function(i){ return i.cat === 'BACK BAR'; }).forEach(function(item) {
+        bbRows.push([item.d365, item.name, item.cat, v.name, item.par || '']);
+      });
     });
-  });
+  }
   XLSX.utils.book_append_sheet(wb, xlsxSheet(bbHeaders, bbRows, [12,32,12,14,6]), 'Back Bar');
 
   // Sheet 3 — Full Order Guide
   var ogHeaders = ['D365', 'Item', 'Category', 'Vendor', 'Par', 'Order Days', 'Cutoff'];
   var ogRows = [];
-  Object.values(ORDER_VENDORS).forEach(function(v) {
-    v.items.forEach(function(item) {
-      ogRows.push([item.d365, item.name, item.cat, v.name, item.par || '', v.days.join(', '), v.cutoff]);
+  if (typeof ORDER_VENDORS !== 'undefined') {
+    Object.values(ORDER_VENDORS).forEach(function(v) {
+      v.items.forEach(function(item) {
+        ogRows.push([item.d365, item.name, item.cat, v.name, item.par || '', v.days.join(', '), v.cutoff]);
+      });
     });
-  });
+  }
   XLSX.utils.book_append_sheet(wb, xlsxSheet(ogHeaders, ogRows, [12,36,12,14,6,10,10]), 'Order Guide');
 
   // Sheet 4 — Vendor Contacts (embedded)

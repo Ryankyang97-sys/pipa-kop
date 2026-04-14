@@ -958,6 +958,7 @@ function loadCountSession() {
     .then(function(r) {
       if (r.error || !r.data || !r.data.length) return;
       var row = r.data[0];
+      if (!row) return;
       if (row.counts && Object.keys(row.counts).length) {
         counts = row.counts;
         localStorage.setItem(LS_COUNTS, JSON.stringify(counts));
@@ -970,7 +971,8 @@ function loadCountSession() {
         shiftNotes = row.notes;
         localStorage.setItem(LS_NOTES, shiftNotes);
       }
-      renderStop(currentStop);
+      renderTabs();
+      renderSections();
       var ta = document.getElementById('shiftNotesTA');
       if (ta) ta.value = shiftNotes;
     });
@@ -986,7 +988,7 @@ function _flushToSupabase() {
     notes:      shiftNotes,
     updated_at: new Date().toISOString(),
   }, { onConflict: 'snap_date' })
-  .then(function(r) { if (r.error) console.warn('count_sessions:', r.error.message); });
+  .then(function(r) { if (r && r.error) console.warn('count_sessions:', r.error.message); });
 }
 function save() {
   try { localStorage.setItem(LS_COUNTS, JSON.stringify(counts)); } catch(e){}
@@ -1450,6 +1452,7 @@ function loadDateSession() {
         return;
       }
       var row = r.data[0];
+      if (!row) { statusEl.textContent = 'No session found'; return; }
       counts = row.counts || {};
       flags  = row.flags  || {};
       shiftNotes = row.notes || '';
@@ -1613,9 +1616,9 @@ async function saveCountToSupabase() {
   var result = await supa.from('inventory_trend')
     .upsert(dedupedRows, { onConflict: 'snap_date,d365' });
 
-  if (btn) btn.textContent = 'Save to Supabase';
+  if (btn) btn.textContent = 'Save to Trend';
 
-  if (result.error) {
+  if (result && result.error) {
     toast('Error: ' + result.error.message);
     return;
   }
@@ -1640,7 +1643,7 @@ async function saveCountToSupabase() {
   var orderResult = await supa.from('order_counts')
     .upsert(orderRows, { onConflict: 'count_date,d365' });
 
-  if (orderResult.error) {
+  if (orderResult && orderResult.error) {
     // Trend write succeeded — don't block the user, just log the issue
     toast('Trend saved ✓ — Orders sync failed: ' + orderResult.error.message);
   } else {

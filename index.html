@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PiPa KOP">
 <title>PiPa KOP — Beverage Tools</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
 
@@ -52,9 +53,7 @@ html, body {
 }
 
 /* HEADER */
-.header {
-  margin-bottom: 32px;
-}
+.header { margin-bottom: 32px; }
 .wordmark-main {
   font-size: 1.75rem;
   font-weight: 700;
@@ -110,7 +109,6 @@ html, body {
   background: var(--surface2);
   border-color: var(--accent);
 }
-
 .app-icon {
   width: 48px; height: 48px;
   border-radius: 12px;
@@ -118,7 +116,6 @@ html, body {
   font-size: 22px;
   flex-shrink: 0;
 }
-
 .app-info { flex: 1; min-width: 0; }
 .app-name {
   font-size: 0.938rem;
@@ -140,7 +137,6 @@ html, body {
   margin-bottom: 4px;
   display: inline-block;
 }
-
 .app-arrow {
   color: var(--text3);
   font-size: 1.125rem;
@@ -192,9 +188,148 @@ html, body {
   line-height: 1.7;
   font-family: 'JetBrains Mono', monospace;
 }
+
+/* ═══════════════════════════════════════════════
+   AUTH OVERLAY
+═══════════════════════════════════════════════ */
+#auth-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--bg);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+#auth-overlay.active { display: flex; }
+
+.auth-card {
+  width: 100%;
+  max-width: 340px;
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 28px 24px 24px;
+  border: 1px solid var(--surface3);
+}
+.auth-lock {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.auth-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 4px;
+}
+.auth-sub {
+  font-size: 0.75rem;
+  color: var(--text3);
+  text-align: center;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+.auth-dest {
+  font-size: 0.688rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+}
+.auth-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--surface3);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 1.125rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+  letter-spacing: 0.12em;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s;
+  margin-bottom: 12px;
+  -webkit-text-security: disc;
+}
+.auth-input:focus { border-color: var(--accent); }
+.auth-input.shake {
+  border-color: #C0392B;
+  animation: shake 0.35s ease;
+}
+.auth-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 0.938rem;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.auth-btn:active { opacity: 0.8; }
+.auth-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.auth-error {
+  font-size: 0.688rem;
+  color: #C0392B;
+  text-align: center;
+  margin-top: 10px;
+  min-height: 18px;
+}
+.auth-loading {
+  font-size: 0.75rem;
+  color: var(--text3);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+}
 </style>
 </head>
 <body>
+
+<!-- ═══════════════════════════════════════════════
+     AUTH OVERLAY — shown when redirected with ?next=
+═══════════════════════════════════════════════ -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-lock">🔐</div>
+    <div class="auth-title">PiPa KOP</div>
+    <div class="auth-sub">
+      Enter hub access code to open<br>
+      <span class="auth-dest" id="auth-dest-label"></span>
+    </div>
+    <div class="auth-loading" id="auth-loading">Loading…</div>
+    <input
+      class="auth-input"
+      id="auth-input"
+      type="text"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+      placeholder="Access code"
+      style="display:none;"
+    />
+    <button class="auth-btn" id="auth-btn" style="display:none;" disabled>Unlock</button>
+    <div class="auth-error" id="auth-error"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     HUB PAGE
+═══════════════════════════════════════════════ -->
 <div class="page">
 
   <div class="header">
@@ -319,9 +454,116 @@ html, body {
 </div>
 
 <script>
+// ═══════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════
+const SUPA_URL = 'https://fhbusipvtxjnwidlgpaa.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYnVzaXB2dHhqbndpZGxncGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNjM5NTksImV4cCI6MjA5MDgzOTk1OX0.GwTqVB31Ewpwal9vkHKeBGeh9XuHOjfnQeV4OB_1rQE';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ═══════════════════════════════════════════════
+// DATE LINE
+// ═══════════════════════════════════════════════
 document.getElementById('dateLine').textContent = new Date().toLocaleDateString('en-US', {
   weekday: 'long', month: 'long', day: 'numeric'
 });
+
+// ═══════════════════════════════════════════════
+// AUTH FLOW — handles ?next= redirect from protected pages
+// ═══════════════════════════════════════════════
+(function() {
+  var params   = new URLSearchParams(window.location.search);
+  var nextPage = params.get('next');
+
+  // No ?next= — normal hub view, nothing to do
+  if (!nextPage) return;
+
+  // Allowlist: only redirect to known protected pages
+  var allowedPages = [
+    'pipa-ops.html', 'pipa-admin.html', 'pipa-count.html', 'pipa-ks.html'
+  ];
+  if (!allowedPages.includes(nextPage)) {
+    window.history.replaceState({}, '', window.location.pathname);
+    return;
+  }
+
+  // Get DOM references
+  var overlay   = document.getElementById('auth-overlay');
+  var input     = document.getElementById('auth-input');
+  var btn       = document.getElementById('auth-btn');
+  var errorEl   = document.getElementById('auth-error');
+  var loadingEl = document.getElementById('auth-loading');
+  var destLabel = document.getElementById('auth-dest-label');
+
+  // Show destination name (e.g. "PiPa Ops")
+  destLabel.textContent = nextPage.replace('.html','').replace('pipa-','PiPa ');
+  overlay.classList.add('active');
+
+  var hubPin = null;
+
+  // Load hub_pin from Supabase app_settings
+  supa.from('app_settings')
+    .select('value')
+    .eq('key', 'hub_pin')
+    .maybeSingle()
+    .then(function(res) {
+      loadingEl.style.display = 'none';
+      if (res && res.error) {
+        console.warn('hub_pin load error:', res.error.message);
+        // Fail open if DB unreachable — don't lock staff out
+        hubPin = null;
+      } else {
+        hubPin = (res && res.data && res.data.value) ? res.data.value : null;
+      }
+      input.style.display = 'block';
+      btn.style.display   = 'block';
+      btn.disabled        = false;
+      setTimeout(function() { input.focus(); }, 100);
+    })
+    .catch(function(e) {
+      console.warn('hub_pin fetch failed:', e);
+      hubPin = null;
+      loadingEl.style.display = 'none';
+      input.style.display = 'block';
+      btn.style.display   = 'block';
+      btn.disabled        = false;
+      setTimeout(function() { input.focus(); }, 100);
+    });
+
+  function tryUnlock() {
+    var entered = input.value.trim();
+    if (!entered) return;
+
+    // If no PIN is configured yet, any entry unlocks (bootstrap mode)
+    if (hubPin === null || hubPin === '') {
+      grantAccess();
+      return;
+    }
+
+    if (entered === hubPin) {
+      grantAccess();
+    } else {
+      errorEl.textContent = 'Incorrect code — try again';
+      input.classList.add('shake');
+      input.value = '';
+      setTimeout(function() { input.classList.remove('shake'); }, 400);
+      setTimeout(function() { input.focus(); }, 50);
+    }
+  }
+
+  function grantAccess() {
+    sessionStorage.setItem('pipa_hub_auth', '1');
+    window.location.href = nextPage;
+  }
+
+  btn.addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); tryUnlock(); }
+  });
+  input.addEventListener('input', function() {
+    errorEl.textContent = '';
+  });
+})();
 </script>
 </body>
 </html>

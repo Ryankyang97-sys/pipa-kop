@@ -1416,6 +1416,13 @@ function manageReceipts(invId, vendor) {
         '</div>' +
         groupHTML +
         '<button class="btn-secondary" style="width:100%;margin-top:8px;" onclick="closeSheet(\'addSheet\')">Close</button>';
+    }).catch(function(e) {
+      console.warn('Error loading receipts:', e);
+      content.innerHTML =
+        '<div class="sheet-handle"></div>' +
+        '<div class="sheet-title">Receipts — ' + vendor + '</div>' +
+        '<div style="text-align:center;padding:40px 0;color:var(--text3);font-size:0.875rem;">Error loading receipt entries.</div>' +
+        '<button class="btn-secondary" style="width:100%;margin-top:8px;" onclick="closeSheet(\'addSheet\')">Close</button>';
     });
 }
 
@@ -2640,6 +2647,10 @@ function renderUpdatesOps() {
         feed;
       // Insert filter buttons via DOM
       setTimeout(function() { _insertFilterBtns(filterTags, tagLabels); }, 0);
+    }).catch(function(e) {
+      console.warn('Error loading updates:', e);
+      var el = document.getElementById('view-updates');
+      if (el) el.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Error loading updates</div></div>';
     });
 }
 
@@ -2653,7 +2664,7 @@ function _insertFilterBtns(filterTags, tagLabels) {
     btn.textContent = tagLabels[t];
     var baseStyle = 'border:none;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;margin:2px;';
     btn.style.cssText = (updFilter === t ? 'background:var(--accent);color:#fff;' : 'background:var(--surface2);color:var(--text2);') + baseStyle;
-
+    btn.onclick = function() { setUpdFilter(t); };
     row.appendChild(btn);
   });
 }
@@ -2792,6 +2803,9 @@ function renderOrderPlanner() {
         opCounts[row.d365] = row.count;
         if (row.notes) opNotes[row.d365] = row.notes;
       });
+      _renderOPInner(el, today, todayVendors);
+    }).catch(function(e) {
+      console.warn('Error loading order counts:', e);
       _renderOPInner(el, today, todayVendors);
     });
   }); // end loadOrderOverrides
@@ -3247,6 +3261,9 @@ function renderInventoryTrend() {
       el.insertAdjacentHTML('beforeend', summaryHTML);
       el.insertAdjacentHTML('beforeend', recentHTML);
       el.insertAdjacentHTML('beforeend', rowsHTML || '<div class="empty-state"><div class="empty-text">No items match.</div></div>');
+    }).catch(function(e) {
+      console.warn('Error loading trend data:', e);
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Error loading trend data</div></div>';
     });
 }
 
@@ -3533,6 +3550,9 @@ function renderSubmissions() {
       });
       el.appendChild(fragment);
     }
+  }).catch(function(e) {
+    console.warn('Error loading submissions:', e);
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Error loading submission data</div></div>';
   });
 }
 
